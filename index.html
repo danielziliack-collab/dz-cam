@@ -2,7 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<!-- viewport-fit=cover [Daniel, 01.09.2026, PWA-Befund]: im
+     Home-Bildschirm-Modus laeuft die App randlos — ohne cover sind
+     die env(safe-area-inset-*)-Werte leer und die untere Knopfreihe
+     klebt am Display-Radius unter dem Home-Balken. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>Daniel Ziliack CAM</title>
@@ -432,7 +436,13 @@
    min-width in PIXELN, nicht Prozent: 31 % einer 1280er-Zeile waeren
    397 px und broechen auch am Laptop um. So bricht die Leiste nur,
    wenn es eng ist (iPhone hochkant: 3+3), sonst bleibt sie einzeilig. */
-.hsoftkeys{display:flex;flex-wrap:wrap;gap:3px;background:var(--panel);border-top:1px solid var(--line);padding:4px;padding-right:48px;flex-shrink:0;}
+/* SAFE-AREA UNTEN [Daniel, 01.09.2026, PWA-Foto]: im randlosen
+   Home-Bildschirm-Modus sass die unterste Knopfreihe direkt am
+   Display-Radius und unter dem Home-Balken. Das env()-Polster hebt
+   sie an; der Panel-Hintergrund fuellt den Bereich bis zur Kante,
+   damit es geordnet aussieht statt abgeschnitten. Am Laptop und im
+   Browser ist env() null — dort aendert sich nichts. */
+.hsoftkeys{display:flex;flex-wrap:wrap;gap:3px;background:var(--panel);border-top:1px solid var(--line);padding:4px;padding-right:48px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));flex-shrink:0;}
 .hsoftkeys .hsk{min-width:96px;}
   .hsk{
     flex:1;min-width:0;min-height:40px;background:hsl(var(--ton), 45%, 95.5%);
@@ -490,7 +500,11 @@
   .mrow .unit{color:hsl(var(--ton), 15.5%, 63.3%);}
   /* [Daniel] Kopf + Hilfebild bleiben STEHEN — nur der Eingabebereich
      scrollt, damit das Fokus-Highlight im Bild immer sichtbar ist. */
-  .mask-body{position:relative;padding:10px 14px;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  .mask-body{position:relative;padding:10px 14px;
+    /* Safe-Area [01.09.2026]: die Uebernehmen-Zeile am Maskenende soll
+       nicht unter dem Home-Balken liegen. */
+    padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+    flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
     /* [Daniel, iPhone]: KEIN seitliches Mitwandern beim vertikalen Wischen —
        horizontales Scrollen aus, Touch-Geste auf vertikal festgelegt. */
     overflow-x:hidden;touch-action:pan-y;overscroll-behavior-x:none;}
@@ -712,7 +726,12 @@
   }
   body.simvoll #simZoomBar.show{
     position:fixed !important; left:0; right:0; bottom:0; z-index:650;
-    height:62px; margin:0; background:hsl(var(--ton), 22.2%, 96.5%); border-top:1px solid hsl(var(--ton), 26.3%, 88.8%);
+    /* Safe-Area [01.09.2026]: min-height statt fester Hoehe, damit das
+       env()-Polster die Knoepfe ueber den Home-Balken hebt (box-sizing
+       wuerde sie sonst in die feste Hoehe quetschen). Die simBar
+       darueber rueckt ueber bottom:calc() mit. */
+    min-height:62px; padding-bottom:env(safe-area-inset-bottom, 0px);
+    margin:0; background:hsl(var(--ton), 22.2%, 96.5%); border-top:1px solid hsl(var(--ton), 26.3%, 88.8%);
     display:flex; align-items:center;
     /* 52 px rechts frei [Daniel, 29.08.2026: "unten rechts ueberlagern
        sich zwei Knoepfe"]: der Artefakt-Viewer legt sein rundes
@@ -735,7 +754,8 @@
     border-color:var(--blue); color:var(--blue); font-weight:700;
   }
   body.simvoll #simBar.show{
-    position:fixed !important; left:0; right:0; bottom:62px; z-index:650;
+    position:fixed !important; left:0; right:0;
+    bottom:calc(62px + env(safe-area-inset-bottom, 0px)); z-index:650;
     margin:0; background:hsl(var(--ton), 22.2%, 96.5%); border-top:1px solid hsl(var(--ton), 26.3%, 88.8%);
     box-shadow:0 -3px 10px rgba(0,0,0,0.07); padding:6px 8px;
   }
@@ -1054,7 +1074,13 @@
    Rot = Crash oder Ausschuss, Gelb = ansehen, Gruen = geprueft.
    Grau ist NICHT "nichts los", sondern "nicht geprueft" — deshalb
    steht es gleich gross daneben und nicht als Fussnote. */
-.ampel{border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0;background:var(--panel);}
+/* AMPEL SCROLLT IN SICH [Daniel, 01.09.2026, Rotorwellen-Foto]: das
+   G-Code-Panel ist ein fixiertes Vollbild mit overflow:hidden und hat
+   keinen scrollenden Body — bei elf Meldungen lief der Bericht unten
+   aus dem Bild und liess sich nicht scrollen. Der Deckel gilt auch am
+   Laptop: eine lange Liste soll das Panel nicht sprengen. */
+.ampel{border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0;background:var(--panel);
+  max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 .ampel-lampen{display:flex;gap:6px;flex-wrap:wrap;}
 .ampel-l{flex:1 1 70px;min-width:70px;border-radius:6px;padding:6px 8px;text-align:center;
   border:1px solid transparent;}
