@@ -442,7 +442,14 @@
    sie an; der Panel-Hintergrund fuellt den Bereich bis zur Kante,
    damit es geordnet aussieht statt abgeschnitten. Am Laptop und im
    Browser ist env() null — dort aendert sich nichts. */
-.hsoftkeys{display:flex;flex-wrap:wrap;gap:3px;background:var(--panel);border-top:1px solid var(--line);padding:4px;padding-right:48px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));flex-shrink:0;}
+/* SYMMETRISCH [Daniel, 01.09.2026, PWA-Foto]: die 48 px rechts waren
+   der Freiraum fuer das runde Artefakt-Viewer-Logo — in der
+   Home-Bildschirm-App gibt es das Logo nicht, der Rand wirkte dort
+   nur schief (rechts viel Platz, links keiner). Der Freiraum gilt
+   jetzt NUR in der eingebetteten Ansicht (body.artefakt, gesetzt
+   aus IN_EMBEDDED_VIEW). */
+.hsoftkeys{display:flex;flex-wrap:wrap;gap:3px;background:var(--panel);border-top:1px solid var(--line);padding:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));flex-shrink:0;}
+body.artefakt .hsoftkeys{padding-right:48px;}
 .hsoftkeys .hsk{min-width:96px;}
   .hsk{
     flex:1;min-width:0;min-height:40px;background:hsl(var(--ton), 45%, 95.5%);
@@ -738,7 +745,15 @@
        Logo in die Ecke, genau auf den Massbericht-Knopf. Die App
        kennt den Viewer nicht — der Freiraum kostet auf 390 px etwas
        Knopfbreite und schadet in der Doppelklick-Datei nicht. */
-    padding:0 52px 0 6px;
+    /* Kurzform ohne 52 px rechts — der Viewer-Logo-Freiraum gilt nur
+       im Artefakt (body.artefakt, s. .hsoftkeys). VORSICHT: diese
+       Kurzform hatte das Safe-Area-padding-bottom von weiter oben
+       ueberschrieben (eigener Fehler beim Safe-Area-Fix, beim
+       Symmetrie-Umbau gefunden) — deshalb steht unten env() mit drin. */
+    padding:0 6px calc(0px + env(safe-area-inset-bottom, 0px)) 6px;
+  }
+  body.artefakt.simvoll #simZoomBar.show{
+    padding-right:52px;
   }
   /* KNOEPFE PASSEN IN DIE BREITE [Daniel, IMG_2630]: acht feste 44-px-Knoepfe
      plus zwei Abstandhalter ergeben rund 415 px — auf 390 px Geraetebreite
@@ -22724,6 +22739,11 @@ document.getElementById('btnCopy').onclick=()=>{
 // der „nichts tut".
 // =================================================================
 const IN_EMBEDDED_VIEW = (function(){ try{ return window.self!==window.top; }catch(e){ return true; } })();
+// KOERPERKLASSE fuer die eingebettete Ansicht [Daniel, 01.09.2026]:
+// der Artefakt-Viewer legt sein rundes Logo unten rechts UEBER die
+// App — nur dort halten die unteren Leisten den 48/52-px-Freiraum.
+// In PWA und Doppelklick-Datei bleibt die Reihe symmetrisch.
+if(IN_EMBEDDED_VIEW){ try{ document.body.classList.add('artefakt'); }catch(e){} }
 
 function exportToast(msg){
   let t=document.getElementById('exportToast');
