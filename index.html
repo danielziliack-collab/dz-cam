@@ -1757,9 +1757,38 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
               <button data-v="zyklus">Zyklus G72</button>
             </div></div>
             <div class="msec">Geometrie</div>
+            <!-- FORM wie beim Einstich [Daniel, 01.09.2026: "vielleicht
+                 waer das besser, wenn wir das unterscheiden"]: ShopTurn
+                 fuehrt die Ecke mit Schraegen als eigenen Softkey
+                 (Abspanen 3), die Monforts-Maske hat dafuer alpha1/alpha2
+                 (DV 594 S. 4.6-12: "Oeffnungswinkel zu X / zu Z"). Bei
+                 uns EIN Feld statt zweier Zyklen - Datenmodell und
+                 gespeicherte Programme bleiben unveraendert. -->
+            <div class="mrow"><label>Form</label>
+              <div class="radiobtns" id="aeFormBtns">
+                <button data-v="ecke" class="sel" data-vorgabe="1">Ecke (90&#176;)</button>
+                <button data-v="winkel">mit Schenkelwinkeln</button>
+              </div>
+            </div>
             <div class="mrow"><label>X0 ⌀ / Z0 Bezugspunkt (abs)</label><input step="any" style="width:51px;" type="number" id="aeX0" value="82"><input step="any" style="width:51px;" type="number" id="aeZ0" value="0"><span class="unit">mm</span></div>
             <div class="mrow mit-ink"><label>X1 Endpunkt ⌀ (abs)</label><input type="number" step="any" id="aeX1" value="60"><button class="inkbtn" id="aeX1mode" data-m="abs" type="button">abs</button><span class="unit">mm</span></div>
             <div class="mrow mit-ink"><label>Z1 Endpunkt (abs)</label><input type="number" step="any" id="aeZ1" value="-60"><button class="inkbtn" id="aeZ1mode" data-m="abs" type="button">abs</button><span class="unit">mm</span></div>
+            <!-- SCHENKELWINKEL [Daniel, 01.09.2026]. Benennung und Bezug
+                 exakt wie die Steuerung (DV 594 S. 4.6-12): W1 ist der
+                 Oeffnungswinkel des STIRNSCHENKELS zur X-Richtung
+                 (90 = zylindrisch, kleiner = der ⌀ waechst zur Schulter
+                 hin), W2 der Oeffnungswinkel der SCHULTER zur Z-Richtung
+                 (90 = senkrecht, kleiner = die Schulter legt sich zum
+                 Futter, der Auslauf am Mantel wandert nach hinten —
+                 zur Stirn geneigt waere sie ein Hinterschnitt fuer
+                 die Z-parallelen Schruppzuege). X1/Z1 bleibt die ECKE - die Schenkel drehen um
+                 diesen Punkt, das andere Ende wandert auf Stirn bzw.
+                 Mantel. Werte UEBER 90 waeren ein Hinterschnitt und
+                 werden im Generator abgewiesen. Eigene Zeilen-IDs statt
+                 FELD_REGELN: die Form haengt an selBtnVal, und das
+                 liefert im Ersatz-Browser nichts (s. esWRow). -->
+            <div class="mrow" id="aeW1Row" style="display:none;"><label>W1 Winkel Stirnschenkel (90=zyl.)</label><input type="number" step="any" id="aeW1" value="90"><span class="unit">Grad</span></div>
+            <div class="mrow" id="aeW2Row" style="display:none;"><label>W2 Winkel Schulter (90=senkr.)</label><input type="number" step="any" id="aeW2" value="90"><span class="unit">Grad</span></div>
             <!-- KANTEN als Gruppe, je Kante EINE Zeile [Daniel, ShopTurn-Art].
                  Umschalter und Maß standen bisher untereinander — sechs
                  Zeilen für drei Kanten, obwohl die Kante ohne gewählten Typ
@@ -2751,6 +2780,23 @@ unten.</dd>
 <dt id="ba-ak-x0z0">X0 / Z0, X1 / Z1</dt>
 <dd>Bezugspunkt (Rohteilseite) und Zielpunkt im Durchmesser bzw. absolut in Z. Der
 Umschalter abs/ink am X1/Z1 wechselt auf inkrementale Eingabe.</dd>
+<dt id="ba-ae-form">Form: Ecke (90&deg;) / mit Schenkelwinkeln</dt>
+<dd>Wie die Steuerung selbst (DV&nbsp;594 S.&nbsp;4.6-12: &bdquo;2 beliebige
+Geraden&ldquo;, &alpha;1/&alpha;2) kann die Ecke seit dem 01.09.2026 schr&auml;ge
+Schenkel. <b>Die Ecke bleibt der eingegebene Punkt X1/Z1</b> &mdash; die Schenkel
+drehen um sie. <b>W1</b> ist der &Ouml;ffnungswinkel des Stirnschenkels zur
+X-Richtung: 90&deg; = zylindrisch, kleinere Werte kippen ihn so, dass der
+Durchmesser zur Schulter hin w&auml;chst (der Einstiegs-&empty; an der Stirn wird
+kleiner). <b>W2</b> ist der &Ouml;ffnungswinkel der Schulter zur Z-Richtung:
+90&deg; = senkrechte Schulter, kleinere Werte legen sie zum Futter (der Auslauf
+am Mantel wandert nach hinten &mdash; die zerspanbare Richtung: die
+Z-parallelen Schruppz&uuml;ge laufen mit dem Werkzeugk&ouml;rper durch schon
+ger&auml;umte Luft). Werte &uuml;ber 90&deg; w&auml;ren ein
+Hinterschnitt und werden mit Ansage abgewiesen; das Hilfebild zeichnet zu jedem
+Winkel die gestrichelte 90&deg;-Referenzlage am Eckpunkt. Geschruppt wird in der
+Winkelform l&auml;ngs; der native G72-Satz f&auml;llt auf G-Einzels&auml;tze
+zur&uuml;ck, bis die Satz-Kodierung der Schr&auml;gen an der Maschine belegt ist
+(Maschinentermin-Liste). Innen gibt es die Winkelform noch nicht.</dd>
 <dt id="ba-ak-kanten">K1&hellip;K3 Kanten</dt>
 <dd>Ein Feld je Kante plus Umschalter Fase/Rundung &mdash; im Datenmodell bleiben es
 zwei Werte, die Maske zeigt nur den gesetzten. Beim Schlichten beginnt die
@@ -8715,6 +8761,8 @@ function editStep(i){
     setRadio('aeK2Btns',p.k2Typ||'keine'); setVal('aeK2',p.k2!==undefined?p.k2:0.5);
     setRadio('aeK3Btns',p.k3Typ||'keine'); setVal('aeK3',p.k3!==undefined?p.k3:0.5);
     setRadio('aeAusgBtns', p.ausg||'gcode');
+    setVal('aeW1', p.w1!==undefined?p.w1:90); setVal('aeW2', p.w2!==undefined?p.w2:90);
+    { const f=aeFormAusWerten(); setRadio('aeFormBtns', f); aeFormSetzen(f); }
     inkReset(['aeX1mode','aeZ1mode']); aeGruppenSync();   // erst NACH allen setVal — sonst fasst sie Altwerte zusammen
     { const m=eingabeModusAusWerten('maskAbspanenEinfach');
       setRadio('aeEingabeBtns', m);
@@ -8933,7 +8981,7 @@ function wireRadioGroup(id){
     btn.classList.add('sel');
   });
 }
-['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns','akPlanFertigBtns'].forEach(wireRadioGroup);
 // Kleinumschalter IN einer Feldzeile (wie abs/ink): verdrahtet, aber
 // BEWUSST ohne Auswahlfeld — ein 51-px-Knopfpaar soll Knopfpaar
@@ -8947,7 +8995,7 @@ wireRadioGroup('boWMode');   // man/auto des Bohr-Vorlaufs — war ebenso tot
   if(g) g.addEventListener('click',()=>{ try{ esLabelsSync(); }catch(e){} }); }
 // Dieselben Gruppen bekommen ihr Auswahlfeld. Eine Liste, damit keine
 // Gruppe verdrahtet ist, aber ohne Feld bleibt (oder umgekehrt).
-const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns'];
 SELFELD_GRUPPEN.forEach(id=>{ try{ selFeldAufbauen(id); }catch(e){} });
 // Die Rueckzugsstufe schaltet ihre Felder frei — beim Klick und einmal
@@ -9346,6 +9394,12 @@ function wirkungsloseFelderAusblenden(maskId, zustaende){
     if(t.closest("#esFormBtns") || (t.id==="sw_esFormBtns")){
       try{ esFormSetzen(selBtnVal("esFormBtns")); }catch(e){}
     }
+    // Ecke: Form und Lage schalten die Winkelzeilen (innen gibt es
+    // die Winkelform noch nicht - s. aeFormSetzen).
+    if(t.closest("#aeFormBtns") || (t.id==="sw_aeFormBtns") ||
+       t.closest("#aeLageBtns") || (t.id==="sw_aeLageBtns")){
+      try{ aeFormSetzen(selBtnVal("aeFormBtns")); }catch(e){}
+    }
   }, false);
   // BUBBLE, NICHT CAPTURE [Daniel, 28.08.2026]. In der Capture-Phase
   // liest selBtnVal noch den alten Wert — der Knopf hat seine Auswahl
@@ -9565,6 +9619,35 @@ function mgZahl(id){ const e=document.getElementById(id); const v=e? parseFloat(
 function mgText(id){ const e=document.getElementById(id); return e? String(e.value||'') : ''; }
 
 // Abspanen (Ecke): Kanten und Zustellung.
+// FORM DER ECKE [Daniel, 01.09.2026: "Schraege einwaerts und Schraege
+// an der Planflaeche ... vielleicht waer das besser, wenn wir das
+// unterscheiden"]. Wie beim Einstich aus den Werten abgeleitet: steht
+// ein Winkel ungleich 90 drin, ist es die Winkelform - beim Oeffnen
+// alter Programme geht nichts verloren.
+function aeFormAusWerten(){
+  const z=(id)=>{ const e=document.getElementById(id); const v=parseFloat(e&&e.value); return isNaN(v)?90:v; };
+  return (Math.abs(z('aeW1')-90)>0.001 || Math.abs(z('aeW2')-90)>0.001) ? 'winkel' : 'ecke';
+}
+// Form anwenden: Winkelzeilen zeigen/verbergen. Beim Zurueckschalten
+// auf "Ecke" gehen die Winkel auf 90 - sonst fuehre der Zyklus
+// Schraegen, die die Maske nicht mehr zeigt (Regel wie esFormSetzen).
+// INNEN gibt es die Winkelform noch nicht: der Generator ist aussen
+// gebaut und gemessen; innen wuerde still Falsches entstehen.
+function aeFormSetzen(form){
+  let f=String(form||'ecke');
+  const innen=(typeof selBtnVal==='function' && selBtnVal('aeLageBtns'))==='innen';
+  if(innen && f==='winkel'){
+    f='ecke';
+    try{ setRadio('aeFormBtns','ecke'); }catch(e){}
+  }
+  const setz90=(id)=>{ const e=document.getElementById(id); if(e && e.value!=='90') e.value='90'; };
+  if(f!=='winkel'){ setz90('aeW1'); setz90('aeW2'); }
+  ['aeW1Row','aeW2Row'].forEach(id=>{
+    const z=document.getElementById(id);
+    if(z) z.style.display = (f==='winkel') ? '' : 'none';
+  });
+  try{ renderMaskHelp('maskAbspanenEinfach', null); }catch(e){}
+}
 function aeGruppenSync(){
   const w=mgZahl;
   const k=[1,2,3].map(n=>{
@@ -9940,6 +10023,7 @@ document.getElementById('boEntBearbBtns').addEventListener('click',(e)=>{
 // ---- Abspanen (Ecke, CYCLE951-Art) ----
 function openAbspanenEinfachMask(){
   inkReset(['aeX1mode','aeZ1mode']); aeGruppenSync();
+  { const f=aeFormAusWerten(); setRadio('aeFormBtns', f); aeFormSetzen(f); }
   { const m=eingabeModusAusWerten('maskAbspanenEinfach');
     setRadio('aeEingabeBtns', m);
     eingabeModusSetzen('maskAbspanenEinfach', m); }
@@ -9964,6 +10048,10 @@ document.getElementById('btnAeOk').onclick=()=>{
     k2Typ: selBtnVal('aeK2Btns'), k2: +document.getElementById('aeK2').value,
     k3Typ: selBtnVal('aeK3Btns'), k3: +document.getElementById('aeK3').value,
     ausg: selBtnVal('aeAusgBtns')||'gcode',
+    // Schenkelwinkel [Daniel, 01.09.2026]: 90/90 = alte Rechteckform,
+    // der Generator laeuft dann den unveraenderten Pfad.
+    w1: (isNaN(parseFloat(document.getElementById('aeW1').value))?90:+document.getElementById('aeW1').value),
+    w2: (isNaN(parseFloat(document.getElementById('aeW2').value))?90:+document.getElementById('aeW2').value),
   };
   commitStep('abspanen_einfach', params);
   document.getElementById('maskAbspanenEinfach').classList.remove('show');
@@ -12033,6 +12121,7 @@ const BA_ANKER={
   aeRichtBtns:'ba-ak-richtung', aeX0:'ba-ak-x0z0', aeZ0:'ba-ak-x0z0',
   aeX1:'ba-ak-x0z0', aeZ1:'ba-ak-x0z0',
   aeK1:'ba-ak-kanten', aeK2:'ba-ak-kanten', aeK3:'ba-ak-kanten',
+  aeW1:'ba-ae-form', aeW2:'ba-ae-form', aeFormBtns:'ba-ae-form',
   aeK1Btns:'ba-ak-kanten', aeK2Btns:'ba-ak-kanten', aeK3Btns:'ba-ak-kanten',
   aeD:'ba-zk-radial', aeUX:'ba-zk-radial', aeUZ:'ba-zk-radial',
   akKontur:'ba-akk-kontur', akRohKontur:'ba-akk-kontur',
@@ -13192,6 +13281,20 @@ function helpKonturAbspanenEcke(){
       zMax:L, rMax:rW};
   }
   const rM=32, rK=16, L=82, zS=30;
+  // FORM "MIT SCHENKELWINKELN" [Daniel, 01.09.2026]: festes
+  // Erklaerschema mit deutlich uebertriebenen Schraegen — die Ecke
+  // (X1/Z1) bleibt derselbe Punkt, der Stirnschenkel faellt zur
+  // Stirn hin ab (W1 < 90: ⌀ waechst zur Schulter), die Schulter
+  // oeffnet zur Stirn (W2 < 90). Die Winkelboegen mit ihren
+  // 90-Grad-Referenzlinien zeichnet das Maskenbild selbst.
+  const form=(typeof selBtnVal==='function' && selBtnVal('aeFormBtns'))||'ecke';
+  if(form==='winkel'){
+    return helpKontur(
+      [[0,rM],[zS-14,rM],[zS,rK],[L-0.0001,rK-10],[L,0.0001]],
+      {1:k(3), 2:k(2), 3:k(1)},
+      {Kante:[zS-14,rM], Absatz:[zS,rK], Mantel:[L*0.22,rM], Klein:[L*0.8,rK-8],
+       K1:[L,rK-10], K2:[zS,rK], K3:[zS-14,rM]});
+  }
   return helpKontur(
     [[0,rM],[zS,rM],[zS,rK],[L-0.0001,rK],[L,0.0001]],
     {1:k(3), 2:k(2), 3:k(1)},
@@ -14113,6 +14216,10 @@ const MASK_HELP = {
     // K1 nach INNEN versetzt — rechts der Stirn laeuft das X1-Mass.
     if(lage==='innen'){
       eckNr('K1',1, -12,-9); eckNr('K2',2, -14,-9); eckNr('K3',3, -14,10);
+    } else if((typeof selBtnVal==='function' && selBtnVal('aeFormBtns'))==='winkel'){
+      // Winkelform: K1 sitzt tiefer (Stirnschenkel faellt zur Stirn) —
+      // der Kreis rueckt nach OBEN, unten schreibt das X1-Mass.
+      eckNr('K1',1, -14,-12); eckNr('K2',2, -14,9); eckNr('K3',3, -14,-10);
     } else {
       eckNr('K1',1, -12,9); eckNr('K2',2, -14,9); eckNr('K3',3, -14,-10);
     }
@@ -14161,8 +14268,59 @@ const MASK_HELP = {
       // +42, nicht +28: der Kreis der Ecke 2 haengt bei +9 mit Radius 7
       // unter dem Absatz, bei +28 beruehrte ihn der Masskasten noch.
       helpDim(c, Absatz.x,Absatz.y+42, Absatz.x-9,Absatz.y+42, -0.001, 'UZ'+V('aeUZ'), A('aeUZ'),'in');
-    helpBahnLogik(c,w,h, richt==='plan'?'Planzüge, Zustellung D je Ebene':'Längszüge, Zustellung D je Ebene',
-                  A('aeD')||A('aeUX')||A('aeUZ'));
+    // =========================================================
+    // SCHENKELWINKEL-REFERENZEN [Daniel, 01.09.2026: "ich brauch
+    // eine klare Darstellung, von wo aus die Senkrechte ... der
+    // Winkel gebildet wird"]. Je Winkel die 90-GRAD-LAGE als
+    // gestrichelte Referenzlinie AM ECKPUNKT plus Bogen zur
+    // wirklichen Geraden: W2 oeffnet aus der Senkrechten zur
+    // Stirn, W1 aus der Achsparallelen zur Schulter. Die Ecke
+    // selbst ist der eingegebene Punkt X1/Z1 und wandert nicht.
+    // =========================================================
+    const formAe=(typeof selBtnVal==='function' && selBtnVal('aeFormBtns'))||'ecke';
+    if(formAe==='winkel' && lage!=='innen' && Kante && Absatz && Klein){
+      const wRef=(px,py,qx,qy, refDx,refDy, lab, on)=>{
+        if(HELP_FOKUS && !on) return;
+        if(helpSpaeter(()=>wRef(px,py,qx,qy,refDx,refDy,lab,on))) return;
+        c.save();
+        const col=on?HELP_ON:'#5a768a';
+        // Referenzlinie (90-Grad-Lage), gestrichelt
+        // Referenz LANG ziehen und den Bogen weit aussen ansetzen:
+        // bei flachen Oeffnungen (10-15 Grad) ist ein kleiner Bogen
+        // am Eckpunkt ein unsichtbarer Splitter [im Bild gemessen].
+        c.strokeStyle=col; c.lineWidth=on?1.6:1.1; c.setLineDash([5,3]);
+        c.beginPath(); c.moveTo(px,py); c.lineTo(px+refDx*46,py+refDy*46); c.stroke();
+        c.setLineDash([]);
+        // Bogen von der Referenz zur wirklichen Geraden
+        const aRef=Math.atan2(refDy,refDx), aIst=Math.atan2(qy-py,qx-px);
+        let d=aIst-aRef; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+        c.beginPath(); c.arc(px,py,40,aRef,aRef+d, d<0); c.stroke();
+        // Pfeilspitze am Bogenende
+        const ae=aRef+d, tang=ae+(d<0?-1:1)*Math.PI/2;
+        const ax=px+40*Math.cos(ae), ay=py+40*Math.sin(ae);
+        c.fillStyle=col;
+        c.beginPath(); c.moveTo(ax,ay);
+        c.lineTo(ax-6*Math.cos(tang)+2.5*Math.cos(ae), ay-6*Math.sin(tang)+2.5*Math.sin(ae));
+        c.lineTo(ax-6*Math.cos(tang)-2.5*Math.cos(ae), ay-6*Math.sin(tang)-2.5*Math.sin(ae));
+        c.closePath(); c.fill();
+        // Beschriftung ausserhalb des Bogens auf der REFERENZSEITE
+        // der Oeffnung, freigestellt
+        const am=aRef+d*0.5, tx=px+54*Math.cos(am), ty=py+54*Math.sin(am);
+        c.font=(on?'bold ':'')+'9.5px Arial'; c.textAlign='center';
+        const tb=c.measureText(lab).width;
+        c.fillStyle='#ffffff'; c.fillRect(tx-tb/2-2, ty-8, tb+4, 11);
+        c.fillStyle=on?HELP_ON:'#38464f'; c.fillText(lab, tx, ty);
+        c.restore();
+      };
+      // W2: Senkrechte am Eckpunkt, Bogen zur Schulter (zeigt zur Kante 3)
+      wRef(Absatz.x, Absatz.y, Kante.x, Kante.y, 0, -1, 'W2'+V('aeW2'), A('aeW2'));
+      // W1: Achsparallele Richtung Stirn, Bogen zum Stirnschenkel
+      wRef(Absatz.x, Absatz.y, Klein.x, Klein.y, 1, 0, 'W1'+V('aeW1'), A('aeW1'));
+    }
+    helpBahnLogik(c,w,h,
+      formAe==='winkel' ? 'W1/W2 öffnen aus der 90°-Lage — die Ecke bleibt X1/Z1'
+        : (richt==='plan'?'Planzüge, Zustellung D je Ebene':'Längszüge, Zustellung D je Ebene'),
+      formAe==='winkel' ? (A('aeW1')||A('aeW2')) : (A('aeD')||A('aeUX')||A('aeUZ')));
     helpBahnLegende(c,w,false);
   },
   maskAbspanenKontur(active){
@@ -17404,6 +17562,59 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
   const kant1Inn=(innen && p.k1Typ && p.k1Typ!=='keine')?Math.max(0,+p.k1||0):0;
   const kant3Inn=(innen && p.k3Typ && p.k3Typ!=='keine')?Math.max(0,+p.k3||0):0;
   // ============================================================
+  // SCHENKELWINKEL [Daniel, 01.09.2026] — Form "mit Schenkelwinkeln".
+  // ------------------------------------------------------------
+  // Vorbild ist die Steuerung selbst (DV 594 S. 4.6-12): "2 beliebige
+  // Geraden", alpha1 = Oeffnungswinkel zu X (Stirnschenkel, 90 =
+  // zylindrisch), alpha2 = Oeffnungswinkel zu Z (Schulter, 90 =
+  // senkrecht). Die ECKE bleibt der eingegebene Punkt X1/Z1 — die
+  // Schenkel drehen um sie, das andere Ende wandert auf der Stirn
+  // (Einstiegs-⌀ wird kleiner) bzw. auf dem Mantel (Auslauf wandert
+  // zum Futter). Bei 90/90 laeuft der unveraenderte alte Pfad —
+  // die Winkelform hat einen EIGENEN Zweig, damit am Bestand kein
+  // Bit kippt.
+  const w1Ae=(p.w1===undefined||isNaN(+p.w1))?90:+p.w1;
+  const w2Ae=(p.w2===undefined||isNaN(+p.w2))?90:+p.w2;
+  let winkelModus = (Math.abs(w1Ae-90)>0.001 || Math.abs(w2Ae-90)>0.001);
+  if(winkelModus && innen){
+    warnings.push('Schenkelwinkel INNEN sind nicht gebaut (Generator aussen gerechnet und gemessen) — die Winkel werden ignoriert, gefertigt wird die 90-Grad-Ecke.');
+    winkelModus=false;
+  }
+  if(winkelModus && (w1Ae>90.001 || w2Ae>90.001)){
+    warnings.push('Schenkelwinkel ueber 90 Grad (W1 '+fmt(w1Ae)+' / W2 '+fmt(w2Ae)+') waeren ein HINTERSCHNITT — der Eckzyklus fertigt das nicht. Winkel ignoriert, gefertigt wird die 90-Grad-Ecke.');
+    winkelModus=false;
+  }
+  if(winkelModus && (w1Ae<20 || w2Ae<20)){
+    warnings.push('Schenkelwinkel unter 20 Grad (W1 '+fmt(w1Ae)+' / W2 '+fmt(w2Ae)+') — so flache Schenkel sind kein Fall fuer den Eckzyklus (Kontur zeichnen). Winkel ignoriert.');
+    winkelModus=false;
+  }
+  // Geometrie der Schenkel — einmal gerechnet, Zweig und Wächter
+  // teilen sich die Werte. tAe: Radius je mm Z (Kegel), tBe: mm Z je
+  // Radius-mm (Schulteroeffnung).
+  let rA0Ae=0, zB1Ae=0, tAe=0, tBe=0;
+  if(winkelModus){
+    tAe=Math.tan((90-w1Ae)*Math.PI/180);
+    tBe=Math.tan((90-w2Ae)*Math.PI/180);
+    rA0Ae=d2r(xInner)-tAe*(zOuter-zInner);
+    // SCHULTER OEFFNET ZUM FUTTER (-Z), nicht zur Stirn. Der erste
+    // Bau kippte sie zur Stirn — dann UEBERHAENGT sie gegenueber den
+    // Z-parallelen Schruppzuegen, und der Werkzeugkoerper ueber der
+    // Spitze reisst beim tieferen Folgezug in die fertige Flaeche.
+    // GEFUNDEN am Hoehenfeld (Probe z-38,39/r37: Material weg, das
+    // stehen musste) — der Bahnpunkt-Scan sah es nicht, weil nur das
+    // Feld den ganzen Klingenumriss stempelt. Zum Futter geneigt
+    // stoppen die aeusseren Ebenen TIEFER als die inneren, der
+    // Koerper des Folgezugs laeuft durch schon geraeumte Luft.
+    zB1Ae=zInner-tBe*(d2r(xOuter)-d2r(xInner));
+    if(rA0Ae<0.25){
+      warnings.push('W1 '+fmt(w1Ae)+' Grad zieht den Einstiegs-⌀ an der Stirn unter Null (rechnerisch ⌀'+fmt(2*rA0Ae)+') — der Kegel ist laenger als der Winkel hergibt. Winkel ignoriert.');
+      winkelModus=false;
+    }
+  }
+  if(winkelModus && p.richtung==='plan'){
+    warnings.push('Schenkelwinkel: geschruppt wird laengs (Z-parallel) — der Plan-Schruppzweig ist fuer die Winkelform nicht gebaut. Die Fertigkontur ist dieselbe.');
+  }
+  // ============================================================
   // NATIVER ABSPANZYKLUS G72 [Daniel, Empfehlung 2, 01.09.2026]
   // ------------------------------------------------------------
   // G72 ist der Menue-Zyklus fuer "2 Geraden + 3 Uebergaenge" —
@@ -17446,6 +17657,15 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     // in die Maske tippen und per DNC ziehen (derselbe Weg, der den
     // kurzen T-Aufruf belegt hat).
     warnings.push('G72 innen: die Steuerung kann es (DV 594 S. 4.6-13), aber die SATZ-Kodierung der Innenlage ist unbelegt (kein Lage-Parameter, kein Innen-Beispielsatz) — Ausgabe erfolgt als G-Einzelsaetze. Beleg-Weg: Innen-Zyklus an der Maschine eintippen und per DNC ziehen.');
+    zyklusModusAe=false;
+  }
+  if(zyklusModusAe && winkelModus){
+    // Die Maske der Steuerung KANN die Winkel (alpha1/alpha2, DV 594
+    // S. 4.6-12) — aber wie der Satz die Schraegen kodiert (Xm/Zm in
+    // PK/PM/PN? Vorzeichen?), ist ohne Beispielsatz mit Winkeln
+    // unbelegt. Ein falsch gedrehter Schenkel schneidet in die
+    // Schulter. Beleg-Weg wie beim Innen-Fall: Maschinentermin.
+    warnings.push('G72 mit Schenkelwinkeln: die SATZ-Kodierung der Schraegen (Xm/Zm-Strecken) ist am Handbuch nicht belegt — Ausgabe erfolgt als G-Einzelsaetze. Beleg-Weg: Winkel-Zyklus an der Maschine eintippen und per DNC ziehen.');
     zyklusModusAe=false;
   }
   if(zyklusModusAe){
@@ -17526,7 +17746,163 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     const dxr=Math.sqrt(Math.max(0, kant2*kant2 - (zv - zInner - kant2)*(zv - zInner - kant2)));
     return Math.max(xBase, xInner + 2*(kant2 - dxr) + (doRough&&doFinish?2*p.ux:0));
   };
-  if(doRough){
+  // ============================================================
+  // WINKELZWEIG [Daniel, 01.09.2026]: eigener, geschlossener Pfad
+  // fuer die Form "mit Schenkelwinkeln" (aussen). Der 90-Grad-Pfad
+  // darunter bleibt unangefasst — bitgenau am Bestand.
+  // ============================================================
+  if(winkelModus){
+    const xi=xInner, xo=xOuter, zo=zOuter, zi=zInner;
+    // Punkte in (z, x=RADIUS): A0 Einstieg an der Stirn, E die Ecke
+    // (der eingegebene Punkt X1/Z1), B1 der Schulterauslauf am Mantel.
+    const A0={z:zo, x:rA0Ae}, E={z:zi, x:d2r(xi)}, B1={z:zB1Ae, x:d2r(xo)};
+    const uF={z:0, x:1};                                  // Stirn, radial nach aussen
+    const uA=norm({z:E.z-A0.z, x:E.x-A0.x});              // Stirnschenkel (Kegel)
+    const uB=norm({z:B1.z-E.z, x:B1.x-E.x});              // Schulter
+    const uM={z:-1, x:0};                                 // Mantel nach -Z
+    // Kante zwischen zwei beliebigen Geraden. Fase: Schenkelmass m
+    // entlang beider Schenkel (bei 90 Grad exakt die alte Bauform).
+    // Radius: Tangentenabstand t = m/tan(theta/2), Zentrum auf der
+    // Winkelhalbierenden im Abstand m/sin(theta/2); Drehsinn aus dem
+    // Kreuzprodukt (positiv = G03) — an den drei 90-Grad-Ecken gegen
+    // die bestehenden Saetze nachgerechnet (K1 G03, K2 G02, K3 G03).
+    const eckeAe=(P,u1,u2,typ,m)=>{
+      if(!(m>0)) return null;
+      const cosI=-(u1.z*u2.z+u1.x*u2.x);
+      const th=Math.acos(Math.max(-1,Math.min(1,cosI)));
+      if(th<0.05 || th>Math.PI-0.05) return null;
+      const t=(typ==='fase')? m : m/Math.tan(th/2);
+      const p1={z:P.z-t*u1.z, x:P.x-t*u1.x};
+      const p2={z:P.z+t*u2.z, x:P.x+t*u2.x};
+      if(typ==='fase') return {p1,p2,c:null,g:0};
+      const bis=norm({z:u2.z-u1.z, x:u2.x-u1.x});
+      const c={z:P.z+bis.z*m/Math.sin(th/2), x:P.x+bis.x*m/Math.sin(th/2)};
+      const cr=(p1.z-c.z)*(p2.x-c.x)-(p1.x-c.x)*(p2.z-c.z);
+      return {p1,p2,c,g:(cr>0?3:2)};
+    };
+    const C1=eckeAe(A0,uF,uA,p.k1Typ,kant1);
+    const C2w=eckeAe(E,uA,uB,p.k2Typ,kant2);
+    const C3w=eckeAe(B1,uB,uM,p.k3Typ,kant3);
+    // Sollkontur als Punktzug (Boegen abgetastet) — daraus kommt die
+    // Schruppgrenze zGrenzW: fuer jede Ebenenhoehe das groesste Z der
+    // Kontur. Radiales Aufmass steckt in der Auswertung bei r+ux
+    // (verschiebt die Grenze entlang der Schraege), axiales als +uz.
+    const kette=[];
+    const bogenAb=(C)=>{ if(!C||!C.c) return;
+      const a1=Math.atan2(C.p1.x-C.c.x, C.p1.z-C.c.z), a2=Math.atan2(C.p2.x-C.c.x, C.p2.z-C.c.z);
+      let d=a2-a1; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+      const rr=Math.hypot(C.p1.x-C.c.x, C.p1.z-C.c.z);
+      for(let k2i=1;k2i<8;k2i++){ const a=a1+d*k2i/8;
+        kette.push({z:C.c.z+rr*Math.cos(a), x:C.c.x+rr*Math.sin(a)}); } };
+    if(C1){ kette.push(C1.p1); bogenAb(C1); kette.push(C1.p2); } else kette.push(A0);
+    kette.push(C2w?C2w.p1:E); if(C2w){ bogenAb(C2w); kette.push(C2w.p2); }
+    kette.push(C3w?C3w.p1:B1); if(C3w){ bogenAb(C3w); kette.push(C3w.p2); }
+    kette.push({z:(C3w?C3w.p2.z:B1.z)-1, x:d2r(xo)});
+    const zBei=(r)=>{ let zv=-Infinity;
+      for(let k3i=1;k3i<kette.length;k3i++){
+        const a=kette[k3i-1], b=kette[k3i];
+        const lo=Math.min(a.x,b.x), hi=Math.max(a.x,b.x);
+        if(r<lo-1e-9 || r>hi+1e-9) continue;
+        const zz=(Math.abs(b.x-a.x)<1e-9)? Math.max(a.z,b.z)
+                : a.z+(b.z-a.z)*(r-a.x)/(b.x-a.x);
+        if(zz>zv) zv=zz;
+      }
+      return (zv===-Infinity)? zo : zv; };
+    const uzW=(doFinish?p.uz:0), uxW=(doFinish?p.ux:0);
+    const zGrenzW=(xv)=>Math.min(zAnf, Math.max(zBei(d2r(xv)), zBei(d2r(xv)+uxW)) + uzW);
+    const duennenW=(pts,tol)=>{
+      if(!pts||pts.length<3) return pts||[];
+      const dP=(a,b,q)=>{const dz=b.z-a.z,dx=(b.x-a.x)/2;const L=Math.hypot(dz,dx)||1e-9;
+        return Math.abs(dz*((q.x-a.x)/2)-dx*(q.z-a.z))/L;};
+      const keep=new Array(pts.length).fill(false);
+      keep[0]=keep[pts.length-1]=true;
+      const st=[[0,pts.length-1]];
+      while(st.length){const sg=st.pop();let mx2=0,mi=-1;
+        for(let k=sg[0]+1;k<sg[1];k++){const d3=dP(pts[sg[0]],pts[sg[1]],pts[k]);if(d3>mx2){mx2=d3;mi=k;}}
+        if(mx2>tol&&mi>0){keep[mi]=true;st.push([sg[0],mi],[mi,sg[1]]);}}
+      return pts.filter((_,k)=>keep[k]);
+    };
+    if(doRough){
+      // Ebenen wie im Laengszweig: gleichmaessige Zustellung bis zum
+      // kleinsten Soll-⌀ (Einstieg an der Stirn) plus Aufmass.
+      const finishXW=2*rA0Ae + (doFinish?2*p.ux:0);
+      const gesamtW=Math.abs(xOuter-finishXW);
+      const nW=Math.max(1, Math.ceil(gesamtW/Math.max(0.001,2*p.d) - 1e-9));
+      const dEffW=gesamtW/nW;
+      const passesW=[];
+      let xw=xOuter-dEffW;
+      while(xw>finishXW+0.001){ passesW.push(xw); xw-=dEffW; }
+      passesW.push(finishXW);
+      passesW.forEach((xv,i)=>{
+        const letzte=(i===passesW.length-1);
+        const xPrev=i>0?passesW[i-1]:Math.max(xOuter,p.x0);
+        if(letzte && kant1>0.05){
+          // Letzte Ebene taucht ueber die K1-Kante ein (Rundung als
+          // Schraege angenaehert — die Form stellt der Schlichtzug her).
+          lines.push(`${N()} (SCHRAEG ) G94 G00 G90 X${fmt(2*(C1?C1.p1.x:rA0Ae)+(doFinish?2*p.ux:0))} Z${fmt(zAnf)}`); bump();
+          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zo)}`); bump();
+          lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xv)} Z${fmt(zGrenzW(xv))}`); bump();
+        } else {
+          lines.push(`${N()} (SCHRAEG ) G94 G00 G90 X${fmt(xv)} Z${fmt(zAnf)}`); bump();
+          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zGrenzW(xv))}`); bump();
+        }
+        // Konturparalleler Auszug bis zur vorherigen Ebene — laeuft
+        // durch zGrenzW von selbst ueber Kegel, K2-Kante und Schulter.
+        let ba=[{z:zGrenzW(xv), x:xv}];
+        const xZiel=Math.min(xPrev, xOuter);
+        for(let xx=xv+0.4; xx<xZiel-1e-9; xx+=0.4) ba.push({z:zGrenzW(xx), x:xx});
+        ba.push({z:zGrenzW(xZiel), x:xZiel});
+        ba=duennenW(ba, 0.05);
+        for(let k=1;k<ba.length;k++){
+          const sw=Math.abs(ba[k].z-ba[k-1].z)>0.001;
+          lines.push(`${N()} (${sw?'SCHRAEG ':'GERADE  '}) G01 X${fmt(ba[k].x)} Z${fmt(ba[k].z)}`); bump();
+        }
+        lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(xZiel + 2)}`); bump();
+        lines.push(`${N()} (GERADE  ) G00 Z${fmt(zAnf)}`); bump();
+      });
+    }
+    if(doFinish){
+      lines.push(`(--- SCHLICHTEN: F${fmt(p.ff)} S${p.sf} ---)`);
+      const compCode = crcCode({crc:'', lage:p.lage});
+      lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sf}`); bump();
+      lines.push(`${N()} (M-BEFEHL) M03`); bump();
+      const bogenSatz=(C)=>{
+        const bw=bogenWorte(C.p1.x, C.p1.z, C.p2.x, C.p2.z, C.c.x, C.c.z, C.g===2, warnings);
+        if(bw!==null){ lines.push(`${N()} (RADIUS  ) G0${C.g} X${fmt(2*C.p2.x)} Z${fmt(C.p2.z)} ${bw}`); bump(); }
+        else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*C.p2.x)} Z${fmt(C.p2.z)}`); bump(); }
+      };
+      if(C1 && p.k1Typ==='fase'){
+        // Fase auf ihrer eigenen Verlaengerung 1 mm vor der Stirn
+        // beginnen — dieselbe Regel wie im 90-Grad-Zug (K1-Befund).
+        const uK=norm({z:C1.p2.z-C1.p1.z, x:C1.p2.x-C1.p1.x});
+        let s=(uK.z<-1e-6)? 1/(-uK.z) : 0;
+        let S={z:C1.p1.z-s*uK.z, x:C1.p1.x-s*uK.x};
+        // Vorlauf schrumpft, wenn der Startpunkt sonst unter ⌀0,5
+        // geriete — dieselbe Klemme wie aF1 im 90-Grad-Zug.
+        if(S.x<0.25 && uK.x>1e-6){ s=Math.max(0,(C1.p1.x-0.25)/uK.x); S={z:C1.p1.z-s*uK.z, x:C1.p1.x-s*uK.x}; }
+        lines.push(`${N()} (SCHRAEG ) G00 G90 X${fmt(2*S.x)} Z${fmt(zAnf)}`); bump();
+        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compCode} Z${fmt(S.z)}`); bump();
+        lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*C1.p2.x)} Z${fmt(C1.p2.z)}`); bump();
+      } else if(C1){
+        // Rundung: radialer Anlauf in der Stirnebene, Bogen tangential.
+        lines.push(`${N()} (SCHRAEG ) G00 G90 X${fmt(2*C1.p1.x-2)} Z${fmt(zAnf)}`); bump();
+        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compCode} Z${fmt(C1.p1.z)}`); bump();
+        lines.push(`${N()} (GERADE  ) G01 X${fmt(2*C1.p1.x)}`); bump();
+        bogenSatz(C1);
+      } else {
+        lines.push(`${N()} (SCHRAEG ) G00 G90 X${fmt(2*A0.x)} Z${fmt(zAnf)}`); bump();
+        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compCode} Z${fmt(zo)}`); bump();
+      }
+      const zielA=C2w?C2w.p1:E;
+      lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*zielA.x)} Z${fmt(zielA.z)}`); bump();
+      if(C2w){ if(p.k2Typ==='fase'){ lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*C2w.p2.x)} Z${fmt(C2w.p2.z)}`); bump(); } else bogenSatz(C2w); }
+      const zielB=C3w?C3w.p1:B1;
+      lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*zielB.x)} Z${fmt(zielB.z)}`); bump();
+      if(C3w){ if(p.k3Typ==='fase'){ lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*C3w.p2.x)} Z${fmt(C3w.p2.z)}`); bump(); } else bogenSatz(C3w); }
+      lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(xo+2)}`); bump();
+    }
+  }
+  if(doRough && !winkelModus){
     if(p.richtung==='laengs'){
       // GLEICHMÄSSIGE ZUSTELLUNG: D ist ein Maximum, kein Festwert. Schnittzahl =
       // aufgerundet Gesamttiefe/Dmax, tatsächliche Zustellung = Gesamttiefe/Schnittzahl.
@@ -17634,7 +18010,7 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
       });
     }
   }
-  if(doRough && !innen && p.richtung!=='laengs'){
+  if(doRough && !winkelModus && !innen && p.richtung!=='laengs'){
     // KANTEN VORSCHRUPPEN (nur PLAN-Richtung) [Daniel, IMG_2609/2610]:
     // im Laengszweig sind K1/K3 in die Ebenen integriert; bei plan liegt
     // UNTER der tiefsten Ebene, K3 (Schulterkante) LINKS des Zyklusfensters —
@@ -17660,7 +18036,7 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
       lines.push(`${N()} (GERADE  ) G00 Z${fmt(zAnf)}`); bump();
     }
   }
-  if(doFinish){
+  if(doFinish && !winkelModus){
     lines.push(`(--- SCHLICHTEN: F${fmt(p.ff)} S${p.sf} ---)`);
     const compCode = crcCode({crc:'', lage:p.lage});
     lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sf}`); bump();
