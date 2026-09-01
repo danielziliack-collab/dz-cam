@@ -17015,13 +17015,17 @@ function roughEnvelope(ux, uz, srcEls){
       let da=a2-a1;
       if(s.cw && da>0) da-=2*Math.PI;
       if(!s.cw && da<0) da+=2*Math.PI;
-      const n=Math.max(24, Math.round(Math.abs(da)*r/0.02));
+      // 0,01er-Abtastung [Daniels NC-Befund 01.09.2026]: mit 0,02er
+      // Punkten auf 0,01er Faechern blieben Luecken, die der carry-Fill
+      // mit dem NACHBARWERT fuellte — an steilen Flanken ein 0,02er
+      // Zufallsfehler. Abtastung und Fachbreite gehoeren zusammen.
+      const n=Math.max(24, Math.round(Math.abs(da)*r/0.01));
       for(let k=0;k<=n;k++){
         const a=a1+da*k/n;
         push(s.cz+r*Math.cos(a), s.cx+r*Math.sin(a));
       }
     } else {
-      const n=Math.max(2, Math.round(Math.hypot(s.z2-s.z1,s.x2-s.x1)/0.02));
+      const n=Math.max(2, Math.round(Math.hypot(s.z2-s.z1,s.x2-s.x1)/0.01));
       for(let k=0;k<=n;k++){
         const t=k/n;
         push(s.z1+(s.z2-s.z1)*t, s.x1+(s.x2-s.x1)*t);
@@ -17029,7 +17033,13 @@ function roughEnvelope(ux, uz, srcEls){
     }
   });
 
-  const step=0.02;
+  // FACHBREITE 0,01 [Daniels NC-Befund 01.09.2026, Stufenbolzen]:
+  // mit 0,02er Faechern lag die Anstiegskante der Huelle bis 0,01 mm
+  // neben der wahren Stelle zKante+UZ — zusammen mit dem 0,05er
+  // Suchraster des Schruppsweeps stand am Teil 0,15 statt 0,10 mm
+  // Z-Aufmass. Daniels Anspruch gilt: das NC muss aufs Hundertstel
+  // stimmen, das Raster darf suchen, aber nicht entscheiden.
+  const step=0.01;
   const zHi=Math.max(...dense.map(q=>q.z)), zLo=Math.min(...dense.map(q=>q.z));
   const nB=Math.max(1, Math.ceil((zHi-zLo)/step)+1);
   // Rohprofil: größter Konturradius je Z-Fach (an Planflächen ist die Kontur mehrdeutig)
@@ -18256,6 +18266,25 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
     }
     return x;
   };
+  // EXAKTE Huellenauswertung fuer die Stopp-Bisektion [Daniels
+  // NC-Befund 01.09.2026]: env ist in 0,01er Faecher gerastert —
+  // die Anstiegskante liegt dadurch ein halbes Fach neben der wahren
+  // Stelle (gemessen: 0,105 statt 0,100 Aufmass). Hier wird das
+  // UZ-Fenstermaximum direkt auf den Konturpunkten gerechnet: an
+  // einer senkrechten Schulter springt es EXAKT bei zKante+UZ.
+  // Die Taschen-Bruecke bleibt analytisch identisch zu mainAt.
+  const exaktAt = (z)=>{
+    const lo=z-p.uz, hi=z+p.uz;
+    let m=Math.max(contourXatZ(lo,pts), contourXatZ(hi,pts));
+    for(const q of pts){ if(q.z>=lo-1e-9 && q.z<=hi+1e-9 && q.x>m) m=q.x; }
+    let x=m+2*p.ux;
+    for(const pk of pockets){
+      if(z <= pk.zIn+1e-9 && z >= pk.zOut-1e-9){
+        x = Math.max(x, pk.mouthX - fallRate*(pk.zIn - z));
+      }
+    }
+    return x;
+  };
 
   if(nurRest){
     // ================= ABSPANEN RESTMATERIAL [Daniel] =================
@@ -18315,9 +18344,22 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         // abzueglich Aufmass noch WEITER ist als die Bahn selbst.
         // Die Vergleichsrichtung ist damit gegenueber aussen gedreht:
         // aussen liegt Material bei groesserem ⌀, innen bei kleinerem.
-        let zAt=zStart;
+        let zAt=zStart, innenGestoppt=false;
         for(let zz=zStart; zz>=zEnd; zz-=0.5){
-          if(contourXatZ(zz,pts)-2*p.ux >= xp-1e-6) zAt=zz; else break;
+          if(contourXatZ(zz,pts)-2*p.ux >= xp-1e-6) zAt=zz; else { innenGestoppt=true; break; }
+        }
+        // BISEKTION [Daniels NC-Befund 01.09.2026, gleiche Falle wie
+        // aussen, nur mit 0,5er Raster ZEHNMAL groeber]: der Zug
+        // stoppte bis 0,5 mm vor der Innenschulter — plus zSkin ergab
+        // das bis 0,6 mm Z-Aufmass statt UZ. contourXatZ ist
+        // stueckweise stetig, die Halbierung trifft die Kante exakt.
+        if(innenGestoppt){
+          let zGut=zAt, zSchlecht=Math.max(zEnd, zAt-0.5);
+          for(let bi=0; bi<12; bi++){
+            const mid=(zGut+zSchlecht)/2;
+            if(contourXatZ(mid,pts)-2*p.ux >= xp-1e-6) zGut=mid; else zSchlecht=mid;
+          }
+          zAt=zGut;
         }
         zAt = Math.min(zStart, zAt + zSkin);   // uz Aufmass an der Schulter stehen lassen
         // WEGFAHREN auf die Rueckzugsebene in Z, nicht auf den
@@ -18715,6 +18757,23 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
           if(zz > zStart - 0.15){ continue; }
           if(mainAt(zz) <= xp){ zAt=zz; reachable=true; }
           else { gestoppt=true; break; }   // ansteigendes Material = echte Schulter
+        }
+        // BISEKTION AUF DIE ECHTE GRENZE [Daniels NC-Befund 01.09.2026]:
+        // der 0,05er-Suchlauf stoppte auf dem letzten Rasterpunkt VOR der
+        // Huellenkante — am Stufenbolzen stand 0,15 statt 0,10 mm
+        // Z-Aufmass an jeder Schulter. Das Raster findet das Intervall,
+        // die Halbierung den Punkt (auf 0,001; fmt rundet auf 0,001).
+        if(reachable && gestoppt){
+          // Suchintervall grosszuegig um den Rastertreffer, Pruefung
+          // auf der EXAKTEN Huelle — das Raster darf suchen, aber
+          // nicht entscheiden.
+          let zGut=Math.min(zStart, zAt+0.05), zSchlecht=zAt-0.05;
+          if(exaktAt(zGut) > xp) { zGut=zAt; }
+          for(let bi=0; bi<14; bi++){
+            const mid=(zGut+zSchlecht)/2;
+            if(exaktAt(mid) <= xp) zGut=mid; else zSchlecht=mid;
+          }
+          zAt=zGut;
         }
         if(reachable){
           zAt = Math.min(zFaceStop, zAt);
@@ -26446,6 +26505,25 @@ function massBericht(){
         lz.z2=a.z; if(Math.abs(a.d)>Math.abs(lz.d)) lz.d=a.d;
       } else zonen.push({z1:a.z, z2:a.z, d:a.d, step:a.step});
     });
+    // SPLITTERZONEN VERSCHMELZEN [Nebenbefund der UZ-Praezisierung,
+    // 01.09.2026]: endet ein Zug um wenige Tausendstel anders, kann
+    // ein einzelnes Messfach eine zusammenhaengende Restzone in zwei
+    // Teile zerschneiden — an der Rotorwelle stand ploetzlich eine
+    // Zone der Breite 0,00 bei Z-500 NEBEN der bekannten Zone hinter
+    // dem Ballen, mit anderem Verursacher (Randfach "unbearbeitet").
+    // Eine punktfoermige Zone ist kein eigener Befund: sie geht in
+    // die Nachbarzone auf, der Verursacher der breiteren gilt.
+    for(let i3=zonen.length-1;i3>0;i3--){
+      const a3=zonen[i3-1], b3=zonen[i3];
+      const schmalA=(Math.abs(a3.z2-a3.z1))<0.06, schmalB=(Math.abs(b3.z2-b3.z1))<0.06;
+      const luecke=Math.min(Math.abs(b3.z1-a3.z2), Math.abs(a3.z1-b3.z2));
+      if((schmalA||schmalB) && luecke<0.25 && (a3.d>0)===(b3.d>0)){
+        if(schmalA && !schmalB){ a3.step=b3.step; }
+        a3.z1=Math.min(a3.z1,b3.z1); a3.z2=Math.max(a3.z2,b3.z2);
+        if(Math.abs(b3.d)>Math.abs(a3.d)) a3.d=b3.d;
+        zonen.splice(i3,1);
+      }
+    }
     return {seite, tol:TOL, gesamtLen, treffLen, maskLen, maxRest, maxUeber, zonen};
   };
 
