@@ -16933,6 +16933,127 @@ const PP_FEST=[
   'D Zustelltiefe und UX Aufmass gelten RADIAL (ap, je Seite); axiale Werte (Planzustellung, UZ) 1:1.',
   'Schneidenradiuskorrektur automatisch: Schruppen ohne, Schlichten G41/G42 nach Lage.',
 ];
+// =================================================================
+// ZYKLUSSATZ-PARAMETER ZUM NACHSCHLAGEN [Daniel, 01.09.2026]:
+// "sonst muss ich jedes Mal im Handbuch nachschlagen, welcher Wert
+// fuer welchen Parameter steht." Je nativer Zyklussatz: Adresse ->
+// Bedeutung laut Handbuch -> aus welchem MASKENFELD die App den
+// Wert fuellt. Quellen sind die belegten Fundstellen der DV 610
+// bzw. R&D 95.05; die Listen muessen zu den worte-Arrays der
+// Generatoren passen (Pruefabschnitt 147 haelt Stichproben).
+// =================================================================
+const ZYKLUS_PARAM=[
+ {g:'G75 / G76 Gewinde laengs/kegelig', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-54 bis 3-56',
+  p:[['X','Nenn-⌀ (innen: Kern-⌀ der Vorbohrung)','Maske X0'],
+     ['Z','Gewindeanfang','Maske Z0'],
+     ['I','X1 ⌀ am Gewindeende — nur G76 Kegel','Maske X1'],
+     ['K','Gewindeende absolut','Maske Z1'],
+     ['F','Steigung mm/U','Maske P'],
+     ['PG','U Schlichtaufmass radial','Maske U'],
+     ['PM','LW Gewindevorlauf','Maske LW'],
+     ['PN','LR Gewindeauslauf','Maske LR'],
+     ['PO','K Gesamtzustelltiefe radial — AUSSEN NEGATIV, innen positiv','Maske H1 (auto aus P)'],
+     ['PP','I Flankenbreite axial (aus Flankenwinkel alpha)','Maske alpha, gerechnet tan(a)*H1'],
+     ['PQ','D 1. Zustellung','Maske D'],
+     ['PT','V Sicherheitsabstand Ruecklauf','Programmkopf SC'],
+     ['PW','Schnittaufteilung 0=fest/linear, 1=degressiv','Maske Schnittaufteilung'],
+     ['PY','L Anzahl Gewindegaenge (nur wenn >1)','Maske Gangzahl'],
+     ['P240:1','Schruppen UND Schlichten in einem Lauf','Maske Bearbeitung beide']]},
+ {g:'G75 Gewinde (1000er-Langform)', nur:'MONFORTS_1000_MTC_K_6624B', q:'R&D 95.05, Abnahme-Annahme P214',
+  p:[['X / Z','Nenn-⌀ / Gewindeanfang','Maske X0 / Z0'],
+     ['K (G91)','Gewindelaenge inkremental','aus Z1-Z0'],
+     ['P206','U Schlichtaufmass','Maske U'],
+     ['P212 / P213','LW Vorlauf / LR Auslauf','Maske LW / LR'],
+     ['P214','Gesamtzustellung signiert (ANNAHME, Abnahmetest!)','Maske H1'],
+     ['P215','Flankenbreite axial','Maske alpha, gerechnet'],
+     ['P216','1. Zustellung','Maske D'],
+     ['P220','Steigung','Maske P'],
+     ['P222','1=degressiv','Maske Schnittaufteilung'],
+     ['P224','Gangzahl (nur >1)','Maske Gangzahl']]},
+ {g:'G77 Plangewinde (Stirn)', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-58/59',
+  p:[['X / Z','Start-⌀ aussen / Stirnflaeche','Maske X0 / Z0'],
+     ['I','X1 End-⌀ innen','Maske X1'],
+     ['F','Steigung radial mm/U','Maske P'],
+     ['PG','U Schlichtaufmass','Maske U'],
+     ['PM / PN','W Vorlauf / R Auslauf (radial)','Maske LW / LR'],
+     ['PO','K Gesamtzustelltiefe axial, NEGATIV','Maske H1'],
+     ['PQ','D 1. Zustellung','Maske D'],
+     ['PT','V Sicherheitsabstand','Programmkopf SC'],
+     ['PW / PY / P240','wie G75','wie G75']]},
+ {g:'G74 Bohren', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-47',
+  p:[['Z','Z0 Bezugspunkt','Maske Z0'],
+     ['PK (G91)','1=Spaenebrechen (Rueckzug um Betrag), 0=Entspanen','Maske Bearbeitung'],
+     ['PL','W Vorlauf','Maske W (man/auto)'],
+     ['PM','D 1. Zustellung (Zentrieren/einfach: volle Tiefe — ANNAHME)','Maske D'],
+     ['PN','DF Degressionsfaktor','Maske DF'],
+     ['PO','Gesamt-Bohrtiefe inkremental','aus Z1'],
+     ['PP','U Mindestbohrtiefe','Maske U'],
+     ['PQ','V Rueckzugsbetrag (nur Spaenebrechen)','Maske V'],
+     ['PT95 / PU0.4','Zeitbasis Umdrehungen / fester Dokumentationswert','fest']]},
+ {g:'G74 Bohren (1000er-Langform)', nur:'MONFORTS_1000_MTC_K_6624B', q:'R&D 95.05 S. 3.35 (P-Werte sind RADIUS-Werte)',
+  p:[['Z','Z0 Bezugspunkt','Maske Z0'],
+     ['P210','0=Rueckzug zur Startposition, 1=um Rueckzugsbetrag','Maske Bearbeitung'],
+     ['P211','W Vorlauf','Maske W (man/auto)'],
+     ['P212','D 1. Zustellung','Maske D'],
+     ['P213','DF Degressionsfaktor','Maske DF'],
+     ['P214','Gesamt-Bohrtiefe','aus Z1'],
+     ['P215','U Mindestbohrtiefe','Maske U'],
+     ['P216','V Rueckzugsbetrag','Maske V']]},
+ {g:'G81 / G82 / G83 Bohren (DIN-Familie)', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-67/68',
+  p:[['Z','Z0 Bezugspunkt','Maske Z0'],
+     ['PQ','Bohrtiefe relativ/positiv','aus Z1'],
+     ['PR','Verweilzeit Sekunden','Maske t1, gerechnet aus t2/S'],
+     ['PS','D Zustellung (G82/G83)','Maske D'],
+     ['PT0','Rueckzugsart (G83)','fest'],
+     ['P226','V Rueckzug mit Vorschub / Vorhalt','Maske V'],
+     ['P227','DF Degressionsfaktor','Maske DF'],
+     ['P228','U Mindestbohrtiefe','Maske U'],
+     ['P229','SV Vorhalt vor dem Bezugspunkt','Maske W (man/auto)'],
+     ['P230','R Rueckzugsebene relativ zum Bezugspunkt','wie P229, sofern nicht gesetzt']]},
+ {g:'G73 Gewindefreistich DIN 76', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-45/46 + DIN 76-1',
+  p:[['X / Z','Gewinde-Nenn-⌀ / Kerbenlage','Maske X0 / Z0'],
+     ['PG (G91)','D Zustellung','Maske D'],
+     ['PH','Planzug radial (ANNAHME: radiale Skalierung)','aus Maske V'],
+     ['PI','U Schlichtaufmass','Maske U'],
+     ['PJ','Lage (0=aussen)','Maske (aussen)'],
+     ['PK','Einstiegswinkel','Maske Einstiegswinkel'],
+     ['PM','Steigungs-INDEX der Steuerung (1..24), nicht die Steigung selbst','aus Maske P (Tabelle S. 3-46)'],
+     ['P227:91 / P240 / P241','Tiefe inkremental / Schruppen / Schlichten','fest / Maske Bearbeitung']]},
+ {g:'G78 / G79 Freistich DIN 509 (F/E)', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 Freistichzyklen',
+  p:[['X / Z','Mantel-⌀ / Kerbenlage','Maske X0 / Z0'],
+     ['I','Aufmass','Maske I'],
+     ['K','Aufmass Z — nur Form F (G78)','Maske K'],
+     ['PH','V Endpunkt Planzug ⌀ — nur Form E (G79)','Maske V'],
+     ['PJ','Lage','Maske (aussen)'],
+     ['PM','Groessen-Index DIN 509','aus Maske Groesse'],
+     ['P227:90','Bezugsart','fest']]},
+ {g:'G72 Abspanen Ecke', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-43 — BEISPIELSATZ gilt, Tabelle druckt Flags/Masse vertauscht',
+  p:[['X / Z','X0 / Z0 Bezugspunkt','Maske X0 / Z0'],
+     ['I / K','X1 / Z1 Endmass','Maske X1 / Z1'],
+     ['PG','D Schnitttiefe (ap, radial)','Maske D'],
+     ['PI','U Schlichtaufmass (EIN Wert allseitig — UZ entfaellt!)','Maske UX'],
+     ['PK','signierte X-Strecke radial (aus 1000er-Systematik belegt)','gerechnet'],
+     ['PM / PN','Xm / Zm Streckenbetraege','gerechnet'],
+     ['PO / PR','Grundkante K2: Mass / 1=Fase','Maske K2'],
+     ['PQ','1=X-parallel (plan), 2=Z-parallel (laengs)','Maske Richtung'],
+     ['P230 / P231','K1: Fase-FLAG / Mass','Maske K1'],
+     ['P232 / P233','K3: Fase-FLAG / Mass','Maske K3'],
+     ['P240 / P241','Schruppen / Schlichten','Maske Bearbeitung']]},
+ {g:'G71 Einstechen', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-40/41 (Tabelle, Beispielsatz und Grafik decken sich)',
+  p:[['X / Z','X0 / Z0 Bezugspunkt (rechte Nutkante, P233:0)','Maske X0 / Z0'],
+     ['PG (G91)','U Schlichtaufmass (EIN Wert — UZ entfaellt)','Maske UX'],
+     ['PJ','Lage: 0=aussen, 1=innen, 2=Stirnnut','Maske Lage'],
+     ['PK / PL','Flankenwinkel 1 / 2','Maske a1 / a2'],
+     ['PM','B1 Einstichbreite am Mund (P235:0)','Maske B1'],
+     ['PN','T Tiefe in mm (P234:91 inkremental)','aus Maske T1'],
+     ['PO+PS / PP+PT','Ecke 1 (Mund links) / Ecke 2 (Grund links): Mass + Flag 1=Fase','Maske Ecken'],
+     ['PQ+PU / PR+PV','Ecke 3 (Mund rechts) / Ecke 4 (Grund rechts)','Maske Ecken'],
+     ['PW','BS Klingenbreite — die Steuerung prueft gegen ihre Werkzeugdaten','Werkzeugtabelle'],
+     ['PY / PZ','N Anzahl / P Abstand SIGNIERT (Richtung -Z)','Maske N / DP'],
+     ['P228','D Spanbrecher-Zustellung','Maske D'],
+     ['P229','W Kegelwinkel','Maske W'],
+     ['P240 / P241','Schruppen / Schlichten','Maske Bearbeitung']]}
+];
 function ppInfoMalen(){
   const box=document.getElementById('ppInfo');
   if(!box) return;
@@ -16943,6 +17064,21 @@ function ppInfoMalen(){
       +'<br><span class="ppw">'+m.w+'</span></div>';
   });
   h+='<div class="ppz fest"><b>Fuer beide Maschinen gleich</b><br><span class="ppw">'+PP_FEST.join('<br>')+'</span></div>';
+  // ZYKLUSSATZ-PARAMETER [Daniel, 01.09.2026]: aufklappbar je Zyklus,
+  // gefiltert auf das AKTIVE Profil — beim 1000er stehen nur die dort
+  // moeglichen Saetze (G74/G75-Langform), nichts Verwirrendes.
+  h+='<div class="ppz"><b>Zyklussatz-Parameter zum Nachschlagen</b><br>'+
+     '<span class="ppw">Adresse &rarr; Bedeutung laut Handbuch &rarr; Maskenfeld, aus dem die App den Wert f&uuml;llt.</span></div>';
+  ZYKLUS_PARAM.filter(zp=>!zp.nur || zp.nur===MASCHINENPROFIL.id).forEach(zp=>{
+    h+='<details class="ppz" style="cursor:pointer;"><summary style="font-weight:700;font-size:12px;">'+zp.g+
+       ' <span class="ppw" style="font-weight:400;">('+zp.q+')</span></summary>'+
+       '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:4px;">'+
+       zp.p.map(z=>'<tr>'+
+         '<td style="padding:2px 6px 2px 0;white-space:nowrap;font-weight:700;vertical-align:top;">'+z[0]+'</td>'+
+         '<td style="padding:2px 6px 2px 0;vertical-align:top;">'+z[1]+'</td>'+
+         '<td style="padding:2px 0;vertical-align:top;color:var(--blue);white-space:nowrap;">'+z[2]+'</td></tr>').join('')+
+       '</table></details>';
+  });
   h+='<div class="ppz"><button onclick="baOeffnen(\'ba-k09\')" style="font-size:11.5px;padding:4px 10px;">Mehr dazu: Anleitung Kap. 9 (NC und Postprozessor)</button> '+
      '<button onclick="baOeffnen(\'ba-k10\')" style="font-size:11.5px;padding:4px 10px;">Kap. 10 (Maschinenprofile)</button></div>';
   box.innerHTML=h;
