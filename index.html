@@ -16952,7 +16952,7 @@ function ppMerkmale(){
     M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
       w:'per Maske waehlbar — Option A020/A020B lt. IBN frei (N9150/9152=1), Syntax DV 610 S. 3-40/41; Abnahme am Teil ausstehend'});
     M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
-      w:'per Maske waehlbar, nur aussen — Option A018 lt. IBN frei (N9180=1), Syntax S. 3-43; Abnahme ausstehend'});
+      w:'per Maske waehlbar, vorerst nur aussen — Option A018 lt. IBN frei (N9180=1), Syntax S. 3-43. Innen KANN die Steuerung (DV 594 S. 4.6-13), aber die Satz-Kodierung der Innenlage ist unbelegt: am Maschinentermin einen Innen-Zyklus eintippen und per DNC ziehen, dann wird innen freigeschaltet.'});
     M.push({t:'Freistichzyklen G78/G79/G73', s:pr.zyklen.g73,
       w:'Option A017 lt. IBN frei (N9160=1) — G78/G79 DIN 509, G73 DIN 76 per Maske, Syntax S. 3-45/46; Abnahme ausstehend'});
     M.push({t:'Plangewinde G77', s:pr.zyklen.g77,
@@ -17436,7 +17436,16 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     zyklusModusAe=false;
   }
   if(zyklusModusAe && innen){
-    warnings.push('G72 innen ist am Handbuch nicht belegt (S. 3-43 zeigt nur Aussenbearbeitung) — Ausgabe erfolgt als G-Einzelsaetze.');
+    // PRAEZISIERT nach Daniels Einwand [01.09.2026, DV 594 S. 4.6-13]:
+    // die STEUERUNG kann den Abspanzyklus innen (Bedienmaske "lage-
+    // und richtungskonform", Anfahrreihenfolge innen X vor Z ist
+    // dokumentiert). Unbelegt ist die SATZ-Kodierung: die G72-Tabelle
+    // hat kein Lage-Feld (anders als G71/PJ), die Lage muss in
+    // Koordinaten/Vorzeichen stecken — ohne Innen-Beispielsatz raten
+    // wir nicht. Klaerung: am Maschinentermin einen Innen-Abspanzyklus
+    // in die Maske tippen und per DNC ziehen (derselbe Weg, der den
+    // kurzen T-Aufruf belegt hat).
+    warnings.push('G72 innen: die Steuerung kann es (DV 594 S. 4.6-13), aber die SATZ-Kodierung der Innenlage ist unbelegt (kein Lage-Parameter, kein Innen-Beispielsatz) — Ausgabe erfolgt als G-Einzelsaetze. Beleg-Weg: Innen-Zyklus an der Maschine eintippen und per DNC ziehen.');
     zyklusModusAe=false;
   }
   if(zyklusModusAe){
