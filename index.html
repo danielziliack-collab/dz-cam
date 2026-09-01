@@ -16838,14 +16838,28 @@ const MASCHINEN_PROFILE = {
     // Freigaben aus IBN.PAR (22.01.2004): N9170=1 Bohrzyklus,
     // N9220/N9230=1 Gewindezyklus samt Schnittaufteilung, N9080=1
     // mehrgaengig, N9150/9160/9180 Einstich/Freistich/Abspanen frei.
+    // FREIGABEN KOMPLETT AUS DER IBN (22.01.2004, Block "Freigabe
+    // Zyklen") [Daniels Merkmale-Pruefauftrag 01.09.2026]:
+    //   A016A/B/D Gewinde N9220/9230/9080=1 -> G75/G76 frei
+    //   A017 Freistichzyklen N9160=1        -> G78/G79/G73 frei
+    //   A018 Abspanzyklus N9180=1           -> G72 frei
+    //   A019 Bohrzyklus N9170=1             -> G74 frei
+    //   A019G "Bohren nach DIN" N9177=0     -> G81ff GESPERRT: die
+    //     Familie ist im Handbuch dokumentiert, aber als
+    //     MASCHINENOPTION an dieser EuroTurn nicht freigeschaltet.
+    //   A020/A020B Einstechzyklus N9150/9152=1 -> G71 frei
+    //   G77 Plangewinde: kein eigenes Bit, unter A016 angenommen.
     zyklen:{ g74:'confirmed_on_machine', g75:'confirmed_on_machine',
-             g81ff:'disabled' /* spaetere getrennte DIN-Option, nicht aus der Bohrmaske */ },
+             g81ff:'disabled' /* IBN N9177=0: Option A019G nicht freigeschaltet */,
+             g71:'documented_for_control', g72:'documented_for_control',
+             g73:'documented_for_control', g77:'documented_for_control' },
     statusZeilen:[
       '(PROFIL: Monforts 1500 - EuroTurn | Zyklussyntax aus DV 610-0C belegt,)',
       '(  Maschinenkonfiguration aus Daniels IBN-Sicherung - Stand 22.01.2004.)',
       '(T-Aufruf kurz - belegt an gesicherten Originalprogrammen der Maschine.)',
       '(IBN-BELEGT 22.01.2004: X-Durchmesserachse N4036=0, Werkzeugkonzept 2,)',
-      '(  Freigaben G74/G75/Einstich/Freistich/Abspanen, Eilgang 5000.)',
+      '(  Freigaben G74/G75/Einstich/Freistich/Abspanen, G81ff gesperrt A019G=0,)',
+      '(  Eilgang 5000.)',
     ],
   }),
   MONFORTS_1000_MTC_K_6624B: Object.assign(_profilBasis(), {
@@ -16864,7 +16878,12 @@ const MASCHINEN_PROFILE = {
     uebertragung:'Empfangen 2400 / Senden 9600 Baud, je 7 Datenbits, EVEN, 1 Stopbit, XON/XOFF — Daniels erprobtes DNC-Profil (asymmetrisch!)',
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
-             g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */ },
+             g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
+             /* G71/G72/G73/G77 [01.09.2026]: die MTC-K schreibt ihre
+                Zyklen mit PA/PB-Adressen, deren Werte die Steuerung
+                selbst errechnet (Beleg: Daniels TAP-Programme) —
+                extern nicht erzeugbar, Ausgabe als G-Einzelsaetze. */
+             g71:'disabled', g72:'disabled', g73:'disabled', g77:'disabled' },
     statusZeilen:[
       '(PROFIL: Monforts 1000 - MTC-K | IBN-belegt: P4037=0 P5105=1 X-Durchmesser,)',
       '(  P9105=2 kurze T-Aufrufe, P9161=0 degressive Gewindeaufteilung,)',
@@ -16906,7 +16925,27 @@ function ppMerkmale(){
       : 'R-Wort bevorzugt; im I/K-Rueckfall gilt das RADIUSMASS'});
   const g74=zyk('g74'); M.push({t:'Bohrzyklus G74', w:g74.w+' — Vorlauf W statt SC', s:g74.s});
   const g75=zyk('g75'); M.push({t:'Gewindezyklus G75', w:g75.w+' — G97 zwingend', s:g75.s});
-  const g81=zyk('g81ff'); M.push({t:'Bohrzyklen G81 ff', w:g81.w, s:g81.s});
+  // G81ff: an BEIDEN Maschinen gesperrt, aber aus VERSCHIEDENEN
+  // Gruenden — Daniels Befund 01.09.2026 ("zweimal derselbe Eintrag"):
+  // vorher stand zweimal derselbe Text, der Unterschied gehoert benannt.
+  M.push({t:'Bohrzyklen G81 ff', s:pr.zyklen.g81ff,
+    w: pr.id==='MONFORTS_1500_EUROTURN'
+      ? 'gesperrt — im Handbuch dokumentiert, aber Maschinenoption A019G Bohren nach DIN lt. IBN NICHT freigeschaltet (N9177=0); Ausgabe als G74'
+      : 'gesperrt — in R&D 95.05 nicht dokumentiert; Ausgabe als G74'});
+  // Neue native Zyklusoptionen [01.09.2026] mit ihren IBN-Freigabebits.
+  if(pr.id==='MONFORTS_1500_EUROTURN'){
+    M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
+      w:'per Maske waehlbar — Option A020/A020B lt. IBN frei (N9150/9152=1), Syntax DV 610 S. 3-40/41; Abnahme am Teil ausstehend'});
+    M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
+      w:'per Maske waehlbar, nur aussen — Option A018 lt. IBN frei (N9180=1), Syntax S. 3-43; Abnahme ausstehend'});
+    M.push({t:'Freistichzyklen G78/G79/G73', s:pr.zyklen.g73,
+      w:'Option A017 lt. IBN frei (N9160=1) — G78/G79 DIN 509, G73 DIN 76 per Maske, Syntax S. 3-45/46; Abnahme ausstehend'});
+    M.push({t:'Plangewinde G77', s:pr.zyklen.g77,
+      w:'per Maske (Gewinde-Form plan) — kein eigenes IBN-Bit, Freigabe unter A016 Gewindezyklus angenommen; Syntax S. 3-58/59'});
+  } else {
+    M.push({t:'G71 / G72 / G73 / G77', s:'disabled',
+      w:'an der 1000er nicht erzeugbar — die MTC-K schreibt ihre Zyklen mit steuerungsberechneten PA/PB-Werten (Beleg: Daniels TAP-Programme); Ausgabe als G-Einzelsaetze'});
+  }
   // Der Wechselpunkt ist BEDIENERSACHE je Bauteil [Daniel, 31.08.]:
   // die Zeile zeigt das LIVE-Kopffeld, keine Maschinen-Annahme mehr.
   M.push({t:'Werkzeugwechselpunkt', w:'aus dem Programmkopf: XT⌀'+
