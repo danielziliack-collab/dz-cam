@@ -1080,7 +1080,17 @@ body.artefakt .hsoftkeys{padding-right:48px;}
     box-shadow:0 -6px 24px rgba(10,25,40,.22);
   }
   body.mode-grafisch #canvasWrap .mask .mask-head{padding:6px 12px;font-size:12px;border-radius:12px 12px 0 0;}
-  body.mode-grafisch #canvasWrap .mask .mrow{padding:4px 0;gap:7px;}
+  body.mode-grafisch #canvasWrap .mask .mrow{padding:4px 30px 4px 0;gap:7px;}
+  /* Feste Zeichenzeile der Editor-Panels [Daniel, 02.09.2026]: die
+     schwebende Rechenleiste lag am iPhone hinter der Tastatur (das
+     Panel klebt unten am Schirm) — Minus war nicht erreichbar.
+     Diese Zeile steht IM Panel ueber den Uebernehmen-Knoepfen. */
+  .ezl{display:none;gap:6px;padding:6px 0 2px;}
+  @media(max-width:899px){ .ezl{display:flex;} }
+  .ezl button{flex:1;min-width:0;padding:8px 0;font-size:16px;font-weight:700;
+    background:hsl(var(--ton), 45%, 95.5%);border:1px solid hsl(var(--ton), 16.9%, 69.8%);
+    border-radius:6px;color:hsl(var(--ton), 22.2%, 14.1%);}
+  .ezl button:active{background:hsl(var(--ton), 25.8%, 87.8%);}
   body.mode-grafisch #canvasWrap .mask .mrow label{font-size:12px;min-width:96px;flex:1 1 96px;}
   body.mode-grafisch #canvasWrap .mask .small-hint{padding:4px 7px;font-size:10.5px;}
   /* abs/ink-Umschalter je Koordinatenfeld [Daniel, ShopTurn-Vorbild] */
@@ -6221,10 +6231,16 @@ function autoFit(){
     let st=null; try{ st=stockModel(); }catch(e){}
     if(st && st.da>0){
       const laenge=Math.abs(st.zA-st.zI)||100;
-      view={zMin:Math.min(st.zI,st.zA)-laenge*0.08, zMax:Math.max(st.zI,st.zA)+laenge*0.08,
+      // STIRNFENSTER [Daniel, 02.09.2026]: nicht das ganze Rohteil
+      // bis zu den Backen — der Nullpunkt klebte am Rand. Gezeigt
+      // wird die Stirngegend: gut die halbe Rohteillaenge nach
+      // links, ein Fuenftel Luft rechts vor der Stirn. Wer weiter
+      // hinten zeichnet, zoomt/verschiebt wie immer.
+      const zA=Math.max(st.zI,st.zA);
+      view={zMin:zA-Math.max(laenge*0.55, 60), zMax:zA+Math.max(laenge*0.18, 15),
             xMin:0, xMax:st.da*1.15};
     } else {
-      view={zMin:-160,zMax:20,xMin:0,xMax:100};
+      view={zMin:-90,zMax:22,xMin:0,xMax:100};
     }
     draw(); return;
   }
@@ -7071,7 +7087,7 @@ function geradeErgaenzen(zRoh, xRoh, aRoh, lRoh, achse){
   const dz=z-zP, dxr=xr-xPr;
   const len=Math.hypot(dz,dxr);
   const wink=(len>1e-9)? Math.atan2(dxr, Math.max(1e-12,-dz))*180/Math.PI : 0;
-  return {z, x:r2d(xr), info:'α '+wink.toFixed(1)+'° · L '+len.toFixed(2)+' mm'
+  return {z, x:r2d(xr), info:'α '+wink.toFixed(1)+'°'+(isFinite(len)?' · L '+len.toFixed(2)+' mm':'')
     +((dz>1e-6)?' · ACHTUNG: läuft in +Z zurück':'')};
 }
 // Schnitt Strahl(offenes Element) x Gerade(durch Endpunkt E, Richtung a2).
@@ -7863,6 +7879,84 @@ function openGeradeMask(axis, idx){
   try{ maskeSichtbarPruefen('maskGerade'); }catch(e){}
   try{ updateGeradePreview(); }catch(e){}
 }
+// =================================================================
+// EDITOR-EINGABEZEILE [Daniel, 02.09.2026: "Minus uebernimmt er gar
+// nicht" + "Cursor liegt links von der Zahl"]
+// -----------------------------------------------------------------
+// Zwei Wurzeln, ein Bau: (1) Die schwebende Rechenleiste haengt sich
+// unter das Feld — im Kontureditor klebt das Panel unten am Schirm,
+// die Leiste lag am iPhone HINTER der Tastatur; ein Minus war nicht
+// erreichbar. (2) Beim Antippen blieb das Feld type=number, iOS
+// setzt den Cursor dort an den Anfang — loeschen ging nur umstaendlich.
+// Jetzt: jedes der drei Panels (Start/Gerade/Kreis) traegt eine
+// FESTE Zeichenzeile ueber den Uebernehmen-Knoepfen (nur Handy), und
+// der Fokus stellt das Feld auf text (Flag warNumber wie beim
+// Ausdrucksrechner — der blur-Handler stellt zurueck) und setzt den
+// Cursor ANS ENDE. Die schwebende Leiste bleibt den Zyklusmasken.
+(function(){
+  if(!document.createElement) return;
+  const PANELS=['maskStart','maskGerade','maskKreis'];
+  let aktiv=null;
+  const zumText=(el)=>{
+    if(el.type==='number'){
+      el.dataset.warNumber='1';
+      el.type='text';
+      if(el.setAttribute) el.setAttribute('inputmode','decimal');
+    }
+    try{ const n=el.value.length; el.setSelectionRange(n,n); }catch(e){}
+  };
+  const einfueg=(z)=>{
+    if(!aktiv) return;
+    zumText(aktiv);
+    const a=aktiv.selectionStart==null? aktiv.value.length : aktiv.selectionStart;
+    const b=aktiv.selectionEnd==null? a : aktiv.selectionEnd;
+    if(z==='⌫'){
+      if(b>a) aktiv.value=aktiv.value.slice(0,a)+aktiv.value.slice(b);
+      else if(a>0) aktiv.value=aktiv.value.slice(0,a-1)+aktiv.value.slice(a);
+      const q=Math.max(0, z==='⌫'&&b<=a? a-1 : a);
+      try{ aktiv.setSelectionRange(q,q); }catch(e){}
+    } else if(z==='±'){
+      const t=String(aktiv.value).trim();
+      aktiv.value = (t==='')? '-' : (t.charAt(0)==='-'? t.slice(1) : '-'+t);
+      try{ const n=aktiv.value.length; aktiv.setSelectionRange(n,n); }catch(e){}
+    } else {
+      aktiv.value=aktiv.value.slice(0,a)+z+aktiv.value.slice(b);
+      try{ aktiv.setSelectionRange(a+1,a+1); }catch(e){}
+    }
+    try{ aktiv.dispatchEvent(new Event('input',{bubbles:true})); }catch(e){}
+  };
+  PANELS.forEach(id=>{
+    const mask=document.getElementById(id);
+    if(!mask) return;
+    const body=mask.querySelector('.mask-body');
+    const okRow=body? [...body.querySelectorAll('.mrow')].find(r=>r.querySelector('.ok-gruen')) : null;
+    if(!okRow) return;
+    const zl=document.createElement('div');
+    zl.className='ezl';
+    [['±','Vorzeichen'],['+',''],['-',''],['×',''],['÷',''],['(',''],[')',''],['⌫','loeschen']].forEach(([z,t])=>{
+      const b=document.createElement('button');
+      b.type='button'; b.textContent=z; if(t) b.title=t;
+      // POINTERDOWN + preventDefault: ein click naehme dem Feld den
+      // Fokus, die Tastatur klappte zu (dieselbe Falle wie beim
+      // Laptop-Vorzeichenknopf).
+      b.addEventListener('pointerdown',(ev)=>{
+        ev.preventDefault();
+        einfueg(z==='×'?'*':(z==='÷'?'/':z));
+      });
+      zl.appendChild(b);
+    });
+    body.insertBefore(zl, okRow);
+    mask.addEventListener('focusin',(e)=>{
+      const el=e.target;
+      if(el && el.tagName==='INPUT' &&
+         (el.type==='number' || el.dataset.warNumber==='1' ||
+          (el.getAttribute && el.getAttribute('inputmode')==='decimal'))){
+        aktiv=el;
+        setTimeout(()=>zumText(el),0);
+      }
+    });
+  });
+})();
 document.getElementById('gTangBtns').addEventListener('click',(e)=>{
   if(e.target.tagName!=='BUTTON') return;
   [...e.target.parentElement.children].forEach(b=>b.classList.remove('sel'));
@@ -8839,6 +8933,18 @@ const VZ_NIE=/^(pkTw|rapidF|esX0|esT1|aeX0|akStock|akTsX0|akXmin|fsX0|fsV|gwX0|s
   const rechenbar=(el)=>{
     if(window.innerWidth>=900) return false;
     if(!el || !el.tagName || el.tagName!=="INPUT") return false;
+    // Die drei Editor-Panels haben ihre FESTE Zeichenzeile — dort
+    // waere die schwebende Leiste doppelt (und lag am iPhone hinter
+    // der Tastatur, s. Editor-Eingabezeile). NICHT ueber closest():
+    // das liefert im Ersatz-Browser bei JEDEM Selektor eine Attrappe
+    // (dokumentierte Falle) — Pruefung 83 fiel prompt um. Die
+    // ID-Menge wird einmal aus den Panels gesammelt.
+    if(!rechenbar.EZF){
+      rechenbar.EZF=new Set();
+      try{ document.querySelectorAll('#maskStart input,#maskGerade input,#maskKreis input')
+             .forEach(q=>{ if(q.id) rechenbar.EZF.add(q.id); }); }catch(e){}
+    }
+    if(el.id && rechenbar.EZF.has(el.id)) return false;
     return (el.type==="number") || el.dataset.warNumber==="1" ||
            el.dataset.vzText==="1" ||
            (el.getAttribute && el.getAttribute("inputmode")==="decimal");
