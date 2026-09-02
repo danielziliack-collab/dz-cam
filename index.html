@@ -3449,6 +3449,16 @@ Falsch herum eingestellte <b>Schneidenlage in der Maschinen-Werkzeugtabelle</b>
 ist der einzige Weg, wie hier etwas schiefgehen kann &mdash; das NC-Programm
 tr&auml;gt keine Seite und keinen Radius.</p>
 </dd>
+<dt id="ba-nc-wiedereinstieg">Wiedereinstieg: alles Modale nach jedem T</dt>
+<dd>Wer nach einer Unterbrechung per Satzvorlauf mitten im Programm einsteigt
+(auf einen Werkzeugaufruf), bekommt den Programmkopf nicht mit &mdash; Vorschub,
+Drehzahl und der G94-Eilgangvorschub w&auml;ren leer. Deshalb schreibt der
+Postprozessor nach <b>jedem</b> T-Aufruf alles Modale neu: <code>(EILGANG )
+G94 F&hellip;</code> (der Eilgang der Monforts l&auml;uft &uuml;ber den
+G94-Vorschub &mdash; belegt am Originalprogramm vom 01.10.2025, Kopfsatz
+<code>G94 F5000 G97 S450 G38</code>), dann Drehzahl (G96/G97&nbsp;S), M03/M07
+und <code>G95 F</code> vor dem ersten Schnittsatz. Pr&uuml;fung 153 h&auml;lt
+das &uuml;ber alle Vorlagen und beide Maschinenprofile fest.</dd>
 <dt id="ba-nc-sim">(SIM:)-Zeilen</dt>
 <dd>Kommentarzeilen NUR f&uuml;r die Simulation &mdash; z. B. f&auml;hrt die
 Freistich-Simulation die G-Code-Bahn mit G42, w&auml;hrend an die Maschine der
@@ -17438,6 +17448,7 @@ const PP_FEST=[
   'NC-Kommentare in ASCII, ohne Klammern im Text — die Steuerung schliesst den Kommentar an der ERSTEN \u0029.',
   'D Zustelltiefe und UX Aufmass gelten RADIAL (ap, je Seite); axiale Werte (Planzustellung, UZ) 1:1.',
   'Schneidenradiuskorrektur automatisch: Schruppen ohne, Schlichten G41/G42 nach Lage.',
+  'WIEDEREINSTIEG: nach jedem T-Aufruf stehen G94-Eilgangvorschub, Drehzahl, M03/M07 und G95-F neu im Programm — ein Satzvorlauf mitten hinein findet alles Modale vor (Daniels Ansage; G94-F belegt am Originalprogramm 01.10.2025).',
 ];
 // =================================================================
 // ZYKLUSSATZ-PARAMETER ZUM NACHSCHLAGEN [Daniel, 01.09.2026]:
@@ -17954,6 +17965,7 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
   // Werkzeugwechsel bei stehender Spindel am Wechselpunkt — erst T,
   // dann Drehzahl/Spindel/Kuehlmittel ([Daniel], NC-Review)
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -19302,6 +19314,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   // Werkzeugwechsel bei stehender Spindel am Wechselpunkt — erst T,
   // dann Drehzahl/Spindel/Kuehlmittel ([Daniel], NC-Review)
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -20066,6 +20079,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
     if(p.t2 && String(p.t2)!==String(p.t)){
       if(typeof window!=='undefined' && window.__wechselAbfahrt) window.__wechselAbfahrt();
       lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t2)}`); bump();
+      lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
     }
     lines.push(`(--- SCHLICHTEN: Kontur ${p.schlRicht==='lr'?'links->rechts':'rechts->links'} - F${fmt(p.ff)} S${p.sf} ---)`);
     lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sf}`); bump();
@@ -20468,6 +20482,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
       const anWeg2 = srkWeg(noseR2);
       lines.push(`(--- HINTERSCHNITTE SCHLICHTEN MIT T${p.t2} ---)`);
       lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t2)}`); bump();
+      lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.ff)} S${p.sf}`); bump();
       pocketRuns.forEach(r=>{
         const pk=pocketsC[r.pocket];
@@ -20532,6 +20547,7 @@ function genFreistich(p, N, bump, lines, warnings){
   warnings.push('Freistich DIN 509: nativer Zyklus, an der Maschine noch unbestaetigt — ersten Lauf im Einzelsatz fahren (Belegliste).');
 
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -20639,6 +20655,7 @@ function genFreistich76(p, N, bump, lines, warnings){
   }
   warnings.push('Freistich DIN 76: neu am 01.09.2026 — ersten Lauf im Einzelsatz fahren.');
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -21050,6 +21067,7 @@ function genEinstechen(p, N, bump, lines, warnings){
     // Werkzeugwechsel bei stehender Spindel am Wechselpunkt — erst T,
     // dann Drehzahl/Spindel/Kuehlmittel ([Daniel], NC-Review)
     lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
     lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -21178,6 +21196,7 @@ function genEinstechen(p, N, bump, lines, warnings){
   // Werkzeugwechsel bei stehender Spindel am Wechselpunkt — erst T,
   // dann Drehzahl/Spindel/Kuehlmittel ([Daniel], NC-Review)
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -21523,6 +21542,7 @@ function genBohren(p, N, bump, lines, warnings){
   // Werkzeugwechsel bei stehender Spindel am Wechselpunkt — erst T,
   // dann Drehzahl/Spindel/Kuehlmittel ([Daniel], NC-Review)
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) G97 S${p.s}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   kuehl();
@@ -21644,6 +21664,7 @@ function genGewindePlan(p, N, bump, lines, warnings){
   }
   const zSafe = p.z0 + 2;
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) G97 S${p.s}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -21760,6 +21781,7 @@ function genGewinde(p, N, bump, lines, warnings){
   // Werkzeugwechsel bei stehender Spindel am Wechselpunkt — erst T,
   // dann Drehzahl/Spindel/Kuehlmittel ([Daniel], NC-Review)
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) G97 S${p.s}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
@@ -22130,6 +22152,7 @@ function genStechdrehen(p, N, bump, lines, warnings){
 
   // Werkzeugwechsel-Kopf wie ueberall: T, Drehzahl, Spindel, Kuehlung
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
