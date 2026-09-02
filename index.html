@@ -853,7 +853,7 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   .gcbtn.primary{background:hsl(var(--ton), 11%, 34%);border-color:hsl(var(--ton), 13.2%, 20.8%);color:hsl(var(--ton), 18.2%, 95.7%);font-weight:700;}
   /* NC-ANSICHT FARBIG [Handbuch S0047, Kap. 2.4.5]: die Anzeige ist
      ein eingefaerbter Block, die Textarea bleibt als reine TEXTQUELLE
-     im DOM — Kopieren (select), Teilen, .nc/.txt und die Simulation
+     im DOM — Kopieren (select), NC sichern und die Simulation
      lesen weiter .value. NICHT display:none: ein unsichtbares Feld
      laesst sich nicht selektieren, der Kopieren-Knopf waere tot. */
   #gcodeOut{position:absolute;left:-9999px;top:0;width:8px;height:8px;opacity:0;resize:none;border:none;}
@@ -2489,22 +2489,30 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
           <button class="gcbtn" id="btnCloseGcode" style="margin-left:auto;min-width:40px;">✕</button>
         </div>
         <div class="gcode-head">
-          <button class="gcbtn primary" id="btnGen">G-Code erzeugen</button>
-          <button class="gcbtn" id="btnCopy">Kopieren</button>
-          <button class="gcbtn" id="btnShare">📤 Teilen / Sichern</button>
+          <!-- AUSGABEZEILE ENTDOPPELT [Daniel, 02.09.2026, Screenshot]:
+               "Teilen / Sichern" und ".txt" riefen WOERTLICH dieselbe
+               Funktion (exportGcode('txt')), ".nc" unterschied sich nur
+               in der Dateiendung — der Inhalt ist immer reiner Text aus
+               gcodeOut, die Endung entscheidet bloss, wie iPhone und
+               DNC-Rechner die Datei einsortieren. Jetzt EIN
+               Sichern-Knopf (O<Nr>.nc): am iPhone oeffnet er das
+               Teilen-Blatt (AirDrop/Dateien/Mail), am Rechner laedt er
+               herunter, im Artefakt faellt er aufs Export-Fenster
+               zurueck — dieselbe Kaskade wie immer (exportiereDatei).
+               Reihenfolge = Arbeitsfluss: erzeugen, pruefen, ausgeben.
+               Labels kurz, damit am iPhone nichts mehr zu
+               "G-Code erzeug..." abschneidet. -->
           <!-- EINRICHTEBLATT [Daniel, Punkt 15]: bewusst hier und nicht als
                eigener Softkey — "teilbar wie der G-Code" heisst, es gehoert
-               neben die anderen Ausgabeknoepfe. Die Reihe hat flex-wrap,
-               am Handy rutscht der Knopf in die naechste Zeile. -->
+               neben die anderen Ausgabeknoepfe. -->
           <!-- AMPEL [Daniel, Punkt 19]: laesst Generator, Kollisions-
                pruefung und Massbericht auf einmal laufen. Bewusst kein
                eigener Softkey — wer freigibt, steht ohnehin hier. -->
+          <button class="gcbtn primary" id="btnGen" title="G-Code erzeugen">⟳ Erzeugen</button>
           <button class="gcbtn" id="btnAmpel" title="Programm prüfen: Generator, Kollision, Massbericht">🚦 Prüfen</button>
+          <button class="gcbtn" id="btnCopy" title="Kompletten NC-Text in die Zwischenablage">Kopieren</button>
+          <button class="gcbtn" id="btnDownload" title="Als Datei O&lt;Nr&gt;.nc sichern — iPhone: Teilen-Blatt (AirDrop/Dateien/Mail), Rechner: Download">📤 NC sichern</button>
           <button class="gcbtn" id="btnEinricht">📋 Einrichteblatt</button>
-          <div class="gc-doppel">
-            <button class="gcbtn" id="btnDownloadTxt">.txt</button>
-            <button class="gcbtn" id="btnDownload">.nc</button>
-          </div>
         </div>
         <div id="ampelBox" style="display:none;"></div>
         <div class="warn" id="warnBox" style="display:none;"></div>
@@ -2520,7 +2528,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
         </div>
         <div id="ppInfo" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:48vh;border-bottom:1px solid var(--line);"></div>
         <div id="gcodeView"></div>
-        <textarea id="gcodeOut" readonly placeholder="Kontur anlegen, dann 'G-Code erzeugen'."></textarea>
+        <textarea id="gcodeOut" readonly placeholder="Kontur anlegen, dann „Erzeugen“ drücken."></textarea>
       </div>
 
     </div>
@@ -23993,14 +24001,14 @@ function einrichteBlattText(){
 
 async function exportEinrichteblatt(){
   const txt=einrichteBlattText();
-  if(!txt){ alert('Noch kein G-Code erzeugt — erst „G-Code erzeugen" drücken.'); return; }
+  if(!txt){ alert('Noch kein G-Code erzeugt — erst „Erzeugen“ drücken.'); return; }
   const O=document.getElementById('progNo').value.trim();
   await exportiereDatei('O'+O+'_Einrichteblatt.txt', txt, 'Einrichteblatt');
 }
 
 async function exportGcode(ext){
   const code=document.getElementById('gcodeOut').value;
-  if(!code){ alert('Noch kein G-Code erzeugt — erst „G-Code erzeugen" drücken.'); return; }
+  if(!code){ alert('Noch kein G-Code erzeugt — erst „Erzeugen“ drücken.'); return; }
   const O=document.getElementById('progNo').value.trim();
   const name='O'+O+'.'+ext;
   await exportiereDatei(name, code, 'G-Code');
@@ -24104,8 +24112,6 @@ document.getElementById('btnAmpel').onclick=()=>{
 }
 document.getElementById('btnEinricht').onclick=()=>exportEinrichteblatt();
 document.getElementById('btnDownload').onclick=()=>exportGcode('nc');
-document.getElementById('btnDownloadTxt').onclick=()=>exportGcode('txt');
-document.getElementById('btnShare').onclick=()=>exportGcode('txt');
 
 // =================================================================
 // 2D Bahnsimulation — parses generated G-code into motion segments
