@@ -977,6 +977,7 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   /* Vorlagenknoepfe der Programmverwaltung: Silhouette + Name in
      einer Zeile, linksbuendig (gleiche Bildsprache wie der
      Startbildschirm). */
+  #maskProgramme .mrow{padding-right:0;}
   .pmvk{width:100%;padding:6px 10px;display:flex;align-items:center;gap:10px;justify-content:flex-start;text-align:left;}
   .pm-sil{width:60px;height:22px;flex:0 0 auto;}
   .demokachel .dk-tx{font-weight:600;font-size:12.5px;}
@@ -1839,7 +1840,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  Zeilen für drei Kanten, obwohl die Kante ohne gewählten Typ
                  gar kein Maß hat. IDs und Auswertung bleiben unverändert. -->
             <div class="mgroup" id="aeGrpKanten">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Kanten (Fase / Radius)</span><span class="zus" id="aeZusKanten">keine</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Kanten (Fase / Radius)</span><span class="zus" id="aeZusKanten">keine</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>K1 Stirnkante außen</label>
                   <div class="radiobtns" id="aeK1Btns">
@@ -1913,7 +1914,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  bleibt beim Schruppen unbenutzt, der SRK-Hinweis erklärt
                  nur die Automatik dahinter. -->
             <div class="mgroup" id="akGrpSchl">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Schlichten</span><span class="zus" id="akZusSchl">rechts → links</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Schlichten</span><span class="zus" id="akZusSchl">rechts → links</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>T Schlichten</label><select id="akT2" class="tool-select-optional"></select></div>
                 <div class="mrow"><label>Schlichtrichtung</label><div class="radiobtns" id="akSchlRichtBtns">
@@ -1958,7 +1959,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  zweiten Zyklus am selben Teil meist unverändert da.
                  Die Zusammenfassung zeigt sie zugeklappt. -->
             <div class="mgroup" id="akGrpRoh">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Rohteil und Grenzen</span><span class="zus" id="akZusRoh">—</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Rohteil und Grenzen</span><span class="zus" id="akZusRoh">—</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label id="akStockLabel">Rohteil-⌀</label><input type="number" step="any" id="akStock" value="82"><span class="unit">mm</span></div>
                 <div class="mrow"><label>Rohteil-Planfläche Z (abs)</label><input type="number" id="akStockZ" value="2" step="any"><span class="unit">mm</span></div>
@@ -1971,7 +1972,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  man selten braucht — steht einer auf "an", klappt die
                  Gruppe beim Öffnen von selbst auf. -->
             <div class="mgroup" id="akGrpTauch">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Eintauchschräge</span><span class="zus" id="akZusTauch">aus</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Eintauchschräge</span><span class="zus" id="akZusTauch">aus</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>Eintauchschräge</label><div class="radiobtns" id="akTauchBtns">
                   <button data-v="aus" class="sel">aus</button>
@@ -1993,7 +1994,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
               </div>
             </div>
             <div class="mgroup" id="akGrpHint">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Hinterschnitte</span><span class="zus" id="akZusHint">nein</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Hinterschnitte</span><span class="zus" id="akZusHint">nein</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>Hinterschnitte bearbeiten</label><div class="radiobtns" id="akHintBtns">
                   <button data-v="nein" class="sel">nein</button>
@@ -2092,7 +2093,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  bewirkt nichts. -->
             <div class="mrow"><label>N Stück / DP Abstand</label><input type="number" step="any" id="esN" value="1" style="width:51px;"><input type="number" step="any" id="esDP" value="10" style="width:51px;"><span class="unit">mm</span></div>
             <div class="mgroup" id="esGrpKanten">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Kanten je Ecke</span><span class="zus" id="esZusKanten">keine</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Kanten je Ecke</span><span class="zus" id="esZusKanten">keine</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>Ecke 1 (Öffnung links)</label>
                   <div class="radiobtns" id="esE1Btns"><button data-v="fase" class="sel" data-vorgabe="1">Fase</button><button data-v="rundung">Radius</button></div>
@@ -2109,7 +2110,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
               </div>
             </div>
             <div class="mgroup" id="esGrpFlanken">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Schräge Flanken / Kegel</span><span class="zus" id="esZusFlanken">gerade</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Schräge Flanken / Kegel</span><span class="zus" id="esZusFlanken">gerade</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>α1 Flankenwinkel links</label><input type="number" step="any" id="esA1" value="0"><span class="unit">Grad</span></div>
                 <div class="mrow"><label>α2 Flankenwinkel rechts</label><input type="number" step="any" id="esA2" value="0"><span class="unit">Grad</span></div>
@@ -2145,7 +2146,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
             <div class="mrow" id="stRKRow" style="display:none;"><label>RK Reststufe (radial)</label><input type="number" step="any" id="stRK" placeholder="auto 2&#215;UX"><span class="unit">mm</span></div>
             <div class="mrow"><label>UX rad. / UZ Schlichtaufmaß</label><input step="any" style="width:51px;" type="number" id="stUX" value="0.3"><input step="any" style="width:51px;" type="number" id="stUZ" value="0.1"><span class="unit">mm</span></div>
             <div class="mgroup" id="stGrpSchl">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Schlichtzug</span><span class="zus" id="stZusSchl">durchgehend</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Schlichtzug</span><span class="zus" id="stZusSchl">durchgehend</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>Schlichtzug (l&#228;ngs)</label>
                   <div class="radiobtns" id="stSchlStratBtns">
@@ -2173,14 +2174,14 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  man einmal, danach steht es nur im Weg. Zugeklappt eine
                  Zeile, aufklappbar wenn man es nachlesen will. -->
             <div class="mgroup" id="stGrpWie">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">So arbeitet der Zyklus</span><span class="zus"></span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">So arbeitet der Zyklus</span><span class="zus"></span></div>
               <div class="mgroup-body">
               </div>
             </div>
             <div class="msec">Konturen</div>
             <div class="mrow"><label>Kontur (Fertigteil)</label><select id="stKontur"></select></div>
             <div class="mgroup" id="stGrpRoh">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Rohteil und Grenzen</span><span class="zus" id="stZusRoh">—</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Rohteil und Grenzen</span><span class="zus" id="stZusRoh">—</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>Rohteil-&#8960;</label><input type="number" step="any" id="stStock" value="82"><span class="unit">mm</span></div>
                 <div class="mrow"><label>Rohteil-Planfl&#228;che Z (abs)</label><input type="number" id="stStockZ" value="2" step="any"><span class="unit">mm</span></div>
@@ -2256,7 +2257,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  folgt aus dem Absatz-⌀. Vier Zeilen für einen Fall, den
                  man selten anfasst. -->
             <div class="mgroup" id="fsGrpAufmass">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Aufmaß und Planzug</span><span class="zus" id="fsZusAufmass">—</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Aufmaß und Planzug</span><span class="zus" id="fsZusAufmass">—</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>I Aufmaß X</label><input type="number" id="fsI" value="0" step="any"><span class="unit">mm</span></div>
                 <div class="mrow" id="fsKRow" style="display:none;"><label>K Aufmaß Z (Form F)</label><input type="number" id="fsK" value="0" step="any"><span class="unit">mm</span></div>
@@ -2289,7 +2290,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  mit welcher Drehzahl gefahren wird — das ist die Angabe,
                  die man beim Durchsehen braucht. -->
             <div class="mgroup" id="abGrpRed">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Reduzierung vor der Mitte</span><span class="zus" id="abZusRed">—</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Reduzierung vor der Mitte</span><span class="zus" id="abZusRed">—</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>XD &#8960; f&#252;r Reduzierung</label><input type="number" step="any" id="abXD" value="8"><span class="unit">mm</span></div>
                 <div class="mrow"><label>SD / FD reduziert</label><input type="number" step="any" id="abSD" value="150" style="width:51px;"><input type="number" id="abFD" value="0.03" step="any" style="width:51px;"><span class="unit unit2"><i>U/min</i><i>mm/U</i></span></div>
@@ -2317,7 +2318,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  Zyklusfamilie ausgegeben wird, stellt man einmal je
                  Maschine ein. Die Zusammenfassung nennt sie zugeklappt. -->
             <div class="mgroup" id="boGrpAusg">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">NC-Ausgabe</span><span class="zus" id="boZusAusg">G-Einzelsätze</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">NC-Ausgabe</span><span class="zus" id="boZusAusg">G-Einzelsätze</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>NC-Ausgabe</label><div class="radiobtns" id="boAusgBtns">
                   <button data-v="gcode" class="sel">G-Einzelsätze</button>
@@ -2337,7 +2338,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  werden. Wird sie gewaehlt, klappt die Gruppe von selbst
                  auf — sonst waeren die Felder zwar da, aber unsichtbar. -->
             <div class="mgroup" id="boGrpTief">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Tieflochbohren</span><span class="zus" id="boZusTief">—</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Tieflochbohren</span><span class="zus" id="boZusTief">—</span></div>
               <div class="mgroup-body">
                 <div class="mrow" id="boEntBearbRow" style="display:none;"><label>Bearbeitung (Tieflochbohren)</label>
                   <div class="radiobtns" id="boEntBearbBtns">
@@ -2388,7 +2389,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  unverändert im DOM — syncGwForm() blendet X1/Ratio/Hinweis
                  weiter selbst ein, jetzt innerhalb der Gruppe. -->
             <div class="mgroup" id="gwGrpKegel">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Form</span><span class="zus" id="gwZusKegel">zylindrisch</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Form</span><span class="zus" id="gwZusKegel">zylindrisch</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>Form</label><div class="radiobtns" id="gwFormBtns">
                   <button data-v="zyl" class="sel">zylindrisch</button>
@@ -2414,7 +2415,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  auf ihren Vorgaben bleiben. Wer sie braucht, klappt auf; wer
                  abweicht, sieht es an der Zusammenfassung. -->
             <div class="mgroup" id="gwGrpZustell">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Zustellung und Schnittaufteilung</span><span class="zus" id="gwZusZustell">—</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Zustellung und Schnittaufteilung</span><span class="zus" id="gwZusZustell">—</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>NC-Ausgabe</label><div class="radiobtns" id="gwAusgBtns">
                   <button data-v="zyklus" class="sel">Nativer Zyklus G75</button>
@@ -2450,7 +2451,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  mehrgängig ist der Sonderfall. Steht N über 1, klappt die
                  Gruppe von selbst auf — sonst übersieht man das Gewinde. -->
             <div class="mgroup" id="gwGrpLauf">
-              <div class="mgroup-head"><span class="pfeil">▶</span><span class="titel">Vor-/Auslauf, Gangzahl</span><span class="zus" id="gwZusLauf">—</span></div>
+              <div class="mgroup-head"><span class="pfeil">▶︎</span><span class="titel">Vor-/Auslauf, Gangzahl</span><span class="zus" id="gwZusLauf">—</span></div>
               <div class="mgroup-body">
                 <div class="mrow"><label>LW Vorlauf / LR Auslauf</label><input step="any" style="width:51px;" type="number" id="gwLW" value="3"><input step="any" style="width:51px;" type="number" id="gwLR" value="2"><span class="unit">mm</span></div>
                 <!-- VR RUECKZUGSWEG [ShopTurn Bild 9-33; Daniels
@@ -3795,13 +3796,14 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
           <tbody id="progBody"></tbody>
         </table>
       </div>
-      <div class="mrow"><button class="gcbtn" id="btnProgExport" style="width:48%;padding:10px;">&#x2B07; Alle exportieren (.json)</button>
+      <div class="mrow"><button class="gcbtn" id="btnProgExport" style="width:48%;padding:10px;">&#x2B07; Alle als Datei sichern</button>
         <label class="gcbtn" style="width:48%;padding:10px;text-align:center;cursor:pointer;">&#x2B06; Importieren
           <input type="file" id="progImportFile" accept=".json" style="display:none;">
         </label>
       </div>
+      <div style="font-size:10.5px;color:var(--text-dim);padding:0 13px 6px;">Sicherungsdateien (.json) &mdash; &uuml;ber &bdquo;Importieren&ldquo; kommt alles zur&uuml;ck, auch auf einem anderen Ger&auml;t.</div>
       <div class="mgroup" id="pmGrpVorlagen">
-        <div class="mgroup-head"><span class="pfeil">&#x25B6;</span><span class="titel">Testvorlagen</span><span class="zus">ersetzen das aktuelle Programm</span></div>
+        <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Testvorlagen</span><span class="zus">ersetzen das aktuelle Programm</span></div>
         <div class="mgroup-body">
           <div class="mrow"><button class="gcbtn pmvk" id="btnDemo"><canvas class="pm-sil" id="btnDemo_sil" width="120" height="44"></canvas><span>Stufenbolzen</span></button></div>
           <div class="mrow"><button class="gcbtn pmvk" id="btnDemo2"><canvas class="pm-sil" id="btnDemo2_sil" width="120" height="44"></canvas><span>Hinterschnitt-Welle</span></button></div>
@@ -17182,6 +17184,19 @@ document.getElementById('hskProgs').onclick=()=>{
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskProgramme'); }catch(e){}
 };
+// AUFKLAPPEN SICHTBAR MACHEN [Daniel, 02.09.2026: "Knoepfe
+// funktionieren teilweise nicht"]: die Vorlagen klappen UNTER dem
+// Kopf auf — wer nicht scrollt, sieht nichts und haelt den Kopf
+// fuer tot. Nach dem Oeffnen faehrt die Maske den Kopf nach oben.
+{ const grp=document.getElementById('pmGrpVorlagen');
+  if(grp){ const kopf=grp.querySelector('.mgroup-head');
+    if(kopf) kopf.addEventListener('click', ()=>{
+      setTimeout(()=>{ try{
+        if(grp.classList.contains('auf') && kopf.scrollIntoView)
+          kopf.scrollIntoView({behavior:'smooth', block:'start'});
+      }catch(e){} }, 60);
+    });
+  } }
 document.getElementById('btnCloseProgs').onclick=()=>{
   document.getElementById('maskProgramme').classList.remove('show');
 };
@@ -17220,7 +17235,7 @@ document.getElementById('btnProgNew').onclick=()=>{
   document.getElementById('maskProgramme').classList.remove('show');
 };
 document.getElementById('btnProgExport').onclick=()=>{
-  if(programs.length===0){ alert('Keine gespeicherten Programme zum Exportieren. Erst "Aktuelles Programm speichern" nutzen.'); return; }
+  if(programs.length===0){ alert('Noch keine Programme in der Liste. Erst „Speichern (diese Sitzung)“, dann sichern — oder das aktuelle Programm direkt „Als Datei sichern“.'); return; }
   exportiereDatei('euroturn-programme.json', JSON.stringify(programs,null,2), 'Programm-Export', 'application/json');
 };
 // DIREKT-SICHERUNG [Daniel, Export-Paket]: das AKTUELLE Programm als
@@ -24100,7 +24115,7 @@ async function exportGcode(ext){
 async function exportiereDatei(name, inhalt, was, mime){
   try{
     if(typeof File!=='undefined' && navigator.canShare){
-      const file=new File([inhalt],name,{type:mime||'text/plain'});
+      const file=new File([inhalt],name,{type:'text/plain'});
       if(navigator.canShare({files:[file]})){
         await navigator.share({files:[file], title:name});
         exportToast('Geteilt: '+name);
@@ -24108,7 +24123,8 @@ async function exportiereDatei(name, inhalt, was, mime){
       }
     }
   }catch(e){ if(e && e.name==='AbortError') return; }
-  if(!IN_EMBEDDED_VIEW){
+  const iosStandalone = (typeof navigator!=='undefined' && navigator.standalone===true);
+  if(!IN_EMBEDDED_VIEW && !iosStandalone){
     try{
       const blob=new Blob([inhalt],{type:(mime||'text/plain')+';charset=utf-8'});
       const url=URL.createObjectURL(blob);
