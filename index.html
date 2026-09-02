@@ -1728,6 +1728,19 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  (roughEnvelope: ur = ux/2). UZ ueblich kleiner. -->
             <div class="mrow"><label>D Zustelltiefe (a<sub>p</sub>)</label><input type="number" step="any" id="aeD" value="2"><span class="unit">mm</span></div>
             <div class="mrow"><label>UX rad. / UZ Schlichtaufmaß</label><input step="any" style="width:51px;" type="number" id="aeUX" value="0.5"><input step="any" style="width:51px;" type="number" id="aeUZ" value="0.1"><span class="unit">mm</span></div>
+            <!-- SPANBRECHEN [Daniel, 02.09.2026]: fuer langspanende
+                 Werkstoffe. Siemens-Vorbild CYCLE952 (S. 474): DI =
+                 Weg bis zur Vorschubunterbrechung, nur Schruppen.
+                 Die Art steht bei uns in der Maske statt in
+                 Maschinendaten: Pause = G04-Verweilsatz (unter G95
+                 in UMDREHUNGEN, DV 610 Kap. 3.6), Rueckzug = um RD
+                 auf der Bahn zurueck. Zeilen-IDs statt FELD_REGELN:
+                 die Sichtbarkeit haengt an selBtnVal, und das
+                 liefert im Ersatz-Browser nichts (s. esWRow). -->
+            <div class="mrow"><label>Spanbrechen (Schruppen)</label><div class="radiobtns" id="aeSbBtns"><button data-v="aus" class="sel" data-vorgabe="1">aus</button><button data-v="pause">Pause</button><button data-v="rueckzug">R&#252;ckzug</button></div></div>
+            <div class="mrow" id="aeSbDIRow" style="display:none;"><label>DI Weg bis Spanbruch</label><input type="number" step="any" id="aeSbDI" value="5"><span class="unit">mm</span></div>
+            <div class="mrow" id="aeSbURow" style="display:none;"><label>Pause (Spindelumdrehungen)</label><input type="number" step="any" id="aeSbU" value="2"><span class="unit">U</span></div>
+            <div class="mrow" id="aeSbRDRow" style="display:none;"><label>RD R&#252;ckzugsweg (auf der Bahn)</label><input type="number" step="any" id="aeSbRD" value="0.5"><span class="unit">mm</span></div>
             <div class="mrow"><label>Bearbeitung</label>
               <div class="radiobtns" id="aeBearbBtns">
                 <button data-v="schruppen" class="sel">Schruppen ▽</button>
@@ -1841,6 +1854,19 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                  ur = ux/2). -->
             <div class="mrow"><label>D Zustelltiefe (a<sub>p</sub>)</label><input type="number" step="any" id="akD" value="2"><span class="unit">mm</span></div>
             <div class="mrow"><label>UX rad. / UZ Schlichtaufmaß</label><input step="any" style="width:51px;" type="number" id="akUX" value="0.5"><input step="any" style="width:51px;" type="number" id="akUZ" value="0.1"><span class="unit">mm</span></div>
+            <!-- SPANBRECHEN [Daniel, 02.09.2026]: fuer langspanende
+                 Werkstoffe. Siemens-Vorbild CYCLE952 (S. 474): DI =
+                 Weg bis zur Vorschubunterbrechung, nur Schruppen.
+                 Die Art steht bei uns in der Maske statt in
+                 Maschinendaten: Pause = G04-Verweilsatz (unter G95
+                 in UMDREHUNGEN, DV 610 Kap. 3.6), Rueckzug = um RD
+                 auf der Bahn zurueck. Zeilen-IDs statt FELD_REGELN:
+                 die Sichtbarkeit haengt an selBtnVal, und das
+                 liefert im Ersatz-Browser nichts (s. esWRow). -->
+            <div class="mrow"><label>Spanbrechen (Schruppen)</label><div class="radiobtns" id="akSbBtns"><button data-v="aus" class="sel" data-vorgabe="1">aus</button><button data-v="pause">Pause</button><button data-v="rueckzug">R&#252;ckzug</button></div></div>
+            <div class="mrow" id="akSbDIRow" style="display:none;"><label>DI Weg bis Spanbruch</label><input type="number" step="any" id="akSbDI" value="5"><span class="unit">mm</span></div>
+            <div class="mrow" id="akSbURow" style="display:none;"><label>Pause (Spindelumdrehungen)</label><input type="number" step="any" id="akSbU" value="2"><span class="unit">U</span></div>
+            <div class="mrow" id="akSbRDRow" style="display:none;"><label>RD R&#252;ckzugsweg (auf der Bahn)</label><input type="number" step="any" id="akSbRD" value="0.5"><span class="unit">mm</span></div>
             <!-- Getrenntes Schlichtwerkzeug und Schlichtrichtung: beides
                  bleibt beim Schruppen unbenutzt, der SRK-Hinweis erklärt
                  nur die Automatik dahinter. -->
@@ -2797,6 +2823,26 @@ Winkel die gestrichelte 90&deg;-Referenzlage am Eckpunkt. Geschruppt wird in der
 Winkelform l&auml;ngs; der native G72-Satz f&auml;llt auf G-Einzels&auml;tze
 zur&uuml;ck, bis die Satz-Kodierung der Schr&auml;gen an der Maschine belegt ist
 (Maschinentermin-Liste). Innen gibt es die Winkelform noch nicht.</dd>
+<dt id="ba-ae-spanbruch">Spanbrechen (nur Schruppen)</dt>
+<dd>F&uuml;r langspanende Werkstoffe (Kunststoff, Alu-Knetlegierungen). Vorbild ist
+das Abspanen der Siemens-Steuerung (Bedienhandbuch 12/2019, S.&nbsp;474): der
+Parameter <b>DI</b> gibt den Weg an, nach dem der Vorschub unterbrochen wird &mdash;
+dort &bdquo;nur bei Schruppen&ldquo;, bei uns genauso. W&auml;hrend Siemens die Art
+der Unterbrechung in Maschinendaten vergr&auml;bt, steht sie bei uns in der Maske:
+<b>Pause</b> f&uuml;gt nach je DI&nbsp;mm Schnittweg einen G04-Verweilsatz ein &mdash;
+unter G95 verweilt G04 in <b>Spindelumdrehungen</b> (DV&nbsp;610 Kap.&nbsp;3.6),
+&bdquo;2&nbsp;U&ldquo; bricht den Span also bei jeder Drehzahl gleich, auch unter
+G96. <b>R&uuml;ckzug</b> f&auml;hrt stattdessen um RD auf der eigenen Bahn
+zur&uuml;ck und weiter &mdash; die h&auml;rtere Variante f&uuml;r z&auml;he
+Flie&szlig;sp&auml;ne. Bewusst KEIN radiales Abheben: das hinterlie&szlig;e
+Ringmarken und w&auml;re an der Schulter kollisionstr&auml;chtig. Gilt f&uuml;r die
+geraden Haupt-Schruppz&uuml;ge (Z- und X-parallel); Kantenanschnitte und der
+konturparallele Auszug sind kurz, dort bricht der Span von selbst. Die NC
+w&auml;chst sp&uuml;rbar (ein 60-mm-Zug mit DI&nbsp;5 bekommt 11 Unterbrechungen);
+die Hauptzeit steigt kaum (2&nbsp;U bei 1500&nbsp;U/min = 80&nbsp;ms je Bruch) und
+wird in Zeitachse und Arbeitsplan mitgerechnet. Der native G72-Zyklussatz kennt
+keine Vorschubunterbrechung &mdash; bei aktivem Spanbrechen f&auml;llt die Ausgabe
+mit Ansage auf G-Einzels&auml;tze zur&uuml;ck.</dd>
 <dt id="ba-ak-kanten">K1&hellip;K3 Kanten</dt>
 <dd>Ein Feld je Kante plus Umschalter Fase/Rundung &mdash; im Datenmodell bleiben es
 zwei Werte, die Maske zeigt nur den gesetzten. Beim Schlichten beginnt die
@@ -2847,6 +2893,11 @@ schnitt einen Halbmond in die fertige Planfl&auml;che.</dd>
 freigefahren nach kleinerem, das Aufma&szlig; liegt unter dem Fertigma&szlig;.
 Konturabspanen innen kann z-parallel; plan- und konturparallel sind innen bewusst
 gesperrt statt falsch gerechnet.</dd>
+<dt id="ba-akk-spanbruch">Spanbrechen (nur Schruppen)</dt>
+<dd>Wie beim Abspanen Ecke (Kapitel 5.1): DI-Weg plus Pause (G04 in
+Spindelumdrehungen) oder R&uuml;ckzug auf der Bahn. Wirkt in den achsparallelen
+Strategien (Z-/X-parallel, au&szlig;en und innen); bei konturparallel schneidet der
+Zyklus durchgehend und sagt das an.</dd>
 <dt id="ba-akk-restwarnung">Was der Zyklus stehen l&auml;sst</dt>
 <dd>Hinter einer Schulter, deren Durchmesser wieder ansteigt (echte Tasche), stellt
 das z-parallele Schruppen nicht zu &mdash; es arbeitet gegen das gleitende Maximum
@@ -8768,6 +8819,9 @@ function editStep(i){
     setRadio('aeAusgBtns', p.ausg||'gcode');
     setVal('aeW1', p.w1!==undefined?p.w1:90); setVal('aeW2', p.w2!==undefined?p.w2:90);
     { const f=aeFormAusWerten(); setRadio('aeFormBtns', f); aeFormSetzen(f); }
+    setRadio('aeSbBtns', p.sbArt||'aus');
+    setVal('aeSbDI', p.sbDI!==undefined?p.sbDI:5); setVal('aeSbU', p.sbU!==undefined?p.sbU:2); setVal('aeSbRD', p.sbRD!==undefined?p.sbRD:0.5);
+    sbSetzen('ae', p.sbArt||'aus');
     inkReset(['aeX1mode','aeZ1mode']); aeGruppenSync();   // erst NACH allen setVal — sonst fasst sie Altwerte zusammen
     { const m=eingabeModusAusWerten('maskAbspanenEinfach');
       setRadio('aeEingabeBtns', m);
@@ -8793,6 +8847,9 @@ function editStep(i){
     setVal('akHintW', p.hintW!==undefined?p.hintW:5);
     setVal('akStockZ', p.stockZ!==undefined ? p.stockZ : 2);
     setRadio('akSModeBtns', p.sMode||'n'); syncSMode('ak',false); setVal('akFR',p.fr); setVal('akSR',p.sr); setVal('akFF',p.ff); setVal('akSF',p.sf);
+    setRadio('akSbBtns', p.sbArt||'aus');
+    setVal('akSbDI', p.sbDI!==undefined?p.sbDI:5); setVal('akSbU', p.sbU!==undefined?p.sbU:2); setVal('akSbRD', p.sbRD!==undefined?p.sbRD:0.5);
+    sbSetzen('ak', p.sbArt||'aus');
     document.getElementById('akStockLabel').textContent = p.lage==='innen'?'Vorbohrung-⌀':'Rohteil-⌀';
     syncAkSicht();
     akGruppenSync();   // erst NACH allen setVal — sonst fasst sie Altwerte zusammen
@@ -8986,7 +9043,7 @@ function wireRadioGroup(id){
     btn.classList.add('sel');
   });
 }
-['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns','akPlanFertigBtns'].forEach(wireRadioGroup);
 // Kleinumschalter IN einer Feldzeile (wie abs/ink): verdrahtet, aber
 // BEWUSST ohne Auswahlfeld — ein 51-px-Knopfpaar soll Knopfpaar
@@ -9000,7 +9057,7 @@ wireRadioGroup('boWMode');   // man/auto des Bohr-Vorlaufs — war ebenso tot
   if(g) g.addEventListener('click',()=>{ try{ esLabelsSync(); }catch(e){} }); }
 // Dieselben Gruppen bekommen ihr Auswahlfeld. Eine Liste, damit keine
 // Gruppe verdrahtet ist, aber ohne Feld bleibt (oder umgekehrt).
-const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns'];
 SELFELD_GRUPPEN.forEach(id=>{ try{ selFeldAufbauen(id); }catch(e){} });
 // Die Rueckzugsstufe schaltet ihre Felder frei — beim Klick und einmal
@@ -9405,6 +9462,12 @@ function wirkungsloseFelderAusblenden(maskId, zustaende){
        t.closest("#aeLageBtns") || (t.id==="sw_aeLageBtns")){
       try{ aeFormSetzen(selBtnVal("aeFormBtns")); }catch(e){}
     }
+    if(t.closest("#aeSbBtns") || (t.id==="sw_aeSbBtns")){
+      try{ sbSetzen("ae", selBtnVal("aeSbBtns")); }catch(e){}
+    }
+    if(t.closest("#akSbBtns") || (t.id==="sw_akSbBtns")){
+      try{ sbSetzen("ak", selBtnVal("akSbBtns")); }catch(e){}
+    }
   }, false);
   // BUBBLE, NICHT CAPTURE [Daniel, 28.08.2026]. In der Capture-Phase
   // liest selBtnVal noch den alten Wert — der Knopf hat seine Auswahl
@@ -9652,6 +9715,15 @@ function aeFormSetzen(form){
     if(z) z.style.display = (f==='winkel') ? '' : 'none';
   });
   try{ renderMaskHelp('maskAbspanenEinfach', null); }catch(e){}
+}
+// Spanbrechen: Felder je Art zeigen (aus -> keine, Pause -> DI+U,
+// Rueckzug -> DI+RD). Werte bleiben stehen (ausgeblendet != geloescht).
+function sbSetzen(pre, art){
+  const a=art||'aus';
+  const zeig=(id,an)=>{ const e=document.getElementById(id); if(e) e.style.display=an?'':'none'; };
+  zeig(pre+'SbDIRow', a!=='aus');
+  zeig(pre+'SbURow',  a==='pause');
+  zeig(pre+'SbRDRow', a==='rueckzug');
 }
 function aeGruppenSync(){
   const w=mgZahl;
@@ -10029,6 +10101,7 @@ document.getElementById('boEntBearbBtns').addEventListener('click',(e)=>{
 function openAbspanenEinfachMask(){
   inkReset(['aeX1mode','aeZ1mode']); aeGruppenSync();
   { const f=aeFormAusWerten(); setRadio('aeFormBtns', f); aeFormSetzen(f); }
+  try{ sbSetzen('ae', selBtnVal('aeSbBtns')); }catch(e){}
   { const m=eingabeModusAusWerten('maskAbspanenEinfach');
     setRadio('aeEingabeBtns', m);
     eingabeModusSetzen('maskAbspanenEinfach', m); }
@@ -10057,6 +10130,10 @@ document.getElementById('btnAeOk').onclick=()=>{
     // der Generator laeuft dann den unveraenderten Pfad.
     w1: (isNaN(parseFloat(document.getElementById('aeW1').value))?90:+document.getElementById('aeW1').value),
     w2: (isNaN(parseFloat(document.getElementById('aeW2').value))?90:+document.getElementById('aeW2').value),
+    sbArt: selBtnVal('aeSbBtns')||'aus',
+    sbDI: +document.getElementById('aeSbDI').value||0,
+    sbU: +document.getElementById('aeSbU').value||2,
+    sbRD: +document.getElementById('aeSbRD').value||0.5,
   };
   commitStep('abspanen_einfach', params);
   document.getElementById('maskAbspanenEinfach').classList.remove('show');
@@ -10079,6 +10156,7 @@ function fillContourSelect(selectedId, blankId){
 function openAbspanenKonturMask(){
   if(!contours.some(c=>c.els.length>1)){ alert('Bitte zuerst eine Kontur anlegen (Softkey "Kontur").'); return; }
   fillContourSelect();
+  try{ sbSetzen('ak', selBtnVal('akSbBtns')); }catch(e){}
   document.getElementById('akStock').value = document.getElementById('stockDia').value;
   document.getElementById('akStockZ').value = document.getElementById('pkZA').value;
   akGruppenSync();
@@ -10114,6 +10192,10 @@ document.getElementById('btnAkOk').onclick=()=>{
     hintW: +document.getElementById('akHintW').value||5,
     fr: +document.getElementById('akFR').value, sr: +document.getElementById('akSR').value, sMode: selBtnVal('akSModeBtns')||'n',
     ff: +document.getElementById('akFF').value, sf: +document.getElementById('akSF').value,
+    sbArt: selBtnVal('akSbBtns')||'aus',
+    sbDI: +document.getElementById('akSbDI').value||0,
+    sbU: +document.getElementById('akSbU').value||2,
+    sbRD: +document.getElementById('akSbRD').value||0.5,
   };
   commitStep('abspanen_kontur', params);
   document.getElementById('maskAbspanenKontur').classList.remove('show');
@@ -12127,6 +12209,8 @@ const BA_ANKER={
   aeX1:'ba-ak-x0z0', aeZ1:'ba-ak-x0z0',
   aeK1:'ba-ak-kanten', aeK2:'ba-ak-kanten', aeK3:'ba-ak-kanten',
   aeW1:'ba-ae-form', aeW2:'ba-ae-form', aeFormBtns:'ba-ae-form',
+  aeSbBtns:'ba-ae-spanbruch', aeSbDI:'ba-ae-spanbruch', aeSbU:'ba-ae-spanbruch', aeSbRD:'ba-ae-spanbruch',
+  akSbBtns:'ba-akk-spanbruch', akSbDI:'ba-akk-spanbruch', akSbU:'ba-akk-spanbruch', akSbRD:'ba-akk-spanbruch',
   aeK1Btns:'ba-ak-kanten', aeK2Btns:'ba-ak-kanten', aeK3Btns:'ba-ak-kanten',
   aeD:'ba-zk-radial', aeUX:'ba-zk-radial', aeUZ:'ba-zk-radial',
   akKontur:'ba-akk-kontur', akRohKontur:'ba-akk-kontur',
@@ -17502,8 +17586,62 @@ function contourXatZ(z, pts){
 }
 
 // ---- Generator: Abspanen (Ecke, CYCLE951-Art) — rectangular corner removal ----
+// =================================================================
+// SPANBRECHEN BEIM SCHRUPPEN [Daniel, 02.09.2026]
+// -----------------------------------------------------------------
+// Fuer langspanende Werkstoffe (Kunststoff, Alu-Knetlegierungen).
+// Vorbild Siemens CYCLE952 (Bedienhandbuch 12/2019 S. 474): EIN
+// Wegparameter DI ("Weg, nach dem die Vorschubunterbrechung
+// erfolgen soll", 0 = kontinuierlich, "nur bei Schruppen"); die
+// Unterbrechungsart steckt dort in Maschinendaten. Bei uns steht
+// sie sichtbar in der Maske:
+//   Pause    — G04-Verweilsatz. Unter G95 verweilt G04 in
+//              UMDREHUNGEN (DV 610 Kap. 3.6): "2 U" bricht den
+//              Span bei jeder Drehzahl gleich, auch unter G96.
+//   Rueckzug — um RD AUF DER BAHN zurueck und weiter. KEIN
+//              radiales Abheben: das hinterliesse Ringmarken und
+//              waere an der Schulter kollisionstraechtig.
+// Gilt nur fuer die geraden HAUPT-Schruppzuege; Kantenanschnitte
+// und der konturparallele Auszug sind kurz, dort bricht der Span
+// von selbst.
+function sbLesen(p, doRough, warnings){
+  const art=p.sbArt||'aus';
+  if(art==='aus' || !doRough) return null;
+  const di=+p.sbDI||0;
+  if(!(di>0.05)){
+    warnings.push('Spanbrechen ist eingeschaltet, aber DI (Weg bis Spanbruch) fehlt — der Zyklus schneidet durchgehend.');
+    return null;
+  }
+  return {art, di, u:Math.max(0.5, +p.sbU||2), rd:Math.max(0.05, +p.sbRD||0.5)};
+}
+// Einen geraden Schruppzug in DI-Segmente teilen. wort 'Z' oder 'X';
+// X laeuft im DURCHMESSER, der Schnittweg zaehlt radial — deshalb
+// dort die doppelte Schrittweite. Der erste Satz traegt G95 F wie
+// der bisherige ungeteilte Zug.
+function sbZug(lines, N, bump, wort, start, ziel, sb, fWert){
+  const radial=(wort==='X');
+  const schritt=radial? sb.di*2 : sb.di;
+  const rdW=radial? sb.rd*2 : sb.rd;
+  const sgn=Math.sign(ziel-start)||1;
+  let pos=start, erster=true;
+  const satz=(zw)=>{
+    lines.push(`${N()} (GERADE  ) ${erster?('G95 F'+fmt(fWert)+' '):''}G01 ${wort}${fmt(zw)}`); bump();
+    erster=false;
+  };
+  while(Math.abs(ziel-pos) > schritt+0.01){
+    pos+=sgn*schritt;
+    satz(pos);
+    if(sb.art==='pause'){
+      lines.push(`${N()} (VERWEIL ) G04 F${fmt(sb.u)}`); bump();
+    } else {
+      lines.push(`${N()} (GERADE  ) G01 ${wort}${fmt(pos-sgn*rdW)}`); bump();
+    }
+  }
+  satz(ziel);
+}
 function genAbspanenEinfach(p, N, bump, lines, warnings){
   const doRough = p.bearbeitung!=='schlichten';
+  const sbAe = sbLesen(p, doRough, warnings);   // Spanbrechen, nur Schruppen
   const doFinish = p.bearbeitung!=='schruppen';
   const innen = p.lage==='innen';
   const xOuter = Math.max(p.x0,p.x1), xInner = Math.min(p.x0,p.x1);
@@ -17678,6 +17816,13 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     // unbelegt. Ein falsch gedrehter Schenkel schneidet in die
     // Schulter. Beleg-Weg wie beim Innen-Fall: Maschinentermin.
     warnings.push('G72 mit Schenkelwinkeln: die SATZ-Kodierung der Schraegen (Xm/Zm-Strecken) ist am Handbuch nicht belegt — Ausgabe erfolgt als G-Einzelsaetze. Beleg-Weg: Winkel-Zyklus an der Maschine eintippen und per DNC ziehen.');
+    zyklusModusAe=false;
+  }
+  if(zyklusModusAe && sbAe){
+    // Der native G72-Satz kennt kein Spanbrechen — die Maschine
+    // fuehre den Zyklus durchgehend, waehrend die Simulation Pausen
+    // zeigte. Deshalb Einzelsaetze, mit Ansage.
+    warnings.push('Spanbrechen und G72-Zyklussatz schliessen sich aus (der Satz kennt keine Vorschubunterbrechung) — Ausgabe erfolgt als G-Einzelsaetze.');
     zyklusModusAe=false;
   }
   if(zyklusModusAe){
@@ -17856,7 +18001,11 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xv)} Z${fmt(zGrenzW(xv))}`); bump();
         } else {
           lines.push(`${N()} (SCHRAEG ) G94 G00 G90 X${fmt(xv)} Z${fmt(zAnf)}`); bump();
-          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zGrenzW(xv))}`); bump();
+          if(sbAe){
+            sbZug(lines, N, bump, 'Z', zAnf, zGrenzW(xv), sbAe, p.fr);
+          } else {
+            lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zGrenzW(xv))}`); bump();
+          }
         }
         // Konturparalleler Auszug bis zur vorherigen Ebene — laeuft
         // durch zGrenzW von selbst ueber Kegel, K2-Kante und Schulter.
@@ -17962,8 +18111,12 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xv)} Z${fmt(zOuter-kant1)}`); bump();
         } else {
           lines.push(`${N()} (SCHRAEG ) G94 G00 G90 X${fmt(xv)} Z${fmt(zAnf)}`); bump();
-          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01`); bump();
-          lines[lines.length-1]=lines[lines.length-1].replace('G01','G01 Z'+fmt(konturGrenzZ(xv)));
+          if(sbAe){
+            sbZug(lines, N, bump, 'Z', zAnf, konturGrenzZ(xv), sbAe, p.fr);
+          } else {
+            lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01`); bump();
+            lines[lines.length-1]=lines[lines.length-1].replace('G01','G01 Z'+fmt(konturGrenzZ(xv)));
+          }
         }
         if(letzte && ((!innen && kant1>0.05) || (innen && kant1Inn>0.05))){
           lines.push(`${N()} (GERADE  ) G01 Z${fmt(konturGrenzZ(xv))}`); bump();
@@ -18016,7 +18169,11 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
       passes.forEach((zv,i)=>{
         const comp = '';   // Schruppen ohne Korrektur, s. crcCode()
         lines.push(`${N()} (SCHRAEG ) G94 G00 ${comp}G90 X${fmt(clearRefX + clearSign*2)} Z${fmt(zv)}`); bump();
-        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 X${fmt(schruppGrenzeX(zv))}`); bump();
+        if(sbAe){
+          sbZug(lines, N, bump, 'X', clearRefX + clearSign*2, schruppGrenzeX(zv), sbAe, p.fr);
+        } else {
+          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 X${fmt(schruppGrenzeX(zv))}`); bump();
+        }
         lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(zv+2)}`); bump();
         lines.push(`${N()} (GERADE  ) G00 X${fmt(clearRefX + clearSign*2)}`); bump();
       });
@@ -18543,6 +18700,16 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   const nurRest = p.bearbeitung==='rest';
   const doRough = !nurRest && p.bearbeitung!=='schlichten';
   const doFinish = !nurRest && p.bearbeitung!=='schruppen';
+  // Spanbrechen [Daniel, 02.09.2026]: nur die geraden Hauptzuege der
+  // achsparallelen Zweige. Konturparallel folgt der Huelle in vielen
+  // kurzen Segmenten — dort ist eine saubere DI-Zaehlung ein eigener
+  // Umbau, und der Span bricht an jeder Richtungsaenderung ohnehin
+  // leichter. Ehrlich benannt statt still ignoriert.
+  let sbAk = sbLesen(p, doRough, warnings);
+  if(sbAk && (p.richtung==='konturparallel' || p.richtung==='x-konturparallel')){
+    warnings.push('Spanbrechen wirkt nur bei den achsparallelen Strategien (Z-/X-parallel) — bei '+p.richtung+' schneidet der Zyklus durchgehend.');
+    sbAk=null;
+  }
   let zStart=pts[0].z, zEnd=pts[pts.length-1].z;
   // EINGRENZEN [ShopTurn Bild 11-5; Daniels Freigabe 28.08.2026].
   // Der Zyklus faehrt dann nur zwischen ZA und ZB. Z laeuft nach
@@ -18980,7 +19147,11 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         // Sicherheitsabstand gilt dem ANfahren; wohin am Ende
         // zurueckgezogen wird, sagt ZRA im Programmkopf.
         lines.push(`${N()} (SCHRAEG ) G94 G00 G90 X${fmt(xp)} Z${fmt(rueckzugZ(undefined,(p&&p.lage)==="innen"))}`); bump();
-        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zAt)}`); bump();
+        if(sbAk){
+          sbZug(lines, N, bump, 'Z', rueckzugZ(undefined,(p&&p.lage)==="innen"), zAt, sbAk, p.fr);
+        } else {
+          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zAt)}`); bump();
+        }
         // FREIFAHREN ZUR BOHRUNGSMITTE [Daniel]: der alte Zweig hob auf
         // den ENDdurchmesser ab — beim Ausdrehen ist das die Richtung
         // INS Material, die Schraege lief in die frisch geschnittene
@@ -19026,8 +19197,13 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
           const mTop = matAt(zv);
           if(!(mTop > xAt + 0.05)) continue;
           lines.push(`${N()} (GERADE  ) G00 Z${fmt(zv)}`); bump();
-          lines.push(`${N()} (GERADE  ) G00 X${fmt(Math.min(startClear, mTop + 1))}`); bump();
-          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 X${fmt(xAt)}`); bump();
+          const xStichStart=Math.min(startClear, mTop + 1);
+          lines.push(`${N()} (GERADE  ) G00 X${fmt(xStichStart)}`); bump();
+          if(sbAk){
+            sbZug(lines, N, bump, 'X', xStichStart, xAt, sbAk, p.fr);
+          } else {
+            lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 X${fmt(xAt)}`); bump();
+          }
           // ZIEHEN an der Wand: der Hülle Richtung Futter folgen, höchstens eine
           // Zustellung weit — das Plan-Gegenstück zum Hochziehen im Längszweig.
           // Räumt den Reststeg an der Schulterwand während der Stiche; ein
@@ -19439,7 +19615,11 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         if(zFeed < zAppr - 1e-9){
           lines.push(`${N()} (GERADE  ) G00 Z${fmt(zFeed)}`); bump();
         }
-        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zAt)}`); bump();
+        if(sbAk){
+          sbZug(lines, N, bump, 'Z', zFeed, zAt, sbAk, p.fr);
+        } else {
+          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(zAt)}`); bump();
+        }
 
         // NUR wenn ansteigendes Material den Schnitt gestoppt hat, steht dort eine Schulter.
         // Das bloße Erreichen des Konturendes ist keine Schulter — dort läuft das Werkstück
@@ -22996,6 +23176,19 @@ function berechneHauptzeiten(code){
   const twEl=document.getElementById('pkTw');
   const twSek=(twEl && twEl.value!=='' && isFinite(+twEl.value)) ? Math.max(0,+twEl.value) : 30;
   moves.forEach(mv=>{
+    // VERWEILSAETZE [Spanbrechen, 02.09.2026]: kein Weg, aber Zeit —
+    // U Umdrehungen bei der wirksamen Drehzahl. Vorher fielen die
+    // G04 der Bohrzyklen hier stumm durch (len 0).
+    if(mv.type==='dwell'){
+      let sEff=mv.s>0?mv.s:500;
+      if(mv.g96){ const dM=Math.max(2, Math.abs(mv.x1)); sEff=Math.min(N_MAX_G96_ZEIT, mv.s*1000/(Math.PI*dM)); }
+      const min=(mv.dwellU||0)/Math.max(1e-6,sEff);
+      let si=-1;
+      for(let g=grenzen.length-1; g>=0; g--){ if(mv.li>=grenzen[g].li){ si=grenzen[g].stepIdx; break; } }
+      if(si>=0){ const zi=schrittIndex(si+1); proSchritt[zi]=(proSchritt[zi]||0)+min; }
+      gesamt+=min;
+      return;
+    }
     let len;
     if(mv.type==='arc' && mv.cz!==undefined && mv.cx!==undefined){
       const r=Math.hypot(mv.z1-mv.cz, d2r(mv.x1-mv.cx));
@@ -26291,6 +26484,21 @@ function parseGcodeForSim(code){
     const zMatch = line.match(/Z(-?[\d.]+)/);
     const iMatch = line.match(/I(-?[\d.]+)/);
     const kMatch = line.match(/K(-?[\d.]+)/);
+    // G04 VERWEILEN [Spanbrechen, 02.09.2026]: das F-Wort im G04 ist
+    // die DAUER (unter G95 in UMDREHUNGEN, DV 610 Kap. 3.6), KEIN
+    // Vorschub. Es darf den modalen F nicht vergiften — genau das tat
+    // es bisher bei den Bohr-Verweilsaetzen: nach 'G04 F2' rechnete
+    // die Zeitachse mit F2 mm/U weiter (Zeitfehler, keine Geometrie).
+    // Der Satz wird als Verweil-Bewegung ohne Weg gefuehrt, damit
+    // Zeitachse und Hauptzeit ihn zaehlen koennen.
+    if(/\bG0?4\b/.test(line) && !/G4\d/.test(line)){
+      const dM4=line.match(/\bF([\d.]+)/);
+      if(curX!==null && curZ!==null){
+        moves.push({type:'dwell', x1:curX, z1:curZ, x2:curX, z2:curZ, t:curT, comp:curComp,
+          f:curF, s:curS, pitch:curPitch, g96:curG96, dwellU:dM4?parseFloat(dM4[1]):0, li:__li, step:curStep});
+      }
+      return;
+    }
     // MODALWORTE VOR DEM BEWEGUNGS-RETURN [Daniel, G96-Paket]: reine
     // Drehzahl-/Vorschubsaetze ('(DREHZAHL) G96 S180') haben kein Motion-G
     // und flogen hier raus, bevor F/S/G96 gelesen wurden. Modalzustaende
@@ -28004,6 +28212,12 @@ function simZeitachseBauen(){
       t=len/Math.max(600, eilgangMmMin()/2);
     } else if(m.type==='thread' && m.pitch>0){
       t=len/Math.max(m.pitch*(m.s>0?m.s:500), 1);      // Gewinde: Steigung mal Drehzahl
+    } else if(m.type==='dwell'){
+      // Verweilen in UMDREHUNGEN (G04 F unter G95): Minuten = U / n.
+      // Bei G96 die wirksame Drehzahl am Satz-⌀, wie die Hauptzeit.
+      let sEff=(m.s>0)?m.s:500;
+      if(m.g96){ const dM=Math.max(2, Math.abs(m.x1)); sEff=Math.min(N_MAX_G96_ZEIT, m.s*1000/(Math.PI*dM)); }
+      t=(m.dwellU||0)/Math.max(1,sEff);
     } else {
       const f=(m.f>0)?m.f:0.15, sp=(m.s>0)?m.s:500;
       t=len/Math.max(f*sp, 1);                         // mm / (mm/U * U/min) = min
