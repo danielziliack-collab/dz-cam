@@ -419,6 +419,7 @@
   .sk .ic svg{display:block;margin:0 auto;}
   .sk.disabled{opacity:.35;pointer-events:none;}
   .sk-spacer{flex:1;}
+  .sk-umbruch{flex-basis:100%;height:0;}
 
   /* ===== Horizontal softkeys (bottom) ===== */
   /* RECHTS 46 px FREI [Daniel, 30.08.2026: das Sprechblasen-Symbol des
@@ -6918,12 +6919,20 @@ function renderSoftkeys(){
       add('yellow sub','✛','Neue<br>Kontur',()=>openStartMask(false));
       importGruppe();
     } else {
-      add('sub','✛','Neue<br>Kontur',()=>newContourSoftkey());
-      importGruppe();
+      // GEOMETRIE ZUERST UND ZUSAMMEN [Daniel, 02.09.2026: "alle
+      // Geometrieelemente nebeneinander, nicht der Kreis allein
+      // unten"]. Die alte Reihenfolge (Neue Kontur, Import, dann
+      // erst Z/X/ZX/Kreis) liess den Umbruch bei fuenf Knoepfen je
+      // Zeile mitten durch die Viererfamilie laufen. Jetzt bilden
+      // die vier Zeichenknoepfe die erste Zeile, ein erzwungener
+      // Umbruch trennt sie von der Verwaltung darunter.
       add('yellow',SK_ICONS.geradeZ,'Gerade<br>Z',()=>openGeradeMask('Z'));
       add('yellow',SK_ICONS.geradeX,'Gerade<br>X',()=>openGeradeMask('X'));
       add('yellow',SK_ICONS.geradeZX,'Gerade<br>ZX',()=>openGeradeMask('ZX'));
       add('yellow',SK_ICONS.kreis,'Kreis',()=>openKreisMask());
+      { const u=document.createElement('div'); u.className='sk-umbruch'; skCol.appendChild(u); }
+      add('sub','✛','Neue<br>Kontur',()=>newContourSoftkey());
+      importGruppe();
       const spacer=document.createElement('div'); spacer.className='sk-spacer'; skCol.appendChild(spacer);
       add('','🔍','Element-<br>Zoom',()=>zoomToSelected(), selectedIdx<0);
       add('','🗑','Element<br>löschen',()=>deleteSelected(), selectedIdx<0);
