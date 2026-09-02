@@ -450,7 +450,8 @@
    aus IN_EMBEDDED_VIEW). */
 .hsoftkeys{display:flex;flex-wrap:wrap;gap:3px;background:var(--panel);border-top:1px solid var(--line);padding:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));flex-shrink:0;}
 body.artefakt .hsoftkeys{padding-right:48px;}
-.hsoftkeys .hsk{min-width:96px;}
+.hsoftkeys .hsk{min-width:96px;flex-direction:column;gap:1px;min-height:46px;padding:4px 2px 3px;}
+.hsk-ic{display:block;flex:0 0 auto;opacity:.85;}
   .hsk{
     flex:1;min-width:0;min-height:40px;background:hsl(var(--ton), 45%, 95.5%);
     border:1px solid hsl(var(--ton), 16.9%, 69.8%);border-radius:4px;font-size:10.5px;font-weight:700;letter-spacing:.1px;
@@ -957,6 +958,22 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   .demokachel{display:flex;flex-direction:column;align-items:flex-start;gap:1px;
     padding:8px 10px;line-height:1.25;}
   .demokachel .dk-ic{font-size:13px;opacity:.75;}
+  /* LEERZUSTAND NEU [Daniel, 02.09.2026, Design-Durchsicht]: erst die
+     Primaeraktionen (das ist die App), dann die Testvorlagen als
+     ehrlich beschriftete Demo-Gruppe. */
+  .leerakt{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px;}
+  .leerakt button{display:flex;align-items:center;gap:10px;justify-content:flex-start;
+    padding:13px 14px;font-size:14px;font-weight:700;text-align:left;
+    background:hsl(var(--ton), 45%, 95.5%);border:1px solid hsl(var(--ton), 16.9%, 69.8%);
+    border-radius:6px;color:hsl(var(--ton), 22.2%, 14.1%);}
+  .leerakt button:active{background:hsl(var(--ton), 25.8%, 87.8%);}
+  .leerakt .la-ic{font-size:17px;line-height:1;opacity:.8;flex:0 0 auto;}
+  .leerakt .la-sub{display:block;font-weight:400;font-size:11px;color:var(--text-dim);}
+  .demotitel{margin:16px 0 2px;font-size:11px;font-weight:700;letter-spacing:.4px;
+    text-transform:uppercase;color:var(--text-dim);text-align:left;}
+  /* Vorlagenkachel mit Teile-Silhouette: die Kontur der Demo selbst
+     ersetzt die Emoji-Glyphen (drei Bildsprachen durcheinander). */
+  .dk-sil{width:88px;height:36px;display:block;margin-bottom:2px;}
   .demokachel .dk-tx{font-weight:600;font-size:12.5px;}
   .demokachel .dk-sub{font-size:10.5px;color:var(--text-dim);}
 
@@ -2512,17 +2529,17 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
   </div>
 
   <div class="hsoftkeys view-arbeitsplan">
-    <div class="hsk" id="hskTools" title="Werkzeugverwaltung">Werkzeuge</div>
-    <div class="hsk" id="hskProgs">Programme</div>
+    <div class="hsk" id="hskTools" title="Werkzeugverwaltung"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8 L17 4 L20 8 L15 12 Z"/><line x1="2" y1="8" x2="12" y2="8"/></svg><span>Werkzeuge</span></div>
+    <div class="hsk" id="hskProgs"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2.5" width="16" height="11" rx="1.5"/><line x1="6" y1="6" x2="16" y2="6"/><line x1="6" y1="9.5" x2="13" y2="9.5"/></svg><span>Programme</span></div>
     <!-- Softkey Kontur-loeschen entfernt [Daniel, 30.08.2026]: redundant
          zum roten Kreuz an der Konturzeile. Der Platz gehoert jetzt dem
          Technologieplaner (Programmvorschlag, Stufe 1). -->
     <!-- kuerzeres Label [Daniel, 30.08.2026]: "vorschlagen" war bei
          fuenf Knoepfen plus Blasen-Freiraum breiter als der Knopf. -->
-    <div class="hsk" id="hskVorschlag" title="Programm vorschlagen (Planer)">Vorschlag</div>
-    <div class="hsk" id="hskSim">Simulation</div>
-    <div class="hsk" id="hskKalk" title="Angebotskalkulation (Zuschlagskalkulation)">Kalkulation</div>
-    <div class="hsk primary" id="hskGcode" title="G-Code Ausgabe">G-Code</div>
+    <div class="hsk" id="hskVorschlag" title="Programm vorschlagen (Planer)"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="4.2"/><line x1="8" y1="2" x2="8" y2="3.8"/><line x1="8" y1="12.2" x2="8" y2="14"/><line x1="2" y1="8" x2="3.8" y2="8"/><line x1="12.2" y1="8" x2="14" y2="8"/><path d="M15.5 11 L17.5 13.5 L21 9.5" stroke-width="1.9"/></svg><span>Planer</span></div>
+    <div class="hsk" id="hskSim"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5 L17 8 L6 13.5 Z"/></svg><span>Simulation</span></div>
+    <div class="hsk" id="hskKalk" title="Angebotskalkulation (Zuschlagskalkulation)"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3.5 A6 6 0 1 0 15 12.5"/><line x1="5" y1="6.3" x2="13" y2="6.3"/><line x1="5" y1="9.7" x2="13" y2="9.7"/></svg><span>Kalkulation</span></div>
+    <div class="hsk primary" id="hskGcode" title="G-Code Ausgabe"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3 L2.5 8 L7 13"/><path d="M15 3 L19.5 8 L15 13"/></svg><span>G-Code</span></div>
   </div>
 
   <!-- ANGEBOTSKALKULATION [Daniel, 31.08.2026]: Zuschlagskalkulation
@@ -6706,6 +6723,20 @@ function pdfJpegSuchen(bytes){
 // =================================================================
 // Softkey column — state machine
 // =================================================================
+// Teile-Silhouetten der Testvorlagen [Daniel, 02.09.2026]: die Punkte
+// sind aus den DEMO-KONTUREN selbst erzeugt (Aussenkontur expandiert,
+// Douglas-Peucker 2%) — die Kachel zeigt das Teil, bevor man liest.
+// Bei geaenderten Demos die Tabelle neu erzeugen (scratchpad silgen.js);
+// Pruefung 152 misst Max-Radius und z-Spanne gegen die echten Konturen.
+const DEMO_SIL={"Stufenbolzen":[[0,0],[-1.5,15],[-22,15],[-23,22.5],[-48.4,22.5],[-51,30],[-72.6,30.1],[-76,37.5],[-100,37.5]],"Hinterschnitt":[[0,0],[0,19],[-19.7,20.1],[-29,32],[-38.2,31.7],[-50,22.1],[-60.7,22],[-68,34],[-80,34]],"Schmiedeteil":[[0,0],[0,19],[-19.6,20.1],[-28,31],[-55.6,31],[-65.3,22.7],[-75,22]],"Stechdrehen":[[0,0],[-1,30],[-9.9,29.7],[-17.1,20],[-37.4,20.1],[-45,30],[-55,30]],"Abstechen":[[0,0],[0,13],[-1,14],[-13.1,14.1],[-14,20],[-42,20]],"Kantenwelle":[[0,0],[-1,27.5],[-28.8,27.5],[-31,35],[-58.4,35],[-61.5,41],[-70,41]],"Freistichwelle":[[0,0],[0,26.5],[-1,27.5],[-30,27.5],[-30,35],[-48,35]],"Rotorwelle":[[0,55],[-71.5,60.3],[-78.8,91.9],[-185,92],[-245,120],[-261,150],[-395,150],[-402.2,95.8],[-440,95],[-445.5,71.3],[-500,66]],"Buchse":[[0,0],[0,36],[-1.5,37.5],[-64,37.5]],"Master":[[0,0],[-1.5,18],[-30,18],[-31.6,27.5],[-70,27.5],[-95,37.5],[-140,37.5],[-142.4,47.4],[-175,47.5]]};
+// Innen-Silhouetten (Bohrungen) der beiden Innen-Demos — schematisch
+// aus den Zyklusmassen (Buchse: ⌀48,4 mit Absatz ⌀40, Vorbohrung ⌀26;
+// Master: ⌀30,4 mit Absatz ⌀28). Ohne sie waere die Buchse ein
+// Vollrechteck und als Buchse unkenntlich.
+const DEMO_SIL_INNEN={
+  'Buchse':[[0,24.2],[-20,24.2],[-20,20],[-45,20],[-45,13],[-58,13]],
+  'Master':[[0,15.2],[-40,15.2],[-40,14],[-60,14]]
+};
 const skCol = document.getElementById('softkeyCol');
 
 function renderSoftkeys(){
@@ -10891,31 +10922,92 @@ function refreshArbeitsplan(){
   });
   if(contour.length===0 && programSteps.length===0){
     const empty=document.createElement('div');
-    empty.style.cssText='padding:16px 14px;color:var(--text-dim);font-size:12.5px;text-align:center;';
+    empty.style.cssText='padding:10px 14px 16px;color:var(--text-dim);font-size:12.5px;text-align:left;';
     // KACHELRASTER STATT KETTE [Daniel, Punkt 6]: neun Vorlagen
     // untereinander sind am Desktop eine lange Spalte, durch die man
     // scrollt. Als Raster stehen sie nebeneinander und man sieht auf
     // einen Blick, was es gibt. Am Handy bleibt es bei einer Spalte —
     // dort ist nebeneinander nichts gewonnen (auto-fit, minmax).
+    // MASTER WAR NICHT WAEHLBAR [eigener Fund, 02.09.2026]: der
+    // apDemoBtn10-Listener existierte, die Kachel fehlte in der
+    // Liste — das Mastertestteil war vom Leerzustand aus unerreichbar.
     const VORLAGEN=[
-      ['apDemoBtn',  '🔧', 'Stufenbolzen',   'Gewinde, Freistich, Bohrung'],
-      ['apDemoBtn2', '🔧', 'Hinterschnitt',  'Welle mit Tasche'],
-      ['apDemoBtn3', '🔧', 'Schmiedeteil',   'eigene Rohteilkontur'],
-      ['apDemoBtn4', '🔧', 'Stechdrehen',    'Nutwelle'],
-      ['apDemoBtn5', '✂',  'Abstechen',      'Bolzen von der Stange'],
-      ['apDemoBtn6', '◲',  'Kantenwelle',    'Abspanen Ecke'],
-      ['apDemoBtn7', '◲',  'Freistichwelle', 'DIN 509'],
-      ['apDemoBtn8', '◲',  'Rotorwelle',     '⌀300×500, Extremtest'],
-      ['apDemoBtn9', '◎',  'Buchse',         'Innenbearbeitung'],
+      ['apDemoBtn',   '', 'Stufenbolzen',   'Gewinde, Freistich, Bohrung'],
+      ['apDemoBtn2',  '', 'Hinterschnitt',  'Welle mit Tasche'],
+      ['apDemoBtn3',  '', 'Schmiedeteil',   'eigene Rohteilkontur'],
+      ['apDemoBtn4',  '', 'Stechdrehen',    'Nutwelle'],
+      ['apDemoBtn5',  '', 'Abstechen',      'Bolzen von der Stange'],
+      ['apDemoBtn6',  '', 'Kantenwelle',    'Abspanen Ecke'],
+      ['apDemoBtn7',  '', 'Freistichwelle', 'DIN 509'],
+      ['apDemoBtn8',  '', 'Rotorwelle',     '\u2300300\u00D7500, Extremtest'],
+      ['apDemoBtn9',  '', 'Buchse',         'Innenbearbeitung'],
+      ['apDemoBtn10', '', 'Master',         'alle 12 Funktionen'],
     ];
-    empty.innerHTML='Noch leer — mit Softkey "Kontur" oder "Zyklen" den ersten Baustein anlegen.'+
+    // PRIMAERAKTIONEN ZUERST [Daniel, 02.09.2026]: der Startbildschirm
+    // zeigte nur die neun Demos — als waeren sie der Inhalt der App.
+    // Jetzt: was man WIRKLICH tut (zeichnen, importieren, laden),
+    // darunter die Vorlagen ehrlich als Testvorlagen beschriftet.
+    empty.innerHTML=
+      '<div class="leerakt">'+
+      '<button id="leerKontur"><span class="la-ic">\u271B</span><span>Kontur zeichnen<span class="la-sub">Startpunkt, Geraden, Radien \u2014 dann Zyklen darauf</span></span></button>'+
+      '<button id="leerDxf"><span class="la-ic">\u21F2</span><span>DXF importieren<span class="la-sub">Fertigteilkontur aus CAD, danach Programmvorschlag</span></span></button>'+
+      '<button id="leerProgs"><span class="la-ic">\u2630</span><span>Programme<span class="la-sub">'+(programs.length?programs.length+' in dieser Sitzung \u2014 ':'')+'laden, importieren, exportieren</span></span></button>'+
+      '</div>'+
+      '<div class="demotitel">Testvorlagen \u2014 ersetzen das aktuelle Programm</div>'+
       '<div class="demoraster">'+
       VORLAGEN.map(v=>'<button class="gcbtn demokachel" id="'+v[0]+'">'+
-        '<span class="dk-ic">'+v[1]+'</span>'+
+        '<canvas class="dk-sil" id="'+v[0]+'_sil" width="176" height="72"></canvas>'+
         '<span class="dk-tx">'+v[2]+'</span>'+
         '<span class="dk-sub">'+v[3]+'</span></button>').join('')+
       '</div>';
     body.appendChild(empty);
+    const bKon=document.getElementById('leerKontur');
+    if(bKon) bKon.addEventListener('click', ()=>{ skMode='kontur'; enterGrafischView(); });
+    const bDxf=document.getElementById('leerDxf');
+    if(bDxf) bDxf.addEventListener('click', ()=>{ const fi=document.getElementById('dxfFile'); if(fi) fi.click(); });
+    const bPr=document.getElementById('leerProgs');
+    if(bPr) bPr.addEventListener('click', ()=>{ const h=document.getElementById('hskProgs'); if(h) h.click(); });
+    // Teile-Silhouetten auf die Kacheln malen (aus DEMO_SIL — die
+    // Punkte stammen aus den Demo-Konturen selbst; Pruefung 152
+    // wacht, dass die Tabelle nicht von den Demos wegdriftet).
+    VORLAGEN.forEach(v=>{
+      try{
+        const cv=document.getElementById(v[0]+'_sil');
+        const pts=DEMO_SIL[v[2]];
+        if(!cv || !cv.getContext || !pts || pts.length<3) return;
+        const c2=cv.getContext('2d');
+        const zs=pts.map(q=>q[0]);
+        const zMin=Math.min.apply(null,zs), zMax=Math.max.apply(null,zs);
+        const rMax=Math.max.apply(null,pts.map(q=>q[1]));
+        const W=cv.width, H=cv.height, R=6;
+        const sx=(W-2*R)/Math.max(1e-6,(zMax-zMin));
+        const sy=(H/2-3)/Math.max(1e-6,rMax);
+        const X=(z)=>R+(z-zMin)*sx, Y=(r)=>H/2 - r*sy;
+        c2.clearRect(0,0,W,H);
+        c2.beginPath();
+        c2.moveTo(X(zMax), Y(0));
+        pts.forEach(q=>c2.lineTo(X(q[0]), Y(q[1])));
+        c2.lineTo(X(zMin), Y(0));
+        for(let k=pts.length-1;k>=0;k--) c2.lineTo(X(pts[k][0]), H-Y(pts[k][1]));
+        c2.closePath();
+        c2.fillStyle='hsl(210, 18%, 84%)';
+        c2.fill();
+        c2.strokeStyle='#3a4a56'; c2.lineWidth=1.6; c2.stroke();
+        // Bohrung ausstanzen (Innen-Demos): weisses Band um die Achse
+        const inn=DEMO_SIL_INNEN[v[2]];
+        if(inn && inn.length>1){
+          c2.beginPath();
+          c2.moveTo(X(inn[0][0]), Y(inn[0][1]));
+          inn.forEach(q=>c2.lineTo(X(q[0]), Y(q[1])));
+          for(let k=inn.length-1;k>=0;k--) c2.lineTo(X(inn[k][0]), H-Y(inn[k][1]));
+          c2.closePath();
+          c2.fillStyle='#fdfdfe'; c2.fill();
+          c2.strokeStyle='#3a4a56'; c2.lineWidth=1.2; c2.stroke();
+        }
+        c2.strokeStyle='#9aa7b1'; c2.lineWidth=0.8; c2.setLineDash([5,3]);
+        c2.beginPath(); c2.moveTo(0,H/2); c2.lineTo(W,H/2); c2.stroke(); c2.setLineDash([]);
+      }catch(e){}
+    });
     const db=document.getElementById('apDemoBtn');
     if(db) db.addEventListener('click', loadDemoStufenbolzen);
     const db2=document.getElementById('apDemoBtn2');
@@ -11207,8 +11299,19 @@ function renderPlanVorschau(){
 
 function refreshAll(){
   zielCacheVerwerfen();          // Programm geaendert -> Ziel-Huelle neu rechnen
-  document.getElementById('statPts').textContent = contour.length+' Elemente · '+programSteps.length+' Zyklen'
-    +((hauptzeiten && hauptzeiten.gesamt>0)?' · ⏱ '+fmtZeit(hauptzeiten.gesamt)+' · komplett '+fmtZeit(hauptzeiten.komplett):'');
+  // Der Chip verschwindet bei leerem Programm (er sagte "0 Elemente ·
+  // 0…", abgeschnitten). Mit Inhalt: das Kurzformat, das in die
+  // Kopfzeile passt — Schritte und Komplettzeit; im Konturmodus ohne
+  // Zyklen die Elementezahl.
+  { const sp=document.getElementById('statPts');
+    if(contour.length===0 && programSteps.length===0){
+      sp.textContent=''; sp.style.display='none';
+    } else {
+      sp.style.display='';
+      sp.textContent = programSteps.length
+        ? programSteps.length+' Schritte'+((hauptzeiten && hauptzeiten.gesamt>0)?' · \u23F1 '+fmtZeit(hauptzeiten.komplett):'')
+        : contour.length+' Elemente';
+    } }
   document.getElementById('tfsForm').textContent = document.getElementById('pkForm').value==='rohr' ? 'Rohr' : 'Zylinder';
   document.getElementById('tfsStock').textContent = parseFloat(document.getElementById('stockDia').value).toFixed(1);
   // Dreher-Leserichtung: ZI links, Pfeil nach links = Bearbeitungsrichtung
