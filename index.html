@@ -2495,7 +2495,10 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
                in der Dateiendung — der Inhalt ist immer reiner Text aus
                gcodeOut, die Endung entscheidet bloss, wie iPhone und
                DNC-Rechner die Datei einsortieren. Jetzt EIN
-               Sichern-Knopf (O<Nr>.nc): am iPhone oeffnet er das
+               Sichern-Knopf (O<Nr>.txt — Daniels Befund: iOS kennt
+               .nc nicht, die Maschine kennt gar keine Endungen, die
+               .TAP seiner Sicherungen vergab das DNC-Programm):
+               am iPhone oeffnet er das
                Teilen-Blatt (AirDrop/Dateien/Mail), am Rechner laedt er
                herunter, im Artefakt faellt er aufs Export-Fenster
                zurueck — dieselbe Kaskade wie immer (exportiereDatei).
@@ -2511,7 +2514,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
           <button class="gcbtn primary" id="btnGen" title="G-Code erzeugen">⟳ Erzeugen</button>
           <button class="gcbtn" id="btnAmpel" title="Programm prüfen: Generator, Kollision, Massbericht">🚦 Prüfen</button>
           <button class="gcbtn" id="btnCopy" title="Kompletten NC-Text in die Zwischenablage">Kopieren</button>
-          <button class="gcbtn" id="btnDownload" title="Als Datei O&lt;Nr&gt;.nc sichern — iPhone: Teilen-Blatt (AirDrop/Dateien/Mail), Rechner: Download">📤 NC sichern</button>
+          <button class="gcbtn" id="btnDownload" title="Als Datei O&lt;Nr&gt;.txt sichern — iPhone: Teilen-Blatt (AirDrop/Dateien/Mail), Rechner: Download. Die Maschine kennt keine Endungen; das DNC-Programm liest jede Textdatei.">📤 NC sichern</button>
           <button class="gcbtn" id="btnEinricht">📋 Einrichteblatt</button>
         </div>
         <div id="ampelBox" style="display:none;"></div>
@@ -13219,6 +13222,46 @@ function loadDemoBuchse(){
 }
 document.getElementById('btnDemo9').onclick=loadDemoBuchse;
 { const b10=document.getElementById('btnDemo10'); if(b10) b10.onclick=loadDemoMaster; }
+// =================================================================
+// DEMOS AUF Vc [Daniels Ansage 02.09.2026 abends, Screenshot der
+// Stufenbolzen-NC: "die Werkzeugaufrufe beim Schruppen und
+// Schlichten muessten jetzt alle in G96 kommen"]
+// -----------------------------------------------------------------
+// Die Vc-Umstellung vom Vortag galt der VORBELEGUNG neuer Zyklen —
+// die Demo-Programme trugen weiter ihre n-Werte (600 U/min als G96
+// auszugeben waeren 600 m/min). Jetzt werden sie beim Laden auf
+// Daniels Monforts-Standard gestellt: Schruppen 180 / Schlichten
+// 200 / Stechen und Abstechen 140 / Freistich 200 m/min. Bohren
+// und Zentrieren bleiben feste Drehzahl, das Gewinde G97
+// (zwingend, der Generator schreibt es fest). Schritte, die schon
+// Vc tragen (Rotorwelle 240/280), behalten ihre Werte. Der
+// PROGRAMMKOPF bleibt G97 — sicherer Grundzustand vor dem ersten
+// Werkzeug, wie in Daniels Originalprogramm (G97 S450 im Kopf).
+// EIN Wrapper statt 30 Einzeledits in den Loadern: die Regeln
+// stehen an EINER Stelle, und ein neuer Demo-Schritt laeuft
+// automatisch mit.
+function demoAufVc(steps){
+  (steps||[]).forEach(st=>{
+    const q=st&&st.params; if(!q) return;
+    if(st.type==='bohren' || st.type==='gewinde') return;
+    if(q.sMode==='vc') return;
+    q.sMode='vc';
+    if(st.type==='abspanen_einfach' || st.type==='abspanen_kontur'){ q.sr=180; if(q.sf!==undefined) q.sf=200; }
+    else if(st.type==='freistich'){ q.sr=200; if(q.sf!==undefined) q.sf=200; }
+    else { q.sr=140; if(q.sf!==undefined) q.sf=140; }
+  });
+}
+['loadDemoStufenbolzen','loadDemoHinterschnitt','loadDemoSchmiedeteil','loadDemoStechdrehen',
+ 'loadDemoAbstechen','loadDemoKantenwelle','loadDemoFreistichwelle','loadDemoRotorwelle',
+ 'loadDemoBuchse','loadDemoMaster'].forEach(nm=>{
+  const orig=globalThis[nm];
+  if(typeof orig!=='function') return;
+  globalThis[nm]=function(){
+    const r=orig.apply(this,arguments);
+    try{ demoAufVc(programSteps); refreshAll(); }catch(e){}
+    return r;
+  };
+});
 // =================================================================
 // Hilfsbilder & Auswahl-Kacheln (ShopTurn-Vorbild), Ausbaustufe 2
 // -----------------------------------------------------------------
@@ -24111,7 +24154,10 @@ document.getElementById('btnAmpel').onclick=()=>{
   });
 }
 document.getElementById('btnEinricht').onclick=()=>exportEinrichteblatt();
-document.getElementById('btnDownload').onclick=()=>exportGcode('nc');
+// .txt statt .nc [Daniel, 02.09.2026]: iOS kennt .nc nicht, die
+// Maschine kennt keine Endungen (seriell), .TAP vergab das
+// DNC-Programm. .txt oeffnet ueberall.
+document.getElementById('btnDownload').onclick=()=>exportGcode('txt');
 
 // =================================================================
 // 2D Bahnsimulation — parses generated G-code into motion segments
@@ -28542,7 +28588,19 @@ function simZeitachseBauen(){
       if(m.g96){ const dM=Math.max(2, Math.abs(m.x1)); sEff=Math.min(N_MAX_G96_ZEIT, m.s*1000/(Math.PI*dM)); }
       t=(m.dwellU||0)/Math.max(1,sEff);
     } else {
-      const f=(m.f>0)?m.f:0.15, sp=(m.s>0)?m.s:500;
+      // G96 [aufgedeckt 02.09.2026, Demos-auf-Vc]: hier wurde S roh
+      // als U/min gerechnet — unter G96 ist S aber die SCHNITT-
+      // GESCHWINDIGKEIT. Die Zeitachse der Rotorwelle (einzige
+      // Vc-Demo) lief damit seit jeher zu langsam ab (gemessen 47
+      // statt 9,4 min am Stufenbolzen); aufgefallen erst, als alle
+      // Demos auf Vc kamen und die Zeitachsen-Hauptzeit-Probe
+      // umfiel. Gleiche Rechnung wie berechneHauptzeiten: n aus Vc
+      // am mittleren Satz-⌀, Kappung N_MAX_G96_ZEIT.
+      const f=(m.f>0)?m.f:0.15; let sp=(m.s>0)?m.s:500;
+      if(m.g96){
+        const dM=Math.max(2, (Math.abs(m.x1)+Math.abs(m.x2))/2);
+        sp=Math.min(N_MAX_G96_ZEIT, sp*1000/(Math.PI*dM));
+      }
       t=len/Math.max(f*sp, 1);                         // mm / (mm/U * U/min) = min
     }
     acc += Math.max(t, 2e-6);                          // Nullsaetze nicht verschlucken
