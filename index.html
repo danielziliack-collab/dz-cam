@@ -16618,6 +16618,41 @@ function planerKonturMaxFall(pts){
   abschluss();
   return m;
 }
+// =================================================================
+// KONTUR-LAUFRICHTUNG UMKEHREN [Daniel, 02.09.2026: Planer am
+// selbstgezeichneten Halbkreis — "er schlichtet, wo nicht
+// geschruppt, durch den Hinterschnitt"]
+// -----------------------------------------------------------------
+// Daniels Kontur war von LINKS nach RECHTS gezeichnet (Start am
+// Futter, Ende an der Stirn). roughEnvelope, findPockets und die
+// ganze Schrupp-/Taschenlogik erwarten Stirn->Futter — an der
+// Rueckwaertskontur war die Taschenerkennung blind, der Planer
+// legte KEIN Stechdreh-Vorschruppen an, und der Schlichtzug fuhr
+// links der Kuppel ins volle Material (Kollisionsmeldung Satz 174,
+// reproduziert). Das hier ist die ECHTE Richtungsumkehr — gleiche
+// Geometrie, andere Laufrichtung: Punktfolge invertiert, Bogen-
+// Drehsinn gekippt, die Kantenuebergaenge (trans sitzt am ENDpunkt
+// des Elements = an der Ecke) wandern mit ihrem geometrischen
+// Punkt. NICHT zu verwechseln mit "Kontur umdrehen" im Editor —
+// das SPIEGELT fuer die zweite Aufspannung.
+function konturRichtungUmkehren(els){
+  if(!els || els.length<2) return els;
+  const n=els.length;
+  const neu=[];
+  const alt0=els[0], altN=els[n-1];
+  neu.push({kind:'start', z:altN.z, x:altN.x,
+    trans:JSON.parse(JSON.stringify(alt0.trans||{type:'none',val:0}))});
+  for(let k=n-1;k>=1;k--){
+    const e=els[k], ziel=els[k-1];
+    const q={kind:(e.kind==='kreis'?'kreis':'gerade'), z:ziel.z, x:ziel.x,
+      trans:JSON.parse(JSON.stringify(ziel.trans||{type:'none',val:0}))};
+    if(e.kind==='kreis'){ q.cz=e.cz; q.cx=e.cx; q.cw=!e.cw; }
+    if(e.offen) q.offen=true;
+    if(e.alpha!==undefined) q.alpha=e.alpha;
+    neu.push(q);
+  }
+  return neu;
+}
 function programmVorschlagen(){
   // AUSSENKONTUR SELBST WAEHLEN [Daniel-Test 2: an der Buchse war
   // die INNENkontur aktiv — der Planer plante sie als Aussenteil
@@ -16641,6 +16676,19 @@ function programmVorschlagen(){
     alert('PROGRAMMVORSCHLAG NICHT MOEGLICH: keine Kontur. Erst Kontur zeichnen oder DXF importieren.');
     return false;
   }
+  // LAUFRICHTUNG NORMALISIEREN (s. konturRichtungUmkehren): liegt
+  // der Start futterseitig vom Ende, ist die Kontur rueckwaerts
+  // gezeichnet — der Planer dreht sie um (snapshot der Aufruferseite
+  // traegt das Undo) und sagt es an.
+  let richtungGedreht=false;
+  {
+    const e0=contour[0], eN=contour[contour.length-1];
+    if(isFinite(e0.z) && isFinite(eN.z) && e0.z < eN.z - 0.01){
+      const neu=konturRichtungUmkehren(contour);
+      setActiveContourEls(neu);
+      richtungGedreht=true;
+    }
+  }
   const stock=+document.getElementById('stockDia').value||0;
   const zA=+document.getElementById('pkZA').value||0;
   const maxX=Math.max.apply(null, contour.filter(e=>isFinite(e.x)).map(e=>e.x));
@@ -16649,6 +16697,7 @@ function programmVorschlagen(){
     return false;
   }
   const hinweiseVorab=[];
+  if(richtungGedreht) hinweiseVorab.push('Die Kontur war vom FUTTER zur Stirn gezeichnet — fuer den Vorschlag wurde die Laufrichtung umgekehrt (gleiche Geometrie, Stirn -> Futter).');
   // WERKZEUGWAHL nach Daniels Praxis [30.08.2026]: geschruppt wird
   // mit der C-PLATTE (80 Grad, bevorzugt 95-Grad-Halter),
   // geschlichtet mit der V-PLATTE (35 Grad). Ohne Aussendreher gibt
