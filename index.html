@@ -974,6 +974,11 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   /* Vorlagenkachel mit Teile-Silhouette: die Kontur der Demo selbst
      ersetzt die Emoji-Glyphen (drei Bildsprachen durcheinander). */
   .dk-sil{width:88px;height:36px;display:block;margin-bottom:2px;}
+  /* Vorlagenknoepfe der Programmverwaltung: Silhouette + Name in
+     einer Zeile, linksbuendig (gleiche Bildsprache wie der
+     Startbildschirm). */
+  .pmvk{width:100%;padding:6px 10px;display:flex;align-items:center;gap:10px;justify-content:flex-start;text-align:left;}
+  .pm-sil{width:60px;height:22px;flex:0 0 auto;}
   .demokachel .dk-tx{font-weight:600;font-size:12.5px;}
   .demokachel .dk-sub{font-size:10.5px;color:var(--text-dim);}
 
@@ -3765,36 +3770,56 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
   <div class="mask" id="maskProgramme" style="position:fixed;">
     <div class="mask-head"><span class="mtitel">Programmverwaltung</span></div>
     <div class="mask-body">
-      <div class="pointlist" style="max-height:32vh;">
+      <!-- AUFGERAEUMT [Daniel, 02.09.2026, iPhone-Durchsicht]: vorher
+           stand eine LEERE Tabelle mit Kopfzeile ganz oben (die
+           Ueberschrift kuendigte an, dass nichts da ist — dieselbe
+           Falle wie leereBereicheAusblenden), darunter ZWEI dunkle
+           Primary-Knoepfe, und 15 Vorlagen-Knoepfe verdraengten den
+           eigentlichen Zweck der Maske. Jetzt drei Sektionen im
+           Arbeitsfluss; die Vorlagen stecken zugeklappt in einer
+           Gruppe und tragen dieselben Teile-Silhouetten wie der
+           Startbildschirm (silhouetteMalen) statt dreierlei Emoji. -->
+      <div class="msec">Aktuelles Programm</div>
+      <div class="mrow"><label>Name</label><input type="text" id="pmSaveName" value="Programm 1" style="width:180px;"></div>
+      <div class="mrow" style="flex-direction:column;align-items:stretch;gap:2px;">
+        <button class="gcbtn primary" id="btnProgSave" style="width:100%;padding:10px;">&#x1F4BE; Speichern (diese Sitzung)</button>
+        <div style="font-size:10.5px;color:var(--text-dim);padding:0 2px;">gilt bis zum Schlie&szlig;en der App &mdash; dauerhaft: als Datei sichern</div>
+      </div>
+      <div class="mrow"><button class="gcbtn" id="btnProgFileSave" style="width:100%;padding:10px;">&#x1F4C4; Als Datei sichern (komplett, inkl. Werkzeuge)</button></div>
+      <div class="mrow"><button class="gcbtn" id="btnProgNew" style="width:100%;padding:10px;">&#xFF0B; Neues leeres Programm</button></div>
+      <div class="msec">Gespeicherte Programme (diese Sitzung)</div>
+      <div id="progLeer" style="display:none;font-size:12px;color:var(--text-dim);padding:6px 10px 8px;">Noch nichts gespeichert. Dauerhafte St&auml;nde kommen &uuml;ber &bdquo;Importieren&ldquo; zur&uuml;ck.</div>
+      <div class="pointlist" id="progListe" style="max-height:32vh;">
         <table>
-          <thead><tr><th>Name</th><th>Elemente</th><th></th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Inhalt</th><th></th><th></th></tr></thead>
           <tbody id="progBody"></tbody>
         </table>
       </div>
-      <div class="mrow" style="margin-top:10px;"><label>Name für aktuelles Programm</label><input type="text" id="pmSaveName" value="Programm 1" style="width:180px;"></div>
-      <div class="mrow"><button class="gcbtn primary" id="btnProgSave" style="width:100%;padding:10px;">💾 Aktuelles Programm speichern</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnProgNew" style="width:100%;padding:10px;">＋ Neues leeres Programm</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo" style="width:100%;padding:10px;">🔧 Testvorlage: Stufenbolzen laden</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo2" style="width:100%;padding:10px;">🔧 Testvorlage: Hinterschnitt-Welle laden</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo3" style="width:100%;padding:10px;">🔧 Testvorlage: Schmiedeteil (Rohteilkontur)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo4" style="width:100%;padding:10px;">🔧 Testvorlage: Stechdrehen (Nutwelle)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo5" style="width:100%;padding:10px;">✂ Testvorlage: Abstechen (Bolzen von der Stange)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo6" style="width:100%;padding:10px;">◲ Testvorlage: Kantenwelle (Abspanen Ecke)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo7" style="width:100%;padding:10px;">◲ Testvorlage: Freistichwelle (DIN 509)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo8" style="width:100%;padding:10px;">◲ Testvorlage: Rotorwelle ⌀300×500 (Extremtest)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo9" style="width:100%;padding:10px;">◎ Testvorlage: Buchse (Innenbearbeitung)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemo10" style="width:100%;padding:10px;">★ Mastertestteil (alle Funktionen)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemoPlaner" style="width:100%;padding:10px;">🧭 Planer-Test: Kontur OHNE Programm (wie nach DXF-Import)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemoPlaner2" style="width:100%;padding:10px;">🧭 Planer-Test 2: AUSSEN + INNEN ohne Programm</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemoPlaner3" style="width:100%;padding:10px;">🧭 Planer-Test 3: Welle mit EINSTICHNUT ohne Programm</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnDemoPlaner4" style="width:100%;padding:10px;">🧭 Planer-Test 4: Welle mit FALLKEGEL (30°) ohne Programm</button></div>
-      <div class="mrow"><button class="gcbtn primary" id="btnProgFileSave" style="width:100%;padding:10px;">💾 Aktuelles Programm als DATEI sichern (komplett, inkl. Werkzeuge)</button></div>
-      <div class="mrow"><button class="gcbtn" id="btnProgExport" style="width:48%;padding:10px;">⬇ Alle exportieren (.json)</button>
-        <label class="gcbtn" style="width:48%;padding:10px;text-align:center;cursor:pointer;">⬆ Importieren
+      <div class="mrow"><button class="gcbtn" id="btnProgExport" style="width:48%;padding:10px;">&#x2B07; Alle exportieren (.json)</button>
+        <label class="gcbtn" style="width:48%;padding:10px;text-align:center;cursor:pointer;">&#x2B06; Importieren
           <input type="file" id="progImportFile" accept=".json" style="display:none;">
         </label>
       </div>
-      <div class="mrow"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">✓ Fertig</button></div>
+      <div class="mgroup" id="pmGrpVorlagen">
+        <div class="mgroup-head"><span class="pfeil">&#x25B6;</span><span class="titel">Testvorlagen</span><span class="zus">ersetzen das aktuelle Programm</span></div>
+        <div class="mgroup-body">
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo"><canvas class="pm-sil" id="btnDemo_sil" width="120" height="44"></canvas><span>Stufenbolzen</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo2"><canvas class="pm-sil" id="btnDemo2_sil" width="120" height="44"></canvas><span>Hinterschnitt-Welle</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo3"><canvas class="pm-sil" id="btnDemo3_sil" width="120" height="44"></canvas><span>Schmiedeteil (Rohteilkontur)</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo4"><canvas class="pm-sil" id="btnDemo4_sil" width="120" height="44"></canvas><span>Stechdrehen (Nutwelle)</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo5"><canvas class="pm-sil" id="btnDemo5_sil" width="120" height="44"></canvas><span>Abstechen (von der Stange)</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo6"><canvas class="pm-sil" id="btnDemo6_sil" width="120" height="44"></canvas><span>Kantenwelle (Abspanen Ecke)</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo7"><canvas class="pm-sil" id="btnDemo7_sil" width="120" height="44"></canvas><span>Freistichwelle (DIN 509)</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo8"><canvas class="pm-sil" id="btnDemo8_sil" width="120" height="44"></canvas><span>Rotorwelle &#x2300;300&#xD7;500</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo9"><canvas class="pm-sil" id="btnDemo9_sil" width="120" height="44"></canvas><span>Buchse (Innenbearbeitung)</span></button></div>
+          <div class="mrow"><button class="gcbtn pmvk" id="btnDemo10"><canvas class="pm-sil" id="btnDemo10_sil" width="120" height="44"></canvas><span>Mastertestteil (alle Funktionen)</span></button></div>
+          <div class="mrow"><button class="gcbtn" id="btnDemoPlaner" style="width:100%;padding:10px;">Planer-Test 1: Kontur ohne Programm (wie nach DXF)</button></div>
+          <div class="mrow"><button class="gcbtn" id="btnDemoPlaner2" style="width:100%;padding:10px;">Planer-Test 2: au&szlig;en + innen ohne Programm</button></div>
+          <div class="mrow"><button class="gcbtn" id="btnDemoPlaner3" style="width:100%;padding:10px;">Planer-Test 3: Welle mit Einstichnut</button></div>
+          <div class="mrow"><button class="gcbtn" id="btnDemoPlaner4" style="width:100%;padding:10px;">Planer-Test 4: Welle mit Fallkegel 30&#xB0;</button></div>
+        </div>
+      </div>
+      <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
     </div>
   </div>
 
@@ -6749,6 +6774,42 @@ function pdfJpegSuchen(bytes){
 // Douglas-Peucker 2%) — die Kachel zeigt das Teil, bevor man liest.
 // Bei geaenderten Demos die Tabelle neu erzeugen (scratchpad silgen.js);
 // Pruefung 152 misst Max-Radius und z-Spanne gegen die echten Konturen.
+function silhouetteMalen(cv, name){
+  try{
+    const pts=DEMO_SIL[name];
+    if(!cv || !cv.getContext || !pts || pts.length<3) return;
+    const c2=cv.getContext('2d');
+    const zs=pts.map(q=>q[0]);
+    const zMin=Math.min.apply(null,zs), zMax=Math.max.apply(null,zs);
+    const rMax=Math.max.apply(null,pts.map(q=>q[1]));
+    const W=cv.width, H=cv.height, R=Math.max(3, Math.round(W*0.034));
+    const sx=(W-2*R)/Math.max(1e-6,(zMax-zMin));
+    const sy=(H/2-3)/Math.max(1e-6,rMax);
+    const X=(z)=>R+(z-zMin)*sx, Y=(r)=>H/2 - r*sy;
+    c2.clearRect(0,0,W,H);
+    c2.beginPath();
+    c2.moveTo(X(zMax), Y(0));
+    pts.forEach(q=>c2.lineTo(X(q[0]), Y(q[1])));
+    c2.lineTo(X(zMin), Y(0));
+    for(let k=pts.length-1;k>=0;k--) c2.lineTo(X(pts[k][0]), H-Y(pts[k][1]));
+    c2.closePath();
+    c2.fillStyle='hsl(210, 18%, 84%)';
+    c2.fill();
+    c2.strokeStyle='#3a4a56'; c2.lineWidth=1.6; c2.stroke();
+    const inn=DEMO_SIL_INNEN[name];
+    if(inn && inn.length>1){
+      c2.beginPath();
+      c2.moveTo(X(inn[0][0]), Y(inn[0][1]));
+      inn.forEach(q=>c2.lineTo(X(q[0]), Y(q[1])));
+      for(let k=inn.length-1;k>=0;k--) c2.lineTo(X(inn[k][0]), H-Y(inn[k][1]));
+      c2.closePath();
+      c2.fillStyle='#fdfdfe'; c2.fill();
+      c2.strokeStyle='#3a4a56'; c2.lineWidth=1.2; c2.stroke();
+    }
+    c2.strokeStyle='#9aa7b1'; c2.lineWidth=0.8; c2.setLineDash([5,3]);
+    c2.beginPath(); c2.moveTo(0,H/2); c2.lineTo(W,H/2); c2.stroke(); c2.setLineDash([]);
+  }catch(e){}
+}
 const DEMO_SIL={"Stufenbolzen":[[0,0],[-1.5,15],[-22,15],[-23,22.5],[-48.4,22.5],[-51,30],[-72.6,30.1],[-76,37.5],[-100,37.5]],"Hinterschnitt":[[0,0],[0,19],[-19.7,20.1],[-29,32],[-38.2,31.7],[-50,22.1],[-60.7,22],[-68,34],[-80,34]],"Schmiedeteil":[[0,0],[0,19],[-19.6,20.1],[-28,31],[-55.6,31],[-65.3,22.7],[-75,22]],"Stechdrehen":[[0,0],[-1,30],[-9.9,29.7],[-17.1,20],[-37.4,20.1],[-45,30],[-55,30]],"Abstechen":[[0,0],[0,13],[-1,14],[-13.1,14.1],[-14,20],[-42,20]],"Kantenwelle":[[0,0],[-1,27.5],[-28.8,27.5],[-31,35],[-58.4,35],[-61.5,41],[-70,41]],"Freistichwelle":[[0,0],[0,26.5],[-1,27.5],[-30,27.5],[-30,35],[-48,35]],"Rotorwelle":[[0,55],[-71.5,60.3],[-78.8,91.9],[-185,92],[-245,120],[-261,150],[-395,150],[-402.2,95.8],[-440,95],[-445.5,71.3],[-500,66]],"Buchse":[[0,0],[0,36],[-1.5,37.5],[-64,37.5]],"Master":[[0,0],[-1.5,18],[-30,18],[-31.6,27.5],[-70,27.5],[-95,37.5],[-140,37.5],[-142.4,47.4],[-175,47.5]]};
 // Innen-Silhouetten (Bohrungen) der beiden Innen-Demos — schematisch
 // aus den Zyklusmassen (Buchse: ⌀48,4 mit Absatz ⌀40, Vorbohrung ⌀26;
@@ -10991,44 +11052,7 @@ function refreshArbeitsplan(){
     // Teile-Silhouetten auf die Kacheln malen (aus DEMO_SIL — die
     // Punkte stammen aus den Demo-Konturen selbst; Pruefung 152
     // wacht, dass die Tabelle nicht von den Demos wegdriftet).
-    VORLAGEN.forEach(v=>{
-      try{
-        const cv=document.getElementById(v[0]+'_sil');
-        const pts=DEMO_SIL[v[2]];
-        if(!cv || !cv.getContext || !pts || pts.length<3) return;
-        const c2=cv.getContext('2d');
-        const zs=pts.map(q=>q[0]);
-        const zMin=Math.min.apply(null,zs), zMax=Math.max.apply(null,zs);
-        const rMax=Math.max.apply(null,pts.map(q=>q[1]));
-        const W=cv.width, H=cv.height, R=6;
-        const sx=(W-2*R)/Math.max(1e-6,(zMax-zMin));
-        const sy=(H/2-3)/Math.max(1e-6,rMax);
-        const X=(z)=>R+(z-zMin)*sx, Y=(r)=>H/2 - r*sy;
-        c2.clearRect(0,0,W,H);
-        c2.beginPath();
-        c2.moveTo(X(zMax), Y(0));
-        pts.forEach(q=>c2.lineTo(X(q[0]), Y(q[1])));
-        c2.lineTo(X(zMin), Y(0));
-        for(let k=pts.length-1;k>=0;k--) c2.lineTo(X(pts[k][0]), H-Y(pts[k][1]));
-        c2.closePath();
-        c2.fillStyle='hsl(210, 18%, 84%)';
-        c2.fill();
-        c2.strokeStyle='#3a4a56'; c2.lineWidth=1.6; c2.stroke();
-        // Bohrung ausstanzen (Innen-Demos): weisses Band um die Achse
-        const inn=DEMO_SIL_INNEN[v[2]];
-        if(inn && inn.length>1){
-          c2.beginPath();
-          c2.moveTo(X(inn[0][0]), Y(inn[0][1]));
-          inn.forEach(q=>c2.lineTo(X(q[0]), Y(q[1])));
-          for(let k=inn.length-1;k>=0;k--) c2.lineTo(X(inn[k][0]), H-Y(inn[k][1]));
-          c2.closePath();
-          c2.fillStyle='#fdfdfe'; c2.fill();
-          c2.strokeStyle='#3a4a56'; c2.lineWidth=1.2; c2.stroke();
-        }
-        c2.strokeStyle='#9aa7b1'; c2.lineWidth=0.8; c2.setLineDash([5,3]);
-        c2.beginPath(); c2.moveTo(0,H/2); c2.lineTo(W,H/2); c2.stroke(); c2.setLineDash([]);
-      }catch(e){}
-    });
+    VORLAGEN.forEach(v=>silhouetteMalen(document.getElementById(v[0]+'_sil'), v[2]));
     const db=document.getElementById('apDemoBtn');
     if(db) db.addEventListener('click', loadDemoStufenbolzen);
     const db2=document.getElementById('apDemoBtn2');
@@ -17063,6 +17087,13 @@ function applySettings(s){
 function renderProgList(){
   const body=document.getElementById('progBody');
   body.innerHTML='';
+  // LEERE TABELLE AUSBLENDEN [Daniel, 02.09.2026]: eine Kopfzeile
+  // ohne Zeilen kuendigt nur an, dass nichts da ist (dieselbe Regel
+  // wie leereBereicheAusblenden in den Masken).
+  { const liste=document.getElementById('progListe');
+    const leer=document.getElementById('progLeer');
+    if(liste) liste.style.display = programs.length? '' : 'none';
+    if(leer) leer.style.display = programs.length? 'none' : ''; }
   programs.forEach((prog,i)=>{
     const tr=document.createElement('tr');
     const kInfo = prog.contours
@@ -17140,6 +17171,13 @@ function loadProgram(prog){
 }
 document.getElementById('hskProgs').onclick=()=>{
   renderProgList();
+  // Vorlagen-Silhouetten (einmal je Oeffnen — billig, 10 kleine Canvas)
+  try{
+    [['btnDemo','Stufenbolzen'],['btnDemo2','Hinterschnitt'],['btnDemo3','Schmiedeteil'],
+     ['btnDemo4','Stechdrehen'],['btnDemo5','Abstechen'],['btnDemo6','Kantenwelle'],
+     ['btnDemo7','Freistichwelle'],['btnDemo8','Rotorwelle'],['btnDemo9','Buchse'],
+     ['btnDemo10','Master']].forEach(v=>silhouetteMalen(document.getElementById(v[0]+'_sil'), v[1]));
+  }catch(e){}
   document.getElementById('maskProgramme').classList.add('show');
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskProgramme'); }catch(e){}
