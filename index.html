@@ -1741,6 +1741,16 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
             <div class="mrow" id="aeSbDIRow" style="display:none;"><label>DI Weg bis Spanbruch</label><input type="number" step="any" id="aeSbDI" value="5"><span class="unit">mm</span></div>
             <div class="mrow" id="aeSbURow" style="display:none;"><label>Pause (Spindelumdrehungen)</label><input type="number" step="any" id="aeSbU" value="2"><span class="unit">U</span></div>
             <div class="mrow" id="aeSbRDRow" style="display:none;"><label>RD R&#252;ckzugsweg (auf der Bahn)</label><input type="number" step="any" id="aeSbRD" value="0.5"><span class="unit">mm</span></div>
+            <!-- DREHZAHLVARIATION [Daniel, 02.09.2026]: gegen
+                 regeneratives Rattern (duennwandige Teile, schlanke
+                 Wellen). S pendelt sinusfoermig um den Schlichtwert;
+                 Periode als BAHNWEG in mm. Okuma nennt es HSSC, Haas
+                 SSV — die Monforts koennen es nicht nativ, das NC
+                 bildet es in S-Stufen nach. Zeilen-IDs statt
+                 FELD_REGELN (selBtnVal im Ersatz-Browser, s. esWRow). -->
+            <div class="mrow"><label>Drehzahl variieren (Schlichten)</label><div class="radiobtns" id="aeSvBtns"><button data-v="aus" class="sel" data-vorgabe="1">aus</button><button data-v="an">an (SSV)</button></div></div>
+            <div class="mrow" id="aeSvAmpRow" style="display:none;"><label>Amplitude &#177; von S</label><input type="number" step="any" id="aeSvAmp" value="10"><span class="unit">%</span></div>
+            <div class="mrow" id="aeSvWegRow" style="display:none;"><label>Periode (Bahnweg)</label><input type="number" step="any" id="aeSvWeg" value="20"><span class="unit">mm</span></div>
             <div class="mrow"><label>Bearbeitung</label>
               <div class="radiobtns" id="aeBearbBtns">
                 <button data-v="schruppen" class="sel">Schruppen ▽</button>
@@ -1867,6 +1877,16 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
             <div class="mrow" id="akSbDIRow" style="display:none;"><label>DI Weg bis Spanbruch</label><input type="number" step="any" id="akSbDI" value="5"><span class="unit">mm</span></div>
             <div class="mrow" id="akSbURow" style="display:none;"><label>Pause (Spindelumdrehungen)</label><input type="number" step="any" id="akSbU" value="2"><span class="unit">U</span></div>
             <div class="mrow" id="akSbRDRow" style="display:none;"><label>RD R&#252;ckzugsweg (auf der Bahn)</label><input type="number" step="any" id="akSbRD" value="0.5"><span class="unit">mm</span></div>
+            <!-- DREHZAHLVARIATION [Daniel, 02.09.2026]: gegen
+                 regeneratives Rattern (duennwandige Teile, schlanke
+                 Wellen). S pendelt sinusfoermig um den Schlichtwert;
+                 Periode als BAHNWEG in mm. Okuma nennt es HSSC, Haas
+                 SSV — die Monforts koennen es nicht nativ, das NC
+                 bildet es in S-Stufen nach. Zeilen-IDs statt
+                 FELD_REGELN (selBtnVal im Ersatz-Browser, s. esWRow). -->
+            <div class="mrow"><label>Drehzahl variieren (Schlichten)</label><div class="radiobtns" id="akSvBtns"><button data-v="aus" class="sel" data-vorgabe="1">aus</button><button data-v="an">an (SSV)</button></div></div>
+            <div class="mrow" id="akSvAmpRow" style="display:none;"><label>Amplitude &#177; von S</label><input type="number" step="any" id="akSvAmp" value="10"><span class="unit">%</span></div>
+            <div class="mrow" id="akSvWegRow" style="display:none;"><label>Periode (Bahnweg)</label><input type="number" step="any" id="akSvWeg" value="20"><span class="unit">mm</span></div>
             <!-- Getrenntes Schlichtwerkzeug und Schlichtrichtung: beides
                  bleibt beim Schruppen unbenutzt, der SRK-Hinweis erklärt
                  nur die Automatik dahinter. -->
@@ -1984,6 +2004,16 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
 
             <div class="mrow"><label>D max. Zustellung Eintauchen</label><input type="number" step="any" id="esD" value="3"><span class="unit">mm</span></div>
             <div class="mrow"><label>UX radial / UZ Schlichtaufmaß</label><input type="number" step="any" id="esUX" value="0.3" style="width:51px;"><input type="number" step="any" id="esUZ" value="0.1" style="width:51px;"><span class="unit">mm</span></div>
+            <!-- DREHZAHLVARIATION [Daniel, 02.09.2026]: gegen
+                 regeneratives Rattern (duennwandige Teile, schlanke
+                 Wellen). S pendelt sinusfoermig um den Schlichtwert;
+                 Periode als BAHNWEG in mm. Okuma nennt es HSSC, Haas
+                 SSV — die Monforts koennen es nicht nativ, das NC
+                 bildet es in S-Stufen nach. Zeilen-IDs statt
+                 FELD_REGELN (selBtnVal im Ersatz-Browser, s. esWRow). -->
+            <div class="mrow"><label>Drehzahl variieren (Schlichten)</label><div class="radiobtns" id="esSvBtns"><button data-v="aus" class="sel" data-vorgabe="1">aus</button><button data-v="an">an (SSV)</button></div></div>
+            <div class="mrow" id="esSvAmpRow" style="display:none;"><label>Amplitude &#177; von S</label><input type="number" step="any" id="esSvAmp" value="10"><span class="unit">%</span></div>
+            <div class="mrow" id="esSvWegRow" style="display:none;"><label>Periode (Bahnweg)</label><input type="number" step="any" id="esSvWeg" value="20"><span class="unit">mm</span></div>
             <div class="mrow"><label>Bearbeitung</label>
               <div class="radiobtns" id="esBearbBtns">
                 <button data-v="schruppen" class="sel">Schruppen ▽</button>
@@ -2843,6 +2873,27 @@ die Hauptzeit steigt kaum (2&nbsp;U bei 1500&nbsp;U/min = 80&nbsp;ms je Bruch) u
 wird in Zeitachse und Arbeitsplan mitgerechnet. Der native G72-Zyklussatz kennt
 keine Vorschubunterbrechung &mdash; bei aktivem Spanbrechen f&auml;llt die Ausgabe
 mit Ansage auf G-Einzels&auml;tze zur&uuml;ck.</dd>
+<dt id="ba-ae-ssv">Drehzahl variieren (SSV, nur Schlichten)</dt>
+<dd>Gegen <b>regeneratives Rattern</b> an d&uuml;nnwandigen Teilen und schlanken
+Wellen: die Schneide schneidet die Welligkeit der vorigen Umdrehung nach, das
+schaukelt sich auf &mdash; eine pendelnde Drehzahl verstimmt die Phasenlage, die
+Resonanz kommt nie zustande. Moderne Steuerungen f&uuml;hren das als Okuma
+&bdquo;HSSC&ldquo;, Haas &bdquo;SSV&ldquo; oder Mazak &bdquo;Variable Speed&ldquo;
+(typisch &plusmn;5&hellip;15&nbsp;%); die Monforts k&ouml;nnen es nicht nativ,
+deshalb bildet das NC es nach: der Schlichtzug wird in Stufen geteilt, jede
+Stufe tr&auml;gt ihr S-Wort auf einer Sinuskurve um den Schlichtwert.
+<b>Amplitude</b> in &plusmn;% (Vorgabe 10), <b>Periode als Bahnweg</b> in mm
+(Vorgabe 20 &mdash; eine Zeitbasis hat das NC nicht; beim Einstich mit seinen
+kurzen Z&uuml;gen lohnt eine kleinere Periode, etwa 4&hellip;6&nbsp;mm). Unter
+G96 pendelt Vc, unter G97 die Drehzahl; G95 l&auml;sst den Vorschub folgen, die
+Spandicke bleibt konstant. Die Bahn selbst ist unver&auml;ndert (kollinear
+geteilt, im Pr&uuml;fstand nachgemessen). <b>An der Maschine unverifiziert:</b>
+ob die Steuerungen S-Wechsel im laufenden Vorschub fliegend ausf&uuml;hren oder
+auf &bdquo;Drehzahl erreicht&ldquo; warten, sagt kein Handbuch &mdash; ersten
+Lauf im Einzelsatz fahren (Maschinentermin-Liste), und den
+Drehzahlw&auml;chter von Hand auf Basisdrehzahl PLUS Amplitude stellen. Der
+native G72/G71-Zyklussatz kennt keine S-Modulation &mdash; bei aktiver
+Variation f&auml;llt die Ausgabe mit Ansage auf G-Einzels&auml;tze zur&uuml;ck.</dd>
 <dt id="ba-ak-kanten">K1&hellip;K3 Kanten</dt>
 <dd>Ein Feld je Kante plus Umschalter Fase/Rundung &mdash; im Datenmodell bleiben es
 zwei Werte, die Maske zeigt nur den gesetzten. Beim Schlichten beginnt die
@@ -2898,6 +2949,11 @@ gesperrt statt falsch gerechnet.</dd>
 Spindelumdrehungen) oder R&uuml;ckzug auf der Bahn. Wirkt in den achsparallelen
 Strategien (Z-/X-parallel, au&szlig;en und innen); bei konturparallel schneidet der
 Zyklus durchgehend und sagt das an.</dd>
+<dt id="ba-akk-ssv">Drehzahl variieren (SSV, nur Schlichten)</dt>
+<dd>Wie beim Abspanen Ecke (Kapitel 5.1): Sinus-Stufen um den Schlichtwert,
+Amplitude &plusmn;% und Periode als Bahnweg. Wirkt im kompletten Schlichtzug
+&mdash; gerade St&uuml;cke werden gestuft, B&ouml;gen bleiben EIN Satz und
+bekommen ihr S-Wort am Satzende.</dd>
 <dt id="ba-akk-restwarnung">Was der Zyklus stehen l&auml;sst</dt>
 <dd>Hinter einer Schulter, deren Durchmesser wieder ansteigt (echte Tasche), stellt
 das z-parallele Schruppen nicht zu &mdash; es arbeitet gegen das gleitende Maximum
@@ -2943,6 +2999,11 @@ schr&auml;g, W legt die Nut auf einen Kegelmantel. Die Anfahrt zur Nut h&auml;lt
 Luft im Durchmesser &uuml;ber der Kante &mdash; ein nur geschruppter Mantel
 tr&auml;gt 2&middot;UX Aufma&szlig;, und die alte 1-mm-Anfahrt lag an der Rotorwelle
 GENAU auf der Aufma&szlig;oberfl&auml;che.</dd>
+<dt id="ba-es-ssv">Drehzahl variieren (SSV, nur Schlichten)</dt>
+<dd>Wie beim Abspanen Ecke (Kapitel 5.1) &mdash; beim Einstich modulieren die
+vier Schlicht-Kettenz&uuml;ge (Flanken + halber Grund). Wegen der kurzen Wege
+Periode klein w&auml;hlen (4&hellip;6&nbsp;mm), sonst durchl&auml;uft der Sinus
+kaum eine halbe Welle.</dd>
 </dl>
 
 <h3 id="ba-k05-stechdrehen">5.4 &nbsp;Stechdrehen</h3>
@@ -8822,6 +8883,9 @@ function editStep(i){
     setRadio('aeSbBtns', p.sbArt||'aus');
     setVal('aeSbDI', p.sbDI!==undefined?p.sbDI:5); setVal('aeSbU', p.sbU!==undefined?p.sbU:2); setVal('aeSbRD', p.sbRD!==undefined?p.sbRD:0.5);
     sbSetzen('ae', p.sbArt||'aus');
+    setRadio('aeSvBtns', p.svArt||'aus');
+    setVal('aeSvAmp', p.svAmp!==undefined?p.svAmp:10); setVal('aeSvWeg', p.svWeg!==undefined?p.svWeg:20);
+    svSetzen('ae', p.svArt||'aus');
     inkReset(['aeX1mode','aeZ1mode']); aeGruppenSync();   // erst NACH allen setVal — sonst fasst sie Altwerte zusammen
     { const m=eingabeModusAusWerten('maskAbspanenEinfach');
       setRadio('aeEingabeBtns', m);
@@ -8850,6 +8914,9 @@ function editStep(i){
     setRadio('akSbBtns', p.sbArt||'aus');
     setVal('akSbDI', p.sbDI!==undefined?p.sbDI:5); setVal('akSbU', p.sbU!==undefined?p.sbU:2); setVal('akSbRD', p.sbRD!==undefined?p.sbRD:0.5);
     sbSetzen('ak', p.sbArt||'aus');
+    setRadio('akSvBtns', p.svArt||'aus');
+    setVal('akSvAmp', p.svAmp!==undefined?p.svAmp:10); setVal('akSvWeg', p.svWeg!==undefined?p.svWeg:20);
+    svSetzen('ak', p.svArt||'aus');
     document.getElementById('akStockLabel').textContent = p.lage==='innen'?'Vorbohrung-⌀':'Rohteil-⌀';
     syncAkSicht();
     akGruppenSync();   // erst NACH allen setVal — sonst fasst sie Altwerte zusammen
@@ -8932,6 +8999,9 @@ function editStep(i){
       setRadio('esEingabeBtns', m);
       eingabeModusSetzen('maskEinstechen', m); }
     setRadio('esSModeBtns', p.sMode||'n'); syncSMode('es',false); setVal('esFR',p.fr); setVal('esSR',p.sr); setVal('esFF',p.ff); setVal('esSF',p.sf);
+    setRadio('esSvBtns', p.svArt||'aus');
+    setVal('esSvAmp', p.svAmp!==undefined?p.svAmp:10); setVal('esSvWeg', p.svWeg!==undefined?p.svWeg:20);
+    svSetzen('es', p.svArt||'aus');
     document.getElementById('maskEinstechen').classList.add('show');
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskEinstechen'); }catch(e){}
@@ -9043,7 +9113,7 @@ function wireRadioGroup(id){
     btn.classList.add('sel');
   });
 }
-['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns','akPlanFertigBtns'].forEach(wireRadioGroup);
 // Kleinumschalter IN einer Feldzeile (wie abs/ink): verdrahtet, aber
 // BEWUSST ohne Auswahlfeld — ein 51-px-Knopfpaar soll Knopfpaar
@@ -9057,7 +9127,7 @@ wireRadioGroup('boWMode');   // man/auto des Bohr-Vorlaufs — war ebenso tot
   if(g) g.addEventListener('click',()=>{ try{ esLabelsSync(); }catch(e){} }); }
 // Dieselben Gruppen bekommen ihr Auswahlfeld. Eine Liste, damit keine
 // Gruppe verdrahtet ist, aber ohne Feld bleibt (oder umgekehrt).
-const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns'];
 SELFELD_GRUPPEN.forEach(id=>{ try{ selFeldAufbauen(id); }catch(e){} });
 // Die Rueckzugsstufe schaltet ihre Felder frei — beim Klick und einmal
@@ -9468,6 +9538,11 @@ function wirkungsloseFelderAusblenden(maskId, zustaende){
     if(t.closest("#akSbBtns") || (t.id==="sw_akSbBtns")){
       try{ sbSetzen("ak", selBtnVal("akSbBtns")); }catch(e){}
     }
+    ["ae","ak","es"].forEach(pre=>{
+      if(t.closest("#"+pre+"SvBtns") || (t.id==="sw_"+pre+"SvBtns")){
+        try{ svSetzen(pre, selBtnVal(pre+"SvBtns")); }catch(e){}
+      }
+    });
   }, false);
   // BUBBLE, NICHT CAPTURE [Daniel, 28.08.2026]. In der Capture-Phase
   // liest selBtnVal noch den alten Wert — der Knopf hat seine Auswahl
@@ -9724,6 +9799,13 @@ function sbSetzen(pre, art){
   zeig(pre+'SbDIRow', a!=='aus');
   zeig(pre+'SbURow',  a==='pause');
   zeig(pre+'SbRDRow', a==='rueckzug');
+}
+// Drehzahlvariation: Amplituden-/Periodenzeile nur bei "an".
+function svSetzen(pre, art){
+  const an=(art==='an');
+  ['SvAmpRow','SvWegRow'].forEach(suf=>{
+    const e=document.getElementById(pre+suf); if(e) e.style.display=an?'':'none';
+  });
 }
 function aeGruppenSync(){
   const w=mgZahl;
@@ -10101,7 +10183,7 @@ document.getElementById('boEntBearbBtns').addEventListener('click',(e)=>{
 function openAbspanenEinfachMask(){
   inkReset(['aeX1mode','aeZ1mode']); aeGruppenSync();
   { const f=aeFormAusWerten(); setRadio('aeFormBtns', f); aeFormSetzen(f); }
-  try{ sbSetzen('ae', selBtnVal('aeSbBtns')); }catch(e){}
+  try{ sbSetzen('ae', selBtnVal('aeSbBtns')); svSetzen('ae', selBtnVal('aeSvBtns')); }catch(e){}
   { const m=eingabeModusAusWerten('maskAbspanenEinfach');
     setRadio('aeEingabeBtns', m);
     eingabeModusSetzen('maskAbspanenEinfach', m); }
@@ -10134,6 +10216,9 @@ document.getElementById('btnAeOk').onclick=()=>{
     sbDI: +document.getElementById('aeSbDI').value||0,
     sbU: +document.getElementById('aeSbU').value||2,
     sbRD: +document.getElementById('aeSbRD').value||0.5,
+    svArt: selBtnVal('aeSvBtns')||'aus',
+    svAmp: +document.getElementById('aeSvAmp').value||10,
+    svWeg: +document.getElementById('aeSvWeg').value||20,
   };
   commitStep('abspanen_einfach', params);
   document.getElementById('maskAbspanenEinfach').classList.remove('show');
@@ -10156,7 +10241,7 @@ function fillContourSelect(selectedId, blankId){
 function openAbspanenKonturMask(){
   if(!contours.some(c=>c.els.length>1)){ alert('Bitte zuerst eine Kontur anlegen (Softkey "Kontur").'); return; }
   fillContourSelect();
-  try{ sbSetzen('ak', selBtnVal('akSbBtns')); }catch(e){}
+  try{ sbSetzen('ak', selBtnVal('akSbBtns')); svSetzen('ak', selBtnVal('akSvBtns')); }catch(e){}
   document.getElementById('akStock').value = document.getElementById('stockDia').value;
   document.getElementById('akStockZ').value = document.getElementById('pkZA').value;
   akGruppenSync();
@@ -10196,6 +10281,9 @@ document.getElementById('btnAkOk').onclick=()=>{
     sbDI: +document.getElementById('akSbDI').value||0,
     sbU: +document.getElementById('akSbU').value||2,
     sbRD: +document.getElementById('akSbRD').value||0.5,
+    svArt: selBtnVal('akSvBtns')||'aus',
+    svAmp: +document.getElementById('akSvAmp').value||10,
+    svWeg: +document.getElementById('akSvWeg').value||20,
   };
   commitStep('abspanen_kontur', params);
   document.getElementById('maskAbspanenKontur').classList.remove('show');
@@ -10323,6 +10411,7 @@ document.getElementById('btnAbOk').onclick=()=>{
 
 // ---- Einstechen (CYCLE930-Art) ----
 function openEinstechenMask(){
+  try{ svSetzen('es', selBtnVal('esSvBtns')); }catch(e){}
   document.getElementById('maskEinstechen').classList.add('show');
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskEinstechen'); }catch(e){}
@@ -10358,6 +10447,9 @@ document.getElementById('btnEsOk').onclick=()=>{
     fr: +document.getElementById('esFR').value, sr: +document.getElementById('esSR').value, sMode: selBtnVal('esSModeBtns')||'n',
     ff: +document.getElementById('esFF').value, sf: +document.getElementById('esSF').value,
     ausg: selBtnVal('esAusgBtns')||'gcode',
+    svArt: selBtnVal('esSvBtns')||'aus',
+    svAmp: +document.getElementById('esSvAmp').value||10,
+    svWeg: +document.getElementById('esSvWeg').value||20,
   };
   commitStep('einstechen', params);
   document.getElementById('maskEinstechen').classList.remove('show');
@@ -12211,6 +12303,9 @@ const BA_ANKER={
   aeW1:'ba-ae-form', aeW2:'ba-ae-form', aeFormBtns:'ba-ae-form',
   aeSbBtns:'ba-ae-spanbruch', aeSbDI:'ba-ae-spanbruch', aeSbU:'ba-ae-spanbruch', aeSbRD:'ba-ae-spanbruch',
   akSbBtns:'ba-akk-spanbruch', akSbDI:'ba-akk-spanbruch', akSbU:'ba-akk-spanbruch', akSbRD:'ba-akk-spanbruch',
+  aeSvBtns:'ba-ae-ssv', aeSvAmp:'ba-ae-ssv', aeSvWeg:'ba-ae-ssv',
+  akSvBtns:'ba-akk-ssv', akSvAmp:'ba-akk-ssv', akSvWeg:'ba-akk-ssv',
+  esSvBtns:'ba-es-ssv', esSvAmp:'ba-es-ssv', esSvWeg:'ba-es-ssv',
   aeK1Btns:'ba-ak-kanten', aeK2Btns:'ba-ak-kanten', aeK3Btns:'ba-ak-kanten',
   aeD:'ba-zk-radial', aeUX:'ba-zk-radial', aeUZ:'ba-zk-radial',
   akKontur:'ba-akk-kontur', akRohKontur:'ba-akk-kontur',
@@ -17639,9 +17734,73 @@ function sbZug(lines, N, bump, wort, start, ziel, sb, fWert){
   }
   satz(ziel);
 }
+// =================================================================
+// DREHZAHLVARIATION BEIM SCHLICHTEN [Daniel, 02.09.2026]
+// -----------------------------------------------------------------
+// Gegen REGENERATIVES RATTERN an duennwandigen Teilen und schlanken
+// Wellen: die Drehzahl pendelt sinusfoermig um den Sollwert, die
+// Schneide trifft die Welligkeit der Vorumdrehung nie in Resonanz.
+// Auf modernen Steuerungen heisst das Okuma HSSC / Haas SSV /
+// Mazak Variable Speed (typisch: Amplitude 5-15 %, Periode 1-3 s);
+// das Siemens-Bedienhandbuch fuehrt es NICHT in den Zyklusmasken
+// (dort Maschinenbauer-Ebene). Die Monforts haben nichts dergleichen
+// — wir bilden es im NC nach: der Schlichtzug wird in Stufen von
+// weg/8 geteilt, jede Stufe traegt ihr S-Wort (unter G96 pendelt Vc,
+// unter G97 die Drehzahl; G95 laesst den Vorschub folgen, die
+// Spandicke bleibt konstant). Die PERIODE ist BAHNWEG in mm — eine
+// Zeitbasis hat das NC nicht.
+// AN DER MASCHINE UNVERIFIZIERT: fuehrt die Steuerung S-Wechsel im
+// laufenden Vorschub fliegend aus, oder wartet sie auf "Drehzahl
+// erreicht"? Das sagt kein Handbuch — Maschinentermin-Test, bis
+// dahin steht die Warnung an jedem Programm.
+function svNeu(p, doFinish, warnings){
+  if((p.svArt||'aus')!=='an' || !doFinish) return null;
+  const amp=Math.min(30, Math.max(1, +p.svAmp||10));
+  const weg=Math.max(2, +p.svWeg||20);
+  warnings.push('Drehzahlvariation Schlichten: S pendelt sinusfoermig um ±'+fmt(amp)+'% je '+fmt(weg)+' mm Bahnweg. AN DER MASCHINE UNVERIFIZIERT (fuehrt die Steuerung S-Wechsel im laufenden Vorschub fliegend aus?) — ersten Lauf im Einzelsatz fahren. Drehzahlwaechter von Hand auf Basisdrehzahl PLUS Amplitude stellen.');
+  return {amp, weg, pfad:0, letztS:null};
+}
+// S-Wort fuer den naechsten Bahnabschnitt (dist mm weiter im Sinus);
+// leer, wenn sich der gerundete Wert nicht aendert.
+function svWort(sv, s0, dist){
+  if(!sv) return '';
+  sv.pfad+=Math.max(0,dist||0);
+  const sW=Math.max(1, Math.round(s0*(1+sv.amp/100*Math.sin(2*Math.PI*sv.pfad/sv.weg))));
+  if(sW===sv.letztS) return '';
+  sv.letztS=sW;
+  return ' S'+sW;
+}
+// Eine gerade Schlichtstrecke (x im DURCHMESSER) in Sinus-Stufen von
+// weg/8 teilen. Geometrisch kollinear — Aequidistante, Eckenklemme
+// und Massbericht sehen dieselbe Bahn, nur in mehr Saetzen.
+function svStrecke(lines, N, bump, sv, s0, x1, z1, x2, z2, xMap){
+  const lang=Math.hypot(z2-z1, (x2-x1)/2);
+  const n=Math.max(1, Math.round(lang/(sv.weg/8)));
+  const dx=Math.abs(x2-x1)>1e-9, dz=Math.abs(z2-z1)>1e-9;
+  for(let i=1;i<=n;i++){
+    const f=i/n, xs=x1+(x2-x1)*f, zs=z1+(z2-z1)*f;
+    const worte=[];
+    if(dx||!dz) worte.push('X'+fmt(xMap?xMap(xs):xs));
+    if(dz) worte.push('Z'+fmt(zs));
+    lines.push(`${N()} (${dx&&dz?'SCHRAEG ':'GERADE  '}) G01 ${worte.join(' ')}${svWort(sv, s0, lang/n)}`); bump();
+  }
+}
+// Punktkette (Einstich-Schlichtzuege): jeder Punkt ein Satz, das
+// S-Wort pendelt entlang der aufgelaufenen Kettenlaenge. xOff/zOff
+// verschieben die BAHN (Innenschneiden-Versatz), die Laenge rechnet
+// auf den Konturpunkten.
+function svKette(lines, N, bump, sv, s0, pts, fWert, xOff, zOff){
+  let pv=null;
+  pts.forEach(q=>{
+    const d=pv? Math.hypot(q.z-pv.z, (q.x-pv.x)/2) : 0;
+    pv=q;
+    lines.push(`${N()} (SCHRAEG ) G95 F${fmt(fWert)} G01 X${fmt(q.x+(xOff||0))} Z${fmt(q.z+(zOff||0))}${sv?svWort(sv, s0, d):''}`); bump();
+  });
+}
 function genAbspanenEinfach(p, N, bump, lines, warnings){
   const doRough = p.bearbeitung!=='schlichten';
   const sbAe = sbLesen(p, doRough, warnings);   // Spanbrechen, nur Schruppen
+  const svAe = svNeu(p, p.bearbeitung!=='schruppen', warnings);   // Drehzahlvariation, nur Schlichten
   const doFinish = p.bearbeitung!=='schruppen';
   const innen = p.lage==='innen';
   const xOuter = Math.max(p.x0,p.x1), xInner = Math.min(p.x0,p.x1);
@@ -17823,6 +17982,10 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     // fuehre den Zyklus durchgehend, waehrend die Simulation Pausen
     // zeigte. Deshalb Einzelsaetze, mit Ansage.
     warnings.push('Spanbrechen und G72-Zyklussatz schliessen sich aus (der Satz kennt keine Vorschubunterbrechung) — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyklusModusAe=false;
+  }
+  if(zyklusModusAe && svAe){
+    warnings.push('Drehzahlvariation und G72-Zyklussatz schliessen sich aus (der Satz kennt keine S-Modulation) — Ausgabe erfolgt als G-Einzelsaetze.');
     zyklusModusAe=false;
   }
   if(zyklusModusAe){
@@ -18055,10 +18218,14 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
         lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compCode} Z${fmt(zo)}`); bump();
       }
       const zielA=C2w?C2w.p1:E;
-      lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*zielA.x)} Z${fmt(zielA.z)}`); bump();
+      const vonA=C1? C1.p2 : A0;
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, 2*vonA.x, vonA.z, 2*zielA.x, zielA.z); }
+      else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*zielA.x)} Z${fmt(zielA.z)}`); bump(); }
       if(C2w){ if(p.k2Typ==='fase'){ lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*C2w.p2.x)} Z${fmt(C2w.p2.z)}`); bump(); } else bogenSatz(C2w); }
       const zielB=C3w?C3w.p1:B1;
-      lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*zielB.x)} Z${fmt(zielB.z)}`); bump();
+      const vonB=C2w? C2w.p2 : E;
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, 2*vonB.x, vonB.z, 2*zielB.x, zielB.z); }
+      else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*zielB.x)} Z${fmt(zielB.z)}`); bump(); }
       if(C3w){ if(p.k3Typ==='fase'){ lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*C3w.p2.x)} Z${fmt(C3w.p2.z)}`); bump(); } else bogenSatz(C3w); }
       lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(xo+2)}`); bump();
     }
@@ -18248,7 +18415,8 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
           else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo)} Z${fmt(zo-k1)}`); bump(); }
         }
       }
-      lines.push(`${N()} (GERADE  ) G01 Z${fmt(zi + k2)}`); bump();
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xo, (k1? zo-k1 : zo), xo, zi + k2); }
+      else { lines.push(`${N()} (GERADE  ) G01 Z${fmt(zi + k2)}`); bump(); }
       if(k2){
         if(p.k2Typ==='fase'){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo-2*k2)} Z${fmt(zi)}`); bump();
@@ -18258,7 +18426,8 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
           else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo-2*k2)} Z${fmt(zi)}`); bump(); }
         }
       }
-      lines.push(`${N()} (GERADE  ) G01 X${fmt(xi + (k3?2*k3:0))}`); bump();
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xo - (k2?2*k2:0), zi, xi + (k3?2*k3:0), zi); }
+      else { lines.push(`${N()} (GERADE  ) G01 X${fmt(xi + (k3?2*k3:0))}`); bump(); }
       if(k3){
         if(p.k3Typ==='fase'){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi)} Z${fmt(zi-k3)}`); bump();
@@ -18308,14 +18477,16 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
         const xPlanEnde = (+p.planBis>0.5) ? Math.max(xOverPlanE, +p.planBis-2) : xOverPlanE;
         lines.push(`${N()} (SCHRAEG ) G00 G90 X${fmt(xo+2)} Z${fmt(zUeberP)}`); bump();
         lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 G41 Z${fmt(zi)}`); bump();
-        lines.push(`${N()} (GERADE  ) G01 X${fmt(xPlanEnde)}`); bump();
+        if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xo+2, zi, xPlanEnde, zi); }
+        else { lines.push(`${N()} (GERADE  ) G01 X${fmt(xPlanEnde)}`); bump(); }
         lines.push(`${N()} (GERADE  ) G01 G40 Z${fmt(zi+2)}`); bump();
         lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(xo+2)}`); bump();
         lines.push(`${N()} (GERADE  ) G00 Z${fmt(zAnf)}`); bump();
         } else {
         lines.push(`${N()} (SCHRAEG ) G00 G90 X${fmt(xOverPlanE)} Z${fmt(zi+2)}`); bump();
         lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compCode} Z${fmt(zi)}`); bump();
-        lines.push(`${N()} (GERADE  ) G01 X${fmt(xo - (k3?2*k3:0))}`); bump();
+        if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xOverPlanE, zi, xo - (k3?2*k3:0), zi); }
+        else { lines.push(`${N()} (GERADE  ) G01 X${fmt(xo - (k3?2*k3:0))}`); bump(); }
         if(k3){
           if(p.k3Typ==='fase'){
             lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo)} Z${fmt(zi-k3)}`); bump();
@@ -18377,7 +18548,8 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
           else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi)} Z${fmt(zo-k1)}`); bump(); }
         }
       }
-      lines.push(`${N()} (GERADE  ) G01 Z${fmt(zi + k2)}`); bump();
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xi, (k1? zo-k1 : zo), xi, zi + k2); }
+      else { lines.push(`${N()} (GERADE  ) G01 Z${fmt(zi + k2)}`); bump(); }
       if(k2){
         if(p.k2Typ==='fase'){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi+2*k2)} Z${fmt(zi)}`); bump();
@@ -18387,7 +18559,8 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
           else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi+2*k2)} Z${fmt(zi)}`); bump(); }
         }
       }
-      lines.push(`${N()} (GERADE  ) G01 X${fmt(xo - (k3?2*k3:0))}`); bump();
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xi + (k2?2*k2:0), zi, xo - (k3?2*k3:0), zi); }
+      else { lines.push(`${N()} (GERADE  ) G01 X${fmt(xo - (k3?2*k3:0))}`); bump(); }
       if(k3){
         if(p.k3Typ==='fase'){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo)} Z${fmt(zi-k3)}`); bump();
@@ -18706,6 +18879,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   // Umbau, und der Span bricht an jeder Richtungsaenderung ohnehin
   // leichter. Ehrlich benannt statt still ignoriert.
   let sbAk = sbLesen(p, doRough, warnings);
+  const svAk = svNeu(p, doFinish, warnings);
   if(sbAk && (p.richtung==='konturparallel' || p.richtung==='x-konturparallel')){
     warnings.push('Spanbrechen wirkt nur bei den achsparallelen Strategien (Z-/X-parallel) — bei '+p.richtung+' schneidet der Zyklus durchgehend.');
     sbAk=null;
@@ -20070,8 +20244,14 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         // G02/G03 ersetzen G01 — beide zusammen in einem Satz ist ein modaler Konflikt.
         const bw = bogenWorte(sg.x1, sg.z1, sg.x2, sg.z2, sg.cx, sg.cz, sg.cw, warnings);
         if(bw===null){ bogenFehler=true; if(typeof window!=='undefined') window.__bogenFehler=true; return; }
-        lines.push(`${N()} (RADIUS  ) ${gcode} X${fmt(cx(x2d))} Z${fmt(sg.z2)} ${bw}`);
+        // Drehzahlvariation: der Bogen bleibt EIN Satz, die Sinusphase
+        // laeuft ueber seine Sehnenlaenge mit und das S-Wort haengt an.
+        const svB=svAk? svWort(svAk, p.sf, Math.hypot(sg.z2-sg.z1, sg.x2-sg.x1)) : '';
+        lines.push(`${N()} (RADIUS  ) ${gcode} X${fmt(cx(x2d))} Z${fmt(sg.z2)} ${bw}${svB}`);
         arcEmitted = true;
+      } else if(svAk){
+        svStrecke(lines, N, bump, svAk, p.sf, r2d(sg.x1), sg.z1, x2d, sg.z2, cx);
+        return;
       } else {
         lines.push(`${N()} (${isSchraeg?'SCHRAEG ':'GERADE  '}) G01 X${fmt(cx(x2d))} Z${fmt(sg.z2)}`);
       }
@@ -20088,8 +20268,12 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         const gcode = sg.cw ? 'G03':'G02';        // Drehsinn kippt mit der Richtung
         const bw = bogenWorte(sg.x2, sg.z2, sg.x1, sg.z1, sg.cx, sg.cz, !sg.cw, warnings);
         if(bw===null){ bogenFehler=true; if(typeof window!=='undefined') window.__bogenFehler=true; return; }
-        lines.push(`${N()} (RADIUS  ) ${gcode} X${fmt(cx(x2d))} Z${fmt(sg.z1)} ${bw}`);
+        const svB=svAk? svWort(svAk, p.sf, Math.hypot(sg.z2-sg.z1, sg.x2-sg.x1)) : '';
+        lines.push(`${N()} (RADIUS  ) ${gcode} X${fmt(cx(x2d))} Z${fmt(sg.z1)} ${bw}${svB}`);
         arcEmitted = true;
+      } else if(svAk){
+        svStrecke(lines, N, bump, svAk, p.sf, r2d(sg.x2), sg.z2, x2d, sg.z1, cx);
+        return;
       } else {
         lines.push(`${N()} (${isSchraeg?'SCHRAEG ':'GERADE  '}) G01 X${fmt(cx(x2d))} Z${fmt(sg.z1)}`);
       }
@@ -20582,7 +20766,14 @@ function genEinstechen71(p, N, bump, lines, warnings){
   }
 }
 function genEinstechen(p, N, bump, lines, warnings){
-  if(p && p.ausg==='zyklus' && !p.__exp) return genEinstechen71(p, N, bump, lines, warnings);
+  // Drehzahlvariation [Daniel, 02.09.2026]: moduliert die vier
+  // Schlicht-Kettenzuege (radial links/rechts, axial aussen/innen).
+  // Der G71-Zyklussatz kennt keine S-Modulation — Ausschluss wie
+  // beim Spanbrechen/G72, mit Ansage.
+  const svEs = svNeu(p, p.bearbeitung!=='schruppen', warnings);
+  if(p && p.ausg==='zyklus' && !p.__exp && svEs){
+    warnings.push('Drehzahlvariation und G71-Zyklussatz schliessen sich aus — Ausgabe erfolgt als G-Einzelsaetze.');
+  } else if(p && p.ausg==='zyklus' && !p.__exp) return genEinstechen71(p, N, bump, lines, warnings);
   // BEZUGSKANTE [Daniel, 29.08.2026]. Der ganze Zyklus rechnet mit
   // z0 als RECHTER Nutkante (die Nut laeuft von z0-b1 bis z0).
   // Steht der Bezug auf "links", wird er hier EINMAL umgerechnet —
@@ -20840,13 +21031,13 @@ function genEinstechen(p, N, bump, lines, warnings){
         const A=segAx(1);
         lines.push(`(--- SCHLICHTEN AUSSENFLANKE + HALBER GRUND ---)`);
         lines.push(`${N()} (GERADE  ) G00 G90 X${fmt(A[0].x)} Z${fmt(p.z0+1)}`); bump();
-        A.forEach(q=>{ lines.push(`${N()} (SCHRAEG ) G95 F${fmt(p.ff)} G01 X${fmt(q.x)} Z${fmt(q.z)}`); bump(); });
+        svKette(lines, N, bump, svEs, p.sf, A, p.ff, 0, 0);
         lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(p.z0+1)}`); bump();
         // Innenzug: Innenschneide auf der Kontur -> Bahn um 2·BS versetzt
         const I=segAx(-1);
         lines.push(`(--- SCHLICHTEN INNENFLANKE + HALBER GRUND (Bahn um Stechbreite ${fmt(bw)} im ⌀ versetzt) ---)`);
         lines.push(`${N()} (GERADE  ) G00 X${fmt(I[0].x + 2*bw)} Z${fmt(p.z0+1)}`); bump();
-        I.forEach(q=>{ lines.push(`${N()} (SCHRAEG ) G95 F${fmt(p.ff)} G01 X${fmt(q.x + 2*bw)} Z${fmt(q.z)}`); bump(); });
+        svKette(lines, N, bump, svEs, p.sf, I, p.ff, 2*bw, 0);
         lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(p.z0+1)}`); bump();
       } else {
         // Ein Zug: Außenflanke runter, Boden nach innen, Innenflanke hoch
@@ -21094,7 +21285,7 @@ function genEinstechen(p, N, bump, lines, warnings){
         const L=segPts(1);
         lines.push(`(--- SCHLICHTEN LINKE FLANKE + HALBER GRUND ---)`);
         lines.push(`${N()} (GERADE  ) G00 X${fmt(nutHoch)} Z${fmt(L[0].z)}`); bump();
-        L.forEach(q=>{ lines.push(`${N()} (SCHRAEG ) G95 F${fmt(p.ff)} G01 X${fmt(q.x)} Z${fmt(q.z)}`); bump(); });
+        svKette(lines, N, bump, svEs, p.sf, L, p.ff, 0, 0);
         // Freifahren VOM Material weg — innen also nach kleinerem ⌀.
         lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(weg(p.x0,2))}`); bump();
         // Rechter Zug: rechte Schneide auf der Kontur -> Bahn um die
@@ -21102,7 +21293,7 @@ function genEinstechen(p, N, bump, lines, warnings){
         const R=segPts(-1);
         lines.push(`(--- SCHLICHTEN RECHTE FLANKE + HALBER GRUND (Bahn um Stechbreite ${fmt(bw)} versetzt) ---)`);
         lines.push(`${N()} (GERADE  ) G00 X${fmt(nutHoch)} Z${fmt(R[0].z+bw)}`); bump();
-        R.forEach(q=>{ lines.push(`${N()} (SCHRAEG ) G95 F${fmt(p.ff)} G01 X${fmt(q.x)} Z${fmt(q.z+bw)}`); bump(); });
+        svKette(lines, N, bump, svEs, p.sf, R, p.ff, 0, bw);
         lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(weg(p.x0,2))}`); bump();
       } else {
         if(kanten && (p.a1||p.a2)){ /* Hinweis kam oben schon */ }
