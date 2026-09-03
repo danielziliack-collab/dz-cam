@@ -2550,8 +2550,14 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
             <option value="MONFORTS_1500_EUROTURN" selected>EuroTurn (1500)</option>
             <option value="MONFORTS_1000_MTC_K_6624B">MTC-K (1000)</option>
           </select>
-          <button id="btnPpInfo" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Merkmale ▸</button>
-          <button id="btnBett" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Bett ▸</button>
+          <!-- Die beiden Knoepfe als EINE rechtsbuendige Gruppe [Daniel,
+               03.09.2026]: einzeln wrappte "Bett" allein nach links
+               unter die Zeile — jetzt ruecken beide zusammen nach
+               rechts, am iPhone als zweite Zeile unter "Merkmale". -->
+          <div style="display:flex;gap:6px;margin-left:auto;flex:0 0 auto;">
+            <button id="btnPpInfo" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Merkmale ▸</button>
+            <button id="btnBett" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Bett ▸</button>
+          </div>
         </div>
         <div id="ppInfo" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:48vh;border-bottom:1px solid var(--line);"></div>
         <div id="bettPanel" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:52vh;border-bottom:1px solid var(--line);padding:8px 10px;font-size:13px;"></div>
