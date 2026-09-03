@@ -2538,9 +2538,15 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
         <div class="warn" id="warnBox" style="display:none;"></div>
         <!-- 10px links/rechts wie die Knopfleiste darueber [Daniel,
              31.08.2026]: Zielmaschine soll mit dem Text oben fluchten. -->
-        <div class="mrow" style="padding:4px 10px 6px 10px;">
+        <!-- flex-wrap + feste Mindestbreite [Daniel, 03.09.2026]: seit
+             dem Bett-Knopf war der Select so eingequetscht, dass am
+             iPhone nur "EuroTurn (1" lesbar war. width:auto schlaegt
+             die 108px-Feldregel der Masken; wird es eng, ruecken die
+             beiden Knoepfe in die zweite Zeile statt den Namen
+             abzuschneiden. -->
+        <div class="mrow" style="padding:4px 10px 6px 10px;flex-wrap:wrap;">
           <label style="width:auto;flex:0 0 auto;">Zielmaschine</label>
-          <select id="maschProfilSel" style="flex:1;min-width:0;">
+          <select id="maschProfilSel" style="flex:1 1 auto;width:auto;min-width:150px;">
             <option value="MONFORTS_1500_EUROTURN" selected>EuroTurn (1500)</option>
             <option value="MONFORTS_1000_MTC_K_6624B">MTC-K (1000)</option>
           </select>
