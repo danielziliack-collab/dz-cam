@@ -5089,10 +5089,26 @@ function toWorld(sx,sy){
 // inzwischen auf der tatsaechlichen Kontur, in 2D weiter auf dem
 // Rohteilmass und mit den alten Abmessungen.
 //
-// Masse nach Forkardt F 315 (Bauhoehe 128..140, Durchgang ⌀80..86,
-// Aufsatzbacken FWB 315/425 mit 36 mm Breite und 62 mm Hoehe).
-const FUTTER = { rAussen:157.5, hoehe:130, rBohrung:41,
-                 backeB:36, backeH:62, backeL:45 };
+// MASSE JE MASCHINE, von Daniel am 03.09.2026 GEMESSEN (der alte
+// Forkardt-Katalogwert "Bauhoehe 130" war fuer BEIDE falsch):
+// - 1500er: SPIRALFUTTER ⌀315, Aufbauhoehe 95. Backen 32 breit,
+//   radial 125 lang (Stufen bei 35/83/125, je 20 tief), axiale
+//   Gesamthoehe 73,16 ab Verzahnungsgrund (Messschieber-Foto).
+// - 1000er: Forkardt F 315 KEILSTANGENFUTTER ⌀315, Bauhoehe ~117.
+//   Aufsatzbacken 107 radial, 35 breit, axial ca. 57 (Stufen ~40/95).
+// backeH ist die GEZEICHNETE Treppe ueber der Spannstufe (radiale
+// Backenlaenge minus unterster Stufe). ANNAHME bleibt backeL, der
+// axiale UEBERSTAND der Backe vor der Futterstirn: die Backen waren
+// am Termin demontiert, der Sitz im Koerper ist ungemessen — 45 mm
+// als plausibler Wert unter den belegten Gesamthoehen (73 bzw. 57),
+// nachmessen am montierten Futter steht auf der Terminliste.
+const FUTTER_JE_MASCHINE = {
+  MONFORTS_1500_EUROTURN:   { rAussen:157.5, hoehe:95,  rBohrung:41,
+                              backeB:32, backeH:90, backeL:45 },
+  MONFORTS_1000_MTC_K_6624B:{ rAussen:157.5, hoehe:117, rBohrung:41,
+                              backeB:35, backeH:67, backeL:45 }
+};
+const FUTTER = Object.assign({}, FUTTER_JE_MASCHINE.MONFORTS_1500_EUROTURN);
 function futterGeometrie(){
   const laEl=document.getElementById('pkLA'); if(!laEl) return null;
   const LA=+laEl.value; if(!(LA>0)) return null;
@@ -17872,6 +17888,11 @@ function setMaschinenProfil(id){
   const p = MASCHINEN_PROFILE[id];
   if(!p || p===MASCHINENPROFIL) return [];
   MASCHINENPROFIL = p;
+  // Das Spannfutter wechselt mit der Maschine (Daniels Messungen
+  // 03.09.2026: 1500er Spiralfutter Bauhoehe 95, 1000er Keilstange
+  // 117) — dieselbe FUTTER-Referenz, neue Masse, damit alle 14
+  // Lesestellen (Zeichnung, 3D, Kollision) mitgehen.
+  Object.assign(FUTTER, FUTTER_JE_MASCHINE[id]||FUTTER_JE_MASCHINE.MONFORTS_1500_EUROTURN);
   try{ const b=document.getElementById('ppInfo');
     if(b && b.style.display!=='none') ppInfoMalen(); }catch(e){}
   const meldungen = ['Maschinenprofil: '+p.label];
@@ -18131,15 +18152,19 @@ function sbZug(lines, N, bump, wort, start, ziel, sb, fWert){
 // unter G97 die Drehzahl; G95 laesst den Vorschub folgen, die
 // Spandicke bleibt konstant). Die PERIODE ist BAHNWEG in mm — eine
 // Zeitbasis hat das NC nicht.
-// AN DER MASCHINE UNVERIFIZIERT: fuehrt die Steuerung S-Wechsel im
-// laufenden Vorschub fliegend aus, oder wartet sie auf "Drehzahl
-// erreicht"? Das sagt kein Handbuch — Maschinentermin-Test, bis
-// dahin steht die Warnung an jedem Programm.
+// AN DER 1500er VERIFIZIERT (Daniels Fahrtest 03.09.2026,
+// O00009104): die EuroTurn fuehrt S-Wechsel im laufenden G01
+// FLIEGEND aus — die Achse zog gleichmaessig durch, kein
+// Vorschubverlust, die Drehzahl pendelte hoerbar. Die 1000er ist
+// weiter ungetestet, dort bleibt die Unverifiziert-Warnung.
 function svNeu(p, doFinish, warnings){
   if((p.svArt||'aus')!=='an' || !doFinish) return null;
   const amp=Math.min(30, Math.max(1, +p.svAmp||10));
   const weg=Math.max(2, +p.svWeg||20);
-  warnings.push('Drehzahlvariation Schlichten: S pendelt sinusfoermig um ±'+fmt(amp)+'% je '+fmt(weg)+' mm Bahnweg. AN DER MASCHINE UNVERIFIZIERT (fuehrt die Steuerung S-Wechsel im laufenden Vorschub fliegend aus?) — ersten Lauf im Einzelsatz fahren. Drehzahlwaechter von Hand auf Basisdrehzahl PLUS Amplitude stellen.');
+  if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B')
+    warnings.push('Drehzahlvariation Schlichten: S pendelt sinusfoermig um ±'+fmt(amp)+'% je '+fmt(weg)+' mm Bahnweg. AN DER 1000er UNVERIFIZIERT (die 1500er zieht fliegend durch, Fahrtest 03.09.2026 — die MTC-K ist noch ungetestet) — ersten Lauf im Einzelsatz fahren. Drehzahlwaechter von Hand auf Basisdrehzahl PLUS Amplitude stellen.');
+  else
+    warnings.push('Drehzahlvariation Schlichten: S pendelt sinusfoermig um ±'+fmt(amp)+'% je '+fmt(weg)+' mm Bahnweg (an der 1500er verifiziert, Fahrtest 03.09.2026: zieht fliegend durch). Drehzahlwaechter von Hand auf Basisdrehzahl PLUS Amplitude stellen.');
   return {amp, weg, pfad:0, letztS:null};
 }
 // S-Wort fuer den naechsten Bahnabschnitt (dist mm weiter im Sinus);
@@ -18338,26 +18363,63 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     warnings.push('G72-Zyklussatz am 1000er-Profil nicht erzeugbar: die MTC-K nutzt PA/PB-Adressen mit steuerungsberechneten Werten (Beleg: Daniels TAP-Programme). Ausgabe erfolgt als G-Einzelsaetze.');
     zyklusModusAe=false;
   }
-  if(zyklusModusAe && innen){
-    // PRAEZISIERT nach Daniels Einwand [01.09.2026, DV 594 S. 4.6-13]:
-    // die STEUERUNG kann den Abspanzyklus innen (Bedienmaske "lage-
-    // und richtungskonform", Anfahrreihenfolge innen X vor Z ist
-    // dokumentiert). Unbelegt ist die SATZ-Kodierung: die G72-Tabelle
-    // hat kein Lage-Feld (anders als G71/PJ), die Lage muss in
-    // Koordinaten/Vorzeichen stecken — ohne Innen-Beispielsatz raten
-    // wir nicht. Klaerung: am Maschinentermin einen Innen-Abspanzyklus
-    // in die Maske tippen und per DNC ziehen (derselbe Weg, der den
-    // kurzen T-Aufruf belegt hat).
-    warnings.push('G72 innen: die Steuerung kann es (DV 594 S. 4.6-13), aber die SATZ-Kodierung der Innenlage ist unbelegt (kein Lage-Parameter, kein Innen-Beispielsatz) — Ausgabe erfolgt als G-Einzelsaetze. Beleg-Weg: Innen-Zyklus an der Maschine eintippen und per DNC ziehen.');
+  // ===================================================================
+  // MASCHINENBELEG 03.09.2026 (Daniels Termin, "1500 Zyklen.TAP"):
+  // Daniel hat an der 7.210i einen Innen- und einen Winkel-Abspanzyklus
+  // in die ZYKLEN-Maske getippt und die erzeugten Saetze per DNC
+  // gezogen. Die REALFORM weicht vom DV-610-Handbuchschema (S. 3-43)
+  // ab, nach dem dieser Generator zuerst gebaut war:
+  //   G72 G90 X60 Z0 I80 K-40 PE1 PF1.2 PG1 PK10 PL-40 PM10 PN40
+  //       PO2 PQ2 P235:6 P236:90 P237:90 P240:1        (innen)
+  //   G72 X130 Z0 I70 K-40 ... PK-30 PL-40 PM21.366 PN32.224
+  //       P235:6 P236:75 P237:70 P240:1                (75/70 Grad)
+  // Entschluesselt: X=Start-⌀, I=Ziel-⌀ (innen X<I), PK=(I-X)/2
+  // signiert, PL=K-Z, P236/P237 = alpha1/alpha2 IM KLARTEXT, PM/PN =
+  // Schenkel-SCHNITTPUNKT (radial ab Startradius, axial ab Stirn) —
+  // die Formel ist am Winkelfall auf drei Nachkommastellen
+  // nachgerechnet (die 70-Grad-Schulter trifft exakt K-40).
+  // Innen und Winkel sind damit FREIGESCHALTET; die alte
+  // P230..233-Kantenkodierung ist raus (stand so nie in einem echten
+  // Satz). ANNAHMEN, als solche im Satzkommentar: PE1 und P235:6
+  // stehen konstant in allen Belegsaetzen, Bedeutung unbekannt;
+  // PF=Zustellung / PG=Aufmass (gestuetzt durch Daniels 1000er-TAP
+  // PF0.4 PG0.5 und das belegte PG=U beim G71).
+  if(zyklusModusAe && innen && winkelModus){
+    warnings.push('G72 innen MIT Schenkelwinkeln: nur aussen am Maschinensatz belegt (03.09.2026) — Ausgabe erfolgt als G-Einzelsaetze.');
     zyklusModusAe=false;
   }
-  if(zyklusModusAe && winkelModus){
-    // Die Maske der Steuerung KANN die Winkel (alpha1/alpha2, DV 594
-    // S. 4.6-12) — aber wie der Satz die Schraegen kodiert (Xm/Zm in
-    // PK/PM/PN? Vorzeichen?), ist ohne Beispielsatz mit Winkeln
-    // unbelegt. Ein falsch gedrehter Schenkel schneidet in die
-    // Schulter. Beleg-Weg wie beim Innen-Fall: Maschinentermin.
-    warnings.push('G72 mit Schenkelwinkeln: die SATZ-Kodierung der Schraegen (Xm/Zm-Strecken) ist am Handbuch nicht belegt — Ausgabe erfolgt als G-Einzelsaetze. Beleg-Weg: Winkel-Zyklus an der Maschine eintippen und per DNC ziehen.');
+  if(zyklusModusAe && p.richtung==='plan'){
+    // Die alte Deutung "PQ=Richtung 1/2" ist durch den Maschinensatz
+    // WIDERLEGT (PQ traegt dort ein Kantenmass). Wie der Satz die
+    // Planrichtung kodiert, ist unbelegt.
+    warnings.push('G72 plan: die Richtungs-Kodierung im Zyklussatz ist am Maschinensatz nicht belegt (die fruehere PQ-Deutung war falsch) — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyklusModusAe=false;
+  }
+  if(zyklusModusAe && xInner<=0){
+    warnings.push('G72 bis X0 (ueber Mitte): am Maschinensatz nicht belegt — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyklusModusAe=false;
+  }
+  const eckUebergangAe = innen ? kant2Inn : kant2;
+  if(zyklusModusAe && eckUebergangAe>0){
+    // Daniels Winkel-Testsatz BEWEIST die Luecke: er tippte Fase 2 /
+    // Radius 3 / Fase 2 — der gezogene Satz traegt nur PO2 und PQ2,
+    // der ECKUEBERGANG (Radius 3) fehlt. Ein Zyklussatz ohne ihn
+    // fertigte eine scharfe Ecke: Massfehler. Deshalb Einzelsaetze.
+    warnings.push('G72: der Maschinensatz kennt nur die beiden Schenkel-Endkanten (PO/PQ) — fuer den Eckuebergang K2 gibt es kein belegtes Wort. Ausgabe erfolgt als G-Einzelsaetze.');
+    zyklusModusAe=false;
+  }
+  // Innen leben die Kantenmasse in kant1Inn/kant3Inn (kant1/kant3
+  // sind dort per Definition 0) — eine gemeinsame Sicht fuer den
+  // Zyklussatz, sonst verloere der Innen-Satz seine Mundfase stumm.
+  const kantStirnAe = innen ? kant1Inn : kant1;
+  const kantAuslaufAe = innen ? kant3Inn : kant3;
+  const kantTypRadiusAe = (kantStirnAe>0 && p.k1Typ!=='fase') || (kantAuslaufAe>0 && p.k3Typ!=='fase');
+  if(zyklusModusAe && kantTypRadiusAe){
+    // Beide Belegsaetze tragen P235:6 unveraendert, obwohl einmal
+    // Fase+Radius und einmal Fase+Fase getippt war — WO der Kantentyp
+    // im Satz steckt, ist damit offen. Eine Rundung, die die Maschine
+    // als Fase fertigt, waere ein stiller Konturfehler.
+    warnings.push('G72: wie der Satz FASE und RUNDUNG an den Endkanten unterscheidet, ist am Maschinensatz nicht belegt (P235 stand in beiden Belegen auf 6) — bei Rundungskanten erfolgt die Ausgabe als G-Einzelsaetze.');
     zyklusModusAe=false;
   }
   if(zyklusModusAe && sbAe){
@@ -18372,30 +18434,33 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     zyklusModusAe=false;
   }
   if(zyklusModusAe){
-    const xmAe=(xOuter-xInner)/2, zmAe=zOuter-zInner;
     if(doFinish && Math.abs((+p.uz||0)-(+p.ux||0))>1e-9){
-      warnings.push('G72: der Zyklus kennt nur EIN Schlichtaufmass U (PI'+fmt(p.ux||0)+', allseitig). UZ '+fmt(p.uz||0)+' wird im Zyklussatz nicht abgebildet — das Fertigmass in Z haengt dann an der Steuerung.');
+      warnings.push('G72: der Zyklus kennt nur EIN Schlichtaufmass U (PG'+fmt(p.ux||0)+', allseitig). UZ '+fmt(p.uz||0)+' wird im Zyklussatz nicht abgebildet — das Fertigmass in Z haengt dann an der Steuerung.');
     }
-    if(trifftMitte){
-      warnings.push('G72 plan: der Zyklus endet auf dem programmierten X'+fmt(xInner)+' — der Planschnitt ueber Mitte der Einzelsaetze entfaellt, aus dem Schneidenradius bleibt ein Zapfen von rund ⌀'+fmt(2*noseR)+' stehen.');
-    }
+    // Realform 7.210i (Beleg s. o.). PK/PL sind die signierten
+    // Gesamtstrecken, PM/PN der Schenkel-Schnittpunkt: der
+    // Stirnschenkel oeffnet ab dem Ziel-⌀ mit (90-w1) gegen die
+    // Achse, die Schulter faellt mit (90-w2) vom Startradius auf K.
+    // Bei 90/90 kollabiert der Schnittpunkt auf |PK|/|PL| — exakt
+    // der Innen-Belegsatz (PM10 PN40).
+    const w1Ae=+(p.w1||90), w2Ae=+(p.w2||90);
+    const t1Ae=Math.tan((90-w1Ae)*Math.PI/180), t2Ae=Math.tan((90-w2Ae)*Math.PI/180);
+    const rDAe=((+p.x0)-(+p.x1))/2, zmAe2=(+p.z1)-(+p.z0);
+    const pnAe=Math.abs((zmAe2 + rDAe*t2Ae)/(t1Ae*t2Ae - 1));
+    const pmAe=Math.abs(rDAe - t1Ae*pnAe);
     const worteAe=[
       'G72','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),'I'+fmt(p.x1),'K'+fmt(p.z1),
-      'PG'+fmt(p.d),
-      (doFinish?'PI'+fmt(p.ux||0):null),
-      'PK'+fmt(-xmAe),'PM'+fmt(xmAe),'PN'+fmt(zmAe),
-      (kant2>0?'PO'+fmt(kant2):null),
-      'PQ'+(p.richtung==='plan'?1:2),
-      (kant2>0 && p.k2Typ==='fase'?'PR1':null),
-      (kant1>0 && p.k1Typ==='fase'?'P230:1':null),
-      (kant1>0?'P231:'+fmt(kant1):null),
-      (kant3>0 && p.k3Typ==='fase'?'P232:1':null),
-      (kant3>0?'P233:'+fmt(kant3):null),
+      'PE1','PF'+fmt(p.d),'PG'+fmt(p.ux||0),
+      'PK'+fmt(((+p.x1)-(+p.x0))/2),'PL'+fmt(zmAe2),
+      'PM'+fmt(pmAe),'PN'+fmt(pnAe),
+      (kantStirnAe>0?'PO'+fmt(kantStirnAe):null),
+      (kantAuslaufAe>0?'PQ'+fmt(kantAuslaufAe):null),
+      'P235:6','P236:'+fmt(w1Ae),'P237:'+fmt(w2Ae),
       (doRough?'P240:1':null),(doFinish?'P241:1':null)
     ].filter(Boolean);
     lines.push('(=== NATIVER G72-ABSPANZYKLUS - Schnittaufteilung macht die Steuerung ===)');
-    lines.push('(P230/232=Fase-Flags, P231/233=Masse: so der Beispielsatz S. 3-43 - die Tabelle druckt es vertauscht)');
-    lines.push('(ANNAHME zu pruefen: PK=signierte X-Strecke radial, abgeleitet aus Beispielsatz und 1000er-Systematik. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
+    lines.push('(REALFORM vom Maschinensatz 03.09.2026: P236/P237=Winkel, PM/PN=Schenkel-Schnittpunkt)');
+    lines.push('(ANNAHME: PE1 und P235:6 standen konstant in den Belegsaetzen - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
     lines.push(`${N()} (ABSPANEN) ${worteAe.join(' ')}`); bump();
     lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
   }
@@ -21093,44 +21158,74 @@ function genEinstechen71(p, N, bump, lines, warnings){
   genEinstechen(Object.assign({}, p, {z0bez:'rechts', __exp:1}), N, bump, tmp, warnings);
   if(!zyk){ tmp.forEach(z=>lines.push(z)); return; }
   if(tmp.length===0) return;   // Hauptgenerator hat abgebrochen (Massfehler) — dann auch kein Zyklussatz
+  // ===================================================================
+  // MASCHINENBELEG 03.09.2026 (Daniels Termin, "1500 Zyklen.TAP" plus
+  // Masken-Fotos): die 7.210i erzeugt fuer Daniels 20er-Nut
+  //   G71 X120 Z-30 PE1 PG0.1 PM20 PN20 PO2 PP3 PQ2 PR3 PS1 PU1
+  //       PY1 PZ-33.1 P230:3.1 P240:1 P241:1
+  // Das WIDERLEGT mehrere Woerter der alten Handbuch-Form (DV 610
+  // S. 3-40/41): kein G91, kein PJ, kein PW, kein P233/P234/P235,
+  // kein P228. Belegt stattdessen: PG=U (Maskenfeld Schlichtaufmass),
+  // PY=N auch bei 1, Flags PS/PU NUR an Fasen-Ecken (Radius-Ecken
+  // tragen keins), P230 = BS Meisselbreite (Maskenfeld "0=autom.",
+  // die Werkzeugtabelle der Maschine kennt keine Breite), und
+  // PZ = Z0 - BS = Bahnpunkt des ersten Stichs (von der Maske
+  // vorgerechnet, Feld P). Die Eckenzaehlung PO..PR deckt sich mit
+  // unserer (Mund links, Grund links, Mund rechts, Grund rechts).
   const stTool = toolTable.find(x=>String(x.t)===String(p.t));
   const bw = Math.max(0.5, +((stTool&&stTool.len) || 3));
+  if(zyk && p.ausr==='axial'){
+    warnings.push('G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — die Stirnnut wird als G-Einzelsaetze ausgegeben (das fruehere PJ2 stand in keinem echten Satz).');
+    zyk=false;
+  }
+  if(zyk && p.lage==='innen'){
+    warnings.push('G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — innen wird als G-Einzelsaetze ausgegeben (das fruehere PJ1 stand in keinem echten Satz).');
+    zyk=false;
+  }
+  if(zyk && ((+p.a1||0)>0 || (+p.a2||0)>0)){
+    warnings.push('G71-Zyklussatz: Flankenwinkel sind am Maschinensatz nicht belegt (im Belegsatz standen beide auf 0) — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyk=false;
+  }
+  if(zyk && (+p.n||1)>1){
+    warnings.push('G71-Zyklussatz: bei mehreren Stichen (N>1) ist die PZ/Abstands-Kodierung unbelegt (der Belegsatz hatte N=1, PZ war dort der Bahnpunkt des ERSTEN Stichs) — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyk=false;
+  }
+  if(zyk && (+p.w||0)!==0){
+    warnings.push('G71-Zyklussatz: der Kegelwinkel W hat kein belegtes Satzwort — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyk=false;
+  }
+  if(!zyk){ tmp.forEach(z=>lines.push(z)); return; }
   if(doFinish && Math.abs((+p.uz||0)-(+p.ux||0))>1e-9)
     warnings.push('G71: der Zyklus kennt nur EIN Schlichtaufmass U (PG'+fmt(p.ux||0)+', allseitig). UZ '+fmt(p.uz||0)+' wird im Zyklussatz nicht abgebildet.');
   if(doFinish && doRough && (Math.abs((+p.ff||0)-(+p.fr||0))>1e-9 || Math.abs((+p.sf||0)-(+p.sr||0))>1e-9))
     warnings.push('G71: der Zyklus faehrt komplett mit den aktiven Schnittwerten F'+fmt(p.fr)+'/S'+fmt(p.sr)+' — die Schlichtwerte F'+fmt(p.ff)+'/S'+fmt(p.sf)+' wirken nur in der Simulation.');
-  // Lage -> PJ (Tabelle S. 3-40): 0 = -X aussen, 1 = +X innen, 2 = -Z Stirnnut.
-  const pj = (p.ausr==='axial') ? 2 : (p.lage==='innen' ? 1 : 0);
-  // Tiefe PN in mm (Menuemaske T=40 -> PN40, 1:1), inkremental P234:91.
-  // Radial ist t1 der GRUND-Durchmesser (absolut), axial schon eine
-  // Z-Tiefe in mm — zwei verschiedene Maskensemantiken, eine Adresse.
-  const tiefeMm = (p.ausr==='axial') ? Math.abs(+p.t1) : Math.abs((+p.t1)-(+p.x0))/2;
-  // Ecken: Mass>0 -> Mass UND Flag schreiben (der Beispielsatz fuehrt
-  // auch die 0-Flags seiner gesetzten Ecken); Ecke ohne Mass entfaellt.
-  const eckW=(mass,flag,aM,aF)=>{
+  if(doRough && (+p.d||0)>0)
+    warnings.push('G71: fuer die Spanbrech-Zustellung D gibt es im Maschinensatz kein Wort — die Schnittaufteilung im Stich macht die Steuerung selbst.');
+  // Tiefe PN in mm: t1 ist radial der GRUND-Durchmesser (absolut) —
+  // Belegsatz: (120-80)/2 = PN20.
+  const tiefeMm = Math.abs((+p.t1)-(+p.x0))/2;
+  // Ecken: Mass immer, Flag NUR bei Fase — exakt der Belegsatz
+  // (PO2 PP3 PQ2 PR3 PS1 PU1: die Radius-Ecken 2/4 tragen kein Flag).
+  const eckM=(mass,aM,aF)=>{
+    const m=Math.max(+(p[aM]||0), +(p[aF]||0));
+    return m>0.005 ? [mass+fmt(m)] : [];
+  };
+  const eckF=(flag,aM,aF)=>{
     const r=+(p[aM]||0), f=+(p[aF]||0);
-    const m=Math.max(r,f);
-    if(m<=0.005) return [];
-    return [mass+fmt(m), flag+(f>r?1:0)];
+    return (f>0.005 && f>r) ? [flag+'1'] : [];
   };
   const worte=[
-    'G71','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),'G91',
-    (doFinish?'PG'+fmt(p.ux||0):null),
-    'PJ'+pj,
-    ((+p.a1||0)>0?'PK'+fmt(p.a1):null),
-    ((+p.a2||0)>0?'PL'+fmt(p.a2):null),
+    'G71','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),
+    'PE1','PG'+fmt(p.ux||0),
     'PM'+fmt(p.b1),'PN'+fmt(tiefeMm)]
-    .concat(eckW('PO','PS','r1','f1'))
-    .concat(eckW('PP','PT','r2','f2'))
-    .concat(eckW('PQ','PU','r3','f3'))
-    .concat(eckW('PR','PV','r4','f4'))
+    .concat(eckM('PO','r1','f1')).concat(eckM('PP','r2','f2'))
+    .concat(eckM('PQ','r3','f3')).concat(eckM('PR','r4','f4'))
+    .concat(eckF('PS','r1','f1')).concat(eckF('PT','r2','f2'))
+    .concat(eckF('PU','r3','f3')).concat(eckF('PV','r4','f4'))
     .concat([
-    'PW'+fmt(bw),
-    ((+p.n||1)>1?'PY'+p.n:null),
-    ((+p.n||1)>1?'PZ'+fmt(-(+p.dp||0)):null),
-    (doRough?'P228:'+fmt(p.d):null),
-    ((+p.w||0)!==0?'P229:'+fmt(p.w):null),
-    'P233:0','P234:91','P235:0',
+    'PY'+(+p.n||1),
+    'PZ'+fmt((+p.z0)-bw),
+    'P230:'+fmt(bw),
     (doRough?'P240:1':null),(doFinish?'P241:1':null)
     ]).filter(Boolean);
   // Kopf (bis einschliesslich VORSCHUB) bleibt echt, danach der
@@ -21139,8 +21234,8 @@ function genEinstechen71(p, N, bump, lines, warnings){
   if(kopfEnde<0) kopfEnde=Math.min(5,tmp.length-1);
   for(let i2=0;i2<=kopfEnde;i2++) lines.push(tmp[i2]);
   lines.push('(=== NATIVER G71-EINSTECHZYKLUS - Schnittaufteilung macht die Steuerung ===)');
-  lines.push('(PW'+fmt(bw)+' Meisselbreite: die Steuerung prueft gegen die Werkzeugdaten und meldet Differenzen)');
-  lines.push('(ANNAHME zu pruefen: P233:0 = Bezugspunkt an der RECHTEN Nutkante wie im CAM. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
+  lines.push('(REALFORM vom Maschinensatz 03.09.2026: P230=BS Meisselbreite aus der CAM-Werkzeugtabelle, PZ=Z0-BS erster Stich)');
+  lines.push('(ANNAHME: PE1 stand konstant im Belegsatz - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
   lines.push(`${N()} (EINSTICH) ${worte.join(' ')}`); bump();
   lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
   let letzterSatz=-1;
