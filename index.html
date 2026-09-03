@@ -2698,6 +2698,18 @@ Basis ist Baustahl. Er &auml;ndert keine bestehenden Zyklen.</dd>
 <dt id="ba-pk-rapid">Eilgang (rapidF)</dt>
 <dd>Geht in Hauptzeitrechnung UND Simulationstempo. Leer = Maschinenprofil,
 R&uuml;ckfall 5000 mm/min.</dd>
+<dt id="ba-pk-nmax">NMAX Drehzahlgrenze</dt>
+<dd>Leer = aus. Mit Wert klemmt das PROGRAMM die Drehzahl selbst: wo die
+G96-Drehzahl am kleinen &empty; die Grenze risse (Grenz-&empty; =
+Vc&middot;1000/(&pi;&middot;NMAX)), steht ein eingef&uuml;gter Satz
+<b>(NMAX) G97 S&lt;Grenze&gt;</b> &mdash; die Spindel l&auml;uft mit fester
+H&ouml;chstdrehzahl weiter, F in mm/U bleibt g&uuml;ltig. Sobald X wieder
+reicht, schaltet <b>(NMAX) G96 S&lt;Vc&gt;</b> zur&uuml;ck. Das ersetzt das
+fehlende G92/LIMS der Monforts im NC-Text; der
+<b>Hardware-Drehzahlw&auml;chter bleibt trotzdem von Hand zu stellen</b>
+(zweite Sicherung). Grenze der Wache: SSV-Zonen mit eigenen S-W&ouml;rtern
+klemmt sie nicht, sondern sagt es an; Bogen-Scheitel zwischen Start und
+Ziel pr&uuml;ft sie nicht.</dd>
 </dl>
 
 <h2 id="ba-k03">3 &nbsp;Kontur zeichnen</h2>
@@ -3712,6 +3724,7 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
       
 
       <div class="mrow"><label>Eilgang-Vorschubwert (G94)</label><input type="number" step="any" id="rapidF" value="5000"><span class="unit unit2"><i>mm/min</i></span></div>
+      <div class="mrow"><label>NMAX Drehzahlgrenze (leer = aus)</label><input type="number" step="any" id="pkNmax" value=""><span class="unit unit2"><i>U/min</i></span></div>
       <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnCloseParams" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button></div>
     </div>
   </div>
@@ -4697,7 +4710,7 @@ function toolRadius(tnum){
 // haengt am BAUTEIL — also gehoert er zum Programm und wandert mit in
 // die Ablage. Alte Ablagen ohne die Felder lassen beim Laden den
 // aktuellen Wert stehen (ablageLaden setzt nur definierte ids).
-const SETTINGS_IDS = ['progNo','pkForm','stockDia','pkXI','pkZA','pkZI','pkZV','pkLA','safeZ','rapidF','pkTw','pkWerkstoff','wwpX','wwpZ'];
+const SETTINGS_IDS = ['progNo','pkForm','stockDia','pkXI','pkZA','pkZI','pkZV','pkLA','safeZ','rapidF','pkTw','pkWerkstoff','wwpX','wwpZ','pkNmax'];
 
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d'), wrap=document.getElementById('canvasWrap');
 
@@ -23028,6 +23041,80 @@ function genStechdrehen(p, N, bump, lines, warnings){
   lines.push(`${N()} (GERADE  ) G00 Z${fmt(zAppr)}`); bump();
 }
 
+// =================================================================
+// NMAX-DREHZAHLWACHE [Daniel, 03.09.2026]: "wenn die aus Vc
+// errechnete Drehzahl die Grenze ueberschreiten wuerde, schalte auf
+// konstante Drehzahl um und wieder zurueck, sobald X wieder gross
+// genug ist." Die Monforts haben kein G92/LIMS (Hardware-Waechter,
+// s. Kopfkommentar) — deshalb bildet das NC die Begrenzung SELBST
+// nach: ein Nachlauf ueber die fertigen Saetze verfolgt den modalen
+// Zustand (G96/G97, S, X) und fuegt Umschaltsaetze ein:
+//   unterschreitet ein Zielpunkt den Grenz-⌀ = Vc*1000/(pi*NMAX),
+//   steht davor "(NMAX    ) G97 S<NMAX>" — die Spindel laeuft mit
+//   fester Hoechstdrehzahl weiter (F in mm/U bleibt gueltig);
+//   liegen Start UND Ziel wieder darueber, steht davor
+//   "(NMAX    ) G96 S<Vc>" und die konstante Schnittgeschwindigkeit
+//   uebernimmt wieder. Konservativ in beide Richtungen: geklemmt
+//   wird schon, wenn nur das Ziel drunter liegt; zurueckgeschaltet
+//   erst, wenn der ganze Satz drueber liegt.
+// Eingefuegte Saetze tragen die Nummer des Folgesatzes minus 5 —
+// die Zaehlung bleibt monoton und alle bestehenden Satzverweise
+// stimmen weiter. Der Nachlauf laeuft VOR der Zeitrechnung:
+// Hauptzeit und Simulation rechnen die Umschaltungen automatisch
+// mit (parseGcodeForSim liest G96/G97/S modal).
+// GRENZE, ehrlich: Saetze, die selbst ein S-Wort tragen (SSV-
+// Stufen), klemmt die Wache nicht — unter G97 waere ihr Vc-Wert
+// eine Drehzahl und damit falsch. Faellt so ein Satz unter den
+// Grenz-⌀, steht stattdessen eine Warnung. Bogen-Scheitel zwischen
+// Start und Ziel prueft die Wache nicht (Zielpunkt-Betrachtung).
+function nmaxWache(lines, warnings){
+  const nmax=+((document.getElementById('pkNmax')||{}).value)||0;
+  if(!(nmax>0)) return;
+  let g96=false, sVc=0, cx=null, clamp=false, anz=0, ssvWarn=false;
+  const out=[];
+  for(let i=0;i<lines.length;i++){
+    const L=lines[i];
+    if(!/^N\d\d\d\d /.test(L)){ out.push(L); continue; }
+    const kern=L.replace(/\([^)]*\)/g,'');
+    if(/\bG96\b/.test(kern)){ g96=true; clamp=false; }
+    if(/\bG97\b/.test(kern)){ g96=false; clamp=false; }
+    const mS=kern.match(/\bS(\d+\.?\d*)/);
+    const mX=kern.match(/\bX(-?\d+\.?\d*)/);
+    const zielX = mX ? Math.abs(+mX[1]) : null;
+    const fahrsatz=/\bG0[0123]\b/.test(kern);
+    if(g96 && fahrsatz && zielX!==null){
+      const basis = mS ? +mS[1] : sVc;
+      if(basis>0){
+        const dGrenz = basis*1000/(Math.PI*nmax);
+        const unterZiel = zielX < dGrenz-1e-9;
+        const unterStart = cx!==null && cx < dGrenz-1e-9;
+        if(mS && (unterZiel||unterStart)){
+          if(!ssvWarn){
+            warnings.push('NMAX '+fmt(nmax)+': eine Drehzahlvariations-Zone unterschreitet den Grenz-⌀ '+fmt(dGrenz)+' — dort kann die Wache nicht auf G97 klemmen (die SSV-Saetze tragen eigene S-Woerter). SSV-Zone verlegen oder NMAX pruefen.');
+            ssvWarn=true;
+          }
+        } else if(!mS){
+          const nr=+L.slice(1,5);
+          if(!clamp && unterZiel){
+            out.push('N'+String(Math.max(1,nr-5)).padStart(4,'0')+' (NMAX    ) G97 S'+fmt(nmax));
+            clamp=true; anz++;
+          } else if(clamp && !unterZiel && !unterStart){
+            out.push('N'+String(Math.max(1,nr-5)).padStart(4,'0')+' (NMAX    ) G96 S'+fmt(sVc));
+            clamp=false; anz++;
+          }
+        }
+      }
+    }
+    if(mS) sVc=+mS[1];
+    if(zielX!==null) cx=zielX;
+    out.push(L);
+  }
+  if(anz>0){
+    warnings.push('NMAX-Wache: '+anz+' Umschaltsaetze eingefuegt — im Programm steht G97 S'+fmt(nmax)+', wo die G96-Drehzahl die Grenze risse, und G96 sobald X wieder reicht. Drehzahlwaechter der Maschine trotzdem von Hand stellen (zweite Sicherung).');
+    lines.length=0;
+    out.forEach(z=>lines.push(z));
+  }
+}
 function buildProgram(){
   const warnBox=document.getElementById('warnBox');
   warnBox.style.display='none';
@@ -23075,6 +23162,8 @@ function buildProgram(){
     const hatVc = programSteps.some(st=>!st.aus && st.params && st.params.sMode==='vc');
     if(hatVc){
       lines.push('(G96 IM PROGRAMM: DREHZAHLWAECHTER DER MASCHINE VON HAND BEGRENZEN)');
+      const nmaxKopf=+((document.getElementById('pkNmax')||{}).value)||0;
+      if(nmaxKopf>0) lines.push('(NMAX '+nmaxKopf+' U/MIN: DAS PROGRAMM SCHALTET UNTER DEM GRENZ-DM SELBST AUF G97 UM)');
       warnings.push('G96 im Programm: Drehzahlwaechter der Maschine von Hand einstellen — die Getriebespindel hat kein programmierbares Limit (kein G92 an den Monforts).');
     }
   }
@@ -23525,8 +23614,9 @@ function buildProgram(){
       'ein Übergehen der betroffenen Elemente wäre am NC-Text nicht erkennbar.';
     return null;
   }
-  const out=ncLesbarMachen(lines.join('\n'));
+  nmaxWache(lines, warnings);
   letzteWarnungen = warnings.slice();
+  const out=ncLesbarMachen(lines.join('\n'));
   if(warnings.length) renderWarnBox(warnBox, warnings);
   return out;
 }
