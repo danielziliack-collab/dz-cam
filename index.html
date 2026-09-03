@@ -2545,8 +2545,10 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
             <option value="MONFORTS_1000_MTC_K_6624B">MTC-K (1000)</option>
           </select>
           <button id="btnPpInfo" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Merkmale ▸</button>
+          <button id="btnBett" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Bett ▸</button>
         </div>
         <div id="ppInfo" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:48vh;border-bottom:1px solid var(--line);"></div>
+        <div id="bettPanel" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:52vh;border-bottom:1px solid var(--line);padding:8px 10px;font-size:13px;"></div>
         <div id="gcodeView"></div>
         <textarea id="gcodeOut" readonly placeholder="Kontur anlegen, dann „Erzeugen“ drücken."></textarea>
       </div>
@@ -3515,6 +3517,21 @@ erkennbar.</dd>
 
 
 <h2 id="ba-k10">10 &nbsp;Die zwei Maschinen (Profile)</h2>
+<dl><dt id="ba-masch-bett">Bettverlaufs-Kompensation (Knopf &bdquo;Bett&ldquo; in der G-Code-Ansicht)</dt>
+<dd>F&uuml;r &auml;ltere Betten, die &uuml;ber die Drehl&auml;nge kegelig oder wellig
+drehen. Je Maschine eine Tabelle: <b>Abstand vor der Backenfront</b> und die am
+Referenz-Zylinderschnitt <b>gemessene &empty;-Abweichung</b> (+ = Maschine dreht dort
+zu gro&szlig;). Mindestens 2 St&uuml;tzstellen; dazwischen wird linear interpoliert.
+<b>Zugeschaltet wird je Programm</b>: Feld &bdquo;Bettkompensation an/aus&ldquo; im
+Programmkopf (wird mit dem Programm gespeichert, Vorgabe aus). Steht es auf an,
+zieht die NC-Ausgabe die Abweichung vom X ab, teilt lange
+Z&uuml;ge an den St&uuml;tzstellen und schreibt an jeden korrigierten Satz das
+<b>SOLL in Klammern</b>; im Programmkopf steht eine Kennzeile. Der Ma&szlig;bericht
+rechnet die Abweichung zur&uuml;ck und misst das erwartete reale Teil &mdash; er
+pr&uuml;ft damit die Kompensation. Die Tabelle ist <b>maschinenfest</b>
+(Browserspeicher), sie wandert nicht mit dem Programm. Grenzen: B&ouml;gen und
+Gewinde werden nur am Zielpunkt korrigiert (Ansage, wenn sich die Abweichung
+&uuml;ber einen Gewindelauf sp&uuml;rbar &auml;ndert).</dd></dl>
 <p>Das Maschinenprofil steuert T-Format, Zyklusfreigaben, I/K-Skalierung und den
 Eilgang-R&uuml;ckfall. Die NC beider Profile wird im Pr&uuml;fstand getrennt gegen
 eingefrorene St&auml;nde gepr&uuml;ft.</p>
@@ -3725,6 +3742,7 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
 
       <div class="mrow"><label>Eilgang-Vorschubwert (G94)</label><input type="number" step="any" id="rapidF" value="5000"><span class="unit unit2"><i>mm/min</i></span></div>
       <div class="mrow"><label>NMAX Drehzahlgrenze (leer = aus)</label><input type="number" step="any" id="pkNmax" value=""><span class="unit unit2"><i>U/min</i></span></div>
+      <div class="mrow"><label>Bettkompensation (Tabelle: Knopf Bett)</label><select id="pkBett"><option value="aus" selected>aus</option><option value="an">an</option></select><span class="unit"></span></div>
       <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnCloseParams" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button></div>
     </div>
   </div>
@@ -4710,7 +4728,7 @@ function toolRadius(tnum){
 // haengt am BAUTEIL — also gehoert er zum Programm und wandert mit in
 // die Ablage. Alte Ablagen ohne die Felder lassen beim Laden den
 // aktuellen Wert stehen (ablageLaden setzt nur definierte ids).
-const SETTINGS_IDS = ['progNo','pkForm','stockDia','pkXI','pkZA','pkZI','pkZV','pkLA','safeZ','rapidF','pkTw','pkWerkstoff','wwpX','wwpZ','pkNmax'];
+const SETTINGS_IDS = ['progNo','pkForm','stockDia','pkXI','pkZA','pkZI','pkZV','pkLA','safeZ','rapidF','pkTw','pkWerkstoff','wwpX','wwpZ','pkNmax','pkBett'];
 
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d'), wrap=document.getElementById('canvasWrap');
 
@@ -17687,6 +17705,48 @@ const PP_STATUS={
   unknown_for_target_machine:{txt:'ANNAHME — nicht belegt', cls:'ann'},
   disabled:{txt:'gesperrt', cls:'aus'},
 };
+// BETTKOMPENSATIONS-MASKE [Daniel, 03.09.2026]: je Maschine eine
+// Tabelle "Abstand vor der Backenfront -> gemessene ⌀-Abweichung
+// des Referenzschnitts". Gespeichert im Browserspeicher-Slot
+// et_bettkomp (maschinenfest, NICHT im Programm — die Tabelle
+// gehoert zur Maschine wie der Werkzeugversatz). Vorzeichen: +dx =
+// die Maschine dreht dort ZU GROSS, die Ausgabe zieht X um dx ab.
+const BETT_ZEILEN=12;
+function bettPanelMalen(){
+  const el=document.getElementById('bettPanel'); if(!el) return;
+  const d=bettKompLaden()[MASCHINENPROFIL.id]||{aktiv:false, stuetz:[]};
+  let h='<b>Bettverlaufs-Kompensation — '+MASCHINENPROFIL.label+'</b><br>'
+   +'<span style="color:var(--mut);">Referenz-Zylinder nahe der Backen vermessen: je St&uuml;tzstelle den '
+   +'Abstand VOR der Backenfront und die gemessene &empty;-Abweichung eintragen '
+   +'(+ = Maschine dreht dort zu gro&szlig;). Die NC-Ausgabe zieht die Abweichung '
+   +'vom X ab und teilt lange Z&uuml;ge an den St&uuml;tzstellen; jeder korrigierte '
+   +'Satz tr&auml;gt sein SOLL in Klammern. Mindestens 2 St&uuml;tzstellen.</span><br>'
+   +'<div style="margin:8px 0;color:var(--mut);"><b>Zugeschaltet wird je Programm</b> im Programmkopf (Feld Bettkompensation) — hier steht nur die Maschinen-Tabelle.</div>'
+   +'<table style="border-collapse:collapse;"><tr><th style="text-align:left;padding:2px 8px 2px 0;">Abstand [mm]</th><th style="text-align:left;padding:2px 8px;">Abw. &empty; [mm]</th></tr>';
+  for(let i=0;i<BETT_ZEILEN;i++){
+    const q=d.stuetz&&d.stuetz[i]||{};
+    h+='<tr><td style="padding:1px 8px 1px 0;"><input type="number" step="any" id="bett_a'+i+'" value="'+(q.a!==undefined?q.a:'')+'" style="width:92px;"></td>'
+      +'<td style="padding:1px 8px;"><input type="number" step="any" id="bett_d'+i+'" value="'+(q.dx!==undefined?q.dx:'')+'" style="width:92px;"></td></tr>';
+  }
+  h+='</table><div style="margin:10px 0 4px;"><button id="bettSpeichern" style="padding:6px 14px;">Speichern</button> <span id="bettMeld" style="color:var(--mut);"></span></div>';
+  el.innerHTML=h;
+  const sp=document.getElementById('bettSpeichern');
+  if(sp) sp.addEventListener('click', ()=>{
+    const stuetz=[];
+    for(let i=0;i<BETT_ZEILEN;i++){
+      const aV=(document.getElementById('bett_a'+i)||{}).value;
+      const dV=(document.getElementById('bett_d'+i)||{}).value;
+      if(aV===''||aV===undefined||dV===''||dV===undefined) continue;
+      if(!isFinite(+aV)||!isFinite(+dV)) continue;
+      stuetz.push({a:+aV, dx:+dV});
+    }
+    const alle=bettKompLaden();
+    alle[MASCHINENPROFIL.id]={stuetz};
+    try{ localStorage.setItem('et_bettkomp', JSON.stringify(alle)); }catch(e){}
+    const m=document.getElementById('bettMeld');
+    if(m) m.textContent='Gespeichert: '+stuetz.length+' Stuetzstellen'+(stuetz.length<2 ? ' — wirksam erst ab 2' : '')+'.';
+  });
+}
 function ppMerkmale(){
   const pr=MASCHINENPROFIL;
   const zyk=k=>pr.zyklen[k]==='disabled'? {w:'gesperrt — es entstehen G-Einzelsaetze', s:'disabled'}
@@ -23042,6 +23102,168 @@ function genStechdrehen(p, N, bump, lines, warnings){
 }
 
 // =================================================================
+// BETTVERLAUFS-KOMPENSATION [Daniel, 03.09.2026 abends]: alte
+// Betten verziehen das Teil ueber die Drehlaenge (kegelig, wellig
+// — sein Beispiel: 0,14 mm im ⌀ auf 1500 mm, ansteigend zu den
+// Backen). Statt Maschinenparameter und Servicetechniker: je
+// MASCHINE eine Stuetzstellen-Tabelle "Abstand vor der Backenfront
+// -> ⌀-Abweichung, die die Maschine dort erzeugt", gemessen am
+// Referenz-Zylinderschnitt. Die NC-Ausgabe GEGENkorrigiert jeden
+// X-Zielwert (X_prog = X_soll - dx), lange G01-Zuege werden an den
+// Stuetzstellen GETEILT (zwischen Stuetzstellen ist dx linear —
+// ein linearer NC-Satz je Intervall bildet die Kompensation exakt
+// ab; ein einzelner 1500er-Zug traefe nur die Endpunkte). Jeder
+// veraenderte Satz traegt das SOLL in Klammern, damit Daniel sich
+// am Programm zurechtfindet. Der Massbericht rechnet dx wieder
+// DRAUF und misst so das erwartete reale Teil — er prueft damit
+// die Kompensation, statt sie als Fehler zu melden.
+// BEZUG: a = z - (ZA - LA) = Abstand des Werkstueckpunkts vor der
+// Backenfront. Das ist bettfest genug, weil Daniel die Werkzeuge
+// nahe der Backen vermisst und die Tabelle genauso ermittelt.
+// GRENZEN, ehrlich: Boegen und G33 werden nur am ZIELPUNKT
+// korrigiert (Warnung, wenn dx sich ueber einen G33-Lauf um mehr
+// als 0,01 aendert — das Gewinde wuerde konisch, was es an der
+// Maschine ohne Kompensation genauso wuerde); der Bogen-VERLAUF
+// zwischen den Punkten bleibt unkorrigiert (Fasen/Radien sind
+// kurz, dx aendert sich dort um Mikrometer).
+let BETT_KOMP=null;   // {profilId:{aktiv:bool, stuetz:[{a,dx}]}}
+function bettKompLaden(){
+  if(BETT_KOMP!==null) return BETT_KOMP;
+  BETT_KOMP={};
+  try{ const j=localStorage.getItem('et_bettkomp'); if(j) BETT_KOMP=JSON.parse(j)||{}; }catch(e){}
+  return BETT_KOMP;
+}
+// Setter fuer Pruefstand und Import — let BETT_KOMP lebt im
+// Skript-Scope und ist von aussen sonst unerreichbar.
+function bettKompSetzen(daten){ BETT_KOMP=daten; }
+// ZUSCHALTUNG JE PROGRAMM [Daniels Ansage]: der Kopfschalter
+// pkBett entscheidet — die Maschinen-Tabelle ist nur die Datenlage.
+// Ein frueheres aktiv-Haekchen in der Bett-Maske ist abgeschafft;
+// ein gespeichertes aktiv-Feld aelterer Staende wird ignoriert.
+function bettKompAktiv(){
+  const schalter=((document.getElementById('pkBett')||{}).value)==='an';
+  if(!schalter) return null;
+  const d=bettKompLaden()[MASCHINENPROFIL.id];
+  return (d && Array.isArray(d.stuetz) && d.stuetz.length>=2) ? d : null;
+}
+// ⌀-Abweichung am Werkstueck-z (linear interpoliert, Raender
+// geklemmt). a waechst von der Backenfront zur Stirn.
+function bettDx(z){
+  const d=bettKompAktiv(); if(!d) return 0;
+  const zA=+((document.getElementById('pkZA')||{}).value)||0;
+  const la=+((document.getElementById('pkLA')||{}).value)||0;
+  const a=z-(zA-la);
+  const st=d.stuetz.slice().sort((u,v)=>u.a-v.a);
+  if(a<=st[0].a) return +st[0].dx||0;
+  if(a>=st[st.length-1].a) return +st[st.length-1].dx||0;
+  for(let i=1;i<st.length;i++){
+    if(a<=st[i].a){
+      const t=(a-st[i-1].a)/(st[i].a-st[i-1].a || 1);
+      return (+st[i-1].dx||0)+t*((+st[i].dx||0)-(+st[i-1].dx||0));
+    }
+  }
+  return 0;
+}
+function bettKompWache(lines, warnings){
+  const d=bettKompAktiv();
+  if(!d){
+    if(((document.getElementById('pkBett')||{}).value)==='an')
+      warnings.push('Bettkompensation ist im Programmkopf AN, aber fuer '+MASCHINENPROFIL.label+' ist keine Tabelle gepflegt (Knopf "Bett" in der G-Code-Ansicht, mindestens 2 Stuetzstellen) — die Ausgabe laeuft UNKOMPENSIERT.');
+    return;
+  }
+  const zA=+((document.getElementById('pkZA')||{}).value)||0;
+  const la=+((document.getElementById('pkLA')||{}).value)||0;
+  const zS=zA-la;
+  const stz=d.stuetz.slice().sort((u,v)=>u.a-v.a).map(q=>({z:zS+(+q.a||0), dx:+q.dx||0}));
+  let cx=null, cz=null, anz=0, geteilt=0, g33warn=false;
+  const out=[];
+  for(let i=0;i<lines.length;i++){
+    const L=lines[i];
+    if(!/^N\d\d\d\d /.test(L)){ out.push(L); continue; }
+    const kern=L.replace(/\([^)]*\)/g,'');
+    const mX=kern.match(/\bX(-?\d+\.?\d*)/);
+    const mZ=kern.match(/\bZ(-?\d+\.?\d*)/);
+    const zielX = mX? +mX[1] : cx;
+    const zielZ = mZ? +mZ[1] : cz;
+    const g01=/\bG0?1\b/.test(kern);
+    const g23=/\bG0?[23]\b/.test(kern);
+    const g33=/\bG33\b/.test(kern);
+    const g00=/\bG0?0\b/.test(kern) && !g01 && !g23;
+    const fahr=(g00||g01||g23||g33) && zielZ!==null && zielX!==null;
+    if(!fahr){ if(mX) cx=zielX; if(mZ) cz=zielZ; out.push(L); continue; }
+    const dxZiel=bettDx(zielZ);
+    // G33: nie teilen, nur Ziel korrigieren; Aenderung ueber den
+    // Lauf ansagen, wenn sie das Gewinde spuerbar kippen wuerde.
+    if(g33 && cz!==null && Math.abs(bettDx(cz)-dxZiel)>0.01 && !g33warn){
+      warnings.push('Bettkompensation: ueber einen Gewindelauf aendert sich die Bettabweichung um '+fmt(Math.abs(bettDx(cz)-dxZiel))+' mm im Durchmesser — der G33-Satz wird nur am Zielpunkt korrigiert.');
+      g33warn=true;
+    }
+    // Teilen: nur G01 mit Z-Lauf, wenn dx sich im Zug merklich
+    // aendert. Zwischenpunkte an den Stuetzstellen im Intervall.
+    const zwischen=[];
+    if(g01 && cz!==null && Math.abs(zielZ-cz)>0.01 && cx!==null){
+      const lo=Math.min(cz,zielZ), hi=Math.max(cz,zielZ);
+      const innere=stz.filter(q=>q.z>lo+0.005 && q.z<hi-0.005).map(q=>q.z);
+      innere.sort((u,v)=> (zielZ>cz)? u-v : v-u);
+      const dxStart=bettDx(cz);
+      if(innere.length && Math.abs(dxStart-dxZiel)>0.003){
+        innere.forEach(zk=>{
+          const t=(zk-cz)/(zielZ-cz);
+          zwischen.push({z:zk, xSoll:cx+(zielX-cx)*t});
+        });
+      }
+    }
+    const nrAlt=L.slice(0,5);
+    if(zwischen.length){
+      // Erster Teilsatz behaelt den Original-Kern (F/G41/G42 usw.),
+      // nur die Zielworte wechseln auf den ersten Zwischenpunkt.
+      zwischen.forEach((q,qi)=>{
+        const xP=q.xSoll-bettDx(q.z);
+        let satz;
+        if(qi===0){
+          satz=L.replace(/\bZ-?\d+\.?\d*/, 'Z'+fmt(q.z))
+               .replace(/\bX-?\d+\.?\d*/, 'X'+fmt(xP));
+          if(!/\bX-?\d/.test(satz.replace(/\([^)]*\)/g,''))) satz=satz.replace(/\bG0?1\b/, 'G01 X'+fmt(xP));
+        } else {
+          satz=nrAlt+' (KOMP    ) G01 X'+fmt(xP)+' Z'+fmt(q.z);
+        }
+        out.push(satz+' (SOLL X'+fmt(q.xSoll)+')');
+        anz++;
+      });
+      geteilt++;
+      out.push(nrAlt+' (KOMP    ) G01 X'+fmt(zielX-dxZiel)+' Z'+fmt(zielZ)+' (SOLL X'+fmt(zielX)+')');
+      anz++;
+    } else if(Math.abs(dxZiel)>=0.001){
+      const xP=zielX-dxZiel;
+      let satz=L;
+      if(mX) satz=satz.replace(/\bX-?\d+\.?\d*/, 'X'+fmt(xP));
+      else if(g01) satz=satz.replace(/\bG0?1\b/, 'G01 X'+fmt(xP));
+      // Eilgang ohne X-Wort: NICHT anfassen — ein eingefuegtes X
+      // waere eine radiale Bewegung, wo keine programmiert war.
+      else satz=null;
+      if(satz){ out.push(satz+' (SOLL X'+fmt(zielX)+')'); anz++; }
+      else out.push(L);
+    } else out.push(L);
+    cx=zielX; cz=zielZ;
+  }
+  if(anz>0){
+    // Eingefuegte Teilsaetze tragen erst die alte Nummer — einmal
+    // komplett neu nummerieren haelt die Zaehlung streng monoton.
+    // FERTIG-Kommentar und ca-Zeiten entstehen NACH diesem Nachlauf
+    // (ncLesbarMachen) und zaehlen automatisch richtig.
+    let nn=0;
+    for(let i=0;i<out.length;i++){
+      if(/^N\d\d\d\d /.test(out[i])){ nn+=10; out[i]='N'+String(nn).padStart(4,'0')+out[i].slice(5); }
+    }
+    const maxDx=Math.max.apply(null, stz.map(q=>Math.abs(q.dx)));
+    const kopfIdx=out.findIndex(z2=>z2.indexOf('(KOPF')>=0);
+    out.splice(Math.max(0,kopfIdx+1),0,'(BETTKOMPENSATION AKTIV: '+stz.length+' STUETZSTELLEN, MAX '+fmt(maxDx)+' MM DM - SOLLWERTE IN KLAMMERN)');
+    warnings.push('Bettkompensation aktiv: '+anz+' Saetze korrigiert ('+geteilt+' Zuege an Stuetzstellen geteilt, groesste Abweichung '+fmt(maxDx)+' mm im Durchmesser). Jeder korrigierte Satz traegt sein SOLL in Klammern; der Massbericht misst das erwartete reale Teil (dx zurueckgerechnet).');
+    lines.length=0;
+    out.forEach(z2=>lines.push(z2));
+  }
+}
+// =================================================================
 // NMAX-DREHZAHLWACHE [Daniel, 03.09.2026]: "wenn die aus Vc
 // errechnete Drehzahl die Grenze ueberschreiten wuerde, schalte auf
 // konstante Drehzahl um und wieder zurueck, sobald X wieder gross
@@ -23615,6 +23837,7 @@ function buildProgram(){
     return null;
   }
   nmaxWache(lines, warnings);
+  bettKompWache(lines, warnings);
   letzteWarnungen = warnings.slice();
   const out=ncLesbarMachen(lines.join('\n'));
   if(warnings.length) renderWarnBox(warnBox, warnings);
@@ -24080,6 +24303,12 @@ document.getElementById('btnPpInfo').onclick=()=>{
   const auf=box.style.display==='none';
   if(auf){ ppInfoMalen(); box.style.display='block'; b.textContent='Merkmale ▾'; }
   else { box.style.display='none'; b.textContent='Merkmale ▸'; }
+};
+document.getElementById('btnBett').onclick=()=>{
+  const box=document.getElementById('bettPanel'), b=document.getElementById('btnBett');
+  const auf=box.style.display==='none';
+  if(auf){ bettPanelMalen(); box.style.display='block'; b.textContent='Bett ▾'; }
+  else { box.style.display='none'; b.textContent='Bett ▸'; }
 };
 
 document.getElementById('btnCopy').onclick=()=>{
@@ -27775,6 +28004,24 @@ function massBericht(){
   if(codeJetzt===null) return null;
   let mvs = (typeof simMoves!=='undefined' && simMoves.length &&
              simMovesQuelle === codeJetzt) ? simMoves : parseGcodeForSim(codeJetzt);
+  // BETTKOMPENSATION [03.09.2026]: der NC-Text ist gegenkorrigiert —
+  // das reale Teil bekommt die Bettabweichung wieder DRAUF. Der
+  // Bericht misst deshalb x + dx(z) (Kopie, simMoves bleibt fuer
+  // die Simulation die gefahrene Maschinenbahn). Bogenzentren
+  // naehern mit dx am Zentrum — Boegen sind kurz gegen die
+  // Stuetzstellenabstaende.
+  if(bettKompAktiv()){
+    mvs = mvs.map(m=>{
+      const k=Object.assign({}, m);
+      if(isFinite(k.x1)&&isFinite(k.z1)) k.x1=k.x1+bettDx(k.z1);
+      if(isFinite(k.x2)&&isFinite(k.z2)) k.x2=k.x2+bettDx(k.z2);
+      // Bogenzentrum mitziehen (cx ist ⌀-skaliert wie x1/x2): das
+      // bildet den real gefahrenen Bogen nach — der Generator laesst
+      // I/K auf Soll, die Endpunkte wandern, das Teil traegt beides.
+      if(isFinite(k.cx)&&isFinite(k.cz)) k.cx=k.cx+bettDx(k.cz);
+      return k;
+    });
+  }
 
   const segPunkte=(m)=>{
     // Schneidzug -> Punktfolge (Boegen fein polygonisieren, Sehnenfehler < 0,002)
