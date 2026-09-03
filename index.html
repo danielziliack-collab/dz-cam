@@ -3521,7 +3521,9 @@ erkennbar.</dd>
 <dd>F&uuml;r &auml;ltere Betten, die &uuml;ber die Drehl&auml;nge kegelig oder wellig
 drehen. Je Maschine eine Tabelle: <b>Abstand vor der Backenfront</b> und die am
 Referenz-Zylinderschnitt <b>gemessene &empty;-Abweichung</b> (+ = Maschine dreht dort
-zu gro&szlig;). Mindestens 2 St&uuml;tzstellen; dazwischen wird linear interpoliert.
+zu gro&szlig;). Die <b>Backenfront ist der eingebaute Nullpunkt</b> (dort sind die Werkzeuge
+vermessen) &mdash; eine gemessene St&uuml;tzstelle gen&uuml;gt, dazwischen wird
+linear interpoliert; eine eigene Zeile bei Abstand 0 &uuml;berschreibt den Anker.
 <b>Zugeschaltet wird je Programm</b>: Feld &bdquo;Bettkompensation an/aus&ldquo; im
 Programmkopf (wird mit dem Programm gespeichert, Vorgabe aus). Steht es auf an,
 zieht die NC-Ausgabe die Abweichung vom X ab, teilt lange
@@ -17720,7 +17722,10 @@ function bettPanelMalen(){
    +'Abstand VOR der Backenfront und die gemessene &empty;-Abweichung eintragen '
    +'(+ = Maschine dreht dort zu gro&szlig;). Die NC-Ausgabe zieht die Abweichung '
    +'vom X ab und teilt lange Z&uuml;ge an den St&uuml;tzstellen; jeder korrigierte '
-   +'Satz tr&auml;gt sein SOLL in Klammern. Mindestens 2 St&uuml;tzstellen.</span><br>'
+   +'Satz tr&auml;gt sein SOLL in Klammern. <b>Die Backenfront ist der eingebaute '
+   +'Nullpunkt</b> (Abstand 0 = Abweichung 0, dort sind die Werkzeuge vermessen) — '
+   +'EINE gemessene St&uuml;tzstelle gen&uuml;gt; eine eigene Zeile bei Abstand 0 '
+   +'&uuml;berschreibt den Anker.</span><br>'
    +'<div style="margin:8px 0;color:var(--mut);"><b>Zugeschaltet wird je Programm</b> im Programmkopf (Feld Bettkompensation) — hier steht nur die Maschinen-Tabelle.</div>'
    +'<table style="border-collapse:collapse;"><tr><th style="text-align:left;padding:2px 8px 2px 0;">Abstand [mm]</th><th style="text-align:left;padding:2px 8px;">Abw. &empty; [mm]</th></tr>';
   for(let i=0;i<BETT_ZEILEN;i++){
@@ -17744,7 +17749,7 @@ function bettPanelMalen(){
     alle[MASCHINENPROFIL.id]={stuetz};
     try{ localStorage.setItem('et_bettkomp', JSON.stringify(alle)); }catch(e){}
     const m=document.getElementById('bettMeld');
-    if(m) m.textContent='Gespeichert: '+stuetz.length+' Stuetzstellen'+(stuetz.length<2 ? ' — wirksam erst ab 2' : '')+'.';
+    if(m) m.textContent='Gespeichert: '+stuetz.length+' Stuetzstellen (Backenfront 0/0 kommt automatisch dazu).';
   });
 }
 function ppMerkmale(){
@@ -23140,11 +23145,23 @@ function bettKompSetzen(daten){ BETT_KOMP=daten; }
 // pkBett entscheidet — die Maschinen-Tabelle ist nur die Datenlage.
 // Ein frueheres aktiv-Haekchen in der Bett-Maske ist abgeschafft;
 // ein gespeichertes aktiv-Feld aelterer Staende wird ignoriert.
+// DIE BACKENFRONT IST DER EINGEBAUTE NULLPUNKT [Daniels Logik]:
+// dort werden die Werkzeuge vermessen, dort ist die Abweichung per
+// Definition 0. bettStuetz() stellt den Anker {a:0, dx:0} voran,
+// wenn der Nutzer keinen eigenen Punkt bei a<=0 eingetragen hat —
+// EINE gemessene Stuetzstelle genuegt damit (linear von der
+// Backenfront dorthin). Eine eigene 0er-Zeile ueberschreibt den
+// Anker (etwa wenn die Vermessung woanders sitzt).
+function bettStuetz(d){
+  const st=d.stuetz.slice().sort((u,v)=>u.a-v.a);
+  if(!st.some(q=>(+q.a||0)<=0)) st.unshift({a:0, dx:0});
+  return st;
+}
 function bettKompAktiv(){
   const schalter=((document.getElementById('pkBett')||{}).value)==='an';
   if(!schalter) return null;
   const d=bettKompLaden()[MASCHINENPROFIL.id];
-  return (d && Array.isArray(d.stuetz) && d.stuetz.length>=2) ? d : null;
+  return (d && Array.isArray(d.stuetz) && d.stuetz.length>=1) ? d : null;
 }
 // ⌀-Abweichung am Werkstueck-z (linear interpoliert, Raender
 // geklemmt). a waechst von der Backenfront zur Stirn.
@@ -23153,7 +23170,8 @@ function bettDx(z){
   const zA=+((document.getElementById('pkZA')||{}).value)||0;
   const la=+((document.getElementById('pkLA')||{}).value)||0;
   const a=z-(zA-la);
-  const st=d.stuetz.slice().sort((u,v)=>u.a-v.a);
+  const st=bettStuetz(d);
+  if(st.length<2) return 0;
   if(a<=st[0].a) return +st[0].dx||0;
   if(a>=st[st.length-1].a) return +st[st.length-1].dx||0;
   for(let i=1;i<st.length;i++){
@@ -23168,13 +23186,13 @@ function bettKompWache(lines, warnings){
   const d=bettKompAktiv();
   if(!d){
     if(((document.getElementById('pkBett')||{}).value)==='an')
-      warnings.push('Bettkompensation ist im Programmkopf AN, aber fuer '+MASCHINENPROFIL.label+' ist keine Tabelle gepflegt (Knopf "Bett" in der G-Code-Ansicht, mindestens 2 Stuetzstellen) — die Ausgabe laeuft UNKOMPENSIERT.');
+      warnings.push('Bettkompensation ist im Programmkopf AN, aber fuer '+MASCHINENPROFIL.label+' ist keine Tabelle gepflegt (Knopf "Bett" in der G-Code-Ansicht, mindestens 1 gemessene Stuetzstelle) — die Ausgabe laeuft UNKOMPENSIERT.');
     return;
   }
   const zA=+((document.getElementById('pkZA')||{}).value)||0;
   const la=+((document.getElementById('pkLA')||{}).value)||0;
   const zS=zA-la;
-  const stz=d.stuetz.slice().sort((u,v)=>u.a-v.a).map(q=>({z:zS+(+q.a||0), dx:+q.dx||0}));
+  const stz=bettStuetz(d).map(q=>({z:zS+(+q.a||0), dx:+q.dx||0}));
   let cx=null, cz=null, anz=0, geteilt=0, g33warn=false;
   const out=[];
   for(let i=0;i<lines.length;i++){
