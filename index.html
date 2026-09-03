@@ -2915,9 +2915,14 @@ Z-parallelen Schruppz&uuml;ge laufen mit dem Werkzeugk&ouml;rper durch schon
 ger&auml;umte Luft). Werte &uuml;ber 90&deg; w&auml;ren ein
 Hinterschnitt und werden mit Ansage abgewiesen; das Hilfebild zeichnet zu jedem
 Winkel die gestrichelte 90&deg;-Referenzlage am Eckpunkt. Geschruppt wird in der
-Winkelform l&auml;ngs; der native G72-Satz f&auml;llt auf G-Einzels&auml;tze
-zur&uuml;ck, bis die Satz-Kodierung der Schr&auml;gen an der Maschine belegt ist
-(Maschinentermin-Liste). Innen gibt es die Winkelform noch nicht.</dd>
+Winkelform l&auml;ngs. <b>Seit dem Maschinentermin 03.09.2026 ist der native
+G72-Satz auch mit Winkeln belegt</b> (P236/P237 tragen &alpha;1/&alpha;2, PM/PN
+den Schenkel-Schnittpunkt &mdash; am gezogenen Maschinensatz entschl&uuml;sselt
+und nachgerechnet); ebenso die Innenlage (X&lt;I, PK positiv). Auf
+G-Einzels&auml;tze f&auml;llt die Ausgabe nur noch mit Ansage zur&uuml;ck, wo der
+Satz kein belegtes Wort hat: Eck&uuml;bergang K2, Rundungs-Endkanten, plan,
+&uuml;ber Mitte, innen+Winkel kombiniert. Innen gibt es die Winkelform weiter
+nicht.</dd>
 <dt id="ba-ae-spanbruch">Spanbrechen (nur Schruppen)</dt>
 <dd>F&uuml;r langspanende Werkstoffe (Kunststoff, Alu-Knetlegierungen). Vorbild ist
 das Abspanen der Siemens-Steuerung (Bedienhandbuch 12/2019, S.&nbsp;474): der
@@ -2952,11 +2957,12 @@ Stufe tr&auml;gt ihr S-Wort auf einer Sinuskurve um den Schlichtwert.
 kurzen Z&uuml;gen lohnt eine kleinere Periode, etwa 4&hellip;6&nbsp;mm). Unter
 G96 pendelt Vc, unter G97 die Drehzahl; G95 l&auml;sst den Vorschub folgen, die
 Spandicke bleibt konstant. Die Bahn selbst ist unver&auml;ndert (kollinear
-geteilt, im Pr&uuml;fstand nachgemessen). <b>An der Maschine unverifiziert:</b>
-ob die Steuerungen S-Wechsel im laufenden Vorschub fliegend ausf&uuml;hren oder
-auf &bdquo;Drehzahl erreicht&ldquo; warten, sagt kein Handbuch &mdash; ersten
-Lauf im Einzelsatz fahren (Maschinentermin-Liste), und den
-Drehzahlw&auml;chter von Hand auf Basisdrehzahl PLUS Amplitude stellen. Der
+geteilt, im Pr&uuml;fstand nachgemessen). <b>An der 1500er verifiziert
+(Fahrtest 03.09.2026):</b> die EuroTurn f&uuml;hrt S-Wechsel im laufenden G01
+fliegend aus &mdash; die Achse zog gleichm&auml;&szlig;ig durch, kein
+Vorschubverlust. Die 1000er ist noch ungetestet und beh&auml;lt ihre
+Unverifiziert-Warnung. In beiden F&auml;llen den Drehzahlw&auml;chter von Hand
+auf Basisdrehzahl PLUS Amplitude stellen. Der
 native G72/G71-Zyklussatz kennt keine S-Modulation &mdash; bei aktiver
 Variation f&auml;llt die Ausgabe mit Ansage auf G-Einzels&auml;tze zur&uuml;ck.</dd>
 <dt id="ba-ak-kanten">K1&hellip;K3 Kanten</dt>
@@ -3546,8 +3552,20 @@ eingefrorene St&auml;nde gepr&uuml;ft.</p>
 <dt id="ba-ma-dnc">Daten&uuml;bertragung (DNC Precision, V24)</dt>
 <dd>Je Maschine ein EIGENES Profil in DNC Precision anlegen (die 1500er sendet
 und empf&auml;ngt gleich, die 1000er NICHT):<br>
-<b>1500 EuroTurn:</b> 4800 Baud &middot; 8 Datenbits &middot; keine Parit&auml;t &middot;
-2 Stopbits &middot; RTS/CTS (aus der IBN der Maschine, N2000&ndash;N2005).<br>
+<b>1500 EuroTurn:</b> 9600 Baud &middot; 7 Datenbits &middot; keine Parit&auml;t &middot;
+1 Stopbit &middot; XON/XOFF (Software-Handshake; DTR/DSR und RTS/CTS AUS) &middot;
+Receive timeout 500 &middot; &bdquo;Strip at end of line&ldquo; leer.
+<b>Am Ger&auml;t bewiesen 03.09.2026</b> (42 Programme raus, alle Testprogramme
+rein). ACHTUNG: die IBN-Datendiskette von 2004 sagt 4800/8/N/2 mit RTS/CTS &mdash;
+diese Werte sind &Uuml;BERHOLT und liefern Kauderwelsch mit Byteverlust (daran
+starben die 2025er-Abz&uuml;ge). Im Zweifel die Werte AM GER&Auml;T ablesen:
+SERVICE &rarr; Konfig. &rarr; Parameter &rarr; Param. suchen &rarr; 2000.<br>
+Softkey-Symbolik der 1500er: Pfeil von rechts nach links = AUSGEBEN
+(Maschine&rarr;Laptop, Status D-OUT), Pfeil von links nach rechts = EINLESEN
+(Laptop&rarr;Maschine, Status D-IN); Blatt = einzeln, gelber Ordner = alle.
+Beim Einspielen IMMER erst die Maschine auf D-IN, dann am Laptop senden;
+vorhandene Programmnummern werden nicht &uuml;berschrieben, sondern mit
+Minus-Nummer abgelegt.<br>
 <b>1000 MTC-K (asymmetrisch!):</b> Empfangen 2400 Baud &middot; Senden 9600 Baud,
 jeweils 7 Datenbits &middot; EVEN &middot; 1 Stopbit &middot; XON/XOFF (erprobtes
 Profil; die Auslese-Rate stellt das Transfermen&uuml; der Steuerung, sie steht in
@@ -3578,8 +3596,12 @@ beim G74 (S.&nbsp;3-47), PG = U Schlichtaufma&szlig; beim G75 (S.&nbsp;3-54), da
 R-Wort beim Kreisbogen (S.&nbsp;3-10). Offen bleiben nur noch MASCHINENDATEN, die
 kein Handbuch beantwortet, kamen am 31.08.2026 aus Daniels DATENDISKETTE der
 1500er (IBN.PAR, Sicherung 22.01.2004): X-Durchmesserachse (N4036=0, damit I im
-&empty;), Werkzeugkonzept 2, alle Zyklusfreigaben, Eilgang 5000. Die Restliste
-f&uuml;r den Maschinentermin liegt in MASCHINENTERMIN.md.</dd>
+&empty;), Werkzeugkonzept 2, alle Zyklusfreigaben, Eilgang 5000.
+<b>Maschinentermin 03.09.2026:</b> Steuerungssoftware real 7.210i (Diskette:
+7.210H); die Zyklens&auml;tze G72 (innen und mit Winkeln) und G71 sind an per
+DNC gezogenen ECHTEN S&auml;tzen der Maschine belegt, Wiedereinstieg, SSV und
+Spanbrechen im Fahrtest gr&uuml;n, P4037/P4038 = Durchmesser best&auml;tigt.
+Die Restliste liegt in MASCHINENTERMIN.md.</dd>
 </dl>
 
 <h2 id="ba-k11">11 &nbsp;Werkzeugverwaltung</h2>
@@ -17634,7 +17656,11 @@ const MASCHINEN_PROFILE = {
     // R bleibt bevorzugt (Handbuch S. 3-10); der I/K-Rueckfall rechnet
     // jetzt im Durchmesser.
     ikDurchmesser:true, ikStatus:'confirmed_on_machine', ikBeleg:'N4036=0, IBN 22.01.2004',
-    uebertragung:'4800 Baud, 8 Datenbits, keine Paritaet, 2 Stopbits, RTS/CTS — Senden und Empfangen gleich (IBN N2000-N2005)',
+    // AM GERAET BEWIESEN 03.09.2026 (Daniels Termin): die Maschine
+    // steht HEUTE auf 9600/7/N/1 mit Xon/Xoff — die IBN-Diskette von
+    // 2004 (4800/8/N/2, RTS/CTS) ist ueberholt; mit ihren Werten kam
+    // Kauderwelsch mit Byteverlust (die verlorenen 2025er-Abzuege).
+    uebertragung:'9600 Baud, 7 Datenbits, keine Paritaet, 1 Stopbit, Xon/Xoff — Senden und Empfangen gleich (am Geraet bewiesen 03.09.2026; die IBN-2004-Werte sind ueberholt)',
     // Freigaben aus IBN.PAR (22.01.2004): N9170=1 Bohrzyklus,
     // N9220/N9230=1 Gewindezyklus samt Schnittaufteilung, N9080=1
     // mehrgaengig, N9150/9160/9180 Einstich/Freistich/Abspanen frei.
