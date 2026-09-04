@@ -7793,7 +7793,12 @@ function rueckzugFelderSync(){
 function inkReset(ids){ ids.forEach(mid=>{ const m=document.getElementById(mid); if(m && m.dataset){ m.dataset.m='abs'; m.textContent='abs'; } }); }
 function leseGeradeFelder(){
   const leer=(id)=>{ const e=document.getElementById(id); return !e || e.value.trim()===''; };
-  const val=(id)=> parseFloat(document.getElementById(id).value);
+  // NaN -> null [Daniel 04.09.2026]: ein halb getipptes Feld ("-",
+  // "abc") lieferte NaN, und NaN!==null liess die Fehlerzeile schon
+  // beim leeren Panel erscheinen ("Z fehlt" auf seinem Foto). Auch
+  // die Minus-VORBELEGUNG der Z-Felder haengt daran: ein blankes "-"
+  // muss als LEER zaehlen, sonst meldet jede frische Maske Fehler.
+  const val=(id)=>{ const v=parseFloat(document.getElementById(id).value); return isFinite(v)? v : null; };
   const ref=elementAnschluss();
   let z = (geradeAxis!=='X' && !leer('gZ')) ? val('gZ') : null;
   let x = (geradeAxis!=='Z' && !leer('gX')) ? val('gX') : null;
@@ -7902,7 +7907,10 @@ function updateKreisPreview(){
   // bisherigen Eingabe schon berechenbar ist, wird sofort gezeichnet —
   // K/I allein: voller Orientierungskreis durch den Anschlusspunkt;
   // Endpunkt allein: Marker + Hinweis; Endpunkt+R/K,I: der Bogen.
-  const leer=(id)=>{ const e=document.getElementById(id); return !e || e.value.trim()===''; };
+  // Ein blankes "-" (Minus-Vorbelegung des kZ, 04.09.2026) zaehlt
+  // als LEER — sonst rechnete die Vorschau mit NaN.
+  const leer=(id)=>{ const e=document.getElementById(id); if(!e) return true;
+    const t=e.value.trim(); return t==='' || !isFinite(parseFloat(t)); };
   const val=(id)=> parseFloat(document.getElementById(id).value);
   previewEl=null;
   const ref=elementAnschluss();
@@ -8108,7 +8116,19 @@ function openGeradeMask(axis, idx){
   document.getElementById('gInfo').style.display='none';
   inkReset(['gZmode','gXmode']);
   document.getElementById('gTangHint').style.display='none';
-  document.getElementById('gZ').value = (editing && !src.offen) ? src.z : '';
+  // MINUS-VORBELEGUNG [Daniels Wunsch 04.09.2026: "weil ich eh alle
+  // Z-Masse in Minus eingebe"]: ein frisches Z-Feld startet mit "-",
+  // der Cursor steht dahinter — Ziffern tippen genuegt. Ein blankes
+  // "-" zaehlt als LEER (NaN->null in leseGeradeFelder), die
+  // OFFEN-Mechanik bleibt also unveraendert; wer +Z braucht, loescht
+  // das Zeichen. Dafuer muss das Feld auf text stehen: ein
+  // type=number verwirft ein nacktes Minus stumm.
+  const gZf=document.getElementById('gZ');
+  if(editing && !src.offen){ gZf.value=src.z; }
+  else if(axis!=='X'){
+    if(gZf.type==='number'){ gZf.dataset.warNumber='1'; gZf.type='text'; gZf.setAttribute('inputmode','decimal'); }
+    gZf.value='-';
+  } else gZf.value='';
   document.getElementById('gX').value = (editing && !src.offen) ? src.x : '';
   if(editing && src.offen) document.getElementById('gA').value = src.alpha;
   document.querySelectorAll('#gTangBtns button').forEach(b=>b.classList.toggle('sel', b.dataset.v==='off'));
@@ -8221,11 +8241,19 @@ function openGeradeMask(axis, idx){
 // =================================================================
 (function(){
   const stumm=(el)=>{
-    if(el && el.setAttribute && (el.tagName==='INPUT'||el.tagName==='TEXTAREA')
-       && !el.getAttribute('autocomplete')){
-      el.setAttribute('autocomplete','off');
-      el.setAttribute('autocorrect','off');
-    }
+    if(!el || !el.setAttribute || (el.tagName!=='INPUT' && el.tagName!=='TEXTAREA')) return;
+    const jetzt=el.getAttribute('autocomplete');
+    if(jetzt && jetzt!=='off') return;
+    // ZWEITER ANLAUF 04.09.2026: autocomplete="off" hat auf Daniels
+    // iPhone NICHT gereicht — die Kontaktleiste blieb (iOS ignoriert
+    // off fuer Kontakt-/Telefonvorschlaege notorisch). Zahlenfelder
+    // bekommen deshalb den VALIDEN Nicht-Kontakt-Token
+    // "transaction-amount" (ein Geldbetrag — semantisch eine Zahl):
+    // iOS kennt ihn und hat dazu schlicht nichts anzubieten.
+    const zahlig=(el.type==='number') || el.getAttribute('inputmode')==='decimal'
+      || (el.dataset && (el.dataset.rechner==='1' || el.dataset.warNumber==='1'));
+    el.setAttribute('autocomplete', zahlig? 'transaction-amount' : 'off');
+    el.setAttribute('autocorrect','off');
   };
   try{ document.querySelectorAll('input, textarea').forEach(stumm); }catch(e){}
   // Dynamisch erzeugte Felder (Werkzeugtabelle u. a.): beim Fokus
@@ -8475,7 +8503,13 @@ function openKreisMask(idx){
   const src = editing ? contour[editIndex] : null;
   const last = editing ? {x:src.x, z:src.z} : {x:0,z:0};
   document.querySelector('#maskKreis .mask-head .mtitel').textContent = editing ? `Konturelement "Kreis" ändern (Punkt ${editIndex})` : 'Konturelement "Kreis"';
-  document.getElementById('kZ').value = editing ? last.z : '';
+  // Minus-Vorbelegung wie beim Gerade-Z (Daniels Kreis-Endpunkt).
+  const kZf=document.getElementById('kZ');
+  if(editing){ kZf.value=last.z; }
+  else{
+    if(kZf.type==='number'){ kZf.dataset.warNumber='1'; kZf.type='text'; kZf.setAttribute('inputmode','decimal'); }
+    kZf.value='-';
+  }
   document.getElementById('kX').value = editing ? last.x : '';
   document.getElementById('kK').value = editing ? src.cz : '';
   document.getElementById('kI').value = editing ? src.cx : '';
@@ -9150,6 +9184,21 @@ function rechneAusdruck(txt){
     const alle=document.querySelectorAll('.mask input[type=number], #maskParams input[type=number]');
     if(alle && alle.forEach) alle.forEach(anBord);
   }
+  // FRUEHWECHSEL [Daniel 04.09.2026: "wenn ich Minus eingebe, springt
+  // der Block mit den Zahlenfeldern weg"]: der number->text-Wechsel
+  // passierte bisher IM Fokus — iOS baut die Tastatur dann neu auf
+  // und wirft sie dabei gern ganz ab. Jetzt wechselt das Feld schon
+  // beim pointerdown, VOR dem Fokus: die Tastatur oeffnet direkt auf
+  // dem text-Feld, nichts wird mehr umgebaut. Der focus-Handler oben
+  // bleibt als Fallback (Tab-Taste am Laptop); der blur-Handler
+  // stellt wie bisher auf number zurueck.
+  document.addEventListener('pointerdown',(e)=>{
+    const el=e.target;
+    if(el && el.tagName==='INPUT' && el.type==='number' && el.dataset && el.dataset.rechner==='1'){
+      el.dataset.warNumber='1'; el.type='text';
+      if(el.setAttribute) el.setAttribute('inputmode','decimal');
+    }
+  }, true);
 })();
 // VORZEICHENKNOPF [Daniel, 26.08.2026]
 // -----------------------------------------------------------------
