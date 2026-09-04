@@ -1197,7 +1197,41 @@ body.artefakt .hsoftkeys{padding-right:48px;}
     /* Der Zoomstapel laege sonst im 37vh-Streifen ueber der Kontur —
        im Editiermodus zaehlt das Bild, gezoomt wird per Geste. */
     body.emodus.mode-grafisch #zoomCtrl{display:none;}
+    /* STUFE 2 [04.09.2026]: Rechen- und Aktionszeile kleben am
+       unteren Panelrand (sticky im scrollenden mask-body) — mit der
+       visualViewport-Anhebung stehen sie damit IMMER direkt an der
+       Tastaturkante, egal wie weit die Maske scrollt. */
+    body.emodus.mode-grafisch #canvasWrap .mask .ezl{
+      position:sticky;bottom:52px;background:#fff;z-index:2;margin-top:auto;
+    }
+    body.emodus.mode-grafisch #canvasWrap .mask .mrow.k-aktion{
+      position:sticky;bottom:0;background:#fff;z-index:2;
+    }
   }
+  /* FILMSTREIFEN [Daniels Freigabe 04.09.2026, Vorschlag B]: die
+     Elementliste als horizontaler Chip-Streifen — die Grafik behaelt
+     ihre Hoehe, egal wie viele Elemente die Kontur hat. Nur am
+     Handy; am Laptop bleibt die Tabelle rechts (Streifen dort aus,
+     Regel in der End-Query nicht noetig: display:none ist die
+     Basis, eingeschaltet wird er NUR unter 900 px). */
+  #elemFilm{display:none;}
+  @media(max-width:899px){
+    body.mode-grafisch #elemFilm{
+      display:flex;gap:5px;overflow-x:auto;padding:6px 8px;
+      background:#fff;-webkit-overflow-scrolling:touch;
+    }
+    /* Die Tabelle weicht dem Streifen; der Ketten-Chip holt sie
+       als Vollliste zurueck (Loeschen und Stift wohnen dort). */
+    body.mode-grafisch #pointListPanel:not(.vollliste) #pointBody{display:none;}
+    body.mode-grafisch #pointListPanel.vollliste #pointBody{max-height:34vh;overflow-y:auto;}
+    /* Kopfzeile KONTURELEMENTE frisst nur Hoehe — der Streifen
+       erklaert sich selbst. */
+    body.mode-grafisch #pointListPanel .ap-head{display:none;}
+  }
+  .f-chip{flex:0 0 auto;border:1px solid hsl(var(--ton), 16.9%, 69.8%);border-radius:15px;
+    padding:5px 11px;font-size:12px;font-weight:700;line-height:1.2;white-space:nowrap;
+    color:hsl(var(--ton), 45%, 30%);background:hsl(var(--ton), 30%, 96.5%);}
+  .f-chip.akt{background:hsl(28, 92%, 45%);border-color:hsl(28, 92%, 45%);color:#fff;}
   /* Feste Zeichenzeile der Editor-Panels [Daniel, 02.09.2026]: die
      schwebende Rechenleiste lag am iPhone hinter der Tastatur (das
      Panel klebt unten am Schirm) — Minus war nicht erreichbar.
@@ -2612,6 +2646,14 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
 
       <div class="arbeitsplan view-grafisch" id="pointListPanel">
         <div class="ap-head">KONTURELEMENTE</div>
+        <!-- FILMSTREIFEN [Daniels Freigabe 04.09.2026, Vorschlag B]:
+             am Handy ersetzt EIN horizontaler Chip-Streifen die
+             wachsende Tabelle — die Grafik behaelt ihre Hoehe, egal
+             ob 4 oder 40 Elemente. Der Kettenknopf oeffnet die
+             Vollliste (pointBody), Tipp waehlt an, zweiter Tipp aufs
+             gewaehlte Element oeffnet die Maske. Am Laptop bleibt
+             die Tabelle rechts, der Streifen ist dort aus. -->
+        <div id="elemFilm"></div>
         <div id="pointBody"></div>
       </div>
 
@@ -8294,6 +8336,28 @@ function eModusSync(){
     }catch(e){}
   });
 })();
+// TASTATURKANTE [Stufe 2, 04.09.2026]: iOS legt die Bildschirm-
+// tastatur UEBER die Seite — visualViewport meldet, was sichtbar
+// bleibt. Im Editiermodus wird das Panel um die Tastaturhoehe
+// angehoben; zusammen mit den sticky-Zeilen (Rechenleiste +
+// Uebernehmen, s. Stylesheet) stehen die Bedienzeilen damit IMMER
+// direkt an der Tastaturkante — auch die iOS-Autofill-Kapsel kann
+// sie nicht mehr verdecken. NUR AM GERAET VERIFIZIERBAR: der
+// Browser-Pane hat keine Bildschirmtastatur.
+(function(){
+  const vv=window.visualViewport;
+  if(!vv || !vv.addEventListener) return;
+  const sync=()=>{
+    const offen=document.body.classList && document.body.classList.contains('emodus');
+    const delta=offen? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    ['maskStart','maskGerade','maskKreis'].forEach(id=>{
+      const m=document.getElementById(id);
+      if(m && m.style) m.style.bottom = delta>2 ? delta+'px' : '';
+    });
+  };
+  vv.addEventListener('resize', sync);
+  vv.addEventListener('scroll', sync);
+})();
 document.getElementById('gTangBtns').addEventListener('click',(e)=>{
   if(e.target.tagName!=='BUTTON') return;
   [...e.target.parentElement.children].forEach(b=>b.classList.remove('sel'));
@@ -11299,6 +11363,45 @@ function refreshPointList(){
       const i=+e.target.dataset.i; snapshot(); contour.splice(i,1); selectedIdx=-1; refreshAll();
     });
   });
+  // FILMSTREIFEN [Vorschlag B, 04.09.2026]: dieselben Elemente als
+  // Chip-Zeile. Tipp waehlt an, ZWEITER Tipp aufs gewaehlte Element
+  // oeffnet die Maske (dasselbe Zweitipp-Muster wie im Arbeitsplan);
+  // der Ketten-Chip klappt die Vollliste auf. Das aktive Element
+  // rueckt von selbst ins Bild — genau Daniels Befund ("ich seh oben
+  // gar nicht mehr das Element").
+  const film=document.getElementById('elemFilm');
+  if(film){
+    film.innerHTML='';
+    const fz=(v)=>Math.round(v*100)/100;
+    const panel=document.getElementById('pointListPanel');
+    const kette=document.createElement('div');
+    kette.className='f-chip f-voll'+((panel.classList && panel.classList.contains('vollliste'))?' akt':'');
+    kette.textContent='☰';
+    kette.title='Vollliste (Loeschen, Bearbeiten)';
+    kette.addEventListener('click',()=>{ panel.classList.toggle('vollliste'); });
+    film.appendChild(kette);
+    contour.forEach((el,i)=>{
+      const c=document.createElement('div');
+      let kurz='';
+      if(el.kind==='start') kurz='S  Z'+fz(el.z)+' ⌀'+fz(el.x);
+      else if(el.kind==='kreis') kurz='◠  Z'+fz(el.z)+' ⌀'+fz(el.x);
+      else if(el.offen) kurz='∠  α'+fz(el.alpha||0)+'°';
+      else kurz='G  Z'+fz(el.z)+' ⌀'+fz(el.x);
+      c.className='f-chip'+(i===selectedIdx?' akt':'');
+      c.textContent=kurz;
+      c.addEventListener('click',()=>{
+        if(selectedIdx===i){
+          const e2=contour[i];
+          if(e2.kind==='start') openStartMask(true);
+          else if(e2.kind==='kreis') openKreisMask(i);
+          else openGeradeMask('ZX', i);
+        } else { selectedIdx=i; refreshAll(); }
+      });
+      film.appendChild(c);
+    });
+    const akt=film.querySelector('.f-chip.akt:not(.f-voll)');
+    if(akt && akt.scrollIntoView){ try{ akt.scrollIntoView({inline:'center', block:'nearest'}); }catch(e){} }
+  }
 }
 
 function refreshArbeitsplan(){
