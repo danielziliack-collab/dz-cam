@@ -584,6 +584,68 @@ body.artefakt .hsoftkeys{padding-right:48px;}
      breit und brachen die Flucht. Der Schalter im Maskenkopf ist
      nicht betroffen, der ist kein Kind einer .mrow. */
   .mrow > .selwert{width:108px;min-width:108px;}
+  /* ================================================================
+     KACHEL-PILOT [Daniels Maskenentwurf, 04.09.2026, Stufe 2]:
+     .kachelpilot formt die Zeilen der Ecke-Maske in ein 2-Spalten-
+     Raster aus Feldkacheln um — Label klein oben, WERT GROSS,
+     angetipptes Feld orange (focus-within, rein CSS). Bewusst nur
+     CSS: die mrow-Struktur, alle IDs und jede Verdrahtung bleiben.
+     Der Rueckfall-Schalter im Maskenkopf nimmt die Klasse wieder
+     weg. Pilot NUR an #maskAbspanenEinfach, bis Daniel abnimmt.
+     ================================================================ */
+  /* minmax(0,1fr) statt 1fr: eine fr-Spalte schrumpft sonst nicht
+     unter ihr Inhaltsminimum — die rechte Kachelspalte lief beim
+     ersten Anlauf aus dem iPhone-Bild (469 statt 375 px gemessen). */
+  .mask.kachelpilot .mask-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;align-items:stretch;padding-top:8px;}
+  .mask.kachelpilot .msec{grid-column:1/-1;margin:2px 0 0;}
+  .mask.kachelpilot .mgroup{grid-column:1/-1;}
+  .mask.kachelpilot .mrow{
+    display:flex;flex-wrap:wrap;align-content:flex-start;gap:1px 6px;
+    border:1px solid var(--line);border-radius:8px;
+    padding:5px 8px 6px;margin:0;border-bottom:1px solid var(--line);
+    background:#fff;min-height:52px;
+  }
+  .mask.kachelpilot .mrow:focus-within{
+    border-color:hsl(28, 92%, 45%);
+    background:hsl(28, 90%, 96%);
+  }
+  .mask.kachelpilot .mrow > label{
+    flex:1 0 100%;width:auto;min-width:0;
+    font-size:10.5px;font-weight:700;letter-spacing:.2px;
+    color:hsl(var(--ton), 55%, 38%);line-height:1.25;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .mask.kachelpilot .mrow:focus-within > label{color:hsl(28, 92%, 40%);}
+  .mask.kachelpilot .mrow input, .mask.kachelpilot .mrow select{
+    width:auto;flex:1 1 40px;min-width:34px;
+    font-size:18px;font-weight:600;
+    text-overflow:ellipsis;
+    border:0;border-radius:0;padding:0 2px;background:transparent;
+    text-align:left;
+  }
+  .mask.kachelpilot .mrow select.tool-select{font-size:15px;}
+  .mask.kachelpilot .mrow > .selwert{
+    width:auto;min-width:0;flex:1 1 auto;
+    border:0;background:transparent;padding:0 2px;
+    font-size:15.5px;font-weight:600;text-align:left;
+    display:flex;align-items:center;gap:6px;
+  }
+  .mask.kachelpilot .mrow .radiobtns:not(.kopfschalter){font-size:13px;}
+  .mask.kachelpilot .mrow .unit{
+    position:static;transform:none;width:auto;
+    align-self:flex-end;margin-left:auto;font-size:10px;
+  }
+  .mask.kachelpilot .mrow .unit.unit2{width:auto;font-size:9px;}
+  /* Breite Kacheln: Zeilen, deren Inhalt eine halbe Spalte sprengt —
+     Werkzeug- und Konturwahl, die Bemerkung, Zeilen mit
+     Erklaertexten. Ueber IDs und Bestandsklassen, nicht ueber :has()
+     (auf aelteren iOS nicht verlaesslich). */
+  .mask.kachelpilot .mrow.k-breit{grid-column:1/-1;}
+  /* Aktionszeile (Uebernehmen/Abbrechen) ist KEINE Kachel: volle
+     Breite, kein Rahmen, kein Fokus-Orange — Knoepfe sind Knoepfe. */
+  .mask.kachelpilot .mrow:has(> .gcbtn){grid-column:1/-1;border:0;background:transparent;min-height:0;padding:5px 0;}
+  .mask.kachelpilot .mrow.k-aktion{grid-column:1/-1;border:0;background:transparent;min-height:0;padding:5px 0;}
+  .mask.kachelpilot .mrow .mhint{flex:1 0 100%;font-size:10px;line-height:1.3;}
   /* UMSCHALTER + WERT teilen sich die Spalte [Daniel, 28.08.2026].
      Acht Zeilen fuehren einen Umschalter UND ein Mass: die drei Kanten
      beim Abspanen Ecke, die vier Ecken beim Einstich, die Kante beim
@@ -1747,7 +1809,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
       <div id="globalMasks">
         <!-- Abspanen einfach (CYCLE951-style) mask -->
         <div class="mask" id="maskAbspanenEinfach">
-          <div class="mask-head"><span class="mtitel" title="Abspanen (Ecke Außen-/Innenkontur — längs/plan)">Abspanen Ecke</span><span class="radiobtns kopfschalter" id="aeEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel" title="Abspanen (Ecke Außen-/Innenkontur — längs/plan)">Abspanen Ecke</span><button id="aeAnsichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Pilot: Kachel- oder Zeilenansicht">⊞</button><span class="radiobtns kopfschalter" id="aeEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskAbspanenEinfach"></canvas>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
@@ -8628,6 +8690,39 @@ function selListeZeigen(groupId){
 // Aufbau: je Auswahlgruppe ein Anzeigefeld direkt dahinter. Laeuft im
 // Ersatz-Browser ins Leere (dort hat keine Gruppe Kinder) — das ist
 // gewollt, geprueft wird dort die Rechenlogik.
+// KACHEL-PILOT-SCHALTER [Stufe 2, 04.09.2026]: nur die Ecke-Maske,
+// Klasse + Browserspeicher. Vorgabe AN — Daniel soll den Entwurf
+// sehen; ein Tipp auf den Kopfknopf faellt auf die Zeilen zurueck.
+function kachelPilotAnwenden(){
+  const m=document.getElementById('maskAbspanenEinfach');
+  const b=document.getElementById('aeAnsichtBtn');
+  if(!m) return;
+  let an=true;
+  try{ an=localStorage.getItem('et_kachelpilot')!=='aus'; }catch(e){}
+  m.classList.toggle('kachelpilot', an);
+  if(b) b.textContent=an?'☰':'⊞';
+  if(an){
+    // Breite Kacheln je Inhalt: Werkzeug-/Konturwahl und Zeilen mit
+    // Erklaertext brauchen die volle Zeile. Einmal je Anwendung
+    // gemessen statt :has() — iOS-Verlaesslichkeit.
+    m.querySelectorAll('.mrow').forEach(r=>{
+      if(r.querySelector('.gcbtn')){ r.classList.add('k-aktion'); return; }
+      const breit=r.querySelector('select.tool-select, select[id$="Kontur"], .mhint')
+        || (r.querySelector('.radiobtns:not(.kopfschalter)') && r.querySelectorAll('button').length>3);
+      r.classList.toggle('k-breit', !!breit);
+    });
+  }
+}
+(function(){
+  const b=document.getElementById('aeAnsichtBtn');
+  if(b) b.onclick=()=>{
+    let an=true;
+    try{ an=localStorage.getItem('et_kachelpilot')!=='aus'; }catch(e){}
+    try{ localStorage.setItem('et_kachelpilot', an?'aus':'an'); }catch(e){}
+    kachelPilotAnwenden();
+  };
+  kachelPilotAnwenden();
+})();
 function selFeldAufbauen(groupId){
   const g=document.getElementById(groupId);
   if(!g || !g.children || !g.children.length) return false;
