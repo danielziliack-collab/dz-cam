@@ -13656,12 +13656,23 @@ function helpSchnitt(H, teilName, opt){
   K.forEach(pt=>c.lineTo(zx(pt[0]), rx(pt[1])));
   c.lineTo(zx(zMax), axY);
   c.closePath();
-  c.fillStyle=HELP_SCHNITT_FLAECHE;
+  // METALL STATT FLACHTON [Daniels Maskenentwurf, 04.09.2026]: der
+  // Verlauf spannt sich ueber die echte Teilhoehe (Oberkante bis
+  // Drehachse) — Glanzband bei 40..55 %, derselbe Look wie
+  // helpFillPart/helpHatch45. Eine Materialsprache fuer alle Bilder.
+  {
+    const gy0=rx(teil.rMax), gy1=axY;
+    const g=c.createLinearGradient(0, gy0, 0, Math.max(gy0+40, gy1));
+    g.addColorStop(0,'#e2e8ed'); g.addColorStop(0.4,'#b6c5d2');
+    g.addColorStop(0.55,'#cdd8e2'); g.addColorStop(1,'#98aabb');
+    c.fillStyle=g;
+  }
   c.fill();
-  // --- Schraffur, in der Flaeche geklemmt ---
+  // --- Schraffur, in der Flaeche geklemmt: nur noch die feine
+  // Norm-Aussage "Schnittflaeche", das Material traegt der Verlauf ---
   c.save(); c.clip();
-  c.strokeStyle=HELP_SCHNITT_SCHRAFFUR; c.lineWidth=1;
-  for(let x=-axY; x<w+axY; x+=9){
+  c.strokeStyle='rgba(86,106,122,0.12)'; c.lineWidth=0.8;
+  for(let x=-axY; x<w+axY; x+=8){
     c.beginPath(); c.moveTo(x, axY); c.lineTo(x+axY, 0); c.stroke();
   }
   c.restore();
@@ -13679,11 +13690,11 @@ function helpSchnitt(H, teilName, opt){
   // --- Kontur nachziehen ---
   c.beginPath();
   K.forEach((pt,i)=>{ const X=zx(pt[0]), Y=rx(pt[1]); if(i===0) c.moveTo(X,Y); else c.lineTo(X,Y); });
-  c.strokeStyle=HELP_SCHNITT_KANTE; c.lineWidth=1.8; c.lineJoin='round'; c.stroke();
+  c.strokeStyle=HELP_SCHNITT_KANTE; c.lineWidth=2.6; c.lineJoin='round'; c.stroke();
   if(teil.i && teil.i.length>1){
     c.beginPath();
     teil.i.forEach((pt,i)=>{ const X=zx(pt[0]), Y=rx(pt[1]); if(i===0) c.moveTo(X,Y); else c.lineTo(X,Y); });
-    c.strokeStyle=HELP_SCHNITT_KANTE; c.lineWidth=1.5; c.stroke();
+    c.strokeStyle=HELP_SCHNITT_KANTE; c.lineWidth=2.2; c.stroke();
   }
   c.restore();
   helpCenterline(c,w,axY);
@@ -14324,20 +14335,44 @@ function helpLabel(c, txt, x, y, on, align){
   // weissen Halo und der Text steht angeschnitten im Bild.
   if(HELP_SPAET){ HELP_SPAET.push(()=>helpLabel(c,txt,x,y,on,align)); return; }
   c.save();
-  c.font=(on?'bold 11.5px ':'10.5px ')+'Arial';
+  c.font=(on?'bold 11px ':'10.5px ')+'Arial';
   c.textAlign=align||'center';
-  // FREISTELLEN: ein deckender Kasten hinter dem Text. Der Halo
-  // allein umrandet nur die Glyphen — zwischen den Buchstaben lief
-  // die Masslinie hindurch ('UX 0.5' wurde zu 'UX,0!5').
   const _tb = c.measureText(String(txt)).width;
   const _al = align||'center';
-  const _x0 = _al==='left' ? x-2 : (_al==='right' ? x-_tb-2 : x-_tb/2-2);
-  c.fillStyle='rgba(255,255,255,0.88)';
-  c.fillRect(_x0, y-9.5, _tb+4, 12.5);
-  c.lineWidth=3; c.strokeStyle='rgba(255,255,255,0.92)'; c.lineJoin='round';
-  c.strokeText(txt,x,y);
-  c.fillStyle=on?HELP_ON:HELP_OFF;
-  c.fillText(txt,x,y);
+  // MASSE ALS PILLEN [Daniels Maskenentwurf, 04.09.2026]: Zahlen-
+  // tragende Beschriftungen bekommen eine abgerundete Kapsel — das
+  // AKTIVE Mass orange gefuellt mit weisser Schrift, die uebrigen
+  // weiss mit feinem Rand. Das ersetzt Halo+Kasten: die Pille deckt
+  // die Masslinie vollstaendig, nichts laeuft mehr durch die
+  // Buchstaben, und das angefasste Feld springt ins Auge.
+  // Beschriftungen OHNE Zahl (Achsen, Legende, "Lage aussen")
+  // behalten den alten Halo-Stil — eine Pille um "Z" saehe nach
+  // Knopf aus, und ein Knopf, der keiner ist, ist eine Falle.
+  const istMass=/[0-9]/.test(String(txt||""));
+  if(istMass){
+    const ph=on?17:15, pw=_tb+13, r=ph/2;
+    const _cx = _al==='left' ? x+_tb/2 : (_al==='right' ? x-_tb/2 : x);
+    const px0=_cx-pw/2, py0=y-3.5-ph/2;
+    c.beginPath();
+    c.moveTo(px0+r,py0); c.lineTo(px0+pw-r,py0);
+    c.arc(px0+pw-r,py0+r,r,-Math.PI/2,Math.PI/2);
+    c.lineTo(px0+r,py0+ph);
+    c.arc(px0+r,py0+r,r,Math.PI/2,-Math.PI/2);
+    c.closePath();
+    if(on){ c.fillStyle=HELP_ON; c.fill(); }
+    else{
+      c.fillStyle='rgba(255,255,255,0.95)'; c.fill();
+      c.lineWidth=1; c.strokeStyle='#c2cdd6'; c.stroke();
+    }
+    c.fillStyle=on?'#fff':HELP_OFF;
+    c.textAlign='center';
+    c.fillText(txt,_cx,y);
+  } else {
+    c.lineWidth=3; c.strokeStyle='rgba(255,255,255,0.92)'; c.lineJoin='round';
+    c.strokeText(txt,x,y);
+    c.fillStyle=on?HELP_ON:HELP_OFF;
+    c.fillText(txt,x,y);
+  }
   c.restore();
 }
 function helpArrowHead(c,x,y,ang,on){
@@ -14436,9 +14471,17 @@ function helpCenterline(c,w,y){
 // Pfad füllen: Teil-Look (Verlauf) oder Schraffur (Abspanbereich)
 function helpFillPart(c, build){
   c.save();
-  const g=c.createLinearGradient(0,0,0,160);
-  g.addColorStop(0,HELP_PART); g.addColorStop(1,HELP_PART2);
-  c.fillStyle=g; c.strokeStyle=HELP_EDGE; c.lineWidth=1.8; c.lineJoin='round';
+  // METALL STATT GRAUKARTON [Daniels Maskenentwurf, 04.09.2026]:
+  // vier Verlaufsstufen mit Glanzband bei 40..55 % — derselbe
+  // Materialeindruck wie die Simulationsdarstellung, nur heller,
+  // damit Pillen und Bahnen darauf lesbar bleiben. Die Kontur wird
+  // deutlich kraeftiger (2.6 statt 1.8): das FERTIGTEIL ist die
+  // wichtigste Linie im Bild und darf dominieren.
+  const gh=Math.max(160, (typeof HELP_H!=='undefined'&&HELP_H)||160);
+  const g=c.createLinearGradient(0,0,0,gh);
+  g.addColorStop(0,'#e2e8ed'); g.addColorStop(0.4,'#b6c5d2');
+  g.addColorStop(0.55,'#cdd8e2'); g.addColorStop(1,'#98aabb');
+  c.fillStyle=g; c.strokeStyle=HELP_EDGE; c.lineWidth=2.6; c.lineJoin='round';
   c.beginPath(); build(c); c.closePath(); c.fill(); c.stroke();
   // SCHNITTFLAECHE SCHRAFFIEREN [Daniel, 28.08.2026: "die Qualitaet
   // der Bilder muessen wir aufwerten"]. Ein Halbschnitt gehoert nach
@@ -14449,20 +14492,33 @@ function helpFillPart(c, build){
   // liegen darueber und muessen lesbar bleiben. Die Schraffur gab es
   // schon als helpHatch45, aber nur zwei von zehn Bildern nutzten sie.
   c.beginPath(); build(c); c.closePath(); c.clip();
-  c.strokeStyle='rgba(86,106,122,0.16)'; c.lineWidth=0.8;
-  for(let t=-240; t<760; t+=7){
+  // Feiner als vorher (0,10 statt 0,16, Abstand 8): auf dem
+  // Metallverlauf traegt die Schraffur nur noch die Norm-Aussage
+  // "Schnittflaeche", nicht mehr den Materialeindruck.
+  c.strokeStyle='rgba(86,106,122,0.10)'; c.lineWidth=0.8;
+  for(let t=-240; t<760; t+=8){
     c.beginPath(); c.moveTo(t,210); c.lineTo(t+230,-24); c.stroke();
   }
   c.restore();
 }
-// robuste Schraffur (45°) über Bounding-Bereich, geclippt auf den Pfad
+// robuste Schraffur (45°) über Bounding-Bereich, geclippt auf den Pfad.
+// SEIT 04.09.2026 im selben Metall-Look wie helpFillPart [Daniels
+// Maskenentwurf]: vorher fuellte dieser Weg nur blassgrau mit harter
+// Schraffur (0,7!) — die Bilder, die ihn nutzen (Einstich u. a.),
+// sahen dadurch anders aus als die helpFillPart-Bilder. Jetzt eine
+// Materialsprache fuer alle: Verlauf mit Glanzband, Schraffur nur
+// noch als feine Norm-Aussage.
 function helpHatch45(c, build){
   c.save();
   c.beginPath(); build(c); c.closePath();
-  c.fillStyle='rgba(160,175,188,0.20)'; c.fill();
+  const gh=Math.max(160, (typeof HELP_H!=='undefined'&&HELP_H)||160);
+  const g=c.createLinearGradient(0,0,0,gh);
+  g.addColorStop(0,'#e2e8ed'); g.addColorStop(0.4,'#b6c5d2');
+  g.addColorStop(0.55,'#cdd8e2'); g.addColorStop(1,'#98aabb');
+  c.fillStyle=g; c.fill();
   c.clip();
-  c.strokeStyle='rgba(86,106,122,0.7)'; c.lineWidth=0.9;
-  for(let t=-200;t<700;t+=6.5){
+  c.strokeStyle='rgba(86,106,122,0.10)'; c.lineWidth=0.8;
+  for(let t=-200;t<700;t+=8){
     c.beginPath(); c.moveTo(t,200); c.lineTo(t+220,-20); c.stroke();
   }
   c.restore();
