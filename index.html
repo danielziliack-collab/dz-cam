@@ -14030,9 +14030,50 @@ function helpKonturAbspanenEcke(){
 // Das Freistich-SCHEMA (s. helpKonturEinstich: feste Proportionen).
 // Absatz links, Mantel rechts — Maschinenlage. Zustand bleibt:
 // Form E (nur Mantelflaeche) oder F (auch Planflaeche).
+// LAGE-BEWUSST seit dem 04.09.2026 [Daniels Auftrag: "je nach
+// Auswahl das passende Hilfsbild in der richtigen Lage"]. Die vier
+// PJ-Lagen (am Handbuch S. 3-60 belegt) entstehen aus EINEM Schema:
+// Schulter rechts = z-Spiegelung der Punkte (Form E/F/DIN76 erben
+// sie automatisch), innen = dieselbe Kerbgeometrie als BOHRUNGS-
+// Kontur (teil.i) unter einem Vollmantel — helpSchnitt spart sie
+// aus und zeichnet sie nach, die Bahn laeuft im Renderer auf i.
+function fsLagePj(){
+  const e=document.getElementById('fsPJ');
+  return e? (+e.value||0) : 0;
+}
 function helpKonturFreistich(){
   const formSel=(typeof selBtnVal==='function' && selBtnVal('fsFormBtns'))||'E';
   const formF=formSel==='F';
+  const pj=fsLagePj();
+  const spiegel=(pj===2||pj===3), innen=(pj===1||pj===3);
+  // Nachlauf fuer beide Sonderlagen: erst das Standard-Schema bauen,
+  // dann umformen. So bleiben die drei Formzweige unangetastet.
+  const lageAnwenden=(teil)=>{
+    let t=teil;
+    const L0=t.zMax;
+    // ERST spiegeln, DANN klappen — PJ3 (innen UND Schulter rechts)
+    // braucht beides; der erste Bau kehrte im innen-Zweig zu frueh
+    // zurueck und liess die Schulter links (am Bild q3 gefunden).
+    let k=t.k, m=t.m;
+    if(spiegel){
+      k=k.map(q=>[L0-q[0], q[1]]).reverse();
+      const m2={}; Object.keys(m).forEach(n=>{ m2[n]=[L0-m[n][0], m[n][1]]; }); m=m2;
+    }
+    if(innen){
+      // Kerbgeometrie an die Bohrungswand klappen: dieselbe Form,
+      // aber die Kerbe sticht NACH AUSSEN in die Wand (DIN 509
+      // innen). Vollmantel drueber; helpSchnitt spart die i-Kontur
+      // aus und zeichnet sie nach.
+      const rWand=14;
+      const rBezug=Math.min.apply(null, k.map(q=>q[1]));
+      const map=k.map(q=>[q[0], rWand + (q[1]-rBezug)]);
+      const m2={}; Object.keys(m).forEach(n=>{ m2[n]=[m[n][0], rWand + (m[n][1]-rBezug)]; });
+      return {k:[[0,32],[L0,32]], i:map, m:m2, zMax:L0, rMax:32, innen:true, spiegel, iMax:Math.max.apply(null,map.map(q=>q[1]))};
+    }
+    if(spiegel) return {k, i:null, m, zMax:L0, rMax:t.rMax, innen:false, spiegel:true};
+    t.innen=false; t.spiegel=false;
+    return t;
+  };
   // DIN 76 [01.09.2026]: die Kerbe des GEWINDEfreistichs ist anders
   // geschnitten als DIN 509 — langer achsparalleler Grund (Auslauf g),
   // kurze steile Schraege im Einstiegswinkel zum Mantel, Radius r an
@@ -14043,9 +14084,9 @@ function helpKonturFreistich(){
     const rG=rM-t;
     const pkte=[[0,rV],[zK,rV],[zK,rG],[zK+g-dz,rG],[zK+g,rM],[L,rM]];
     const kanten={}; kanten[2]={typ:'rundung', mass:r};
-    return helpKontur(pkte, kanten,
+    return lageAnwenden(helpKontur(pkte, kanten,
       {Kante:[zK,rG], Grund:[zK+ (g-dz)*0.5, rG],
-       Auslauf:[zK+g,rM], Mantel:[L*0.85,rM], Absatz:[zK*0.4,rV]});
+       Auslauf:[zK+g,rM], Mantel:[L*0.85,rM], Absatz:[zK*0.4,rV]}));
   }
   const rV=30, rM=19, t=4, r=4;
   const f=2.5*t+r, zK=28, L=75;
@@ -14054,9 +14095,9 @@ function helpKonturFreistich(){
     : [[0,rV],[zK,rV],[zK,rM-t],[zK+f,rM],[L,rM]];
   const iGrund = formF? 3 : 2;
   const kanten={}; kanten[iGrund]={typ:'rundung', mass:r};
-  return helpKontur(pkte, kanten,
+  return lageAnwenden(helpKontur(pkte, kanten,
     {Kante:[zK,rM], Grund:[pkte[iGrund][0],pkte[iGrund][1]],
-     Auslauf:[zK+f,rM], Mantel:[L*0.8,rM], Absatz:[zK*0.4,rV]});
+     Auslauf:[zK+f,rM], Mantel:[L*0.8,rM], Absatz:[zK*0.4,rV]}));
 }
 // Die Abstech-Kontur AUS DEN FELDWERTEN [Daniel: die sieben offenen
 // Masken]. Die Klinge sticht LINKS von Z0 (Bezugsschneide auf Z0),
@@ -14857,7 +14898,10 @@ const MASK_HELP = {
     const Kante=P('Kante'), Grund=P('Grund'), Aus=P('Auslauf'), Mant=P('Mantel'), Abs=P('Absatz');
     // DIN 76 [01.09.2026]: das Schema ist fest, aber die NORMWERTE der
     // gewaehlten Steigung stehen im Label — das ist Zustand, kein Mass.
-    let kopfText = formF?'Form F: + Planfläche':'Form E: 15° · r · Flanke';
+    const pjR=fsLagePj();
+    const spiegelR=(pjR===2||pjR===3), innenR=(pjR===1||pjR===3);
+    const lagenName=['außen · Schulter links','innen · Schulter links','außen · Schulter rechts','innen · Schulter rechts'][pjR]||'';
+    let kopfText = (formF?'Form F: + Planfläche':'Form E: 15° · r · Flanke')+' · '+lagenName;
     if(formD76){
       const p76=parseFloat((document.getElementById('fsP76')||{}).value)||1.5;
       const n76=(typeof D76_NORM!=='undefined')?D76_NORM[p76]:null;
@@ -14876,7 +14920,9 @@ const MASK_HELP = {
     // links der Flanke durch die Schulterwand. Jetzt: Konturpunkte
     // zwischen Kante und Auslauf, senkrecht 3 px in die LUFTSEITE
     // versetzt (Normale nach oben; an der Steilflanke nach rechts).
-    if(Kante&&Grund&&Aus && M.teil && M.teil.k && M.teil.m.Kante && M.teil.m.Auslauf){
+    // Innen laeuft die Kerbkette in der BOHRUNGSKONTUR (teil.i).
+    const ketteQ = innenR ? M.teil.i : M.teil.k;
+    if(Kante&&Grund&&Aus && M.teil && ketteQ && M.teil.m.Kante && M.teil.m.Auslauf){
       // Bei Form F liegt der GRUND links der Kante (Hinterschnitt
       // zK-1,2t) — die Kette muss ihn einschliessen, sonst fehlt der
       // Zug unter die Nase und die Planflaeche [Daniel, 29.08.2026:
@@ -14884,7 +14930,7 @@ const MASK_HELP = {
       // ziehen'].
       const kzW=Math.min(M.teil.m.Kante[0], M.teil.m.Grund? M.teil.m.Grund[0] : M.teil.m.Kante[0]);
       const azW=M.teil.m.Auslauf[0];
-      const kette=M.teil.k.filter(q=>q[0]>=Math.min(kzW,azW)-1e-6 && q[0]<=Math.max(kzW,azW)+1e-6);
+      const kette=ketteQ.filter(q=>q[0]>=Math.min(kzW,azW)-1e-6 && q[0]<=Math.max(kzW,azW)+1e-6);
       const pts=[];
       for(let i=0;i<kette.length;i++){
         const x =M.zx(kette[i][0]),                        y =M.rx(kette[i][1]);
@@ -14897,7 +14943,11 @@ const MASK_HELP = {
         // das Material liegt dabei IMMER rechts der Laufrichtung, die
         // Linksnormale zeigt immer in die Luft. Die alte Regel 'Luft
         // ist oben' drehte sie am Ueberhang auf die Materialseite.
-        const nx=dy/l, ny=-dx/l;
+        // Luftseite je Lage: aussen liegt das Material rechts der
+        // Kante->Auslauf-Laufrichtung (Linksnormale = Luft); die
+        // z-Spiegelung UND die Innenlage kehren das jeweils um.
+        const vz=((spiegelR?-1:1)*(innenR?-1:1));
+        const nx=vz*dy/l, ny=vz*(-dx)/l;
         pts.push([x+nx*3, y+ny*3]);
       }
       if(pts.length>1){
@@ -14908,14 +14958,19 @@ const MASK_HELP = {
         // Flanke RADIAL ab. Die alte Bildbahn lief andersherum und am
         // Mantel entlang hinaus — sie suggerierte genau das Kratzen.
         pts.reverse();
-        pts.unshift([pts[0][0]+14, pts[0][1]-16]);            // schraeg aus der Luft einsetzen
-        pts.push([pts[pts.length-1][0], Abs? Abs.y-10 : Kante.y-26]); // an der Flanke radial hinaus
+        // Einsetzen aus der Luft: aussen von oben (y-16), innen von
+        // der Achse her (y+16); rechts gespiegelt kommt die Anfahrt
+        // von links (x-14).
+        pts.unshift([pts[0][0]+(spiegelR?-14:14), pts[0][1]+(innenR?16:-16)]);
+        pts.push([pts[pts.length-1][0], (Abs? Abs.y : Kante.y) + (innenR? (innenR&&Abs?10:26) : (Abs?-10:-26))]);
         helpBahn(c, pts, {on:A('fsFR')||A('fsSR')});
       }
     }
 
-    if(Mant) helpDim(c, M.zx(M.zMax)+16,M.axY, M.zx(M.zMax)+16,Mant.y, 0.001, 'X0⌀'+V('fsX0'), A('fsX0'),'in');
-    if(Abs) helpDim(c, 32,M.axY, 32,Abs.y, 0.001, 'V⌀'+V('fsV'), A('fsV'),'in');
+    const dimXm = spiegelR ? 34 : M.zx(M.zMax)+16;     // Mantelmass an der Stirnseite
+    const dimXa = spiegelR ? M.zx(M.zMax)+16 : 32;      // Absatzmass an der Futterseite
+    if(Mant) helpDim(c, dimXm,M.axY, dimXm,Mant.y, 0.001, 'X0⌀'+V('fsX0'), A('fsX0'),'in');
+    if(Abs) helpDim(c, dimXa,M.axY, dimXa,Abs.y, 0.001, 'V⌀'+V('fsV'), A('fsV'),'in');
     if(Kante) helpDim(c, Kante.x,M.rx(M.rMax)-26, Kante.x,M.rx(M.rMax)-2, 0.001, 'Z0'+V('fsZ0'), A('fsZ0'),'in');
     helpBahnLogik(c,w,h,'schräg einsetzen → Kerbe → an der Flanke radial hinaus', A('fsFR')||A('fsSR'));
     helpBahnLegende(c,w,false);
