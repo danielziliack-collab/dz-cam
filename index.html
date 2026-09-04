@@ -2333,9 +2333,18 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
               </select>
             </div>
             <div class="mrow"><label>Lage (PJ, wie Steuerungs-Icon)</label>
+              <!-- PJ-Lagen AM HANDBUCH BELEGT [04.09.2026, Daniels
+                   Screenshot: die Liste zeigte nackte 1/2/3]:
+                   Programmieranleitung S. 3-60 (G78) zeigt die vier
+                   Icon-Lagen — 0/2 aussen (Schulter links/rechts),
+                   1/3 innen. Der Generator faehrt selbst nur PJ0;
+                   bei PJ 1-3 traegt der Zyklussatz die Lage und die
+                   Einzelsatz-Ausgabe faellt mit Ansage zurueck. -->
               <select id="fsPJ">
-                <option value="0" selected>0 — außen, Standard (Welle)</option>
-                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                <option value="0" selected>0 — außen, Schulter links (Welle)</option>
+                <option value="1">1 — innen, Schulter links (Bohrung)</option>
+                <option value="2">2 — außen, Schulter rechts</option>
+                <option value="3">3 — innen, Schulter rechts</option>
               </select>
             </div>
             <div class="mrow"><label>NC-Ausgabe</label><div class="radiobtns" id="fsAusgBtns">
