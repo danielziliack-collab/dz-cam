@@ -596,7 +596,7 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   /* minmax(0,1fr) statt 1fr: eine fr-Spalte schrumpft sonst nicht
      unter ihr Inhaltsminimum — die rechte Kachelspalte lief beim
      ersten Anlauf aus dem iPhone-Bild (469 statt 375 px gemessen). */
-  .mask.kachelpilot .mask-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;align-items:stretch;padding-top:8px;}
+  .mask.kachelpilot .mask-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-rows:min-content;gap:7px;align-items:start;padding-top:8px;}
   .mask.kachelpilot .msec{grid-column:1/-1;margin:2px 0 0;}
   .mask.kachelpilot .mgroup{grid-column:1/-1;}
   .mask.kachelpilot .mrow{
@@ -637,7 +637,17 @@ body.artefakt .hsoftkeys{padding-right:48px;}
      versteckt — ein blankes display:inline-flex hier holte sie
      alle zurueck ins Bild (Einstich zeigte Knopfreihe UND
      Auswahlfeld uebereinander, gemessen). */
-  .mask.kachelpilot .mrow .radiobtns:not(.kopfschalter):not(.selfeld){font-size:12px;display:inline-flex;flex-wrap:nowrap;gap:3px;align-items:center;}
+  /* flex:0 0 auto: als schrumpfendes Flex-Item wurde die man/auto-
+     Gruppe beim Bohren auf 51px gequetscht, ihre Knoepfe liefen
+     ueber und der Wert lag AUF dem auto-Knopf (Daniels Screenshot).
+     Nicht schrumpfen — der Wert bricht dann sauber in die naechste
+     Kachelzeile um. */
+  /* width/min-width mit !important: einzelne Gruppen tragen INLINE-
+     Breiten aus dem Zeilenlayout (boWMode width:51px — die Knoepfe
+     liefen ueber den geschrumpften Span, der Wert lag auf auto).
+     Inline schlaegt jede Klasse; im Kachelkontext ist das important
+     die ehrliche Antwort auf die Altlast. */
+  .mask.kachelpilot .mrow .radiobtns:not(.kopfschalter):not(.selfeld){font-size:12px;display:inline-flex;flex-wrap:nowrap;gap:3px;align-items:center;flex:0 0 auto;width:auto!important;min-width:0!important;}
   .mask.kachelpilot .mrow .radiobtns:not(.kopfschalter):not(.selfeld) button{padding:3px 8px;white-space:nowrap;}
   .mask.kachelpilot .mrow .unit{
     position:static;transform:none;width:auto;
@@ -649,6 +659,7 @@ body.artefakt .hsoftkeys{padding-right:48px;}
      Erklaertexten. Ueber IDs und Bestandsklassen, nicht ueber :has()
      (auf aelteren iOS nicht verlaesslich). */
   .mask.kachelpilot .mrow.k-breit{grid-column:1/-1;}
+  .mask.kachelpilot .mask-body > canvas.mask-help{grid-column:1/-1;width:100%;}
   /* Aktionszeile (Uebernehmen/Abbrechen) ist KEINE Kachel: volle
      Breite, kein Rahmen, kein Fokus-Orange — Knoepfe sind Knoepfe. */
   .mask.kachelpilot .mrow:has(> .gcbtn){grid-column:1/-1;border:0;background:transparent;min-height:0;padding:5px 0;}
@@ -2378,7 +2389,13 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
               </div>
             </div>
             
-            <div class="mask-btns"><button id="btnAbCancel">Abbruch</button><button id="btnAbOk" class="primary ok-gruen">&#220;bernehmen</button></div>
+            <!-- BESTANDSFEHLER BEHOBEN [04.09.2026, Daniels Kachel-
+                 Screenshot machte ihn sichtbar]: als EINZIGE Maske
+                 trugen die Abstech-Knoepfe nie die gcbtn-Hausklasse —
+                 sie standen als graue Browser-Defaults da, in anderer
+                 Reihenfolge und mit "Abbruch" statt "Abbrechen".
+                 Jetzt das Muster der sieben Geschwister. -->
+            <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnAbOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnAbCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
           </div>
         </div>
         <div class="mask" id="maskBohren">
@@ -8719,7 +8736,7 @@ function kachelPilotAnwenden(){
       // mit Erklaertext brauchen die volle Zeile. Einmal gemessen
       // statt :has() — iOS-Verlaesslichkeit.
       m.querySelectorAll('.mrow').forEach(r=>{
-        if(r.querySelector('.gcbtn')){ r.classList.add('k-aktion'); return; }
+        if(r.querySelector('.gcbtn, .ok-gruen, .ab-rot')){ r.classList.add('k-aktion'); return; }
         const breit=r.querySelector('select.tool-select, select[id$="Kontur"], .mhint')
           || (r.querySelector('.radiobtns:not(.kopfschalter)') && r.querySelectorAll('button').length>3);
         r.classList.toggle('k-breit', !!breit);
