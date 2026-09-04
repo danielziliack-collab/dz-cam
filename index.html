@@ -659,6 +659,11 @@ body.artefakt .hsoftkeys{padding-right:48px;}
      Erklaertexten. Ueber IDs und Bestandsklassen, nicht ueber :has()
      (auf aelteren iOS nicht verlaesslich). */
   .mask.kachelpilot .mrow.k-breit{grid-column:1/-1;}
+  /* Editor-Rechenzeile und Hinweiszeilen im Kachelraster: volle
+     Breite, sonst wuerden die acht Tasten in eine halbe Spalte
+     gequetscht (Editor-Panels sind seit 04.09. Kachelmasken). */
+  .mask.kachelpilot .ezl{grid-column:1/-1;}
+  .mask.kachelpilot .mrow.small-hint{border:0;background:transparent;min-height:0;padding:2px 4px;}
   .mask.kachelpilot .mask-body > canvas.mask-help{grid-column:1/-1;width:100%;}
   /* Aktionszeile (Uebernehmen/Abbrechen) ist KEINE Kachel: volle
      Breite, kein Rahmen, kein Fokus-Orange — Knoepfe sind Knoepfe. */
@@ -1163,6 +1168,36 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   }
   body.mode-grafisch #canvasWrap .mask .mask-head{padding:6px 12px;font-size:12px;border-radius:12px 12px 0 0;}
   body.mode-grafisch #canvasWrap .mask .mrow{padding:4px 30px 4px 0;gap:7px;}
+  /* ================================================================
+     EDITIER-VOLLBILDMODUS [Daniels Freigabe 04.09.2026, Vorschlag A
+     des Kontureditor-Entwurfs]: sobald ein Element-Panel offen ist
+     (body.emodus, gesetzt von eModusSync), gibt es am Handy DREI
+     FESTE ZONEN statt vier schwebender Schichten — oben die Grafik
+     (37vh, aufs Element gezoomt, zeichnet live), darunter das Panel,
+     unten dessen Aktions-/Rechenzeile. Elementliste und Zeichen-
+     Softkeys sind waehrenddessen KOMPLETT weg statt halb verdeckt.
+     Nur unter 900 px: am Laptop sind die Panels zentrierte Dialoge
+     (Regel in der End-Query), dort waere das Ausblenden der Liste
+     ein Verlust. ================================================ */
+  @media(max-width:899px){
+    body.emodus.mode-grafisch #pointListPanel{display:none !important;}
+    body.emodus.mode-grafisch .softkeys{display:none !important;}
+    body.emodus.mode-grafisch .stage-main{grid-template-rows:37vh 0 !important;}
+    /* !important gegen die INLINE-Hoehen von applyGrafischLayout —
+       das laeuft bei jedem resize und wuerde die Zone sonst sofort
+       wieder auf Vollhoehe schreiben (gemessen: height:709px). */
+    body.emodus.mode-grafisch #canvasWrap{height:37vh !important;min-height:0;overflow:hidden;}
+    body.emodus.mode-grafisch #canvasWrap .mask{
+      top:calc(37vh + 41px); bottom:0; height:auto; max-height:none;
+      display:flex; flex-direction:column;
+    }
+    body.emodus.mode-grafisch #canvasWrap .mask .mask-body{
+      flex:1 1 auto; min-height:0; overflow-y:auto; max-height:none;
+    }
+    /* Der Zoomstapel laege sonst im 37vh-Streifen ueber der Kontur —
+       im Editiermodus zaehlt das Bild, gezoomt wird per Geste. */
+    body.emodus.mode-grafisch #zoomCtrl{display:none;}
+  }
   /* Feste Zeichenzeile der Editor-Panels [Daniel, 02.09.2026]: die
      schwebende Rechenleiste lag am iPhone hinter der Tastatur (das
      Panel klebt unten am Schirm) — Minus war nicht erreichbar.
@@ -8197,6 +8232,40 @@ function openGeradeMask(axis, idx){
   // nachziehen — spaetestens ab dem zweiten Antippen greift es.
   document.addEventListener('focusin',(e)=>stumm(e.target));
 })();
+// =================================================================
+// EDITIER-VOLLBILDMODUS [Daniels Freigabe 04.09.2026, Vorschlag A]:
+// body.emodus haelt fest, ob ein Element-Panel offen ist — das CSS
+// macht daraus die drei festen Zonen (s. Stylesheet). Der Beobachter
+// haengt an den class-Attributen der drei Panels: die .show wird an
+// einem Dutzend Stellen gesetzt und entfernt, EIN Beobachter ist
+// robuster als zwoelf Callsites. Nach jedem Wechsel ein resize:
+// der Canvas hat im Modus eine andere Hoehe und muss neu einpassen.
+// =================================================================
+function eModusSync(){
+  const offen=!!document.querySelector('#maskStart.show, #maskGerade.show, #maskKreis.show');
+  const war=document.body.classList.contains('emodus');
+  if(offen===war) return;
+  document.body.classList.toggle('emodus', offen);
+  try{ window.dispatchEvent(new Event('resize')); }catch(e){}
+  // AUTOZOOM beim BEARBEITEN (Daniels Kernwunsch: "ich seh oben gar
+  // nicht mehr das Element"): das angefasste Element gross im
+  // Grafikstreifen. Beim NEU-Anlegen bleibt die Ansicht, wie sie
+  // ist — dort ist der Anschlusspunkt schon im Bild.
+  if(offen && typeof editIndex!=='undefined' && editIndex>=0){
+    try{ userAdjustedView=true; zoomToSelected(); }catch(e){}
+  }
+  try{ draw(); }catch(e){}
+}
+(function(){
+  if(typeof MutationObserver==='undefined') return;   // Ersatz-Browser
+  ['maskStart','maskGerade','maskKreis'].forEach(id=>{
+    const m=document.getElementById(id);
+    if(!m || !m.nodeType) return;
+    try{
+      new MutationObserver(eModusSync).observe(m,{attributes:true, attributeFilter:['class']});
+    }catch(e){}
+  });
+})();
 document.getElementById('gTangBtns').addEventListener('click',(e)=>{
   if(e.target.tagName!=='BUTTON') return;
   [...e.target.parentElement.children].forEach(b=>b.classList.remove('sel'));
@@ -8784,21 +8853,34 @@ function selListeZeigen(groupId){
 // Waehlen aus der Pilotphase gelten weiter).
 const KACHEL_MASKEN=['maskAbspanenEinfach','maskAbspanenKontur',
   'maskEinstechen','maskStechdrehen','maskFreistich','maskAbstechen',
-  'maskBohren','maskGewinde'];
+  'maskBohren','maskGewinde',
+  // EDITOR-PANELS [Daniels Freigabe 04.09.2026, Vorschlag A]: der
+  // Kontureditor traegt denselben Kachelstil wie die Zyklusmasken —
+  // der Editor sieht aus wie der Rest der App.
+  'maskStart','maskGerade','maskKreis'];
 function kachelPilotAnwenden(){
   let an=true;
   try{ an=localStorage.getItem('et_kachelpilot')!=='aus'; }catch(e){}
   KACHEL_MASKEN.forEach(id=>{
     const m=document.getElementById(id);
     if(!m) return;
+    const editorPanel=(id==='maskStart'||id==='maskGerade'||id==='maskKreis');
     m.classList.toggle('kachelpilot', an);
     if(an){
       // Breite Kacheln je Inhalt: Werkzeug-/Konturwahl und Zeilen
       // mit Erklaertext brauchen die volle Zeile. Einmal gemessen
       // statt :has() — iOS-Verlaesslichkeit.
       m.querySelectorAll('.mrow').forEach(r=>{
-        if(r.querySelector('.gcbtn, .ok-gruen, .ab-rot')){ r.classList.add('k-aktion'); return; }
-        const breit=r.querySelector('select.tool-select, select[id$="Kontur"], .mhint')
+        // Aktionszeile NUR an Uebernehmen/Abbrechen erkennen: der
+        // Editor hat gcbtn-Knoepfe mitten im Formular ("Berechnen"),
+        // die eine breite Kachel sein sollen, keine rahmenlose Zeile.
+        if(r.querySelector('.ok-gruen, .ab-rot')){ r.classList.add('k-aktion'); return; }
+        const breit=r.querySelector('select.tool-select, select[id$="Kontur"], .mhint, .gcbtn')
+          || r.classList.contains('small-hint')
+          // NUR im Editor: α/L-Doppelfeld braucht die volle Zeile.
+          // In den Zyklusmasken bleiben die abgenommenen Paarzeilen
+          // (UX/UZ, F/S) halbe Kacheln — Daniels Stufe-3-Abnahme.
+          || (editorPanel && r.querySelectorAll('input').length>1)
           || (r.querySelector('.radiobtns:not(.kopfschalter)') && r.querySelectorAll('button').length>3);
         r.classList.toggle('k-breit', !!breit);
       });
