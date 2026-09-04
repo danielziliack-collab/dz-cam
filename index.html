@@ -18773,6 +18773,21 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
   // stehen konstant in allen Belegsaetzen, Bedeutung unbekannt;
   // PF=Zustellung / PG=Aufmass (gestuetzt durch Daniels 1000er-TAP
   // PF0.4 PG0.5 und das belegte PG=U beim G71).
+  //
+  // HANDBUCH-ABGLEICH S. 3-44 (04.09.2026, Ausgabe 02.2004):
+  // - Der gedruckte Beispielsatz X300 I200 K-60 ... PM50 PN60
+  //   BESTAETIGT die Schnittpunktformel: bei 90/90 kollabiert
+  //   PM/PN auf |(I-X)/2| / |K-Z| = 50/60. Zweiter unabhaengiger
+  //   Beleg neben dem Maschinensatz.
+  // - Die Papierform 02.2004 schreibt PG=D / PI=U und PP=
+  //   Eintauchwinkel (alternativ zu Fasen P230-233) — Daniels
+  //   7.210i schreibt real PF=D / PG=U und P236/P237-Winkel OHNE
+  //   Alternativzwang. VERSIONSDIFFERENZ: die Realform der eigenen
+  //   Maschine gilt, das Papier ist keine Gegenevidenz.
+  // - "In der Steuerung fest hinterlegt: Sicherheitsabstand
+  //   (Parameter 5205)" — der G72-Satz traegt KEIN SC-Wort; der
+  //   Programmkopf-SC wirkt beim Zyklussatz also NICHT (anders als
+  //   G75/G76, die PT aus pkSC fuehren). Steht als Hinweis im NC.
   if(zyklusModusAe && innen && winkelModus){
     warnings.push('G72 innen MIT Schenkelwinkeln: nur aussen am Maschinensatz belegt (03.09.2026) — Ausgabe erfolgt als G-Einzelsaetze.');
     zyklusModusAe=false;
@@ -18850,6 +18865,7 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     lines.push('(=== NATIVER G72-ABSPANZYKLUS - Schnittaufteilung macht die Steuerung ===)');
     lines.push('(REALFORM vom Maschinensatz 03.09.2026: P236/P237=Winkel, PM/PN=Schenkel-Schnittpunkt)');
     lines.push('(ANNAHME: PE1 und P235:6 standen konstant in den Belegsaetzen - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
+    lines.push('(HINWEIS: der G72 traegt kein SC-Wort - sein Sicherheitsabstand kommt aus Maschinenparameter 5205, NICHT aus dem Programmkopf-SC. DV 610 S. 3-44)');
     lines.push(`${N()} (ABSPANEN) ${worteAe.join(' ')}`); bump();
     lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
   }
