@@ -7235,8 +7235,13 @@ function geradeErgaenzen(zRoh, xRoh, aRoh, lRoh, achse){
   const ref=elementAnschluss();
   if(!ref) return {fehler:'Kein Anschlusspunkt.'};
   const zP=ref.z, xPr=d2r(ref.x);
-  let z=zRoh, xr=(xRoh===null)?null:d2r(xRoh);
-  const a=(aRoh===null)?null:aRoh*Math.PI/180, L=lRoh;
+  // NaN-WAECHTER [Daniel 04.09.2026, Foto "OFFEN: nur α NaN°"]: ein
+  // leeres oder halb getipptes Feld liefert NaN, und NaN!==null liess
+  // es als "Wert vorhanden" durchgehen — der Hinweis zeigte NaN und
+  // die Vorschau rechnete Muell. NaN zaehlt ab jetzt als LEER.
+  const nn=v=>(v===null||v===undefined||!isFinite(v))?null:v;
+  let z=nn(zRoh), xr=(nn(xRoh)===null)?null:d2r(xRoh);
+  const a=(nn(aRoh)===null)?null:aRoh*Math.PI/180, L=nn(lRoh);
   if(achse==='Z'){ xr=xPr; }
   if(achse==='X'){ z=zP; }
   if(z===null || xr===null){
@@ -8042,9 +8047,26 @@ function openGeradeMask(axis, idx){
     const h=document.getElementById("gOffenHint");
     if(h){
       h.style.display="block";
-      if(axis==="X")      h.textContent="Feld leer lassen: die Gerade bleibt OFFEN und läuft plan nach außen (90°) — das nächste Element bestimmt, wie weit. Für einen anderen Winkel: „Gerade ZX“.";
-      else if(axis==="Z") h.textContent="Feld leer lassen: die Gerade bleibt OFFEN und läuft längs nach hinten (0°) — das nächste Element bestimmt, wie weit. Für einen anderen Winkel: „Gerade ZX“.";
-      else                h.textContent="Nur α angeben (Z und X leer): die Gerade bleibt OFFEN, das nächste Element bestimmt ihren Endpunkt per Schnitt.";
+      // KOMPAKT [Daniel 04.09.2026, "Erklaerkaesten fressen die halbe
+      // Maske"]: EINE Zeile plus (i), der Volltext klappt per Tipp
+      // auf. Die Entdeckbarkeit des offenen Elements (Daniels Ansage
+      // 28.08.) bleibt — die Zeile ist immer da, nur der Lehrtext
+      // ist gefaltet.
+      let kurz, lang;
+      if(axis==="X"){      kurz="Feld leer = Gerade bleibt OFFEN, plan (90°)"; lang="Feld leer lassen: die Gerade bleibt OFFEN und läuft plan nach außen (90°) — das nächste Element bestimmt, wie weit. Für einen anderen Winkel: „Gerade ZX“."; }
+      else if(axis==="Z"){ kurz="Feld leer = Gerade bleibt OFFEN, längs (0°)"; lang="Feld leer lassen: die Gerade bleibt OFFEN und läuft längs nach hinten (0°) — das nächste Element bestimmt, wie weit. Für einen anderen Winkel: „Gerade ZX“."; }
+      else{                kurz="Nur α = Gerade bleibt OFFEN, Ende per Schnitt"; lang="Nur α angeben (Z und X leer): die Gerade bleibt OFFEN, das nächste Element bestimmt ihren Endpunkt per Schnitt."; }
+      h.textContent=kurz+"  ⓘ";
+      h.title=lang;
+      h.style.cursor="pointer";
+      h.dataset.kurz=kurz; h.dataset.lang=lang; h.dataset.offen="0";
+      // onclick-Zuweisung statt addEventListener: die Maske wird bei
+      // jedem Oeffnen neu befuellt, ein Listener-Stapel waere ein Leck.
+      h.onclick=()=>{
+        const zu=h.dataset.offen==="1";
+        h.dataset.offen=zu?"0":"1";
+        h.textContent=(zu? h.dataset.kurz+"  ⓘ" : h.dataset.lang);
+      };
     }
   }
   document.getElementById('gA').value=''; document.getElementById('gL').value='';
@@ -8090,6 +8112,14 @@ function openGeradeMask(axis, idx){
       el.dataset.warNumber='1';
       el.type='text';
       if(el.setAttribute) el.setAttribute('inputmode','decimal');
+      // FOKUS-HALTER [Daniel 04.09.2026: "dann schliesst sich manchmal
+      // wieder das Eingabefeld"]: iOS wirft beim type-Wechsel am
+      // FOKUSSIERTEN Feld gelegentlich Fokus und Tastatur ab — genau
+      // "manchmal", naemlich nur beim ERSTEN Antippen (danach ist das
+      // Feld schon text). Fokus aktiv zurueckholen.
+      if(document.activeElement!==el){
+        try{ el.focus({preventScroll:true}); }catch(e){ try{ el.focus(); }catch(e2){} }
+      }
     }
     try{ const n=el.value.length; el.setSelectionRange(n,n); }catch(e){}
   };
@@ -8144,6 +8174,28 @@ function openGeradeMask(axis, idx){
       }
     });
   });
+})();
+// =================================================================
+// iOS-AUTOFILL ABSTELLEN [Daniel 04.09.2026, Foto: die Kontakt-/
+// Adressleiste ("Hermaringen 89568 Deutschland") lag ueber unserer
+// Rechenleiste]. iOS haelt nackte Text-/Zahlenfelder fuer
+// Kontaktfelder und bietet Adressen an — autocomplete/autocorrect
+// aus nimmt der Heuristik die Nahrung. Die schmale QuickType-Leiste
+// selbst ist Systemsache und bleibt, aber leer. WIRKUNG NUR AM
+// GERAET PRUEFBAR — der Browser-Pane hat kein iOS-Autofill.
+// =================================================================
+(function(){
+  const stumm=(el)=>{
+    if(el && el.setAttribute && (el.tagName==='INPUT'||el.tagName==='TEXTAREA')
+       && !el.getAttribute('autocomplete')){
+      el.setAttribute('autocomplete','off');
+      el.setAttribute('autocorrect','off');
+    }
+  };
+  try{ document.querySelectorAll('input, textarea').forEach(stumm); }catch(e){}
+  // Dynamisch erzeugte Felder (Werkzeugtabelle u. a.): beim Fokus
+  // nachziehen — spaetestens ab dem zweiten Antippen greift es.
+  document.addEventListener('focusin',(e)=>stumm(e.target));
 })();
 document.getElementById('gTangBtns').addEventListener('click',(e)=>{
   if(e.target.tagName!=='BUTTON') return;
@@ -8979,7 +9031,15 @@ function rechneAusdruck(txt){
     el.dataset.rechner='1';
     el.addEventListener('focus', ()=>{
       if(el.type==='number'){ el.dataset.warNumber='1'; el.type='text';
-                              el.setAttribute('inputmode','decimal'); }
+                              el.setAttribute('inputmode','decimal');
+        // FOKUS-HALTER [Daniel 04.09.2026]: der type-Wechsel im
+        // focus-Handler trift JEDES Zahlenfeld der App — iOS wirft
+        // dabei gelegentlich Fokus und Tastatur ab ("das Eingabefeld
+        // schliesst sich"). Fokus aktiv zurueckholen.
+        if(document.activeElement!==el){
+          try{ el.focus({preventScroll:true}); }catch(e){ try{ el.focus(); }catch(e2){} }
+        }
+      }
     });
     el.addEventListener('blur', ()=>{
       const roh=el.value;
@@ -9231,6 +9291,12 @@ const VZ_NIE=/^(pkTw|rapidF|esX0|esT1|aeX0|akStock|akTsX0|akXmin|fsX0|fsV|gwX0|s
     if(feld.type==="number"){
       feld.dataset.vzText="1"; feld.type="text";
       if(feld.setAttribute) feld.setAttribute("inputmode","decimal");
+      // FOKUS-HALTER wie im Editor (Daniel 04.09.2026): der type-
+      // Wechsel am fokussierten Feld kann auf iOS die Tastatur
+      // abwerfen — Fokus aktiv zurueckholen.
+      if(document.activeElement!==feld){
+        try{ feld.focus({preventScroll:true}); }catch(e){ try{ feld.focus(); }catch(e2){} }
+      }
     }
     feld.value=neu;
     ergebnisZeigen();
