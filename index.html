@@ -14953,10 +14953,14 @@ const MASK_HELP = {
         // das Material liegt dabei IMMER rechts der Laufrichtung, die
         // Linksnormale zeigt immer in die Luft. Die alte Regel 'Luft
         // ist oben' drehte sie am Ueberhang auf die Materialseite.
-        // Luftseite je Lage: aussen liegt das Material rechts der
-        // Kante->Auslauf-Laufrichtung (Linksnormale = Luft); die
-        // z-Spiegelung UND die Innenlage kehren das jeweils um.
-        const vz=((spiegelR?-1:1)*(innenR?-1:1));
+        // Luftseite je Lage [Daniels dritte Korrektur, 04.09.2026]:
+        // nach dem Klappungs-Umbau laufen ALLE vier Ketten im Array
+        // in +z — aussen liegt das Material UNTER der Kontur (Luft
+        // oben), innen DARUEBER (Luft unten). Nur die Innenlage
+        // dreht die Normale; die fruehere spiegel-Abhaengigkeit war
+        // ein Rest der alten Reihenfolge-Logik und schob die Bahn
+        // bei PJ3 ins Material.
+        const vz=(innenR?-1:1);
         const nx=vz*dy/l, ny=vz*(-dx)/l;
         pts.push([x+nx*3, y+ny*3]);
       }
@@ -14967,12 +14971,22 @@ const MASK_HELP = {
         // und beruehrt den Zapfen nur dort; am Ende hebt er an der
         // Flanke RADIAL ab. Die alte Bildbahn lief andersherum und am
         // Mantel entlang hinaus — sie suggerierte genau das Kratzen.
-        pts.reverse();
-        // Einsetzen aus der Luft: aussen von oben (y-16), innen von
-        // der Achse her (y+16); rechts gespiegelt kommt die Anfahrt
-        // von links (x-14).
-        pts.unshift([pts[0][0]+(spiegelR?-14:14), pts[0][1]+(innenR?16:-16)]);
-        pts.push([pts[pts.length-1][0], (Abs? Abs.y : Kante.y) + (innenR? (innenR&&Abs?10:26) : (Abs?-10:-26))]);
+        // SEMANTISCH orientieren statt blind zu drehen [Daniels
+        // dritte Korrektur: "die An- und Abfahrbewegungen passen
+        // nicht"]: nach Spiegelung/Klappung wechselt die Array-
+        // Reihenfolge der Kette — das blinde reverse setzte den
+        // Einstieg an die Schulter statt an den Auslauf. Jetzt:
+        // die Bahn STARTET immer am Ende, das dem Auslauf-Marker
+        // naeher liegt, und faehrt an der Schulterflanke radial
+        // LANG in die Luft hinaus (ueber den Absatz), wie im
+        // Standardbild.
+        const dA0=Math.hypot(pts[0][0]-Aus.x, pts[0][1]-Aus.y);
+        const dAn=Math.hypot(pts[pts.length-1][0]-Aus.x, pts[pts.length-1][1]-Aus.y);
+        if(dA0>dAn) pts.reverse();
+        const luft=innenR?1:-1;                       // Bild-y der Luftseite
+        const dirX=Math.sign(Aus.x-Kante.x)||1;       // vom Ausstieg weg
+        pts.unshift([pts[0][0]+dirX*14, pts[0][1]+luft*16]);
+        pts.push([pts[pts.length-1][0], (Abs? Abs.y : Kante.y) + luft*10]);
         helpBahn(c, pts, {on:A('fsFR')||A('fsSR')});
       }
     }
