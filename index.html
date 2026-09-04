@@ -1168,6 +1168,18 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   }
   body.mode-grafisch #canvasWrap .mask .mask-head{padding:6px 12px;font-size:12px;border-radius:12px 12px 0 0;}
   body.mode-grafisch #canvasWrap .mask .mrow{padding:4px 30px 4px 0;gap:7px;}
+  /* VOLLLISTE SICHTBAR MACHEN [Daniels Befund 04.09.2026: "der
+     Button geht nicht"]: der Toggle schaltete pointBody zwar auf
+     block, aber applyGrafischLayout hatte dem Canvas seine Hoehe
+     INLINE festgeschrieben — das Panel darunter behielt nur die
+     Streifenhoehe, die Liste wurde von overflow:hidden der stage
+     abgeschnitten. body.elemvoll (setzt der Ketten-Chip) gibt dem
+     Canvas die Hoehe frei; die Liste selbst scrollt in 34vh.
+     Steht VOR dem emodus-Block: ist ein Panel offen, gewinnt die
+     spaetere 37vh-Regel — dort ist die Liste ohnehin aus. */
+  @media(max-width:899px){
+    body.elemvoll.mode-grafisch #canvasWrap{height:auto !important;min-height:110px;}
+  }
   /* ================================================================
      EDITIER-VOLLBILDMODUS [Daniels Freigabe 04.09.2026, Vorschlag A
      des Kontureditor-Entwurfs]: sobald ein Element-Panel offen ist
@@ -11378,7 +11390,14 @@ function refreshPointList(){
     kette.className='f-chip f-voll'+((panel.classList && panel.classList.contains('vollliste'))?' akt':'');
     kette.textContent='☰';
     kette.title='Vollliste (Loeschen, Bearbeiten)';
-    kette.addEventListener('click',()=>{ panel.classList.toggle('vollliste'); });
+    kette.addEventListener('click',()=>{
+      panel.classList.toggle('vollliste');
+      const an=panel.classList.contains('vollliste');
+      kette.classList.toggle('akt', an);           // Feedback sofort, nicht erst beim naechsten Render
+      document.body.classList.toggle('elemvoll', an);
+      // Der Canvas muss seine Inline-Hoehe neu einpassen (s. CSS).
+      try{ window.dispatchEvent(new Event('resize')); }catch(e){}
+    });
     film.appendChild(kette);
     contour.forEach((el,i)=>{
       const c=document.createElement('div');
