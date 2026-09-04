@@ -21239,6 +21239,24 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
 // Rattern, sauberer Butzen); X1 leicht negativ trennt sicher ueber Mitte.
 // =================================================================
 // =================================================================
+// LAGEN-TRANSFORMATION [Daniels Auftrag 04.09.2026]: die Einzelsatz-
+// und SIM-Bahnen der Lagen PJ1-3 entstehen aus der fertig
+// gerechneten Standardbahn (PJ0) durch SPIEGELUNG — Z um Z0
+// (Schulter rechts), X um X0 (innen). EINE Spiegelung kippt
+// Umlaufsinn und Korrekturseite (G02<->G03, G42<->G41), zwei
+// stellen sie zurueck. Zyklussaetze (FREISTI) bleiben unangetastet:
+// dort traegt PJ die Lage und die STEUERUNG spiegelt selbst.
+function fsLageWandeln(s, sp, inn, x0, z0){
+  if(s.indexOf('(FREISTI )')>=0) return s;
+  if(inn) s=s.replace(/X(-?\d+(?:\.\d+)?)/g, (m,v)=>'X'+fmt(2*x0-parseFloat(v)));
+  if(sp)  s=s.replace(/Z(-?\d+(?:\.\d+)?)/g, (m,v)=>'Z'+fmt(2*z0-parseFloat(v)));
+  if(sp!==inn){
+    s=s.replace(/\bG02\b/g,'§B§').replace(/\bG03\b/g,'G02').replace(/§B§/g,'G03');
+    s=s.replace(/\bG42\b/g,'§K§').replace(/\bG41\b/g,'G42').replace(/§K§/g,'G41');
+  }
+  return s;
+}
+// =================================================================
 // FREISTICH DIN 509 FORM E/F [Daniel]: NATIVER Zyklus G79 (Form E,
 // Kap. 3.41) bzw. G78 (Form F, Kap. 3.40) — Radius/Tiefe setzt die
 // Steuerung ueber PM nach DIN 509. Darunter (SIM:)-Zeilen mit einer
@@ -21256,16 +21274,29 @@ function genFreistich(p, N, bump, lines, warnings){
     warnings.push('Freistich: T'+p.t+' hat Spitzenwinkel '+t.sw+'° — fuer den 15°-Einstieg ist eine 35°-Platte ueblich.');
   const nrm=FS_NORM[p.pm]||FS_NORM[2];
   const formF = p.form==='F';
-  // G-EINZELSATZ-AUSGABE [Daniel, 29.08.2026]: nur Standardlage PJ0 —
-  // fuer die anderen Lagen ist die Bahn nicht gerechnet, dann lieber
-  // der Zyklussatz mit Warnung als stiller Falschcode.
-  const gcodeAus = (p.ausg==='gcode') && (+p.pj===0 || !p.pj);
-  if(p.ausg==='gcode' && +p.pj!==0)
-    warnings.push('Freistich: G-Einzelsaetze nur in Standardlage PJ0 — es wird der Zyklussatz ausgegeben.');
+  // G-EINZELSATZ-AUSGABE fuer ALLE VIER LAGEN [04.09.2026]: die Bahn
+  // wird in der Standardlage gerechnet und am Ende gespiegelt
+  // (fsLageWandeln). Vorher fiel jede Sonderlage stumm auf den
+  // Zyklussatz zurueck und die Simulation blieb komplett leer.
+  const gcodeAus = (p.ausg==='gcode');
+  const pjW=+p.pj||0, spW=(pjW===2||pjW===3), innW=(pjW===1||pjW===3);
   if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B' && !gcodeAus)
     warnings.push('Freistich-Zyklus (G78/G79) am 1000er-Profil nicht belegt — Trockenlauf im Einzelsatz ODER NC-Ausgabe auf G-Einzelsaetze stellen.');
-  if(+p.pj!==0)
-    warnings.push('Freistich: Lage PJ'+p.pj+' — die Simulation zeigt nur die Standardlage (PJ0, aussen); der Zyklussatz traegt die gewaehlte Lage.');
+  if(pjW!==0)
+    warnings.push('Freistich: Lage PJ'+pjW+' — Bahn als Spiegelung der Standardbahn gerechnet, an der Maschine unverifiziert; ersten Lauf im Einzelsatz fahren.');
+  if(innW && t && t.art!=='innen')
+    warnings.push('Freistich: Lage innen mit T'+p.t+' (Art '+(t.art||'?')+') — fuer die Bohrung eine Bohrstangen-Platte (Art innen) verwenden.');
+  if(innW && p.x0<8)
+    warnings.push('Freistich innen: Bohrung ⌀'+fmt(p.x0)+' — die gespiegelten An-/Freifahrwege (X0-4 bzw. X0-6) laufen unter die Drehachse; Lage innen ist hier nicht fahrbar.');
+  // V ist innen der KLEINERE Absatz-⌀ hinter der Schulter. Er wird
+  // VOR der Rechnung in die Standardlage gespiegelt, damit die
+  // fertige (zurueckgespiegelte) Bahn exakt auf Daniels V endet.
+  let fsV=+p.v||0;
+  if(innW && fsV){
+    if(fsV>=p.x0){ warnings.push('Freistich innen: V⌀'+fmt(fsV)+' ist nicht kleiner als die Bohrung X0⌀'+fmt(p.x0)+' — V wird ignoriert.'); fsV=0; }
+    else fsV=2*p.x0-fsV;
+  }
+  const fsLi0=lines.length;
   warnings.push('Freistich DIN 509: nativer Zyklus, an der Maschine noch unbestaetigt — ersten Lauf im Einzelsatz fahren (Belegliste).');
 
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
@@ -21282,9 +21313,10 @@ function genFreistich(p, N, bump, lines, warnings){
       lines.push(`${N()} (FREISTI ) G79 G90 X${fmt(p.x0)} Z${fmt(p.z0)} I${fmt(p.i||0)} PH${fmt(p.v||p.x0+10)} PJ${p.pj||0} PM${p.pm} P227:90`); bump();
     }
   }
-  // --- SIM-Naeherung (Standardlage PJ0, aussen): 15-Grad-Einstieg,
-  // Grundradius, Flanke; Form F zusaetzlich Planzug in die Anlageflaeche.
-  if(+p.pj===0){
+  // --- Bahn (immer in Standardlage gerechnet — Sonderlagen werden
+  // am Funktionsende gespiegelt): 15-Grad-Einstieg, Grundradius,
+  // Flanke; Form F zusaetzlich Planzug in die Anlageflaeche.
+  {
     const r1=nrm.r, t1=nrm.t;
     // KLINGENVERSATZ [Daniel, IMG_2616]: das Sim-Stechermodell fuehrt die
     // Klinge LINKS vom Referenzpunkt (Breite bw) — ohne Versatz stach der
@@ -21292,6 +21324,8 @@ function genFreistich(p, N, bump, lines, warnings){
     // SIM-Z-Punkte werden um bw nach rechts geschoben, damit die LINKE
     // Schneidecke an den Sollpunkten arbeitet.
     const bw=(t && t.art==='stechen' && +t.len>0)? +t.len : 0;
+    if(pjW && bw>0)
+      warnings.push('Freistich: der Stechmeissel-Klingenversatz ist nur fuer die Standardlage modelliert — in Lage PJ'+pjW+' eine 35°-Platte verwenden.');
     // TANGENTIALE BOGENKONSTRUKTION [Daniel, IMG_2622]: der Grundradius
     // liegt KONKAV in der Kerbe — Zentrum (z0+r1, Grund+r1): Schraege
     // endet tangential bei (z0+r1, Grund), der Bogen laeuft im UZS (G02)
@@ -21312,7 +21346,7 @@ function genFreistich(p, N, bump, lines, warnings){
         lines.push(`${N()} (GERADE  ) G01 Z${fmt(p.z0-t1*0.6+bw)}`); bump();
         lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(p.x0+2)}`); bump();
       } else {
-        lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(Math.max(p.v||p.x0+6, p.x0+2))}`); bump();
+        lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(Math.max(fsV||p.x0+6, p.x0+2))}`); bump();
       }
     } else {
     // SIM MIT SCHNEIDENRADIUSKOMPENSATION [Daniel, 30.08.2026]:
@@ -21330,7 +21364,7 @@ function genFreistich(p, N, bump, lines, warnings){
       lines.push(`(SIM: G01 Z${fmt(p.z0-t1*0.6+bw)})`);
       lines.push(`(SIM: G01 G40 X${fmt(p.x0+2)})`);
     } else {
-      lines.push(`(SIM: G01 G40 X${fmt(Math.max(p.v||p.x0+6, p.x0+2))})`);
+      lines.push(`(SIM: G01 G40 X${fmt(Math.max(fsV||p.x0+6, p.x0+2))})`);
     }
     lines.push(`(SIM: G94 G00 Z${fmt(p.z0+bw+4)})`);
     }
@@ -21341,10 +21375,15 @@ function genFreistich(p, N, bump, lines, warnings){
   // (radial auf max(V, x0+6), axial auf z0+4); ein Rueckzug auf
   // "x0+SC" laege dahinter und fuehre radial nach innen.
   // p.z0 ist hier der ORT der Kerbe, nicht die Werkstueckstirn.
-  lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(Math.max(p.v||p.x0+6, p.x0+pkSC()))}`); bump();
+  lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(Math.max(fsV||p.x0+6, p.x0+pkSC()))}`); bump();
   lines.push(`${N()} (GERADE  ) G00 Z${fmt(p.z0+4+pkSC())}`); bump();
   lines.push(`${N()} (M-BEFEHL) M09`); bump();
   lines.push(`${N()} (M-BEFEHL) M05`); bump();
+  // Lagen-Nachlauf: JETZT wird gespiegelt — ueber alle Saetze dieses
+  // Zyklus, einschliesslich Anfahrt und Endrueckzug (nur der
+  // FREISTI-Zyklussatz bleibt, s. fsLageWandeln). Bei PJ0 ist die
+  // Schleife wirkungslos, jede Bestandsbahn bleibt bitgenau.
+  if(pjW) for(let i=fsLi0;i<lines.length;i++) lines[i]=fsLageWandeln(lines[i], spW, innW, p.x0, p.z0);
 }
 // =================================================================
 // FREISTICH DIN 76 (Gewinde) [01.09.2026, Empfehlung 1]
@@ -21371,10 +21410,20 @@ function genFreistich76(p, N, bump, lines, warnings){
     warnings.push('Freistich DIN 76: fuer Steigung '+fmt(p.p76)+' liegt keine Normtabelle in der App — nur Zyklusausgabe moeglich.');
     return;
   }
-  if(+p.pj!==0 && ausg==='gcode'){
-    warnings.push('Freistich DIN 76: G-Einzelsaetze nur in Standardlage PJ0.');
-    return;
+  // LAGEN [04.09.2026]: dieselbe Spiegelmechanik wie beim 509er
+  // (fsLageWandeln) — vorher brach die Einzelsatz-Ausgabe bei jeder
+  // Sonderlage komplett ab (early return VOR dem Werkzeugsatz).
+  const pjW=+p.pj||0, spW=(pjW===2||pjW===3), innW=(pjW===1||pjW===3);
+  if(pjW!==0)
+    warnings.push('Freistich DIN 76: Lage PJ'+pjW+' — Bahn als Spiegelung der Standardbahn gerechnet, an der Maschine unverifiziert.');
+  if(innW)
+    warnings.push('Freistich DIN 76: Masse nach DIN 76-1 (AUSSENgewinde) — der Innenfreistich nach DIN 76-2 hat andere Masse; vor dem Lauf gegen das Normblatt pruefen.');
+  let fsV=+p.v||0;
+  if(innW && fsV){
+    if(fsV>=p.x0){ warnings.push('Freistich DIN 76 innen: V⌀'+fmt(fsV)+' ist nicht kleiner als die Bohrung X0⌀'+fmt(p.x0)+' — V wird ignoriert.'); fsV=0; }
+    else fsV=2*p.x0-fsV;
   }
+  const fsLi0=lines.length;
   warnings.push('Freistich DIN 76: neu am 01.09.2026 — ersten Lauf im Einzelsatz fahren.');
   lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
@@ -21392,9 +21441,10 @@ function genFreistich76(p, N, bump, lines, warnings){
     lines.push(`${N()} (FREISTI ) G73 G90 X${fmt(p.x0)} Z${fmt(p.z0)} G91 PG${fmt(p.d76||2)} PH${fmt(ph)} PI${fmt(p.u76||0)} PJ${p.pj||0} PK${fmt(p.al76||60)} PM${pmIdx||14} P227:91 P240:1 P241:1`); bump();
     lines.push('(ANNAHME zu pruefen: PH-Skalierung radial - erster Lauf im Einzelsatz)');
   }
-  // --- Einzelsaetze/SIM (PJ0, aussen): identische Bahn fuer beide —
-  // gcodeAus schreibt SAETZE, sonst laufen dieselben Zuege als (SIM:).
-  if(n76 && +p.pj===0){
+  // --- Einzelsaetze/SIM: identische Bahn fuer beide — gcodeAus
+  // schreibt SAETZE, sonst laufen dieselben Zuege als (SIM:).
+  // Immer in Standardlage gerechnet, Spiegelung am Funktionsende.
+  if(n76){
     const g=(p.g76==='B')? n76.gB : n76.gA;
     const tR=n76.dd/2, r1=n76.r;
     const al=(+p.al76||60)*Math.PI/180;
@@ -21402,7 +21452,7 @@ function genFreistich76(p, N, bump, lines, warnings){
     const zEnd=p.z0+g;                       // Auslauf-Ende auf Nenn-⌀
     const zGrund=zEnd - tR/Math.tan(al);     // Schraege unten angekommen
     const bw=(t && t.art==='stechen' && +t.len>0)? +t.len : 0;
-    const vZiel=Math.max(+p.v||p.x0+6, p.x0+2);
+    const vZiel=Math.max(fsV||p.x0+6, p.x0+2);
     const Zg=[
       `G94 G00 G90 X${fmt(p.x0+4)} Z${fmt(zEnd+bw+2)}`,
       `G01 G95 F${fmt(p.fr)} G42 X${fmt(p.x0)} Z${fmt(zEnd+bw)}`,
@@ -21419,10 +21469,12 @@ function genFreistich76(p, N, bump, lines, warnings){
       lines.push(`(SIM: G94 G00 Z${fmt(p.z0+bw+4)})`);
     }
   }
-  lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(Math.max(+p.v||p.x0+6, p.x0+pkSC()))}`); bump();
+  lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(Math.max(fsV||p.x0+6, p.x0+pkSC()))}`); bump();
   lines.push(`${N()} (GERADE  ) G00 Z${fmt(p.z0+4+pkSC())}`); bump();
   lines.push(`${N()} (M-BEFEHL) M09`); bump();
   lines.push(`${N()} (M-BEFEHL) M05`); bump();
+  // Lagen-Nachlauf wie beim 509er: PJ0 laesst jede Zeile unberuehrt.
+  if(pjW) for(let i=fsLi0;i<lines.length;i++) lines[i]=fsLageWandeln(lines[i], spW, innW, p.x0, p.z0);
 }
 function genAbstechen(p, N, bump, lines, warnings){
   const t=toolTable.find(x=>String(x.t)===String(p.t));
