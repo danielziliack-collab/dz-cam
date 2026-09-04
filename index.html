@@ -630,7 +630,15 @@ body.artefakt .hsoftkeys{padding-right:48px;}
     font-size:15.5px;font-weight:600;text-align:left;
     display:flex;align-items:center;gap:6px;
   }
-  .mask.kachelpilot .mrow .radiobtns:not(.kopfschalter){font-size:13px;}
+  /* Knopfgruppen bleiben in der Kachel EINE Reihe — man/auto beim
+     Bohren stapelte sonst uebereinander (gemessen). */
+  /* :not(.selfeld) ist PFLICHT: die vom Auswahlfeld ersetzten
+     Gruppen (Punkt 22) sind per .radiobtns.selfeld{display:none}
+     versteckt — ein blankes display:inline-flex hier holte sie
+     alle zurueck ins Bild (Einstich zeigte Knopfreihe UND
+     Auswahlfeld uebereinander, gemessen). */
+  .mask.kachelpilot .mrow .radiobtns:not(.kopfschalter):not(.selfeld){font-size:12px;display:inline-flex;flex-wrap:nowrap;gap:3px;align-items:center;}
+  .mask.kachelpilot .mrow .radiobtns:not(.kopfschalter):not(.selfeld) button{padding:3px 8px;white-space:nowrap;}
   .mask.kachelpilot .mrow .unit{
     position:static;transform:none;width:auto;
     align-self:flex-end;margin-left:auto;font-size:10px;
@@ -1809,7 +1817,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
       <div id="globalMasks">
         <!-- Abspanen einfach (CYCLE951-style) mask -->
         <div class="mask" id="maskAbspanenEinfach">
-          <div class="mask-head"><span class="mtitel" title="Abspanen (Ecke Außen-/Innenkontur — längs/plan)">Abspanen Ecke</span><button id="aeAnsichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Pilot: Kachel- oder Zeilenansicht">⊞</button><span class="radiobtns kopfschalter" id="aeEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel" title="Abspanen (Ecke Außen-/Innenkontur — längs/plan)">Abspanen Ecke</span><button id="aeAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="aeEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskAbspanenEinfach"></canvas>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
@@ -1947,7 +1955,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
 
         <!-- Konturabspanen (CYCLE952-style) mask -->
         <div class="mask" id="maskAbspanenKontur">
-          <div class="mask-head"><span class="mtitel" title="Abspanen Kontur (CYCLE952-Art) — nutzt gezeichnete Kontur">Abspanen Kontur</span><span class="radiobtns kopfschalter" id="akEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel" title="Abspanen Kontur (CYCLE952-Art) — nutzt gezeichnete Kontur">Abspanen Kontur</span><button id="akkAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="akEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskAbspanenKontur"></canvas>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
@@ -2083,7 +2091,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
 
         <!-- Einstechen (CYCLE930-style) mask -->
         <div class="mask" id="maskEinstechen">
-          <div class="mask-head"><span class="mtitel" title="Einstich (radial, Rechteck-Nut)">Einstich</span><span class="radiobtns kopfschalter" id="esEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel" title="Einstich (radial, Rechteck-Nut)">Einstich</span><button id="esAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="esEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskEinstechen"></canvas>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
@@ -2195,7 +2203,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
         </div>
         <!-- Stechdrehen (ShopTurn-Art, konturbasiert) mask -->
         <div class="mask" id="maskStechdrehen">
-          <div class="mask-head"><span class="mtitel" title="Stechdrehen (Kontur, Stechplatte)">Stechdrehen</span><span class="radiobtns kopfschalter" id="stEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel" title="Stechdrehen (Kontur, Stechplatte)">Stechdrehen</span><button id="stAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="stEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskStechdrehen"></canvas>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
@@ -2270,7 +2278,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
              das iPhone direkt fotografieren oder aus Fotos waehlen. -->
         <input type="file" id="unterlageFile" accept="image/*,.pdf,application/pdf" style="display:none;">
         <div class="mask" id="maskFreistich">
-          <div class="mask-head"><span class="mtitel" title="Freistich DIN 509 (E/F) und DIN 76 (Gewinde)">Freistich DIN 509 / 76</span><span class="radiobtns kopfschalter" id="fsEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel" title="Freistich DIN 509 (E/F) und DIN 76 (Gewinde)">Freistich DIN 509 / 76</span><button id="fsAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="fsEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
             <div class="mrow"><label>T Werkzeug (Stechplatte)</label><select id="fsT" class="tool-select"></select></div>
@@ -2341,7 +2349,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
           </div>
         </div>
         <div class="mask" id="maskAbstechen">
-          <div class="mask-head"><span class="mtitel">Abstechen</span><span class="radiobtns kopfschalter" id="abEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel">Abstechen</span><button id="abAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="abEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskAbstechen"></canvas>
           <div class="mask-body">
             <div class="mrow"><label>T Werkzeug (Abstechstahl)</label><select id="abT" class="tool-select"></select></div>
@@ -2374,7 +2382,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
           </div>
         </div>
         <div class="mask" id="maskBohren">
-          <div class="mask-head"><span class="mtitel" title="Bohren (Zentrieren / Bohren / Tieflochbohren)">Bohren</span><span class="radiobtns kopfschalter" id="boEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel" title="Bohren (Zentrieren / Bohren / Tieflochbohren)">Bohren</span><button id="boAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="boEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskBohren"></canvas>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
@@ -2433,7 +2441,7 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
         </div>
         <!-- Gewinde Längs (CYCLE97-Art) mask -->
         <div class="mask" id="maskGewinde">
-          <div class="mask-head"><span class="mtitel">Gewinde Längs</span><span class="radiobtns kopfschalter" id="gwEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+          <div class="mask-head"><span class="mtitel">Gewinde Längs</span><button id="gwAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="gwEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
           <canvas class="mask-help" id="help_maskGewinde"></canvas>
           <div class="mask-body">
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
@@ -8690,37 +8698,45 @@ function selListeZeigen(groupId){
 // Aufbau: je Auswahlgruppe ein Anzeigefeld direkt dahinter. Laeuft im
 // Ersatz-Browser ins Leere (dort hat keine Gruppe Kinder) — das ist
 // gewollt, geprueft wird dort die Rechenlogik.
-// KACHEL-PILOT-SCHALTER [Stufe 2, 04.09.2026]: nur die Ecke-Maske,
-// Klasse + Browserspeicher. Vorgabe AN — Daniel soll den Entwurf
-// sehen; ein Tipp auf den Kopfknopf faellt auf die Zeilen zurueck.
+// KACHELANSICHT [Stufe 3, 04.09.2026 — Daniels Abnahme des Ecke-
+// Piloten: "Passt! Bitte weiter die anderen Masken so aufbauen."]:
+// EINE Einstellung fuer alle acht Zyklusmasken, Vorgabe AN, der
+// Kopfknopf jeder Maske schaltet global auf die Zeilenansicht
+// zurueck (et_kachelpilot — der Schluessel bleibt, gespeicherte
+// Waehlen aus der Pilotphase gelten weiter).
+const KACHEL_MASKEN=['maskAbspanenEinfach','maskAbspanenKontur',
+  'maskEinstechen','maskStechdrehen','maskFreistich','maskAbstechen',
+  'maskBohren','maskGewinde'];
 function kachelPilotAnwenden(){
-  const m=document.getElementById('maskAbspanenEinfach');
-  const b=document.getElementById('aeAnsichtBtn');
-  if(!m) return;
   let an=true;
   try{ an=localStorage.getItem('et_kachelpilot')!=='aus'; }catch(e){}
-  m.classList.toggle('kachelpilot', an);
-  if(b) b.textContent=an?'☰':'⊞';
-  if(an){
-    // Breite Kacheln je Inhalt: Werkzeug-/Konturwahl und Zeilen mit
-    // Erklaertext brauchen die volle Zeile. Einmal je Anwendung
-    // gemessen statt :has() — iOS-Verlaesslichkeit.
-    m.querySelectorAll('.mrow').forEach(r=>{
-      if(r.querySelector('.gcbtn')){ r.classList.add('k-aktion'); return; }
-      const breit=r.querySelector('select.tool-select, select[id$="Kontur"], .mhint')
-        || (r.querySelector('.radiobtns:not(.kopfschalter)') && r.querySelectorAll('button').length>3);
-      r.classList.toggle('k-breit', !!breit);
-    });
-  }
+  KACHEL_MASKEN.forEach(id=>{
+    const m=document.getElementById(id);
+    if(!m) return;
+    m.classList.toggle('kachelpilot', an);
+    if(an){
+      // Breite Kacheln je Inhalt: Werkzeug-/Konturwahl und Zeilen
+      // mit Erklaertext brauchen die volle Zeile. Einmal gemessen
+      // statt :has() — iOS-Verlaesslichkeit.
+      m.querySelectorAll('.mrow').forEach(r=>{
+        if(r.querySelector('.gcbtn')){ r.classList.add('k-aktion'); return; }
+        const breit=r.querySelector('select.tool-select, select[id$="Kontur"], .mhint')
+          || (r.querySelector('.radiobtns:not(.kopfschalter)') && r.querySelectorAll('button').length>3);
+        r.classList.toggle('k-breit', !!breit);
+      });
+    }
+  });
+  document.querySelectorAll('.ansichtBtn').forEach(b=>{ b.textContent=an?'☰':'⊞'; });
 }
 (function(){
-  const b=document.getElementById('aeAnsichtBtn');
-  if(b) b.onclick=()=>{
-    let an=true;
-    try{ an=localStorage.getItem('et_kachelpilot')!=='aus'; }catch(e){}
-    try{ localStorage.setItem('et_kachelpilot', an?'aus':'an'); }catch(e){}
-    kachelPilotAnwenden();
-  };
+  document.querySelectorAll('.ansichtBtn').forEach(b=>{
+    b.onclick=()=>{
+      let an=true;
+      try{ an=localStorage.getItem('et_kachelpilot')!=='aus'; }catch(e){}
+      try{ localStorage.setItem('et_kachelpilot', an?'aus':'an'); }catch(e){}
+      kachelPilotAnwenden();
+    };
+  });
   kachelPilotAnwenden();
 })();
 function selFeldAufbauen(groupId){
