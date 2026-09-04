@@ -14060,20 +14060,48 @@ function helpKonturFreistich(){
       const m2={}; Object.keys(m).forEach(n=>{ m2[n]=[L0-m[n][0], m[n][1]]; }); m=m2;
     }
     if(innen){
-      // Kerbgeometrie an die Bohrungswand klappen: dieselbe Form,
-      // aber die Kerbe sticht NACH AUSSEN in die Wand (DIN 509
-      // innen). Vollmantel drueber; helpSchnitt spart die i-Kontur
-      // aus und zeichnet sie nach.
-      const rWand=14;
-      const rBezug=Math.min.apply(null, k.map(q=>q[1]));
-      const map=k.map(q=>[q[0], rWand + (q[1]-rBezug)]);
-      const m2={}; Object.keys(m).forEach(n=>{ m2[n]=[m[n][0], rWand + (m[n][1]-rBezug)]; });
-      return {k:[[0,32],[L0,32]], i:map, m:m2, zMax:L0, rMax:32, innen:true, spiegel, iMax:Math.max.apply(null,map.map(q=>q[1]))};
+      // Vollmantel drueber, die Innenkontur als teil.i — helpSchnitt
+      // spart sie aus und zeichnet sie nach.
+      return {k:[[0,32],[L0,32]], i:k, m, zMax:L0, rMax:32, innen:true, spiegel, iMax:Math.max.apply(null,k.map(q=>q[1]))};
     }
     if(spiegel) return {k, i:null, m, zMax:L0, rMax:t.rMax, innen:false, spiegel:true};
     t.innen=false; t.spiegel=false;
     return t;
   };
+  // ============================================================
+  // INNEN WIRD EXPLIZIT KONSTRUIERT [Daniels Korrektur 04.09.2026:
+  // "innen erzeugt der Freistich eine VERTIEFUNG — auf dem Bild
+  // steht er nach innen hervor"]. Die generische Klappe hatte
+  // Kerbgrund und Wand vertauscht: der Grund lag UNTER der
+  // Wandlinie und ragte als Wulst in die Bohrung. Fachlich gilt
+  // innen: V-Ausdrehung ist der GROESSTE Radius, die Wand (X0) der
+  // kleinste, und der Kerbgrund liegt um t UEBER der Wand — die
+  // Lufttasche geht nach oben ins Material. V und Kerbe klappen
+  // also ENTGEGENGESETZT, deshalb je Form ein eigener Punktsatz
+  // statt einer Formel.
+  if(innen){
+    // Proportionen BEWUSST kraeftig [Daniels Korrektur]: mit ti 3,6
+    // gegen 11 Stufenhoehe las sich die Kerbe kaum als Vertiefung —
+    // das Schema erklaert, es bildet nicht ab (Maskentag-Doktrin).
+    const rW=14, rVi=24, ti=5.2, ri=4.2;
+    if(formSel==='D76'){
+      const g=22, dz=5, zK=24, L=78, rGi=rW+ti;
+      const pkte=[[0,rVi],[zK,rVi],[zK,rGi],[zK+g-dz,rGi],[zK+g,rW],[L,rW]];
+      const kanten={}; kanten[2]={typ:'rundung', mass:ri};
+      return lageAnwenden(helpKontur(pkte, kanten,
+        {Kante:[zK,rGi], Grund:[zK+(g-dz)*0.5,rGi],
+         Auslauf:[zK+g,rW], Mantel:[L*0.85,rW], Absatz:[zK*0.4,rVi]}));
+    }
+    const f=2.5*ti+ri, zK=28, L=75;
+    const pkte = formF
+      ? [[0,rVi],[zK,rVi],[zK,rW+0.5*ti],[zK-1.2*ti,rW+ti],[zK+f,rW],[L,rW]]
+      : [[0,rVi],[zK,rVi],[zK,rW+ti],[zK+f,rW],[L,rW]];
+    const iG = formF? 3 : 2;
+    const kanten={}; kanten[iG]={typ:'rundung', mass:ri};
+    return lageAnwenden(helpKontur(pkte, kanten,
+      {Kante:[zK,rW+ti], Grund:[pkte[iG][0],pkte[iG][1]],
+       Auslauf:[zK+f,rW], Mantel:[L*0.8,rW], Absatz:[zK*0.4,rVi]}));
+  }
   // DIN 76 [01.09.2026]: die Kerbe des GEWINDEfreistichs ist anders
   // geschnitten als DIN 509 — langer achsparalleler Grund (Auslauf g),
   // kurze steile Schraege im Einstiegswinkel zum Mantel, Radius r an
@@ -14906,9 +14934,10 @@ const MASK_HELP = {
       const p76=parseFloat((document.getElementById('fsP76')||{}).value)||1.5;
       const n76=(typeof D76_NORM!=='undefined')?D76_NORM[p76]:null;
       const gAB=(typeof selBtnVal==='function' && selBtnVal('fsG76Btns'))==='B';
-      kopfText = n76
+      kopfText = (n76
         ? ('DIN 76 P'+p76+': dd '+n76.dd+' · r '+n76.r+' · g '+(gAB?n76.gB:n76.gA))
-        : ('DIN 76: Steigung '+p76+' nicht in der Normtabelle');
+        : ('DIN 76: Steigung '+p76+' nicht in der Normtabelle'))
+        + (pjR? ' · '+lagenName : '');
     }
     helpLabel(c, kopfText, 12, 15, false, 'left');
 
