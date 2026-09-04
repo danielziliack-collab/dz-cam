@@ -14060,48 +14060,29 @@ function helpKonturFreistich(){
       const m2={}; Object.keys(m).forEach(n=>{ m2[n]=[L0-m[n][0], m[n][1]]; }); m=m2;
     }
     if(innen){
-      // Vollmantel drueber, die Innenkontur als teil.i — helpSchnitt
-      // spart sie aus und zeichnet sie nach.
-      return {k:[[0,32],[L0,32]], i:k, m, zMax:L0, rMax:32, innen:true, spiegel, iMax:Math.max.apply(null,k.map(q=>q[1]))};
+      // KOMPLETTE RADIALE KLAPPUNG [Daniels zweite Korrektur,
+      // 04.09.2026: "erstell dir ein Programm und schau die Bahn an"
+      // — der Simulations-Blick als Pruefstein]. Innen ist das
+      // "mehr Material hinter der Schulter" eine KLEINERE Bohrung:
+      // V liegt UNTER der Wand, und die Kerbe wird zum lokalen
+      // MAXIMUM der Bohrungskontur — eine Rille in der Wand direkt
+      // an der Schulter, exakt die Spiegelung des Aussenbilds.
+      // r_i = 2*rMantel - r klappt ALLES konsistent: Mantel wird
+      // Wand (gleicher Radius), Kerbgrund springt darueber, V
+      // darunter — und Form F und DIN 76 erben die Klappung samt
+      // Hinterschnitt automatisch. Mein voriger Bau hatte V OBEN
+      // gelassen; damit war die "Kerbe" nur eine Stufe im Abstieg
+      // und stand als Wulst im Bild.
+      const rRef=(m.Mantel && m.Mantel[1]) || 19;
+      const C=2*rRef;
+      const ki=k.map(q=>[q[0], C-q[1]]);
+      const m2={}; Object.keys(m).forEach(n=>{ m2[n]=[m[n][0], C-m[n][1]]; });
+      return {k:[[0,32],[L0,32]], i:ki, m:m2, zMax:L0, rMax:32, innen:true, spiegel, iMax:Math.max.apply(null,ki.map(q=>q[1]))};
     }
     if(spiegel) return {k, i:null, m, zMax:L0, rMax:t.rMax, innen:false, spiegel:true};
     t.innen=false; t.spiegel=false;
     return t;
   };
-  // ============================================================
-  // INNEN WIRD EXPLIZIT KONSTRUIERT [Daniels Korrektur 04.09.2026:
-  // "innen erzeugt der Freistich eine VERTIEFUNG — auf dem Bild
-  // steht er nach innen hervor"]. Die generische Klappe hatte
-  // Kerbgrund und Wand vertauscht: der Grund lag UNTER der
-  // Wandlinie und ragte als Wulst in die Bohrung. Fachlich gilt
-  // innen: V-Ausdrehung ist der GROESSTE Radius, die Wand (X0) der
-  // kleinste, und der Kerbgrund liegt um t UEBER der Wand — die
-  // Lufttasche geht nach oben ins Material. V und Kerbe klappen
-  // also ENTGEGENGESETZT, deshalb je Form ein eigener Punktsatz
-  // statt einer Formel.
-  if(innen){
-    // Proportionen BEWUSST kraeftig [Daniels Korrektur]: mit ti 3,6
-    // gegen 11 Stufenhoehe las sich die Kerbe kaum als Vertiefung —
-    // das Schema erklaert, es bildet nicht ab (Maskentag-Doktrin).
-    const rW=14, rVi=24, ti=5.2, ri=4.2;
-    if(formSel==='D76'){
-      const g=22, dz=5, zK=24, L=78, rGi=rW+ti;
-      const pkte=[[0,rVi],[zK,rVi],[zK,rGi],[zK+g-dz,rGi],[zK+g,rW],[L,rW]];
-      const kanten={}; kanten[2]={typ:'rundung', mass:ri};
-      return lageAnwenden(helpKontur(pkte, kanten,
-        {Kante:[zK,rGi], Grund:[zK+(g-dz)*0.5,rGi],
-         Auslauf:[zK+g,rW], Mantel:[L*0.85,rW], Absatz:[zK*0.4,rVi]}));
-    }
-    const f=2.5*ti+ri, zK=28, L=75;
-    const pkte = formF
-      ? [[0,rVi],[zK,rVi],[zK,rW+0.5*ti],[zK-1.2*ti,rW+ti],[zK+f,rW],[L,rW]]
-      : [[0,rVi],[zK,rVi],[zK,rW+ti],[zK+f,rW],[L,rW]];
-    const iG = formF? 3 : 2;
-    const kanten={}; kanten[iG]={typ:'rundung', mass:ri};
-    return lageAnwenden(helpKontur(pkte, kanten,
-      {Kante:[zK,rW+ti], Grund:[pkte[iG][0],pkte[iG][1]],
-       Auslauf:[zK+f,rW], Mantel:[L*0.8,rW], Absatz:[zK*0.4,rVi]}));
-  }
   // DIN 76 [01.09.2026]: die Kerbe des GEWINDEfreistichs ist anders
   // geschnitten als DIN 509 — langer achsparalleler Grund (Auslauf g),
   // kurze steile Schraege im Einstiegswinkel zum Mantel, Radius r an
@@ -14996,8 +14977,8 @@ const MASK_HELP = {
       }
     }
 
-    const dimXm = spiegelR ? 34 : M.zx(M.zMax)+16;     // Mantelmass an der Stirnseite
-    const dimXa = spiegelR ? M.zx(M.zMax)+16 : 32;      // Absatzmass an der Futterseite
+    const dimXm = spiegelR ? 46 : M.zx(M.zMax)+16;     // Mantelmass an der Stirnseite
+    const dimXa = spiegelR ? M.zx(M.zMax)+16 : 46;      // Absatzmass an der Futterseite (46: die Pille kollidierte mit dem X-Achslabel)
     if(Mant) helpDim(c, dimXm,M.axY, dimXm,Mant.y, 0.001, 'X0⌀'+V('fsX0'), A('fsX0'),'in');
     if(Abs) helpDim(c, dimXa,M.axY, dimXa,Abs.y, 0.001, 'V⌀'+V('fsV'), A('fsV'),'in');
     if(Kante) helpDim(c, Kante.x,M.rx(M.rMax)-26, Kante.x,M.rx(M.rMax)-2, 0.001, 'Z0'+V('fsZ0'), A('fsZ0'),'in');
