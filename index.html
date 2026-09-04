@@ -15168,47 +15168,48 @@ const MASK_HELP = {
       // INNENBEARBEITUNG [Daniel]: Halbschnitt einer Hülse — die
       // Innenkontur wird von der Vorbohrung aus LÄNGS ausgespant,
       // Aufmaß liegt zur ACHSE hin. (Innen gibt es nur Z-parallel.)
+      // SEIT 04.09.2026 ueber helpSchnitt [Daniels Lagenbild-
+      // Auftrag]: das alte Linienbild war das einzige ohne
+      // Materialfuellung — jetzt echte Huelse (Vollmantel, die
+      // Innen-Treppe als teil.i ausgespart), derselbe Metall-Look
+      // wie ueberall.
       // =========================================================
-      const yWand=24, yV=50, yHz=70, yVor=92;
-      // Außenwand + Stirn (fein, nicht Gegenstand)
-      helpLine(c,zL,yWand,zR,yWand,'#8d99a3',1.3);
-      helpLine(c,zR,yWand,zR,axY-4,'#8d99a3',1.3);
-      // Abtrag: Längsstreifen zwischen Vorbohrung und Aufmaßhülle
-      for(let y=yVor-4; y>yV+AUF+2; y-=8){
-        const zEnd = y>yHz+AUF ? zL : zStufe+AUF;
-        helpLine(c, zR+10, y, zEnd, y, '#a9b6c0', 1);
+      const L=82, rA=34, rV=22, rHz=13, rVor=6, zSt=41;
+      const teilI={k:[[0,rA],[L,rA]],
+                   i:[[0,rHz],[zSt,rHz],[zSt,rV],[L,rV]],
+                   m:{}, zMax:L, rMax:rA};
+      const M=helpSchnitt(H, teilI, {oben:30});
+      if(!M) return;
+      const yVor=M.rx(rVor), yV=M.rx(rV), yHz=M.rx(rHz), zRi=M.zx(L), zLi=M.zx(0), zSti=M.zx(zSt);
+      const aufY=M.rx(rV)-M.rx(rV-AUF*0.55);   // Aufmass im Bildmass
+      // Abtrag: Laengsstreifen zwischen Vorbohrung und Aufmasshuelle
+      for(let y=yVor-5; y>yV+aufY+3; y-=8){
+        const zEnd = y>yHz+aufY ? zLi : zSti+4;
+        helpLine(c, zRi+10, y, zEnd, y, 'rgba(90,118,138,0.55)', 1);
       }
-      { // Richtungspfeil längs
+      { // Richtungspfeil laengs
         c.save(); c.strokeStyle='#5a768a'; c.fillStyle='#5a768a'; c.lineWidth=1.3;
-        c.beginPath(); c.moveTo(zR+10, yVor-4); c.lineTo(zR-22, yVor-4); c.stroke();
-        c.beginPath(); c.moveTo(zR-22, yVor-4);
-        c.lineTo(zR-15, yVor-8.5); c.lineTo(zR-15, yVor+0.5); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(zRi+10, yVor-5); c.lineTo(zRi-22, yVor-5); c.stroke();
+        c.beginPath(); c.moveTo(zRi-22, yVor-5);
+        c.lineTo(zRi-15, yVor-9.5); c.lineTo(zRi-15, yVor-0.5); c.closePath(); c.fill();
         c.restore();
       }
       // Vorbohrung (gestrichelt)
-      helpLine(c,zL,yVor,zR+10,yVor,A('akStock')?HELP_ON:'#7d8d9a',A('akStock')?1.8:1.2,[6,4]);
-      // Fertig-Innenkontur (Treppe): vorn groß ausgedreht, hinten kleiner
-      c.save(); c.strokeStyle='#2c3940'; c.lineWidth=1.5;
-      c.beginPath();
-      c.moveTo(zR,yWand+2); c.lineTo(zR,yV); c.lineTo(zStufe,yV);
-      c.lineTo(zStufe,yHz); c.lineTo(zL,yHz);
-      c.stroke(); c.restore();
-      // Aufmaßhülle: zur Achse versetzt (innen!)
+      helpLine(c,zLi,yVor,zRi+10,yVor,A('akStock')?HELP_ON:'#7d8d9a',A('akStock')?1.8:1.2,[6,4]);
+      // Aufmasshuelle: zur Achse versetzt (innen!)
       c.save();
       c.strokeStyle=(A('akUX')||A('akUZ'))?HELP_ON:HELP_HULL;
       c.setLineDash([5,3]); c.lineWidth=(A('akUX')||A('akUZ'))?1.8:1.2;
       c.beginPath();
-      c.moveTo(zR+AUF, yVor-2);
-      c.lineTo(zR+AUF, yV+AUF); c.lineTo(zStufe+AUF, yV+AUF);
-      c.lineTo(zStufe+AUF, yHz+AUF); c.lineTo(zL, yHz+AUF);
+      c.moveTo(zRi+8, yV+aufY);
+      c.lineTo(zSti+4, yV+aufY); c.lineTo(zSti+4, yHz+aufY); c.lineTo(zLi, yHz+aufY);
       c.stroke(); c.restore();
-      // Maße — luftig verteilt
-      helpDim(c, zL+12,axY, zL+12,yVor, 0.001, '⌀Vorb.'+V('akStock'), A('akStock'),'in');
-      helpDim(c, zR,yBlank-1+0, zR+18,yBlank-1, -8, 'ZA'+V('akStockZ'), A('akStockZ'));
-      helpDim(c, zR+34,yVor-4, zR+34,yVor-12, 0.001, 'D'+V('akD'), A('akD'),'in');
-      helpDim(c, zR,yV+AUF+12, zR+AUF,yV+AUF+12, 9, 'UZ'+V('akUZ'), A('akUZ'));
-      helpDim(c, zStufe-18,yV, zStufe-18,yV+AUF, 0.001, 'UX'+V('akUX'), A('akUX'),'in');
-      helpLabel(c,'innen · z-parallel', zL+2, yWand-8, false,'left');
+      // Masse — luftig verteilt
+      helpDim(c, zLi+12,M.axY, zLi+12,yVor, 0.001, '⌀Vorb.'+V('akStock'), A('akStock'),'in');
+      helpDim(c, zRi+34,yVor-5, zRi+34,yVor-15, 0.001, 'D'+V('akD'), A('akD'),'in');
+      helpDim(c, zSti+22,yV, zSti+22,yV+aufY, 0.001, 'UX'+V('akUX'), A('akUX'),'in');
+      helpDim(c, zSti-14,yHz, zSti-14,yHz+aufY, 0.001, 'UZ'+V('akUZ'), A('akUZ'),'in');
+      helpLabel(c,'innen · z-parallel', 12, 15, false,'left');
       return;
     }
     // ============ FESTES SCHEMA [Daniel, 29.08.2026] ============
