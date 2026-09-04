@@ -2742,10 +2742,12 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
           <div style="display:flex;gap:6px;margin-left:auto;flex:0 0 auto;">
             <button id="btnPpInfo" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Merkmale ▸</button>
             <button id="btnBett" style="font-size:11px;padding:4px 8px;white-space:nowrap;">Bett ▸</button>
+            <button id="btnDnc" style="font-size:11px;padding:4px 8px;white-space:nowrap;">DNC ▸</button>
           </div>
         </div>
         <div id="ppInfo" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:48vh;border-bottom:1px solid var(--line);"></div>
         <div id="bettPanel" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:52vh;border-bottom:1px solid var(--line);padding:8px 10px;font-size:13px;"></div>
+        <div id="dncPanel" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:52vh;border-bottom:1px solid var(--line);padding:8px 10px;font-size:13px;"></div>
         <div id="gcodeView"></div>
         <textarea id="gcodeOut" readonly placeholder="Kontur anlegen, dann „Erzeugen“ drücken."></textarea>
       </div>
@@ -3740,6 +3742,18 @@ Gewinde werden nur am Zielpunkt korrigiert (Ansage, wenn sich die Abweichung
 <p>Das Maschinenprofil steuert T-Format, Zyklusfreigaben, I/K-Skalierung und den
 Eilgang-R&uuml;ckfall. Die NC beider Profile wird im Pr&uuml;fstand getrennt gegen
 eingefrorene St&auml;nde gepr&uuml;ft.</p>
+<dt id="ba-ma-dnc-seriell">DNC direkt aus der App (Web-Serial)</dt>
+<dd>Der Knopf <b>&bdquo;DNC&ldquo;</b> in der G-Code-Ansicht &ouml;ffnet die serielle
+&Uuml;bertragung: Verbinden (USB-RS232-Adapter w&auml;hlen), dann
+&bdquo;Programm senden&ldquo; &mdash; die App wartet auf die Anforderung der
+Maschine (Xon; an der Steuerung EINLESEN starten) und zeigt den Fortschritt.
+&bdquo;Empfangen&ldquo; sichert Programme VON der Maschine als Datei (Ende =
+3&nbsp;Sekunden Stille). Die Parameter kommen aus dem Maschinenprofil; die
+1000er ist asymmetrisch (senden 9600, empfangen 2400 &mdash; zum Empfangen mit
+2400 verbinden). Das geht NUR in Chrome oder Edge am Rechner &mdash; das iPhone
+kann grunds&auml;tzlich nicht direkt seriell; daf&uuml;r ist das
+DNC-Funk-K&auml;stchen geplant. Erster Lauf an der Maschine steht noch aus
+&mdash; mit einem kurzen Testprogramm beginnen.</dd>
 <dt id="ba-ma-dnc">Daten&uuml;bertragung (DNC Precision, V24)</dt>
 <dd>Je Maschine ein EIGENES Profil in DNC Precision anlegen (die 1500er sendet
 und empf&auml;ngt gleich, die 1000er NICHT):<br>
@@ -25025,6 +25039,226 @@ document.getElementById('btnBett').onclick=()=>{
   const auf=box.style.display==='none';
   if(auf){ bettPanelMalen(); box.style.display='block'; b.textContent='Bett ▾'; }
   else { box.style.display='none'; b.textContent='Bett ▸'; }
+};
+// =================================================================
+// DNC SERIELL (Web-Serial) [Daniels Freigabe 04.09.2026, Paket 1
+// des Werkstatt-DNC-Entwurfs]: die App sendet und empfaengt am
+// Laptop DIREKT ueber den USB-RS232-Adapter — das DNC-Programm
+// entfaellt. Nur Chrome/Edge koennen navigator.serial; am iPhone
+// zeigt das Panel den ehrlichen Hinweis (dafuer kommt Paket 2, das
+// Funk-Kaestchen). Parameter je MASCHINE: die 1500er ist am
+// Geraet BEWIESEN (Termin 03.09.2026: 9600/7/N/1 Xon-Xoff, beide
+// Richtungen); die 1000er ist bis zu Daniels Foto vom
+// Uebertragungsweg eine ANNAHME (gleiche Werte, editierbar).
+//
+// XON-XOFF IST SELBST GEBAUT: Web-Serial kennt als flowControl nur
+// 'none' und 'hardware' — der Software-Handshake der Monforts
+// (DC1=0x11 weiter, DC3=0x13 anhalten) laeuft deshalb in unserer
+// Leseschleife, und der Sender prueft das Flag VOR jedem Haeppchen.
+// Gesendet wird in 32-Byte-Bloecken: bei 9600 Baud ist ein Block
+// ~33 ms — die Steuerung kann jederzeit anhalten, ohne dass ihr
+// Puffer ueberlaeuft.
+// =================================================================
+// Die 1000er stand im erprobten DNC-Precision-Profil ASYMMETRISCH
+// (senden 9600, empfangen 2400, beides 7/EVEN/1). DANIELS
+// EINSCHAETZUNG 04.09.2026: die 2400 beim Empfangen ist vermutlich
+// eine FEHLEINSTELLUNG im Transfermenue der Steuerung (die
+// Auslese-Rate stellt dort der Bediener) — real wohl auch 9600 wie
+// an der 1500er. Bis zum Beweis am Geraet bleibt 2400 die
+// Empfangs-Vorbelegung (so lief es nachweislich), der Belegtext
+// nennt beides; Pruefpunkt steht in MASCHINENTERMIN.md.
+const DNC_PROFILE={
+  MONFORTS_1500_EUROTURN:{baud:9600,baudEmpf:9600,bits:7,parity:'none',stop:1,
+    beleg:'am Geraet bewiesen (Termin 03.09.2026, beide Richtungen)'},
+  MONFORTS_1000_MTC_K_6624B:{baud:9600,baudEmpf:2400,bits:7,parity:'even',stop:1,
+    beleg:'erprobtes Profil: senden 9600, empfangen 2400 (7/EVEN/1). Daniels Verdacht 04.09.: 2400 war Fehleinstellung im Transfermenue, wohl auch 9600 - am Termin pruefen'}
+};
+let dncPort=null, dncXoff=false, dncLeser=null, dncRx=[], dncRxCb=null, dncSendeLauf=false;
+function dncLog(t, warn){
+  const el=document.getElementById('dncLog');
+  if(!el) return;
+  const z=document.createElement('div');
+  if(warn) z.style.color='#b03030';
+  z.textContent=new Date().toLocaleTimeString()+' '+t;
+  el.appendChild(z);
+  while(el.children.length>80) el.removeChild(el.firstChild);
+  el.scrollTop=el.scrollHeight;
+}
+function dncPanelMalen(){
+  const box=document.getElementById('dncPanel');
+  if(!box) return;
+  const p=DNC_PROFILE[MASCHINENPROFIL.id]||DNC_PROFILE.MONFORTS_1500_EUROTURN;
+  if(!('serial' in navigator)){
+    box.innerHTML='<b>DNC seriell</b><div style="margin-top:6px;">Die direkte serielle '
+      +'Übertragung (Web-Serial) gibt es nur in <b>Chrome oder Edge am Rechner</b> — '
+      +'dieser Browser kann sie nicht. Fürs iPhone ist das Funk-Kästchen geplant '
+      +'(Werkstatt-DNC-Entwurf); bis dahin: „NC sichern" und wie bisher übertragen.</div>';
+    return;
+  }
+  if(box.dataset.gebaut==='1'){ dncFelderVorbelegen(); return; }
+  box.dataset.gebaut='1';
+  box.innerHTML=
+    '<b>DNC seriell (Web-Serial)</b> <span id="dncBeleg" style="font-size:11px;color:#6b7883;"></span>'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;align-items:center;">'
+    +'<label style="font-size:12px;">Baud <select id="dncBaud"><option>2400</option><option>4800</option><option selected>9600</option><option>19200</option></select></label>'
+    +'<label style="font-size:12px;">Datenbits <select id="dncBits"><option>7</option><option>8</option></select></label>'
+    +'<label style="font-size:12px;">Parität <select id="dncPar"><option value="none">keine</option><option value="even">gerade</option><option value="odd">ungerade</option></select></label>'
+    +'<label style="font-size:12px;">Stop <select id="dncStop"><option>1</option><option>2</option></select></label>'
+    +'<label style="font-size:12px;"><input type="checkbox" id="dncWartXon" checked> auf Anforderung der Maschine warten (Xon)</label>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;">'
+    +'<button id="dncVerb" class="gcbtn">Verbinden</button>'
+    +'<button id="dncSend" class="gcbtn primary" disabled>Programm senden</button>'
+    +'<button id="dncEmpf" class="gcbtn" disabled>Empfangen (Sicherung)</button>'
+    +'<button id="dncStop2" class="gcbtn" disabled>Abbrechen</button>'
+    +'</div>'
+    +'<div id="dncStatus" style="font-size:12.5px;margin:4px 0;color:#39434c;">nicht verbunden</div>'
+    +'<div id="dncLog" style="font:11px/1.5 ui-monospace,monospace;background:#f4f7f9;border:1px solid var(--line);border-radius:6px;max-height:110px;overflow-y:auto;padding:4px 8px;"></div>';
+  dncFelderVorbelegen();
+  document.getElementById('dncVerb').onclick=dncVerbindenTrennen;
+  document.getElementById('dncSend').onclick=dncSenden;
+  document.getElementById('dncEmpf').onclick=dncEmpfangen;
+  document.getElementById('dncStop2').onclick=()=>{ dncSendeLauf=false; dncRxCb=null; dncLog('Abbruch durch Bediener.'); dncKnoepfe(); };
+}
+function dncFelderVorbelegen(){
+  const p=DNC_PROFILE[MASCHINENPROFIL.id]||DNC_PROFILE.MONFORTS_1500_EUROTURN;
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=String(v); };
+  set('dncBaud',p.baud); set('dncBits',p.bits); set('dncPar',p.parity); set('dncStop',p.stop);
+  const b=document.getElementById('dncBeleg');
+  if(b) b.textContent='· '+MASCHINENPROFIL.name+': '+p.beleg;
+}
+function dncKnoepfe(){
+  const verb=!!dncPort;
+  const en=(id,an)=>{ const e=document.getElementById(id); if(e) e.disabled=!an; };
+  en('dncSend', verb && !dncSendeLauf && !dncRxCb);
+  en('dncEmpf', verb && !dncSendeLauf && !dncRxCb);
+  en('dncStop2', verb && (dncSendeLauf || !!dncRxCb));
+  const v=document.getElementById('dncVerb');
+  if(v) v.textContent=verb? 'Trennen' : 'Verbinden';
+}
+function dncStatus(t){ const e=document.getElementById('dncStatus'); if(e) e.textContent=t; }
+async function dncVerbindenTrennen(){
+  if(dncPort){
+    try{ if(dncLeser){ await dncLeser.cancel(); } }catch(e){}
+    try{ await dncPort.close(); }catch(e){}
+    dncPort=null; dncStatus('getrennt'); dncLog('Verbindung getrennt.'); dncKnoepfe();
+    return;
+  }
+  try{
+    const port=await navigator.serial.requestPort();
+    await port.open({
+      baudRate:+document.getElementById('dncBaud').value,
+      dataBits:+document.getElementById('dncBits').value,
+      parity:document.getElementById('dncPar').value,
+      stopBits:+document.getElementById('dncStop').value,
+      flowControl:'none'   // Xon-Xoff macht die Leseschleife selbst
+    });
+    dncPort=port; dncXoff=false; dncRx=[];
+    dncStatus('verbunden ('+document.getElementById('dncBaud').value+'/'
+      +document.getElementById('dncBits').value+'/'
+      +document.getElementById('dncPar').value.charAt(0).toUpperCase()+'/'
+      +document.getElementById('dncStop').value+', Xon-Xoff)');
+    dncLog('Port geoeffnet.');
+    dncKnoepfe();
+    dncLeseSchleife();
+  }catch(e){
+    dncStatus('Verbindung fehlgeschlagen'); dncLog('Fehler: '+(e&&e.message), true);
+  }
+}
+async function dncLeseSchleife(){
+  // Laeuft solange der Port offen ist: fuehrt das Xon-Xoff-Flag und
+  // sammelt Nutzbytes (fuer den Empfangsmodus).
+  while(dncPort && dncPort.readable){
+    dncLeser=dncPort.readable.getReader();
+    try{
+      for(;;){
+        const {value, done}=await dncLeser.read();
+        if(done) break;
+        if(!value) continue;
+        for(const b of value){
+          if(b===0x13){ dncXoff=true; dncLog('Maschine: HALT (Xoff)'); }
+          else if(b===0x11){
+            const war=dncXoff; dncXoff=false;
+            dncLog(war? 'Maschine: WEITER (Xon)' : 'Maschine fordert an (Xon)');
+            if(dncRxCb && dncRxCb.aufXon){ const cb=dncRxCb; dncRxCb=null; cb.los(); }
+          }
+          else { dncRx.push(b); if(dncRxCb && dncRxCb.daten) dncRxCb.daten(); }
+        }
+      }
+    }catch(e){ dncLog('Lesefehler: '+(e&&e.message), true); }
+    finally{ try{ dncLeser.releaseLock(); }catch(e){} dncLeser=null; }
+    if(!dncPort) break;
+  }
+}
+async function dncSenden(){
+  if(!dncPort || dncSendeLauf) return;
+  const text=document.getElementById('gcodeOut').value;
+  if(!text || !text.trim()){ dncStatus('kein Programm — erst „Erzeugen" druecken'); return; }
+  // Zeilenenden auf CR LF — so liegen Daniels .TAP-Sicherungen vor.
+  const bytes=new TextEncoder().encode(text.replace(/\r\n/g,'\n').replace(/\n/g,'\r\n'));
+  const wartXon=document.getElementById('dncWartXon').checked;
+  const los=async()=>{
+    dncSendeLauf=true; dncKnoepfe();
+    const w=dncPort.writable.getWriter();
+    try{
+      let i=0, xoffSeit=0;
+      while(i<bytes.length && dncSendeLauf){
+        if(dncXoff){
+          await new Promise(r=>setTimeout(r,25));
+          xoffSeit+=25;
+          if(xoffSeit>15000){ dncLog('Maschine haelt seit 15 s an (Xoff) — weiter warten...', true); xoffSeit=0; }
+          continue;
+        }
+        xoffSeit=0;
+        const stueck=bytes.slice(i, i+32);
+        await w.write(stueck);
+        i+=stueck.length;
+        dncStatus('sende... '+Math.round(100*i/bytes.length)+' % ('+i+' / '+bytes.length+' Zeichen)');
+      }
+      if(dncSendeLauf){ dncStatus('gesendet: '+bytes.length+' Zeichen'); dncLog('Programm komplett gesendet.'); }
+      else { dncStatus('Senden abgebrochen bei '+i+' Zeichen'); }
+    }catch(e){ dncLog('Sendefehler: '+(e&&e.message), true); dncStatus('Sendefehler'); }
+    finally{ try{ w.releaseLock(); }catch(e){} dncSendeLauf=false; dncKnoepfe(); }
+  };
+  if(wartXon){
+    dncStatus('warte auf Anforderung der Maschine (an der Steuerung „Einlesen" starten)...');
+    dncLog('Warte auf Xon der Maschine.');
+    dncRxCb={aufXon:true, los};
+    dncKnoepfe();
+  } else los();
+}
+function dncEmpfangen(){
+  if(!dncPort || dncRxCb) return;
+  const p=DNC_PROFILE[MASCHINENPROFIL.id];
+  if(p && p.baudEmpf && +document.getElementById('dncBaud').value!==p.baudEmpf)
+    dncLog('ACHTUNG: diese Maschine sendet mit '+p.baudEmpf+' Baud — zum Empfangen trennen, Baud umstellen, neu verbinden.', true);
+  dncRx=[];
+  let still=null;
+  dncStatus('empfange... (an der Steuerung „Ausgeben" starten)');
+  dncLog('Empfangsmodus: warte auf Daten.');
+  const fertig=()=>{
+    dncRxCb=null;
+    const txt=new TextDecoder('ascii').decode(new Uint8Array(dncRx)).replace(/\r\n/g,'\n');
+    dncStatus('empfangen: '+dncRx.length+' Zeichen');
+    dncLog('Uebertragung beendet ('+dncRx.length+' Zeichen, 3 s Stille).');
+    dncKnoepfe();
+    if(dncRx.length>10){
+      // Als Datei sichern — derselbe Weg wie „NC sichern".
+      try{ exportiereDatei('Maschinensicherung.txt', txt); }catch(e){
+        const ta=document.getElementById('gcodeOut'); if(ta){ ta.value=txt; }
+        dncLog('Export-Fenster nicht verfuegbar — Text steht in der NC-Ansicht.', true);
+      }
+    }
+  };
+  dncRxCb={daten:()=>{ if(still) clearTimeout(still); still=setTimeout(fertig,3000);
+    dncStatus('empfange... '+dncRx.length+' Zeichen'); }};
+  dncKnoepfe();
+}
+document.getElementById('btnDnc').onclick=()=>{
+  const box=document.getElementById('dncPanel'), b=document.getElementById('btnDnc');
+  const auf=box.style.display==='none';
+  if(auf){ dncPanelMalen(); box.style.display='block'; b.textContent='DNC ▾'; }
+  else { box.style.display='none'; b.textContent='DNC ▸'; }
 };
 
 document.getElementById('btnCopy').onclick=()=>{
