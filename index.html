@@ -1511,6 +1511,59 @@ body.dunkel .small-hint{color:hsl(var(--ton), 45%, 75%);background:hsl(var(--ton
    Grundregel faerbt Knopftext im Dunkeln hell, auf Amber traegt das
    nicht (Sweep: 1,4). */
 body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel .inkbtn.sel{color:#3a2a10;background:var(--amber);}
+/* ===== DUNKELMODUS VERVOLLSTAENDIGT [Daniels Auftrag 05.09.2026] —
+   alles, was seit dem 30.08. dazukam, per Browser-Sweep gefunden:
+   Kachelansicht, Filmstreifen, Editor-Zeilen, DNC-Panel, Planer-
+   Rueckfragen, Merkmale, Kopf-Kleinknoepfe, Tabellen. ===== */
+/* Kachelansicht: die Kacheln waren hart #fff. */
+body.dunkel .mask.kachelpilot .mrow{background:hsl(var(--ton), 13%, 17%);border-color:var(--line-light);}
+body.dunkel .mask.kachelpilot .mrow:focus-within{background:hsl(28, 40%, 20%);border-color:hsl(28, 80%, 55%);}
+body.dunkel .mask.kachelpilot .mrow > label{color:hsl(var(--ton), 30%, 68%);}
+body.dunkel .mask.kachelpilot .mrow:focus-within > label{color:hsl(28, 85%, 68%);}
+/* Hervorgehobene Einzelzeilen trugen Inline-Weiss — nur hier darf
+   !important, gegen den Inline-Stil. */
+body.dunkel #esLageRow, body.dunkel #fsPMRow, body.dunkel #stRaeumRow{background:var(--panel) !important;}
+/* Kleine Kopf- und Zeilenknoepfe (Ansicht/Merkmale/Bett/DNC/Stift/
+   Kreuz/Grafikschalter). */
+body.dunkel .ansichtBtn, body.dunkel #btnPpInfo, body.dunkel #btnBett, body.dunkel #btnDnc,
+body.dunkel #apPkEdit, body.dunkel .ap-edit, body.dunkel .ap-del,
+body.dunkel .grafikschalter, body.dunkel #btnUnterlageAbbr, body.dunkel #btnUnterlageMM,
+body.dunkel #btnKalkMerken{background:var(--key);color:var(--text);border-color:var(--line);}
+body.dunkel .ap-del{color:#e08a8a;}
+/* Haupt-Softkeys: der 02.09.-Neubau definierte seine Flaeche nach
+   der alten Dunkelregel — hier mit der Kaskade nachgezogen. */
+body.dunkel .hsoftkeys{background:var(--panel);}
+body.dunkel .hsoftkeys .hsk{background:var(--key);color:var(--text);border-color:var(--line);}
+body.dunkel .hsoftkeys .hsk.primary{background:hsl(var(--ton), 14%, 30%);color:hsl(var(--ton), 20%, 92%);}
+/* Filmstreifen des Kontureditors. */
+body.dunkel #elemFilm{background:var(--white);border-color:var(--line-light);}
+body.dunkel .f-chip{background:var(--key);border-color:var(--line);color:hsl(var(--ton), 25%, 78%);}
+body.dunkel .f-chip.akt{background:hsl(28, 92%, 45%);border-color:hsl(28, 92%, 45%);color:#fff;}
+/* Editor: feste Rechenzeile und sticky Aktionszeile waren #fff. */
+body.dunkel .ezl button{background:var(--key);color:var(--text);border-color:var(--line);}
+body.dunkel.emodus.mode-grafisch #canvasWrap .mask .ezl,
+body.dunkel.emodus.mode-grafisch #canvasWrap .mask .mrow.k-aktion{background:hsl(var(--ton), 14%, 14%);}
+/* DNC-Panel (05.09.): Log, Felder, Knoepfe. */
+body.dunkel #dncPanel select, body.dunkel #dncPanel button{background:var(--key);color:var(--text);border-color:var(--line);}
+#dncLog{background:#f4f7f9;border:1px solid var(--line);}
+body.dunkel #dncLog{background:hsl(var(--ton), 13%, 15%);border-color:var(--line-light);color:hsl(var(--ton), 15%, 75%);}
+/* Planer-Rueckfragen. */
+body.dunkel .pl-text{color:hsl(var(--ton), 30%, 75%);}
+body.dunkel .pl-wahl button{background:var(--key);color:var(--text);border-color:var(--line);}
+body.dunkel .pl-wahl button.sel{background:hsl(28, 92%, 45%);border-color:hsl(28, 92%, 45%);color:#fff;}
+body.dunkel .pl-hinweis{color:var(--text-dim) !important;}
+/* Tabellen (Werkzeuge, Merkmale, Kalkulation) und Listen. */
+body.dunkel th{background:var(--panel);color:var(--text);}
+body.dunkel td{border-color:var(--line-light);}
+body.dunkel #twPreview, body.dunkel #warnBox, body.dunkel #progListe,
+body.dunkel .pointlist{background:var(--white);color:var(--text);border-color:var(--line-light);}
+/* NC-Ansicht: dunkler Editorgrund, die Farbcodes (rot Eilgang,
+   gruen Vorschub) tragen auf dunkel sogar besser. */
+body.dunkel #gcodeView{background:hsl(var(--ton), 15%, 11%);color:hsl(var(--ton), 12%, 78%);}
+body.dunkel #ppInfo, body.dunkel #bettPanel, body.dunkel #dncPanel{background:var(--white);color:var(--text);}
+/* Rechenleisten (schwebend + Ergebnisfeld). */
+body.dunkel .rz-leiste{background:var(--panel);border-color:var(--line);}
+body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(--line);}
 /* Zeichenflaechen-Rahmen: der Canvas fuellt sich selbst weiss —
    der Rand um ihn darf dunkel sein, das liest sich als Viewport. */
 @media(min-width:900px){
@@ -3813,7 +3866,11 @@ Zeile mit dem Generator), Gewinde-U im Werkzeug-Offset (S. 132), fester
 <dt id="ba-ma-1000">Monforts 1000 MTC-K</dt>
 <dd>Belegt aus der KNC-Programmieranleitung (R&D 95.05): G74-Bohren mit P211 = W
 Vorlauf, P-Parameter immer als RADIUS-Werte, SC der Zyklen kommt dort aus einem
-MASCHINENparameter, nicht aus dem NC-Satz.</dd>
+MASCHINENparameter, nicht aus dem NC-Satz. P206 = Schlichtaufma&szlig; ist seit
+dem 03.09.2026 aus Daniels Novembersicherung der Maschine belegt (Parameter
+N5206, maximales Schlichtaufma&szlig;). Die G72-Zyklen der 1000er schreibt die
+Steuerung selbst mit PA/PB-Werten &mdash; extern nicht erzeugbar, deshalb dort
+immer G-Einzels&auml;tze.</dd>
 <dt id="ba-ma-offen">Ehrlich offen</dt>
 <dd>Die Programmieranleitung DV 610-0C ist seit dem 31.08.2026 LESBAR (die
 Scan-Seiten werden im Browser gerendert). Damit belegt: P229 = SV Vorhalt vor dem
@@ -9165,6 +9222,18 @@ function melde(text){
     b.addEventListener('click', ()=>{ b.style.display='none'; }); }
 }
 try{ window.alert = melde; }catch(e){}
+// ANSICHTSWECHSEL OHNE KLASSENVERLUST [Daniel 05.09.2026, Wurzel
+// des "unvollstaendigen" Dunkelmodus]: vier Stellen setzten
+// body.className HART neu — jeder Wechsel Arbeitsplan/Grafisch
+// warf die dunkel-Klasse (und alles andere am body) wieder ab.
+// setBodyMode verwaltet NUR mode-*/simvoll und laesst den Rest
+// (dunkel, elemvoll, embedded, …) in Ruhe.
+function setBodyMode(mode){
+  const b=document.body;
+  b.classList.remove('mode-arbeitsplan','mode-grafisch');
+  b.classList.add(mode);
+  b.classList.toggle('simvoll', (typeof simActive!=='undefined' && !!simActive));
+}
 // DUNKELMODUS-SCHALTER [Daniel, 30.08.2026]. Vorgabe hell; die Wahl
 // wird im Browserspeicher gemerkt (try: im Artefakt-Viewer ist er
 // gesperrt, dort gilt sie je Sitzung).
@@ -11814,7 +11883,7 @@ function refreshArbeitsplan(){
 function enterGrafischView(){
   viewMode='grafisch';
   showMirror=false;
-  document.body.className='mode-grafisch'+((typeof simActive!=='undefined'&&simActive)?' simvoll':'');
+  setBodyMode('mode-grafisch');
   document.getElementById('backLabel').textContent = contour.length ? 'Kontur bearbeiten' : 'Neue Kontur anlegen';
   skMode='kontur';
   renderSoftkeys();
@@ -11825,7 +11894,7 @@ function enterGrafischView(){
 }
 function backToArbeitsplan(){
   viewMode='arbeitsplan';
-  document.body.className='mode-arbeitsplan'+((typeof simActive!=='undefined'&&simActive)?' simvoll':'');
+  setBodyMode('mode-arbeitsplan');
   if(simActive){
     simActive=false; simPlaying=false;
     if(simRAF) cancelAnimationFrame(simRAF);
@@ -18380,7 +18449,7 @@ document.getElementById('progImportFile').addEventListener('change',(e)=>{
   e.target.value='';
 });
 
-document.body.className='mode-arbeitsplan'+((typeof simActive!=='undefined'&&simActive)?' simvoll':'');
+setBodyMode('mode-arbeitsplan');
 resizeCanvas();
 refreshAll();
 
@@ -18514,8 +18583,15 @@ const MASCHINEN_PROFILE = {
     //   G77 Plangewinde: kein eigenes Bit, unter A016 angenommen.
     zyklen:{ g74:'confirmed_on_machine', g75:'confirmed_on_machine',
              g81ff:'disabled' /* IBN N9177=0: Option A019G nicht freigeschaltet */,
-             g71:'documented_for_control', g72:'documented_for_control',
+             /* G72/G71 seit dem Maschinentermin 03.09.2026 an per
+                DNC gezogenen ECHTEN Saetzen belegt (Realform der
+                7.210i, "1500 Zyklen.TAP") — G73/G77 weiter nur am
+                Handbuch. */
+             g71:'machine_syntax', g72:'machine_syntax',
              g73:'documented_for_control', g77:'documented_for_control' },
+    // (uebertragung steht weiter oben im Profil — am Geraet bewiesen
+    // 03.09.2026; hier nur der Fahrtest-Ertrag des Termins.)
+    fahrtests:'Maschinentermin 03.09.2026: Wiedereinstieg (Satzvorlauf, G96-Drehzahl exakt), Drehzahlvariation SSV und Spanbrechen (G04) im FAHRTEST gruen; Steuerungssoftware real 7.210i',
     statusZeilen:[
       '(PROFIL: Monforts 1500 - EuroTurn | Zyklussyntax aus DV 610-0C belegt,)',
       '(  Maschinenkonfiguration aus Daniels IBN-Sicherung - Stand 22.01.2004.)',
@@ -18538,7 +18614,7 @@ const MASCHINEN_PROFILE = {
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
     // unter G90 ebenfalls im DURCHMESSERMASS ausgegeben (IBN-belegt).
     ikDurchmesser:true, ikStatus:'confirmed_on_machine', ikBeleg:'P5105=1, IBN',
-    uebertragung:'Empfangen 2400 / Senden 9600 Baud, je 7 Datenbits, EVEN, 1 Stopbit, XON/XOFF — Daniels erprobtes DNC-Profil (asymmetrisch!)',
+    uebertragung:'Empfangen 2400 / Senden 9600 Baud, je 7 Datenbits, EVEN, 1 Stopbit, XON/XOFF — Daniels erprobtes DNC-Profil (asymmetrisch!). Daniels Verdacht (04.09.2026): die 2400 beim Empfangen ist eine Fehleinstellung im Transfermenue der Steuerung, real wohl auch 9600 — am Termin pruefen',
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
@@ -18572,6 +18648,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
 // das ueber den Profilwechsel (T-Beispiel und Status kippen mit).
 const PP_STATUS={
   confirmed_on_machine:{txt:'an der Maschine belegt (IBN)', cls:'ibn'},
+  // MASCHINENTERMIN 03.09.2026 [Daniels Nachfrage 05.09.]: die
+  // Zyklussaetze G72/G71 sind an per DNC gezogenen ECHTEN Saetzen
+  // der 7.210i belegt — staerker als "Handbuch", aber ehrlich
+  // schwaecher als IBN/gefahren: getippt und gezogen wurde die
+  // SYNTAX, ein Lauf am Teil steht noch aus.
+  machine_syntax:{txt:'Maschinensatz belegt (Termin 03.09.2026) — Lauf am Teil offen', cls:'ibn'},
   documented_for_control:{txt:'am Handbuch belegt', cls:'doc'},
   unknown_for_target_machine:{txt:'ANNAHME — nicht belegt', cls:'ann'},
   disabled:{txt:'gesperrt', cls:'aus'},
@@ -18643,9 +18725,9 @@ function ppMerkmale(){
   // Neue native Zyklusoptionen [01.09.2026] mit ihren IBN-Freigabebits.
   if(pr.id==='MONFORTS_1500_EUROTURN'){
     M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
-      w:'per Maske waehlbar — Option A020/A020B lt. IBN frei (N9150/9152=1), Syntax DV 610 S. 3-40/41; Abnahme am Teil ausstehend'});
+      w:'per Maske waehlbar (radiale Aussennut) — Option A020/A020B lt. IBN frei (N9150/9152=1). Syntax seit dem 03.09.2026 an Daniels per DNC gezogenem MASCHINENSATZ belegt (Realform der 7.210i, weicht vom Handbuchschema ab); axial/innen/mehrfach fallen mit Ansage auf Einzelsaetze zurueck. Lauf am Teil steht aus.'});
     M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
-      w:'per Maske waehlbar, vorerst nur aussen — Option A018 lt. IBN frei (N9180=1), Syntax S. 3-43. Innen KANN die Steuerung (DV 594 S. 4.6-13), aber die Satz-Kodierung der Innenlage ist unbelegt: am Maschinentermin einen Innen-Zyklus eintippen und per DNC ziehen, dann wird innen freigeschaltet.'});
+      w:'per Maske waehlbar, AUSSEN UND INNEN, auch mit Schenkelwinkeln (P236/P237) — Option A018 lt. IBN frei (N9180=1). Syntax seit dem 03.09.2026 an Daniels Maschinensaetzen belegt (innen + 75/70-Winkelfall, "1500 Zyklen.TAP"); Eckuebergang K2, Rundungskanten und plan fallen mit Ansage auf Einzelsaetze zurueck. Sicherheitsabstand des Zyklus kommt aus Maschinenparameter 5205, nicht aus dem Programmkopf-SC (S. 3-44). Lauf am Teil steht aus.'});
     M.push({t:'Freistichzyklen G78/G79/G73', s:pr.zyklen.g73,
       w:'Option A017 lt. IBN frei (N9160=1) — G78/G79 DIN 509, G73 DIN 76 per Maske, Syntax S. 3-45/46; Abnahme ausstehend'});
     M.push({t:'Plangewinde G77', s:pr.zyklen.g77,
@@ -18668,6 +18750,10 @@ function ppMerkmale(){
   // und 'Ignore line prefix' AUS/LEER sein. Dass die Steuerungen
   // Kommentare und Leerzeichen speichern, belegen seine Abzuege.
   if(pr.uebertragung) M.push({t:'Uebertragung (V24, DNC Precision)', w:pr.uebertragung});
+  // Fahrtest-Belege vom Maschinentermin [Daniels Nachfrage 05.09.:
+  // "hast Du dir das nach dem Termin aktualisiert?"] — als eigene
+  // Zeile, damit der Terminertrag in den Merkmalen sichtbar ist.
+  if(pr.fahrtests) M.push({t:'Fahrtests', s:'confirmed_on_machine', w:pr.fahrtests});
   return M;
 }
 // Feste Uebersetzungsregeln — fuer BEIDE Maschinen gleich, im
@@ -25338,7 +25424,9 @@ function dncPanelMalen(){
     +'<button id="dncStop2" class="gcbtn" disabled>Abbrechen</button>'
     +'</div>'
     +'<div id="dncStatus" style="font-size:12.5px;margin:4px 0;color:#39434c;">nicht verbunden</div>'
-    +'<div id="dncLog" style="font:11px/1.5 ui-monospace,monospace;background:#f4f7f9;border:1px solid var(--line);border-radius:6px;max-height:110px;overflow-y:auto;padding:4px 8px;"></div>';
+    // background/border NICHT inline — sonst kaeme der Dunkelmodus
+    // nie an den Kasten heran (Inline schlaegt jede Klasse).
+    +'<div id="dncLog" style="font:11px/1.5 ui-monospace,monospace;border-radius:6px;max-height:110px;overflow-y:auto;padding:4px 8px;"></div>';
   dncFelderVorbelegen();
   document.getElementById('dncVerb').onclick=dncVerbindenTrennen;
   document.getElementById('dncSend').onclick=dncSenden;
@@ -30065,7 +30153,7 @@ function openSimulation(){
   // halbe Hoehe leer. Gespiegelt fuellt das volle Drehteil die Flaeche und
   // sieht aus wie das Werkstueck, nicht wie ein halber Schnitt.
   showMirror = (window.innerWidth>=900);
-  document.body.className='mode-grafisch'+((typeof simActive!=='undefined'&&simActive)?' simvoll':'');
+  setBodyMode('mode-grafisch');
   document.getElementById('backLabel').textContent='Simulation';
   applyGrafischLayout();
   resizeCanvas();
