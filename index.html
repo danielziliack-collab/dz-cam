@@ -17504,7 +17504,19 @@ function planerFunde(taeler){
         let p=1.5, best=1e9;
         REGELGEWINDE.forEach(([dm,st])=>{ const ab=Math.abs(dm-b.x); if(ab<best){ best=ab; p=st; } });
         if(best>0.3) p=1.5;   // kein Norm-⌀ in der Naehe: neutraler Vorschlag
-        f.gewinde.push({x0:b.x, z0:+a.z.toFixed(3), z1:+b.z.toFixed(3), p});
+        // KOLLISIONSSCHUTZ [Daniels Sim-Befund 05.09.2026, Stufen-
+        // welle]: der Gewindegenerator faehrt den AUSLAUF LR ueber
+        // z1 hinaus (zEnd = z1 - lr) und den VORLAUF LW vor z0 —
+        // endet der Zylinder an einer STEIGENDEN Schulter, fraeste
+        // das Gewinde in die Stirnflaeche (roter EINSCHNITT im
+        // Feld). Deshalb merkt sich der Fund, ob Schulter/Bund
+        // anliegen; die Schrittanlage nimmt z1/z0 dann um
+        // Auslauf + 2 Steigungen zurueck (Gewindeauslauf-Faustmass
+        // ohne Freistich).
+        const schulter = !!(c && c.kind==='gerade' && isFinite(c.x) && c.x > b.x + 0.5);
+        const bund     = (i>=2) && isFinite(contour[i-2].x) && contour[i-2].x > a.x + 0.5
+                          && Math.abs(a.x-b.x)<0.02;
+        f.gewinde.push({x0:b.x, z0:+a.z.toFixed(3), z1:+b.z.toFixed(3), p, schulter, bund});
       }
     }
   }
@@ -17909,9 +17921,20 @@ function programmVorschlagen(interaktiv){
       if(!g || !g.an) return;
       if(!gwStahl){ hinweise.push('Gewinde auf ⌀'+fmt(gk.x0)+' ausgelassen: kein Gewindestahl in der Tabelle'); return; }
       const p=+(g.p||gk.p||1.5);
+      // SCHULTER/BUND-RUECKNAHME (s. planerFunde): Auslauf lr=2 plus
+      // 2 Steigungen Gewindeauslauf — sonst schneidet der Auslauf in
+      // die Stirnflaeche (Daniels Kollision an der Stufenwelle).
+      const gwLr=2, gwLw=3;
+      let z1eff=gk.z1 + (gk.schulter? (gwLr + 2*p) : 0);
+      let z0eff=gk.z0 - (gk.bund?     (gwLw + 2*p) : 0);
+      if(z0eff - z1eff < 4*p){
+        hinweise.push('Gewinde auf ⌀'+fmt(gk.x0)+' ausgelassen: nach Schulter-/Bund-Ruecknahme bleiben nur '+fmt(z0eff-z1eff)+' mm Gewindelaenge');
+        return;
+      }
+      if(gk.schulter) hinweise.push('Gewinde ⌀'+fmt(gk.x0)+': Ende auf Z'+fmt(z1eff)+' zurueckgenommen (Auslauf + 2P vor der Schulter — Freistich DIN 76 waere die saubere Loesung)');
       neu.push({id:stepCounter++, type:'gewinde', params:{
         bearbeitung:'beide', lage:'aussen', form:'zyl',
-        x0:+gk.x0.toFixed(3), z0:+gk.z0.toFixed(3), z1:+gk.z1.toFixed(3),
+        x0:+gk.x0.toFixed(3), z0:+z0eff.toFixed(3), z1:+z1eff.toFixed(3),
         p:p, h1:+(0.6134*p).toFixed(2),
         // U-Vorgabe 0: Daniel macht das Aufmass im Werkzeug-Offset
         // (Doktrin vom 29.08., DV 594 S. 132).
