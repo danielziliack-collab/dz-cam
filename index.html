@@ -19930,6 +19930,15 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     warnings.push('Drehzahlvariation und G72-Zyklussatz schliessen sich aus (der Satz kennt keine S-Modulation) — Ausgabe erfolgt als G-Einzelsaetze.');
     zyklusModusAe=false;
   }
+  // [Daniels Befund 05.09.2026: "der schlichtet mir trotzdem immer von
+  // rechts nach links"] Der G72-Satz faehrt seinen EIGENEN Schlichtzug
+  // und kennt keine Richtungswahl — mit Zyklusausgabe zeigte die Sim
+  // links->rechts, die Maschine fuehre rechts->links. Diese Luecke galt
+  // seit dem 171er-Bau auch aussen. Deshalb Einzelsaetze, mit Ansage.
+  if(zyklusModusAe && doFinish && p.schlRicht==='lr'){
+    warnings.push('Schlichtrichtung links→rechts und G72-Zyklussatz schliessen sich aus (der Zyklus schlichtet fest rechts→links) — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyklusModusAe=false;
+  }
   if(zyklusModusAe){
     if(doFinish && Math.abs((+p.uz||0)-(+p.ux||0))>1e-9){
       warnings.push('G72: der Zyklus kennt nur EIN Schlichtaufmass U (PG'+fmt(p.ux||0)+', allseitig). UZ '+fmt(p.uz||0)+' wird im Zyklussatz nicht abgebildet — das Fertigmass in Z haengt dann an der Steuerung.');
@@ -20331,9 +20340,63 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     const k1=(p.k1Typ&&p.k1Typ!=='keine')?Math.max(0,+p.k1||0):0;
     const k2=(p.k2Typ&&p.k2Typ!=='keine')?Math.max(0,+p.k2||0):0;
     const k3=(p.k3Typ&&p.k3Typ!=='keine')?Math.max(0,+p.k3||0):0;
-    if(innen){
-      if(p.schlRicht==='lr')
-        warnings.push('Ecke: Schlichtrichtung links→rechts ist für Lage innen in dieser Ausbaustufe nicht umgesetzt — geschlichtet wird rechts→links.');
+    if(innen && p.schlRicht==='lr'){
+      // =============================================================
+      // SCHLICHTRICHTUNG LINKS -> RECHTS, LAGE INNEN [Daniels Befund
+      // 05.09.2026: "der schlichtet mir trotzdem immer von rechts nach
+      // links" — der 171er-Bau hatte nur den Aussenzweig, innen stand
+      // ein Rueckfall mit Warnung]. Spiegel des Aussen-lr-Zugs:
+      // Anfahrt AXIAL durch die Vorbohrung (die Diagonale des
+      // Aussenzweigs fuehrte hier durch die Stirn), Start an der
+      // Vorbohrkante K3 — eine konvexe Materialecke, dort verschneidet
+      // keine SRK. Boegen und Korrekturseite kippen (G41->G42 ueber
+      // crcCode/srkFlip). Am Stirnende laeuft die K1-Fase auf ihrer
+      // eigenen VERLAENGERUNG nach GROESSEREM ⌀ in die Luft vor der
+      // Stirn aus (innen ist dort immer Luft — die Zapfenklemme des
+      // Aussenzweigs entfaellt); die K1-Rundung endet tangential in
+      // der Stirnebene, Abwahl radial nach aussen.
+      // =============================================================
+      const xi=xInner, xo=xOuter, zo=zOuter, zi=zInner;
+      const compL = crcCode({crc:'', lage:p.lage, schlRicht:'lr'});
+      const anW = srkWeg(toolRadius(p.t));
+      lines.push(`(--- SCHLICHTEN LINKS->RECHTS ---)`);
+      lines.push(`${N()} (GERADE  ) G00 G90 X${fmt(Math.max(0.5, xi-anW))} Z${fmt(zAnf)}`); bump();
+      lines.push(`${N()} (GERADE  ) G00 Z${fmt(k3? zi-k3 : zi)}`); bump();
+      lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compL} X${fmt(xi)}`); bump();
+      if(k3){
+        if(p.k3Typ==='fase'){
+          lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi+2*k3)} Z${fmt(zi)}`); bump();
+        } else {
+          const bw=bogenWorte(d2r(xi), zi-k3, d2r(xi)+k3, zi, d2r(xi)+k3, zi-k3, false, warnings);
+          if(bw!==null){ lines.push(`${N()} (RADIUS  ) G03 X${fmt(xi+2*k3)} Z${fmt(zi)} ${bw}`); bump(); }
+          else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi+2*k3)} Z${fmt(zi)}`); bump(); }
+        }
+      }
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xi + (k3?2*k3:0), zi, xo - (k2?2*k2:0), zi); }
+      else { lines.push(`${N()} (GERADE  ) G01 X${fmt(xo - (k2?2*k2:0))}`); bump(); }
+      if(k2){
+        if(p.k2Typ==='fase'){
+          lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo)} Z${fmt(zi+k2)}`); bump();
+        } else {
+          const bw=bogenWorte(d2r(xo)-k2, zi, d2r(xo), zi+k2, d2r(xo)-k2, zi+k2, true, warnings);
+          if(bw!==null){ lines.push(`${N()} (RADIUS  ) G02 X${fmt(xo)} Z${fmt(zi+k2)} ${bw}`); bump(); }
+          else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo)} Z${fmt(zi+k2)}`); bump(); }
+        }
+      }
+      if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xo, zi + (k2||0), xo, (k1? zo-k1 : zo)); }
+      else { lines.push(`${N()} (GERADE  ) G01 Z${fmt(k1? zo-k1 : zo)}`); bump(); }
+      if(k1 && p.k1Typ==='fase'){
+        lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo+2*k1)} Z${fmt(zo)}`); bump();
+        lines.push(`${N()} (SCHRAEG ) G01 G40 X${fmt(xo+2*k1+2)} Z${fmt(zo+1)}`); bump();
+      } else if(k1){
+        const bw=bogenWorte(d2r(xo), zo-k1, d2r(xo)+k1, zo, d2r(xo)+k1, zo-k1, false, warnings);
+        if(bw!==null){ lines.push(`${N()} (RADIUS  ) G03 X${fmt(xo+2*k1)} Z${fmt(zo)} ${bw}`); bump(); }
+        else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo+2*k1)} Z${fmt(zo)}`); bump(); }
+        lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(xo+2*k1+2)}`); bump();
+      } else {
+        lines.push(`${N()} (GERADE  ) G01 G40 Z${fmt(zo+anW)}`); bump();
+      }
+    } else if(innen){
       // =========================================================
       // INNEN-SCHLICHTZUG MIT KANTENBELEGUNG [Daniel, Innen-Paket 1]:
       // Spiegelbild des Aussenzugs — Bohrungsoeffnung -> Mantel ->
@@ -20780,6 +20843,87 @@ function detectUndercut(pts){
 }
 
 function genAbspanenKontur(p, N, bump, lines, warnings){
+  // =================================================================
+  // RESTMATERIAL INNEN ALS SPIEGELUNG [Daniels Innen-Paket 05.09.2026,
+  // Teil 3 — dieselbe Methodik wie Stechdrehen innen, Pruefung 173]:
+  // Die Innen-KAMMER hinter einem engeren Hals ist in der
+  // Spiegelwelt eine normale Aussen-Tasche — findPockets, die
+  // Eintauchrampe und die WIRKKONTUR-Dilatation des Restzyklus
+  // erben ungespiegelt. Kontur an XM gespiegelt (start bleibt an
+  // der Achse), Aussen-Restzyklus in tmp, X/I-Worte und G02<->G03,
+  // G41<->G42 zurueckgekippt; RZ_RELATIV neutralisiert die absolute
+  // Kopf-Rueckzugsebene.
+  // =================================================================
+  if(p.lage==='innen' && p.bearbeitung==='rest' && !p.__spiegel){
+    const cEls = contour;
+    const xs = cEls.filter(e=>e.kind!=='start' && isFinite(e.x)).map(e=>+e.x);
+    if(!xs.length){ warnings.push('RESTMATERIAL INNEN: Kontur ohne X-Werte.'); return; }
+    const maxX = Math.max.apply(null, xs), minX = Math.min.apply(null, xs);
+    if(!(+p.stock>0) || +p.stock >= minX - 0.01){
+      warnings.push('RESTMATERIAL INNEN: die Vorbohrung ⌀'+fmt(p.stock)+' muss KLEINER sein als der kleinste Kontur-⌀ ('+fmt(minX)+'). Zyklus uebersprungen.');
+      return;
+    }
+    { const tw=toolTable.find(x=>String(x.t)===String(p.t));
+      if(tw && tw.art!=='innen')
+        warnings.push('Restmaterial innen mit T'+p.t+' (Art "'+(tw?tw.art:'?')+'"): fuer die Kammer in der Bohrung gehoert eine BOHRSTANGE (Art "Innendrehen") in den Zyklus — der Halter eines Aussenwerkzeugs laeuft durch die Bohrungswand.'); }
+    warnings.push('Restmaterial INNEN: spiegelgerechnet aus dem Aussenzweig — NICHT an einem realen Innenzyklus verifiziert, ersten Testlauf im Einzelsatz fahren. Kommentar-Masse in Klartextzeilen stammen aus der Spiegelrechnung.');
+    if(p.blankContourId!==undefined)
+      warnings.push('Restmaterial innen: eine ROHTEILKONTUR wird nicht gespiegelt — gerechnet wird mit der Vorbohrung ⌀'+fmt(p.stock)+'.');
+    const XM = maxX + 10;
+    const sp=(v)=> 2*XM - v;
+    const gespiegelt = cEls.map(e=>{
+      const c2 = Object.assign({}, e);
+      if(c2.kind==='start') return c2;
+      if(isFinite(c2.x)) c2.x = sp(+c2.x);
+      if(c2.cw!==undefined) c2.cw = !c2.cw;
+      return c2;
+    });
+    const p2 = Object.assign({}, p, {
+      lage:'aussen', __spiegel:1,
+      stock: sp(+p.stock),
+      xmin: undefined, blankContourId: undefined, _rest: undefined,
+    });
+    // DAS WERKZEUG MUSS MITGESPIEGELT WERDEN [Befund beim Bau: mit dem
+    // echten Innenwerkzeug (SL 4) rechnete der Aussen-Restzyklus den
+    // FUSSABDRUCK falsch herum — die Wirkkontur kollabierte auf 6
+    // Saetze mit X109,8 UEBER dem Spiegelwelt-Rohteil]. Ein
+    // sl-4-Innendreher IST in der Spiegelwelt ein sl-3-Aussendreher:
+    // temporaerer Klon in der Werkzeugtabelle, die T-Saetze werden in
+    // der Ruecktransformation auf die echte Nummer zurueckgeschrieben.
+    let tTmp=null;
+    { const twIdx=toolTable.findIndex(x=>String(x.t)===String(p.t));
+      if(twIdx>=0){
+        const tw=toolTable[twIdx];
+        tTmp='SP'+tw.t;
+        toolTable.push(Object.assign({}, tw, {t:tTmp, art:'aussen', sl: tw.sl===4?3:tw.sl, platz:undefined}));
+        p2.t=tTmp;
+        if(String(p.t2||p.t)===String(tw.t)) p2.t2=tTmp;
+      } }
+    const saved = contour;
+    contour = gespiegelt;
+    const tmp=[];
+    try{ RZ_RELATIV=true; genAbspanenKontur(p2, N, bump, tmp, warnings); }
+    finally{ RZ_RELATIV=false; contour = saved;
+      if(tTmp){ const i2=toolTable.findIndex(x=>x.t===tTmp); if(i2>=0) toolTable.splice(i2,1); } }
+    if(!tmp.length) return;
+    let xKleinst=Infinity;
+    const raus=tmp.map(z=>{
+      if(!/^N\d+/.test(z)) return z;
+      let s2=z.replace(/X(-?\d+(?:\.\d+)?)/g, (m,v)=>{ const nv=sp(+v); if(nv<xKleinst) xKleinst=nv; return 'X'+fmt(nv); });
+      s2=s2.replace(/I(-?\d+(?:\.\d+)?)/g, (m,v)=>'I'+fmt(sp(+v)));
+      s2=s2.replace(/\bG02\b/g,'G0@').replace(/\bG03\b/g,'G02').replace(/G0@/g,'G03');
+      s2=s2.replace(/\bG41\b/g,'G4@').replace(/\bG42\b/g,'G41').replace(/G4@/g,'G42');
+      if(tTmp) s2=s2.replace(/\bTSP/g,'T');   // Werkzeug-Klon zurueck auf die echte Nummer
+      return s2;
+    });
+    if(xKleinst < 0.4){
+      warnings.push('RESTMATERIAL INNEN: eine Bahn kaeme der Drehachse zu nahe (⌀'+fmt(xKleinst)+') — Kammer/Vorbohrung pruefen. Zyklus uebersprungen.');
+      return;
+    }
+    lines.push('(--- RESTMATERIAL INNEN: Bahnen spiegelgerechnet, Spiegelebene ⌀'+fmt(XM)+' ---)');
+    raus.forEach(z=>lines.push(z));
+    return;
+  }
   // BAHN-AUSDUENNUNG [Daniel, IMG_2605]: konturnahe Schruppbahnen (Schulter-
   // Nachziehen, Stirnkeil) wurden mit 0,05er-Raster als Satzflut ausgegeben —
   // viele Mini-Bewegungen statt weniger Saetze. Douglas-Peucker mit
@@ -20885,16 +21029,16 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   const nurRest = p.bearbeitung==='rest';
   const doRough = !nurRest && p.bearbeitung!=='schlichten';
   const doFinish = !nurRest && p.bearbeitung!=='schruppen';
-  // Schlichtrichtung links->rechts ist INNEN nicht umgesetzt: die
-  // lr-Anfahrt des Aussenzweigs (X stock+2, dann axial hinter das
-  // Konturende) liefe in der Bohrung aussen am Teil vorbei und
-  // radial durch die Absatzwand. Ansage statt stiller Falschbahn;
-  // p wird lokal auf rl normalisiert, damit crcCode und lr-Zweig
-  // dieselbe Antwort sehen [05.09.2026].
-  if(p.schlRicht==='lr' && p.lage==='innen' && doFinish){
-    warnings.push('Konturschlichten links→rechts ist bei Lage INNEN in dieser Ausbaustufe nicht umgesetzt — geschlichtet wird rechts→links.');
-    p = Object.assign({}, p, {schlRicht:'rl'});
-  }
+  // Schlichtrichtung links->rechts INNEN [Daniels Nachforderung
+  // 05.09.2026 "Ja brauche ich auch", nach dem Ecke-innen-lr-Fix]:
+  // der fruehere Rueckfall auf rl ist raus. Der lr-Zweig des
+  // Schlichtblocks traegt die Lage jetzt selbst: Anfahrt in der
+  // VORBOHRUNGSSPUR statt ueber dem Rohteil, Z-vor-X-Reihenfolge
+  // passt innen von selbst (axial durch die Bohrung tauchen, radial
+  // zur Wand), die Korrekturseite kippt ueber srkFlip. Die
+  // tangentiale Frei-Anwahl bleibt innen AUS — wie tief die Bohrung
+  // hinter dem Konturende reicht, weiss der Zyklus nicht (Sackloch =
+  // Wand), also ehrliche radiale Anwahl mit Eckrest-Ansage.
   // Spanbrechen [Daniel, 02.09.2026]: nur die geraden Hauptzuege der
   // achsparallelen Zweige. Konturparallel folgt der Huelle in vielen
   // kurzen Segmenten — dort ist eine saubere DI-Zaehlung ein eigener
@@ -22494,7 +22638,11 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
       // 45° schräg nach VORN in die freie Luft, nicht die frische Fläche hoch.
       // =============================================================
       lines.push(`(--- SCHLICHTEN LINKS->RECHTS ---)`);
-      lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(p.stock+2)} Z${fmt(zAppr)}`); bump();
+      // INNEN faehrt die Startspur in der VORBOHRUNG (p.stock ist dort
+      // der Vorbohrungs-⌀): X stock-2 liegt in garantierter Luft, der
+      // folgende Z-Tauchgang je Lauf geht axial durch die Bohrung.
+      // Aussen bleibt X stock+2 ueber dem Rohteil — bitgenau alt.
+      lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(innen? Math.max(0.5, p.stock-2) : p.stock+2)} Z${fmt(zAppr)}`); bump();
       const revRuns = mainRuns.slice().reverse();
       // Anwahl-Vorhalt: hinter dem Laufbeginn steht Material (Rohteilüberstand
       // hinter dem Konturende bzw. die Taschenbrücke) — eine radiale Anwahl
@@ -22547,7 +22695,12 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
           // Frei nur, wenn der GANZE Verlaengerungsweg in Luft liegt
           // (Rohteilkontur UND Reststand des Vorgaengers) und der
           // Reitstockschutz ihn nicht klemmt.
-          const frei = Math.abs(tg.z)>1e-6 && r2d(pV.r)>xmin+0.1 &&
+          // INNEN nie tangential: matAt ist die AUSSEN-Materialhuelle,
+          // und ob die Bohrung hinter dem Konturende weitergeht
+          // (Durchgang) oder dort endet (Sackloch/Absatz), steht in
+          // keinem Zyklusparameter — die Verlaengerung koennte im
+          // Vollen liegen. Konservativ radiale Anwahl mit Ansage.
+          const frei = !innen && Math.abs(tg.z)>1e-6 && r2d(pV.r)>xmin+0.1 &&
             [0.34,0.67,1].every(t2=>{
               const zq=sgE.z2 + tg.z*anWeg*t2, rq=sgE.x2 + tg.r*anWeg*t2;
               return matAt(zq) < r2d(rq) - 0.4;
