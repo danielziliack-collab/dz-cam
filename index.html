@@ -21052,35 +21052,20 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
           // auf Schraegen schneidet der Nasenbogen tiefer als der
           // programmierte Punkt (39,8-Grad-Flanke: 0,43 mm radial,
           // Formel r·(tanb·(1+sinb)−1+cosb), am Feld bestaetigt).
+          // Fussabdruck aus der GEMEINSAMEN Quelle (werkzeugFussabdruck
+          // — dieselbe Tabelle, die der Massbericht fuer comp-lose
+          // Zuege nutzt): lo je Versatz d=(i-iOff)*dRas, mz/mx schon
+          // im Weltsinn.
           const wzP=toolTable.find(x=>String(x.t)===String(p.t));
-          const polyW=(typeof toolCutPolygon==='function')? toolCutPolygon(wzP) : null;
           const dirW=slDirection((wzP&&wzP.sl)||3);
           const mzW=(dirW.dx<0)?-1:1;
-          const dRas=0.05;
-          let fussT=null, nF=0;
-          if(polyW && polyW.length){
-            let zMaxP=0; polyW.forEach(q=>{ if(q.z*mzW>zMaxP) zMaxP=q.z*mzW; });
-            nF=Math.max(1, Math.ceil(zMaxP/dRas)+1);
-            fussT=new Float64Array(nF).fill(1e9);
-            for(let k2=0;k2<polyW.length;k2++){
-              const a=polyW[k2], b2=polyW[(k2+1)%polyW.length];
-              const az=a.z*mzW, bz=b2.z*mzW;
-              if(Math.abs(bz-az)<1e-12) continue;
-              const i0=Math.max(0,Math.ceil(Math.min(az,bz)/dRas)), i1=Math.min(nF-1,Math.floor(Math.max(az,bz)/dRas));
-              for(let i2=i0;i2<=i1;i2++){
-                const t2=(i2*dRas-az)/(bz-az);
-                if(t2<-1e-9||t2>1+1e-9) continue;
-                const xw=a.x+(b2.x-a.x)*t2;
-                if(xw<fussT[i2]) fussT[i2]=xw;
-              }
-            }
-          }
+          const fA=(typeof werkzeugFussabdruck==='function')? werkzeugFussabdruck(wzP) : null;
           // Passt die Wirkkante bei (z0, ⌀xp) ueber die Huelle?
           const fussFrei=(z0,xp)=>{
-            if(!fussT) return true;
-            for(let i2=0;i2<nF;i2++){
-              if(fussT[i2]>8) continue;
-              if(xp + 2*fussT[i2] < effAt(z0 + i2*dRas*mzW) - 1e-6) return false;
+            if(!fA) return true;
+            for(let i2=0;i2<fA.n;i2++){
+              if(fA.lo[i2]>8) continue;
+              if(xp + 2*fA.lo[i2] < effAt(z0 + (i2-fA.iOff)*fA.dRas) - 1e-6) return false;
             }
             return true;
           };
@@ -21098,7 +21083,8 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
             // die Wirkkante frei ist; wird das Fenster dabei leer, ist
             // die Stufe fuer diese Platte zu schmal und entfaellt.
             let zEin=w.zA;
-            while(zEin>w.zB+1e-9 && !fussFrei(zEin, xp)) zEin-=dRas;
+            const dSchritt=fA? fA.dRas : 0.05;
+            while(zEin>w.zB+1e-9 && !fussFrei(zEin, xp)) zEin-=dSchritt;
             if(zEin<=w.zB+1e-9 || !fussFrei(zEin, xp)) continue;
             lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(xPrevP+1)} Z${fmt(zEin)}`); bump();
             lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 X${fmt(xp)}`); bump();
@@ -21125,14 +21111,14 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
           // TANGIERT die echte Wirkkante die Aufmasshuelle, Innenecken
           // werden automatisch verrundet statt ueberschossen.
           // Bahn = Dilatation der Huelle mit dem Fussabdruck (Tabelle
-          // fussT von oben — dieselbe Wirkkanten-Rechnung wie die
-          // abgerueckten Einstiege).
+          // fA von oben — dieselbe Wirkkanten-Rechnung wie die
+          // abgerueckten Einstiege und der Massbericht).
           const wirkAt=(zz)=>{
             let m=effAt(zz);
-            if(!fussT) return m;
-            for(let i2=0;i2<nF;i2++){
-              if(fussT[i2]>8) continue;              // hoch am Halter: nie limitierend
-              const v=effAt(zz + i2*dRas*mzW) - 2*fussT[i2];
+            if(!fA) return m;
+            for(let i2=0;i2<fA.n;i2++){
+              if(fA.lo[i2]>8) continue;              // hoch am Halter: nie limitierend
+              const v=effAt(zz + (i2-fA.iOff)*fA.dRas) - 2*fA.lo[i2];
               if(v>m) m=v;
             }
             return m;
@@ -26679,6 +26665,49 @@ function toolCutPolygon(tool){
   return null;   // Bohren/Gewinde ändern die ZX-Silhouette nicht sinnvoll
 }
 
+// =================================================================
+// WERKZEUG-FUSSABDRUCK [05.09.2026, Daniels Hinterschnitt-Befund]
+// -----------------------------------------------------------------
+// Untere und obere Huelle des Schneidpolygons je z-Versatz, im
+// WELTSINN (mz/mx der Schneidenlage schon eingerechnet — dieselbe
+// Abbildung wie hfSchneiden). Ein Zug OHNE G4x programmiert das
+// Tangentenkreuz; auf Schraegen schneidet der Nasenbogen bis
+// r·(tanb·(1+sinb)−1+cosb) tiefer als der programmierte Punkt.
+// Aus dieser Tabelle rechnen der RESTZYKLUS seine Wirkbahn und der
+// MASSBERICHT das Ist comp-loser Zuege — eine Quelle, damit
+// Generator, Bericht und Abtragssimulation dieselbe Platte sehen.
+// Rueckgabe: {dRas, iOff, n, lo, hi} mit Versatz d=(i-iOff)*dRas;
+// lo/hi in RADIUS relativ zum programmierten Punkt.
+// =================================================================
+function werkzeugFussabdruck(tool){
+  const poly=toolCutPolygon(tool);
+  if(!poly || !poly.length) return null;
+  const dir=slDirection((tool&&tool.sl)||3);
+  const mz=(dir.dx<0)?-1:1, mx=(dir.dy>0)?-1:1;
+  const dRas=0.05;
+  let dMin=1e9, dMax=-1e9;
+  poly.forEach(q=>{ const d=q.z*mz; if(d<dMin)dMin=d; if(d>dMax)dMax=d; });
+  const iOff=Math.max(0, Math.ceil(-dMin/dRas)+1);
+  const n=iOff+Math.ceil(dMax/dRas)+2;
+  const lo=new Float64Array(n).fill(1e9), hi=new Float64Array(n).fill(-1e9);
+  for(let k=0;k<poly.length;k++){
+    const a=poly[k], b=poly[(k+1)%poly.length];
+    const az=a.z*mz, bz=b.z*mz;
+    if(Math.abs(bz-az)<1e-12) continue;      // senkrechte Kante: Nachbarn decken sie
+    const i0=Math.max(0, Math.ceil((Math.min(az,bz)+iOff*dRas)/dRas));
+    const i1=Math.min(n-1, Math.floor((Math.max(az,bz)+iOff*dRas)/dRas));
+    for(let i=i0;i<=i1;i++){
+      const d=(i-iOff)*dRas;
+      const t=(d-az)/(bz-az);
+      if(t<-1e-9||t>1+1e-9) continue;
+      const xw=(a.x+(b.x-a.x)*t)*mx;
+      if(xw<lo[i]) lo[i]=xw;
+      if(xw>hi[i]) hi[i]=xw;
+    }
+  }
+  return {dRas, iOff, n, lo, hi};
+}
+
 // -----------------------------------------------------------------
 // Ecken der Bahnkette: konkav (Innenecke) oder nicht
 // -----------------------------------------------------------------
@@ -29842,6 +29871,9 @@ function massBericht(){
   };
 
   // ---- Ist-Profil einer Seite --------------------------------------
+  // Fussabdruecke je Werkzeug einmal je Berichtslauf (istBauen laeuft
+  // fuer aussen UND innen ueber dieselben Werkzeuge).
+  const fussCache={};
   const istBauen=(seite, zs, startWert)=>{
     const ist=zs.map(()=>startWert);
     const von=zs.map(()=>null);
@@ -29969,6 +30001,49 @@ function massBericht(){
               xh=A.x+(B.x-A.x)*tt;
             }
             if(besser(xh, ist[i2])){ ist[i2]=xh; von[i2]=m.step; }
+          }
+        }
+      }
+      // ==============================================================
+      // WIRKKANTE COMP-LOSER ZUEGE [05.09.2026, Daniels Hinterschnitt-
+      // Befund]: Ein Zug OHNE G4x programmiert das TANGENTENKREUZ —
+      // auf Schraegen schneidet der Nasenbogen bis
+      // r·(tanb·(1+sinb)−1+cosb) tiefer als der programmierte Punkt.
+      // Der Bericht rechnete solche Zuege als reine Spitzenbahn und
+      // uebersah so den Restzyklus-Einschnitt, den die Simulation
+      // laengst zeigte (dokumentierte Klingenband-Luecke). Jetzt wird
+      // das Segment zusaetzlich mit dem WERKZEUG-FUSSABDRUCK
+      // dilatiert — dieselbe Tabelle (werkzeugFussabdruck), aus der
+      // der Restzyklus seine Wirkbahn rechnet: Bericht, Generator und
+      // Abtragssimulation sehen dieselbe Platte. Achsparallele
+      // Segmente (Steigung < 0,02 r/mm) aendern sich nicht — dort ist
+      // die Wirkkante die Spitze; comp-Zuege kompensiert die
+      // Steuerung selbst aequidistant.
+      if(!m.comp && !bw && tw && (tw.art==='aussen'||tw.art==='innen')){
+        const key=String(tw.t);
+        if(!(key in fussCache)) fussCache[key]=(typeof werkzeugFussabdruck==='function')? werkzeugFussabdruck(tw) : null;
+        const fB=fussCache[key];
+        if(fB){
+          for(let k2=0;k2+1<pts.length;k2++){
+            const A=pts[k2], B=pts[k2+1];
+            if(Math.abs(B.z-A.z)<1e-9) continue;
+            if(Math.abs((B.x-A.x)/2/(B.z-A.z))<0.02) continue;
+            const zA=Math.min(A.z,B.z), zB2=Math.max(A.z,B.z);
+            const dLoW=(0-fB.iOff)*fB.dRas, dHiW=(fB.n-1-fB.iOff)*fB.dRas;
+            for(let i2=0;i2<zs.length;i2++){
+              const z=zs[i2];
+              if(z<zA+dLoW-1e-9) continue;
+              if(z>zB2+dHiW+1e-9) break;
+              for(let j2=0;j2<fB.n;j2++){
+                const kap=(seite==='innen')? fB.hi[j2] : fB.lo[j2];
+                if(!(kap>-8 && kap<8)) continue;
+                const zb=z-(j2-fB.iOff)*fB.dRas;
+                if(zb<zA-1e-9||zb>zB2+1e-9) continue;
+                const t3=(zb-A.z)/(B.z-A.z);
+                const xw=A.x+(B.x-A.x)*t3 + 2*kap;
+                if(besser(xw, ist[i2])){ ist[i2]=xw; von[i2]=m.step; }
+              }
+            }
           }
         }
       }
