@@ -673,7 +673,7 @@ body.artefakt .hsoftkeys{padding-right:48px;}
      dncLog-Lehre aus Pruefung 167). Subzeile traegt R/SL/Vc unter
      dem Namen, dafuer sind die zwei Schmalspalten weg. */
   .wzkopf td{background:hsl(var(--ton), 26%, 93%);font-weight:700;font-size:11px;
-    padding:6px 8px;letter-spacing:.4px;color:hsl(var(--ton), 40%, 30%);}
+    padding:6px 8px;letter-spacing:.4px;color:hsl(var(--ton), 40%, 30%);position:relative;}
   .wzname{font-size:12.5px;line-height:1.25;}
   .wzsub{font-size:10.5px;color:hsl(var(--ton), 14%, 46%);white-space:nowrap;}
   .wzfrei{color:hsl(var(--ton), 12%, 62%);}
@@ -4151,9 +4151,14 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
       <div class="msec">Schnittwerte (optional) — belegen die Zyklusmasken automatisch vor</div>
       <div class="mrow"><label>Vc Schnittgeschwindigkeit</label><input type="number" id="twVc" placeholder="z.B. 180" step="any"><span class="unit">m/min</span></div>
       <div class="mrow"><label>F Schruppen / F Schlichten</label><input type="number" id="twF1" placeholder="mm/U" step="any" style="width:76px;"><input type="number" id="twF2" placeholder="mm/U" step="any" style="width:76px;"><span class="unit">mm/U</span></div>
-      <div class="mrow"><label>Vorschau</label>
-        <canvas id="twPreview" width="150" height="110"
-          style="border:1px solid var(--line);border-radius:3px;background:#fff;width:150px;height:110px;"></canvas>
+      <!-- VORSCHAU GROSS UND MITTIG [Daniels Befund 05.09.2026: die
+           150x110-Briefmarke neben dem Label war "eine Katastrophe" —
+           das Werkzeug hing winzig in der Ecke]. Volle Zeile ohne
+           Label (ein Bild erklaert sich selbst), das Werkzeug wird in
+           drawToolIcon per Tintenmessung formatfuellend eingepasst. -->
+      <div class="mrow" style="display:block;text-align:center;">
+        <canvas id="twPreview" width="300" height="180"
+          style="border:1px solid var(--line);border-radius:3px;background:#fff;width:100%;max-width:300px;height:180px;"></canvas>
       </div>
       <div class="mrow">
         <button class="gcbtn primary" id="btnToolAdd" style="flex:1;padding:10px;">+ Hinzufügen</button>
@@ -12880,21 +12885,61 @@ function drawToolIcon(canvas, tool){
     px = w*0.5 - d.dx*w*off;
     py = h*0.5 - d.dy*h*off;
   }
-  drawToolShape(c, px, py, scale, tool, {
-    bodyLen: small? extMM*0.5 : extMM*0.62,
-    dot: small?1.8:2.4,
-    lw: small?0.8:1,
-    ring: small? 6 : 0,
-  });
+  // GROSSE VORSCHAU: MESSEN STATT SCHAETZEN [Daniels Befund
+  // 05.09.2026, Screenshot Runddrehmeissel: das Werkzeug hing klein
+  // in der Ecke, der Halter lief aus dem Bild]. Die Zeichnung wird
+  // erst auf ein Offscreen gemalt, ihre TINTE ausgemessen und dann
+  // VEKTORIELL neu gezeichnet — Massstab und Lage so, dass sie das
+  // Bild fuellt (kein Raster-Blit: der wuerde beim Vergroessern
+  // weich). Die Mindest-Pixelgroessen in drawToolShape machen die
+  // Skalierung nicht exakt linear — praktisch sitzt ein Durchgang.
+  // domstub liefert getImageData voller Nullen -> Fallback ist der
+  // bisherige Schaetzweg.
+  const opts0={ bodyLen: small? extMM*0.5 : extMM*0.62,
+    dot: small?1.8:2.4, lw: small?0.8:1, ring: small? 6 : 0 };
+  let eingepasst=false;
+  if(!small){
+    try{
+      const mess=document.createElement('canvas'); mess.width=w; mess.height=h;
+      const mc=mess.getContext('2d');
+      drawToolShape(mc, px, py, scale, tool, opts0);
+      const dd=mc.getImageData(0,0,w,h).data;
+      let x0=1e9,y0=1e9,x1=-1,y1=-1;
+      for(let yy=0;yy<h;yy++) for(let xx=0;xx<w;xx++){
+        if(dd[(yy*w+xx)*4+3]>10){ if(xx<x0)x0=xx; if(xx>x1)x1=xx; if(yy<y0)y0=yy; if(yy>y1)y1=yy; }
+      }
+      if(x1>x0+3 && y1>y0+3){
+        const f=Math.min(2.6, (Math.min((w-18)/(x1-x0+1), (h-30)/(y1-y0+1))));
+        const cx=(x0+x1)/2, cy=(y0+y1)/2;
+        const px2=w/2 + (px-cx)*f, py2=(h-14)/2 + (py-cy)*f;
+        drawToolShape(c, px2, py2, scale*f, tool, opts0);
+        eingepasst=true;
+      }
+    }catch(e){}
+  }
+  if(!eingepasst) drawToolShape(c, px, py, scale, tool, opts0);
   if(!small && isTurn && tool.art!=='gewinde'){
-    const g=insertGeometry(tool, 9);
-    c.font='9px Consolas, monospace';
-    c.fillStyle = g.krMinor>0 ? '#5d6b76' : '#c8281f';
-    c.fillText(`ε${g.eps}° κr${g.kr}° κr'${g.krMinor.toFixed(0)}° r${g.r}`, 4, h-5);
-    if(g.krMinor<=0){
-      c.fillStyle='#c8281f';
-      c.fillText('κr+ε ≥ 180° — Geometrie unmöglich', 4, 11);
+    c.font='10px Consolas, monospace'; c.textAlign='center';
+    // Die Vorschau zeichnet das FORMULAR-Werkzeug (readToolForm), und
+    // das Formular fuehrt kein rund-Flag — dort ist Spitzenwinkel 0
+    // die Rundplatte (readToolForm-Kommentar). Beide Kennungen pruefen,
+    // sonst stand "ε80° κr90°" unter dem Kreis (am Bild gefunden).
+    if(tool.rund || !(+tool.sw>0)){
+      // Fuer die Rundplatte sind ε/κr keine Kenngroessen — die alte
+      // Zeile schrieb "ε80° κr90°" unter einen Kreis [Daniels
+      // Screenshot]. Sie hat genau zwei: Radius und Schneidenlage.
+      c.fillStyle='#5d6b76';
+      c.fillText('Rundplatte · r'+(+tool.r||0)+' mm · SL'+(tool.sl||'-'), w/2, h-5);
+    } else {
+      const g=insertGeometry(tool, 9);
+      c.fillStyle = g.krMinor>0 ? '#5d6b76' : '#c8281f';
+      c.fillText(`ε${g.eps}° κr${g.kr}° κr'${g.krMinor.toFixed(0)}° r${g.r}`, w/2, h-5);
+      if(g.krMinor<=0){
+        c.fillStyle='#c8281f';
+        c.fillText('κr+ε ≥ 180° — Geometrie unmöglich', w/2, 11);
+      }
     }
+    c.textAlign='start';
   }
 }
 function renderToolTable(){
@@ -12941,10 +12986,16 @@ function renderToolTable(){
     body.appendChild(tr);
   }
   const lager=toolTable.map((t,i)=>({t,i})).filter(q=>!q.t.platz);
-  if(lager.length){
+  // Der LAGER-Kopf steht IMMER und traegt den ＋-Einstieg [Daniels
+  // Befund 05.09.2026: neue Werkzeuge liessen sich nur ueber einen
+  // FREIEN Revolverplatz anlegen — bei voller Bestueckung gab es
+  // gar keinen Weg ins Lager].
+  {
     const kopf2=document.createElement('tr');
     kopf2.className='wzkopf';
-    kopf2.innerHTML='<td colspan="5">LAGER — '+lager.length+' Werkzeuge ohne Revolverplatz</td>';
+    kopf2.innerHTML='<td colspan="5">LAGER — '
+      +(lager.length? lager.length+' Werkzeuge ohne Revolverplatz' : 'leer')
+      +' <button class="ap-edit" data-tlagerneu="1" title="Neues Werkzeug im Lager anlegen" style="position:absolute;right:6px;top:2px;">＋</button></td>';
     body.appendChild(kopf2);
   }
   lager.forEach(q=>{
@@ -12980,6 +13031,16 @@ function renderToolTable(){
   };
   const freiePlaetze=()=>{ const f=[]; for(let p2=1;p2<=16;p2++)
     if(!toolTable.some(t=>t.platz===p2)) f.push({v:p2, txt:'T'+p2}); return f; };
+  body.querySelectorAll('button[data-tlagerneu]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      cancelToolEdit();
+      document.getElementById('twPlatz').value='';
+      document.getElementById('twT').value='';
+      document.getElementById('twName').value='';
+      document.getElementById('twFormTitle').textContent='Neues Werkzeug im Lager';
+      twFormAuf();
+    });
+  });
   body.querySelectorAll('button[data-tunload]').forEach(btn=>{
     btn.addEventListener('click',(e)=>{
       if(werkzeugPlatzAendern(+e.target.dataset.tunload, null)){
@@ -13085,6 +13146,11 @@ function readToolForm(){
     if(t.ew===undefined) t.ew=0;
     if(t.sw===undefined) t.sw=80;
   }
+  // Das rund-Flag entsteht im Formular aus dem Spitzenwinkel —
+  // dieselbe Schwelle wie insertOutline. Ohne diese Zeile verlor
+  // jede editierte Rundplatte ihr Flag, weil readToolForm das
+  // Werkzeugobjekt KOMPLETT ersetzt (Altfehler, 05.09.2026).
+  if((+t.sw||0)<5 && (t.art==='aussen'||t.art==='innen')) t.rund=true;
   return t;
 }
 // Felder je nach Werkzeugart ein-/ausblenden und passend beschriften.
@@ -13251,7 +13317,11 @@ function startToolEdit(i){
   document.getElementById('twR').value=t.r;
   document.getElementById('twSL').value=t.sl||3;
   document.getElementById('twEW').value=t.ew||0;
-  document.getElementById('twSW').value=t.sw||80;
+  // t.sw||80 machte aus dem Spitzenwinkel 0 der RUNDPLATTE still 80 —
+  // zusammen mit dem fehlenden rund-Flag in readToolForm wurde ein
+  // einmal editierter Runddrehmeissel beim Speichern zur 80er-Platte
+  // (Altfehler, am Vorschaubild gefunden 05.09.2026).
+  document.getElementById('twSW').value = (t.sw!==undefined && t.sw!==null) ? t.sw : 80;
   document.getElementById('twLen').value=t.len||0;
   document.getElementById('twDM').value = t.dm!==undefined?t.dm:10;
   { const e=document.getElementById('twIso'); if(e) e.value = t.iso||''; }
