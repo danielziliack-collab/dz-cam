@@ -658,6 +658,15 @@ body.artefakt .hsoftkeys{padding-right:48px;}
      Werkzeug- und Konturwahl, die Bemerkung, Zeilen mit
      Erklaertexten. Ueber IDs und Bestandsklassen, nicht ueber :has()
      (auf aelteren iOS nicht verlaesslich). */
+  /* Planer-Rueckfragen: Fundzeile mit eigener Knopfgruppe (pl-wahl
+     statt .radiobtns — s. planerMaskeZeigen, Pruefung-99-Wache). */
+  .pl-zeile{flex-wrap:wrap;gap:4px 10px;padding:7px 4px;}
+  .pl-text{flex:1 0 100%;font-size:13.5px;font-weight:600;color:hsl(var(--ton), 45%, 28%);}
+  .pl-wahl{display:inline-flex;gap:4px;}
+  .pl-wahl button{font:600 13px/1.2 inherit;padding:7px 10px;border:1px solid hsl(var(--ton), 16.9%, 69.8%);
+    border-radius:7px;background:#fff;color:hsl(var(--ton), 45%, 30%);}
+  .pl-wahl button.sel{background:hsl(28, 92%, 45%);border-color:hsl(28, 92%, 45%);color:#fff;}
+  .pl-extra{font-size:13px;display:inline-flex;align-items:center;gap:4px;}
   .mask.kachelpilot .mrow.k-breit{grid-column:1/-1;}
   /* Editor-Rechenzeile und Hinweiszeilen im Kachelraster: volle
      Breite, sonst wuerden die acht Tasten in eine halbe Spalte
@@ -2652,6 +2661,18 @@ body.dunkel .radiobtns button.sel, body.dunkel .swliste button.sel, body.dunkel 
               </div>
             </div>
             <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnGwOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnGwCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
+          </div>
+        </div>
+
+        <!-- PLANER-RUECKFRAGEN [Stufe 2 Rest, 05.09.2026]: der Planer
+             fragt, statt nur zu benennen — Zeilen entstehen dynamisch
+             aus den Funden (planerMaskeZeigen). -->
+        <div class="mask" id="maskPlaner">
+          <div class="mask-head"><span class="mtitel">Planer — Rückfragen vor dem Vorschlag</span></div>
+          <div class="mask-body">
+            <div class="mrow pl-hinweis" style="display:block;font-size:12.5px;color:hsl(var(--ton),15%,40%);">Vorbelegt ist, was der Planer selbst gewählt hätte — jede Zeile lässt sich umstellen. Freistiche und Gewinde stehen in keiner DXF, deshalb die Frage.</div>
+            <div id="plFundeBody"></div>
+            <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnPlOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Vorschlag anlegen</button> <button class="gcbtn ab-rot" id="btnPlAb" style="padding:10px 16px;">✕ Abbrechen</button></div>
           </div>
         </div>
       </div>
@@ -11328,9 +11349,22 @@ document.getElementById('btnGwOk').onclick=()=>{
 // per Zweiklick ersetzt (confirm ist im Artefakt stumm), sonst
 // direkt. snapshot in der Funktion traegt das Undo.
 document.getElementById('hskVorschlag').onclick=(ev)=>{
+  window.__planerAntworten=null;   // frischer Lauf = frische Rueckfragen
   if(programSteps.length){
-    zweiklickBestaetigen(ev && ev.target, 'Arbeitsplan ersetzen?', ()=>{ programmVorschlagen(); });
-  } else programmVorschlagen();
+    zweiklickBestaetigen(ev && ev.target, 'Arbeitsplan ersetzen?', ()=>{ programmVorschlagen(true); });
+  } else programmVorschlagen(true);
+};
+// PLANER-RUECKFRAGEN [05.09.2026]: "Vorschlag anlegen" traegt die
+// Antworten in denselben Planer-Lauf zurueck; Abbrechen laesst
+// alles, wie es war (es ist noch nichts angelegt worden).
+document.getElementById('btnPlOk').onclick=()=>{
+  window.__planerAntworten=planerAntwortenLesen();
+  document.getElementById('maskPlaner').classList.remove('show');
+  programmVorschlagen(true);
+};
+document.getElementById('btnPlAb').onclick=()=>{
+  window.__planerAntworten=null;
+  document.getElementById('maskPlaner').classList.remove('show');
 };
 // hskClear ist entfernt (s. Softkey-Kommentar); Loeschen laeuft ueber
 // das rote Kreuz der Konturzeile. Der Wachhund bleibt gegen Altbestand:
@@ -17351,7 +17385,130 @@ function konturRichtungUmkehren(els){
   }
   return neu;
 }
-function programmVorschlagen(){
+// =================================================================
+// PLANER-RUECKFRAGEN [Stufe 2 Rest, 05.09.2026]
+// -----------------------------------------------------------------
+// planerFunde sammelt, was der Planer nicht allein entscheiden darf:
+// - TAELER (aus findPockets, vom Aufrufer uebergeben) mit der
+//   Automatik-Vorgabe als Vorbelegung,
+// - FREISTICH-KANDIDATEN: Zylinder, der in eine steile steigende
+//   Schulter laeuft, OHNE dass die Ecke schon eine Fase/Rundung
+//   traegt (dann ist sie gestaltet und kein Kandidat),
+// - GEWINDE-KANDIDATEN: Aussenzylinder ab 8 mm Laenge, Steigungs-
+//   vorschlag aus der Regelgewinde-Tabelle (nur ein VORSCHLAG —
+//   die Steigung steht in keiner DXF, Daniel bestaetigt sie).
+// DOM-frei, damit der Pruefstand direkt rechnen kann.
+// =================================================================
+const REGELGEWINDE=[[6,1],[8,1.25],[10,1.5],[12,1.75],[16,2],[20,2.5],[24,3],[30,3.5],[36,4],[42,4.5],[48,5]];
+function planerFunde(taeler){
+  const f={taeler:[], freistiche:[], gewinde:[]};
+  (taeler||[]).forEach(tal=>{
+    const breite=+(tal.zIn-tal.zOut).toFixed(2);
+    const tiefeR=(tal.mouthX-tal.floorX)/2;
+    let vorgabe='ueberfahren';
+    if(breite<=12 && tal.riseMax>75 && tal.fallMax>75) vorgabe='einstich';
+    else if(tal.riseMax>15 && tal.fallMax>15 && tiefeR>=1) vorgabe='stechdrehen';
+    f.taeler.push({zIn:tal.zIn, zOut:tal.zOut, breite, tiefeR:+tiefeR.toFixed(2),
+      mouthX:tal.mouthX, floorX:tal.floorX, vorgabe});
+  });
+  for(let i=1;i<contour.length;i++){
+    const a=contour[i-1], b=contour[i];
+    if(b.kind!=='gerade' || !isFinite(a.x)||!isFinite(b.x)||!isFinite(a.z)||!isFinite(b.z)) continue;
+    const dz=b.z-a.z, dx=b.x-a.x;
+    const zyl=(Math.abs(dx)<0.02 && dz<-0.5);
+    if(zyl){
+      // Freistich: das NAECHSTE Segment steigt steil (Schulter) und
+      // die Ecke traegt keinen Uebergang.
+      const c=contour[i+1];
+      const eckeGestaltet=(b.trans && b.trans.type && b.trans.type!=='none');
+      // KEIN Kandidat im TALBEREICH: die steigende Flanke eines
+      // Einstichs/einer Tasche ist keine Schulter — dort saehe die
+      // Erkennung sonst den NUTGRUND als Freistich-Stelle (am
+      // Browser-Testbild gefunden: ⌀36 an Z-46 war der Nutgrund).
+      const imTal=f.taeler.some(t=> b.z>=t.zOut-0.1 && b.z<=t.zIn+0.1);
+      if(c && c.kind==='gerade' && isFinite(c.x) && (c.x-b.x)>=2
+         && Math.abs(c.z-b.z) < 0.6*((c.x-b.x)/2) && !eckeGestaltet && b.x>1 && !imTal){
+        f.freistiche.push({x0:b.x, z0:b.z, v:c.x, laenge:+(-dz).toFixed(1)});
+      }
+      // Gewinde: jeder Aussenzylinder ab 8 mm ist ein Kandidat.
+      if(-dz>=8 && b.x>3){
+        let p=1.5, best=1e9;
+        REGELGEWINDE.forEach(([dm,st])=>{ const ab=Math.abs(dm-b.x); if(ab<best){ best=ab; p=st; } });
+        if(best>0.3) p=1.5;   // kein Norm-⌀ in der Naehe: neutraler Vorschlag
+        f.gewinde.push({x0:b.x, z0:+a.z.toFixed(3), z1:+b.z.toFixed(3), p});
+      }
+    }
+  }
+  return f;
+}
+// Die Rueckfrage-Maske: dynamisch aus den Funden gebaut. Eigene
+// pl-wahl-Knoepfe statt .radiobtns — die Radiogruppen-Wache
+// (Pruefung 99) verlangt fuer .radiobtns eine wireRadioGroup-
+// Verdrahtung, die es fuer dynamische Zeilen nicht gibt.
+function planerMaskeZeigen(funde){
+  const m=document.getElementById('maskPlaner');
+  const body=document.getElementById('plFundeBody');
+  if(!m || !body) return;
+  body.innerHTML='';
+  const gruppe=(titel)=>{ const h=document.createElement('div'); h.className='msec'; h.textContent=titel; body.appendChild(h); };
+  const wahlZeile=(text, optionen, aktiv, extraHtml)=>{
+    const z=document.createElement('div'); z.className='mrow pl-zeile';
+    const l=document.createElement('div'); l.className='pl-text'; l.textContent=text; z.appendChild(l);
+    const g=document.createElement('div'); g.className='pl-wahl';
+    optionen.forEach(([wert,label])=>{
+      const b=document.createElement('button'); b.type='button';
+      b.dataset.v=wert; b.textContent=label;
+      if(wert===aktiv) b.classList.add('sel');
+      b.onclick=()=>{ [...g.children].forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); };
+      g.appendChild(b);
+    });
+    z.appendChild(g);
+    if(extraHtml){ const e=document.createElement('div'); e.className='pl-extra'; e.innerHTML=extraHtml; z.appendChild(e); }
+    body.appendChild(z);
+    return z;
+  };
+  if(funde.taeler.length){
+    gruppe('Täler in der Kontur — wie fertigen?');
+    funde.taeler.forEach(t=>{
+      wahlZeile('Z'+fmt(t.zIn)+'..Z'+fmt(t.zOut)+' · '+fmt(t.breite)+' mm breit, '+fmt(t.tiefeR)+' mm tief',
+        [['einstich','Einstich'],['stechdrehen','Stechdrehen'],['ueberfahren','überfahren']], t.vorgabe);
+    });
+  }
+  if(funde.freistiche.length){
+    gruppe('Freistich an der Schulter? (DIN 509 E, Form in der Maske änderbar)');
+    funde.freistiche.forEach(k=>{
+      wahlZeile('⌀'+fmt(k.x0)+' an Z'+fmt(k.z0)+' (Schulter auf ⌀'+fmt(k.v)+')',
+        [['nein','kein'],['ja','Freistich E']], 'nein');
+    });
+  }
+  if(funde.gewinde.length){
+    gruppe('Gewinde auf dem Zylinder? (Steigung ist nur ein Vorschlag)');
+    funde.gewinde.forEach(k=>{
+      wahlZeile('⌀'+fmt(k.x0)+' · Z'+fmt(k.z0)+'..Z'+fmt(k.z1),
+        [['nein','kein'],['ja','Gewinde']], 'nein',
+        'P <input type="text" inputmode="decimal" class="pl-p" value="'+fmt(k.p)+'" style="width:52px;font-size:15px;"> mm');
+    });
+  }
+  m.classList.add('show');
+  try{ maskeSichtbarPruefen('maskPlaner'); }catch(e){}
+}
+function planerAntwortenLesen(){
+  const body=document.getElementById('plFundeBody');
+  const funde=window.__planerFunde||{taeler:[],freistiche:[],gewinde:[]};
+  const zeilen=[...body.querySelectorAll('.pl-zeile')];
+  const antw={taeler:[], freistiche:[], gewinde:[]};
+  let z=0;
+  funde.taeler.forEach(()=>{ const s=zeilen[z++].querySelector('.pl-wahl .sel'); antw.taeler.push(s?s.dataset.v:'ueberfahren'); });
+  funde.freistiche.forEach(()=>{ const s=zeilen[z++].querySelector('.pl-wahl .sel'); antw.freistiche.push(!!(s&&s.dataset.v==='ja')); });
+  funde.gewinde.forEach(()=>{ const zeile=zeilen[z++]; const s=zeile.querySelector('.pl-wahl .sel');
+    const p=parseFloat(String((zeile.querySelector('.pl-p')||{}).value||'').replace(',','.'));
+    antw.gewinde.push({an:!!(s&&s.dataset.v==='ja'), p:(isFinite(p)&&p>0)?p:undefined}); });
+  return antw;
+}
+// interaktiv=true nur aus der Bedienung (Softkey/Rueckfrage-Maske):
+// dann duerfen Rueckfragen erscheinen. Direktaufrufe (Pruefstand,
+// Skripte) laufen wie bisher als reine Automatik durch.
+function programmVorschlagen(interaktiv){
   // AUSSENKONTUR SELBST WAEHLEN [Daniel-Test 2: an der Buchse war
   // die INNENkontur aktiv — der Planer plante sie als Aussenteil
   // (44 % Quote, Phantom-Flanken). Aussen = der groesste Max-⌀
@@ -17432,6 +17589,32 @@ function programmVorschlagen(){
   const w=werkstoffJetzt();
   const fr=+(0.25*w.f).toFixed(3), ff=+(0.12*w.f).toFixed(3);
   const sr=Math.max(50, Math.round(600*w.vc/10)*10), sf=Math.max(50, Math.round(800*w.vc/10)*10);
+  // ================================================================
+  // RUECKFRAGEN [Stufe 2 Rest, Daniels Freigabe 05.09.2026]: alles,
+  // was der Planer bisher nur BENANNT hat, wird jetzt GEFRAGT —
+  // je Tal die Fertigungsart, dazu Freistich- und Gewinde-Kandidaten
+  // (stehen in keiner DXF; Reihenfolge fest: erst Freistiche, dann
+  // Gewinde — Daniels Ansage vom 30.08.). Ablauf: erster Aufruf
+  // sammelt die Funde und zeigt die Maske; "Uebernehmen" ruft
+  // dieselbe Funktion mit window.__planerAntworten erneut — die
+  // Kontur ist dann schon normalisiert, der zweite Lauf ist
+  // gefahrlos wiederholbar.
+  // ================================================================
+  const taeler=(()=>{ let t=[];
+    try{
+      const envE=roughEnvelope(0,0);
+      const ptsE=sampleContourForRough();
+      if(envE && ptsE.length) t=findPockets(envE, ptsE[0].z, ptsE[ptsE.length-1].z);
+    }catch(e){}
+    return t; })();
+  const funde=planerFunde(taeler);
+  const antw=window.__planerAntworten||null;
+  window.__planerFunde=funde;             // Offenlegung fuer den Pruefstand
+  if(interaktiv && !antw && (funde.taeler.length || funde.freistiche.length || funde.gewinde.length)){
+    try{ planerMaskeZeigen(funde); }catch(e){}
+    return 'frage';
+  }
+  window.__planerAntworten=null;          // verbraucht — nie in den naechsten Lauf tragen
   const neu=[]; const hinweise=hinweiseVorab;
   // Offenlegung fuer den Pruefstand (Muster __maskFenster): ohne sie
   // liesse sich nur die alert-Meldung ansehen und glauben.
@@ -17559,17 +17742,22 @@ function programmVorschlagen(){
   // Konturzyklus hat sie bereits gebrueckt/ueberfahren — die Nut
   // selbst fertigt jetzt ihr Einstechzyklus, ganz am Ende.
   {
-    let taeler=[];
-    try{
-      const envE=roughEnvelope(0,0);
-      const ptsE=sampleContourForRough();
-      if(envE && ptsE.length) taeler=findPockets(envE, ptsE[0].z, ptsE[ptsE.length-1].z);
-    }catch(e){}
     const stechVor=[];
-    taeler.forEach(tal=>{
+    taeler.forEach((tal,ti)=>{
       const breite=+(tal.zIn-tal.zOut).toFixed(2);
       const tiefeR=(tal.mouthX-tal.floorX)/2;
-      if(!(breite<=12 && tal.riseMax>75 && tal.fallMax>75)){
+      // ANTWORT SCHLAEGT AUTOMATIK: hat Daniel in der Rueckfrage
+      // "ueberfahren" gewaehlt, bleibt das Tal dem Konturzyklus;
+      // "einstich"/"stechdrehen" erzwingen den jeweiligen Weg auch
+      // dort, wo die Automatik anders entschieden haette.
+      const wahl=(antw && antw.taeler && antw.taeler[ti]) || null;
+      if(wahl==='ueberfahren'){
+        hinweise.push('Tal Z'+fmt(tal.zIn)+'..Z'+fmt(tal.zOut)+': auf Ansage ueberfahren — fertigt der Konturzyklus');
+        return;
+      }
+      const autoEinstich=(breite<=12 && tal.riseMax>75 && tal.fallMax>75);
+      const willEinstich = wahl? (wahl==='einstich') : autoEinstich;
+      if(!willEinstich){
         // BREITE TASCHE [Daniel, 30.08.2026: 'er schruppt den
         // Hinterschnitt nicht vor — der Schlichtzug faehrt ins
         // Volle']. Der z-parallele Schrupp haelt das gleitende
@@ -17578,7 +17766,7 @@ function programmVorschlagen(){
         // Muster: eingrenz za/zb), VOR der Schlichtkette. Ein
         // auslaufendes Tal ohne Rueckanstieg (Fallkegel) braucht
         // das nicht — das fertigt die Kontur-Kette selbst.
-        if(tal.riseMax>15 && tal.fallMax>15 && tiefeR>=1){
+        if(wahl==='stechdrehen' || (tal.riseMax>15 && tal.fallMax>15 && tiefeR>=1)){
           const stecherB=toolTable.filter(t=>t.art==='stechen' && +t.len>0 && +t.len<=breite-0.1)
             .sort((a,b)=>+b.len-+a.len)[0]||null;
           if(stecherB){
@@ -17629,8 +17817,45 @@ function programmVorschlagen(){
       neu.splice.apply(neu, [idxS,0].concat(stechVor));
     }
   }
-  if(innenPlan || true)
-    hinweise.push('Freistiche und Gewinde stehen in keiner DXF — von Hand ergaenzen: erst Freistiche, dann Gewinde (Reihenfolge Daniel)');
+  // FREISTICHE, dann GEWINDE [Daniels Reihenfolge] — aus den
+  // Rueckfrage-Antworten. Beide sind Schlichtvorgaenge und kommen
+  // ganz ans Ende, nach den Einstichen.
+  let fsAngelegt=0, gwAngelegt=0;
+  if(antw && antw.freistiche){
+    funde.freistiche.forEach((fk,fi)=>{
+      if(!antw.freistiche[fi]) return;
+      neu.push({id:stepCounter++, type:'freistich', params:{
+        form:'E', pm:2, pj:0, x0:+fk.x0.toFixed(3), z0:+fk.z0.toFixed(3),
+        i:0, k:0, v:+(fk.v||fk.x0+10).toFixed(3), ausg:'gcode',
+        t:String(schlicht.t), fr:+(0.08*w.f).toFixed(3),
+        sr:Math.round(200*w.vc), sMode:'vc' }});
+      fsAngelegt++;
+    });
+  }
+  if(antw && antw.gewinde){
+    const gwStahl=toolTable.find(t=>t.art==='gewinde' && !/innen/i.test(t.name||''))
+               || toolTable.find(t=>t.art==='gewinde');
+    funde.gewinde.forEach((gk,gi)=>{
+      const g=antw.gewinde[gi];
+      if(!g || !g.an) return;
+      if(!gwStahl){ hinweise.push('Gewinde auf ⌀'+fmt(gk.x0)+' ausgelassen: kein Gewindestahl in der Tabelle'); return; }
+      const p=+(g.p||gk.p||1.5);
+      neu.push({id:stepCounter++, type:'gewinde', params:{
+        bearbeitung:'beide', lage:'aussen', form:'zyl',
+        x0:+gk.x0.toFixed(3), z0:+gk.z0.toFixed(3), z1:+gk.z1.toFixed(3),
+        p:p, h1:+(0.6134*p).toFixed(2),
+        // U-Vorgabe 0: Daniel macht das Aufmass im Werkzeug-Offset
+        // (Doktrin vom 29.08., DV 594 S. 132).
+        u:0, verf:'B', nd:Math.max(4,Math.round(5*p)), n:1, d:0.3,
+        lw:3, lr:2, s:Math.max(50,Math.round(400*w.vc/10)*10),
+        t:String(gwStahl.t), ausg:'gcode', gart:'metrisch',
+        alpha:29, flanke:'wechselnd', vr:2 }});
+      gwAngelegt++;
+      hinweise.push('Gewinde ⌀'+fmt(gk.x0)+' P'+fmt(p)+': die Kontur traegt den NENN-⌀ — Kerndurchmesser/Vorbearbeitung selbst pruefen');
+    });
+  }
+  if(!fsAngelegt && !gwAngelegt)
+    hinweise.push('keine Freistiche/Gewinde angelegt'+((funde.freistiche.length||funde.gewinde.length)?' (in der Rueckfrage abgewaehlt)':' — keine Kandidaten in der Kontur')+'; von Hand ergaenzen geht jederzeit: erst Freistiche, dann Gewinde');
   // KEIN automatisches Abstechen [Daniel: 'soll nicht grundsaetzlich
   // abstechen — die Praxis ist erste Aufspannung, umdrehen, zweite
   // Aufspannung als eigenes Programm'].
