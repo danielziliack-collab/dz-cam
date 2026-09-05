@@ -667,6 +667,22 @@ body.artefakt .hsoftkeys{padding-right:48px;}
     border-radius:7px;background:#fff;color:hsl(var(--ton), 45%, 30%);}
   .pl-wahl button.sel{background:hsl(28, 92%, 45%);border-color:hsl(28, 92%, 45%);color:#fff;}
   .pl-extra{font-size:13px;display:inline-flex;align-items:center;gap:4px;}
+  /* Werkzeugtabelle [Daniel, 05.09.2026: "komfortabler,
+     uebersichtlicher"]: Sektionskoepfe und Wahlzeile als KLASSEN
+     statt Inline-Farben — Inline schluege jede Dunkelregel (die
+     dncLog-Lehre aus Pruefung 167). Subzeile traegt R/SL/Vc unter
+     dem Namen, dafuer sind die zwei Schmalspalten weg. */
+  .wzkopf td{background:hsl(var(--ton), 26%, 93%);font-weight:700;font-size:11px;
+    padding:6px 8px;letter-spacing:.4px;color:hsl(var(--ton), 40%, 30%);}
+  .wzname{font-size:12.5px;line-height:1.25;}
+  .wzsub{font-size:10.5px;color:hsl(var(--ton), 14%, 46%);white-space:nowrap;}
+  .wzfrei{color:hsl(var(--ton), 12%, 62%);}
+  .wzwahl td{padding:6px 8px;background:hsl(var(--ton), 30%, 94%);}
+  #toolBody td{padding:4px 5px;vertical-align:middle;}
+  body.dunkel .wzkopf td{background:hsl(var(--ton), 18%, 20%);color:hsl(var(--ton), 25%, 72%);}
+  body.dunkel .wzsub{color:hsl(var(--ton), 12%, 60%);}
+  body.dunkel .wzfrei{color:hsl(var(--ton), 10%, 45%);}
+  body.dunkel .wzwahl td{background:hsl(var(--ton), 18%, 22%);}
   .mask.kachelpilot .mrow.k-breit{grid-column:1/-1;}
   /* Editor-Rechenzeile und Hinweiszeilen im Kachelraster: volle
      Breite, sonst wuerden die acht Tasten in eine halbe Spalte
@@ -4068,14 +4084,33 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
   <div class="mask" id="maskWerkzeuge" style="position:fixed;">
     <div class="mask-head"><span class="mtitel">Werkzeugverwaltung</span></div>
     <div class="mask-body">
-      <div class="pointlist" style="max-height:30vh;">
+      <!-- KEIN thead mehr [05.09.2026]: die R/SL-Spalten sind in die
+           Subzeile unter den Namen gewandert, und die Sektionskoepfe
+           REVOLVER/LAGER strukturieren die Liste — eine zusaetzliche
+           Kopfzeile aus leeren th war nur Platzverlust. Hoehe 30vh ->
+           48vh: die Liste ist der Hauptinhalt dieser Maske. -->
+      <div class="pointlist" style="max-height:48vh;">
         <table>
-          <thead><tr><th></th><th>T</th><th>Name</th><th>R</th><th>SL</th><th></th><th></th></tr></thead>
           <tbody id="toolBody"></tbody>
         </table>
       </div>
+      <!-- LADEN/ENTLADEN + PERSISTENZ [Daniel, 05.09.2026]: ⤒ laedt aus
+           dem Lager auf einen Platz, ⤓ nimmt vom Platz zurueck ins
+           Lager (Lagernummer bleibt stabil). Die Tabelle liegt im
+           Browserspeicher (et_werkzeuge) und uebersteht das Neuladen;
+           der Reset-Knopf holt die eingebaute Vorgabe zurueck. -->
+      <div class="mrow" style="justify-content:space-between;">
+        <span style="font-size:11px;color:#5b6b78;">⤒ laden · ⤓ entladen — Änderungen werden auf diesem Gerät gespeichert</span>
+        <button class="gcbtn" id="btnToolReset" style="padding:6px 10px;font-size:12px;">Vorgabe wiederherstellen</button>
+      </div>
 
-      <div class="msec" id="twFormTitle" style="margin-top:16px;">Neues Werkzeug</div>
+      <!-- FORMULAR IN DER KLAPPGRUPPE [Daniel, 05.09.2026: die Maske
+           war Tabelle + 20 Formularzeilen uebereinander — die Liste
+           ist der Hauptinhalt, das Anlegen der Sonderfall. Die Gruppe
+           oeffnet sich von selbst, wenn ✎ oder ＋ sie braucht. -->
+      <div class="mgroup" id="twGrpForm" style="margin-top:14px;">
+        <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel" id="twFormTitle">Neues Werkzeug</span><span class="zus"></span></div>
+        <div class="mgroup-body">
       <div class="mrow" style="display:block;"><label style="display:block;margin-bottom:6px;">Vorlage wählen (füllt alle Felder vor)</label>
         <div id="twVorlagen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
       </div>
@@ -4124,6 +4159,8 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
         <button class="gcbtn primary" id="btnToolAdd" style="flex:1;padding:10px;">+ Hinzufügen</button>
         <button class="gcbtn ab-rot" id="btnToolCancelEdit" style="padding:10px 14px;display:none;">✕ Abbrechen</button>
       </div>
+        </div>
+      </div><!-- /twGrpForm -->
       <div class="mrow"><button class="gcbtn" id="btnCloseTools" style="width:100%;padding:10px;">✓ Fertig</button></div>
     </div>
   </div>
@@ -5013,7 +5050,90 @@ function toolSortiere(){
     return String(a.t).localeCompare(String(b.t));
   });
 }
+// =================================================================
+// WERKZEUGE UEBERLEBEN DAS NEULADEN [Daniel, 05.09.2026]. Bis dahin
+// wurde die Tabelle NIRGENDS gespeichert — jedes angelegte Werkzeug
+// und jede Platzbelegung war nach dem naechsten Laden der App weg
+// (nur Programm-Export-Dateien trugen eine Kopie mit). Slot-Muster
+// wie et_kalk: Muell-JSON oder leerer Slot faellt stumm auf die
+// eingebaute Vorgabetabelle zurueck; der Reset-Knopf in der
+// Werkzeugmaske loescht den Slot ausdruecklich.
+// =================================================================
+const WZ_SLOT='et_werkzeuge';
+const WZ_VORGABE=JSON.parse(JSON.stringify(toolTable));
+function werkzeugeSpeichern(){
+  try{ localStorage.setItem(WZ_SLOT, JSON.stringify(toolTable)); }catch(e){}
+}
+function werkzeugeAusSlot(){
+  try{
+    const s=localStorage.getItem(WZ_SLOT); if(!s) return;
+    const arr=JSON.parse(s);
+    // Nur eine PLAUSIBLE Tabelle uebernehmen: jedes Element braucht
+    // t und name — sonst bliebe nach einem kaputten Slot eine leere
+    // Tabelle stehen und keine Maske faende ihr Werkzeug.
+    if(Array.isArray(arr) && arr.length &&
+       arr.every(w=>w && typeof w.t!=='undefined' && typeof w.name==='string'))
+      toolTable=arr;
+  }catch(e){}
+}
+werkzeugeAusSlot();
 toolSortiere();
+// LADEN UND ENTLADEN [Daniel, 05.09.2026: "aus dem Lager in die
+// Plaetze 1-16 einfuegen ... und entladen"]. EINE Funktion fuer
+// beide Richtungen. Die Lagernummer bleibt STABIL: beim Laden wird
+// sie in lagerId gemerkt (T-Nummer wird die Platznummer — so ruft
+// die Maschine), beim Entladen bekommt das Werkzeug sie zurueck.
+// Offene Programmschritte ziehen mit (dasselbe Muster wie die
+// T-Aenderung im Formular); gespeicherte Programme der Ablage
+// bleiben unangetastet — sie tragen ihre T-Nummern selbst.
+function werkzeugPlatzAendern(idx, platz){
+  const w=toolTable[idx]; if(!w) return false;
+  const altT=String(w.t);
+  if(platz){
+    if(toolTable.some((x,i2)=>i2!==idx && x.platz===platz)){
+      alert('Platz '+platz+' ist bereits belegt.'); return false;
+    }
+    // Die Platznummer wird die T-Nummer. Traegt ein ANDERES
+    // Lagerwerkzeug genau diese Nummer, gaebe es zwei gleiche
+    // Schluessel und die Zyklen faenden das falsche Werkzeug.
+    if(toolTable.some((x,i2)=>i2!==idx && String(x.t)===String(platz))){
+      alert('Im Lager gibt es schon die Nr. '+platz+' — erst dort umbenennen, dann laden.');
+      return false;
+    }
+    if(!w.platz) w.lagerId = w.lagerId || altT;
+    w.platz=platz; w.t=String(platz);
+  } else {
+    if(!w.platz) return false;
+    delete w.platz;
+    let ziel = w.lagerId || altT;
+    if(toolTable.some((x,i2)=>i2!==idx && String(x.t)===String(ziel))){
+      let n2=1; while(toolTable.some(x=>String(x.t)==='L'+n2)) n2++; ziel='L'+n2;
+    }
+    w.t=String(ziel); delete w.lagerId;
+  }
+  if(altT!==String(w.t)){
+    programSteps.forEach(st=>{ if(st.params && String(st.params.t)===altT) st.params.t=w.t; });
+  }
+  werkzeugeSpeichern();
+  return true;
+}
+// Referenz-Aufloesung fuer LADEPFADE: Testvorlagen und gespeicherte
+// Programme referenzieren Werkzeuge ueber ihre Nummer zum
+// SPEICHERZEITPUNKT. Liegt so ein Werkzeug inzwischen auf einem
+// Revolverplatz (t = Platznummer, alte Nummer in lagerId), faende
+// der Schritt sein Werkzeug nicht mehr — die Nut der Rotorwelle
+// verloere z. B. ihren 6-mm-Stecher, sobald Nr. 21 geladen ist.
+// Aufgeloest wird NUR, wenn die Nummer selbst nicht (mehr)
+// existiert: eine vorhandene Nummer gewinnt immer.
+function werkzeugRefAufloesen(steps){
+  (steps||[]).forEach(st=>{
+    const q=st&&st.params; if(!q || q.t===undefined) return;
+    const tn=String(q.t);
+    if(toolTable.some(x=>String(x.t)===tn)) return;
+    const verlegt=toolTable.find(x=>String(x.lagerId)===tn);
+    if(verlegt) q.t=String(verlegt.t);
+  });
+}
 let programs = []; // {name, contour, programSteps, settings:{...}}
 // Zuordnung der NC-Schrittnummer auf den Platz in programSteps.
 // Sie weicht ab, sobald ein Schritt stillgelegt ist (s. Punkt 13).
@@ -12743,44 +12863,109 @@ function renderToolTable(){
   toolSortiere();
   // REVOLVER 1-16 [Daniel]: feste Platzliste wie an der Maschine —
   // leere Plaetze sichtbar, ＋ legt direkt auf diesem Platz an.
+  // NAME + SUBZEILE statt Schmalspalten [Daniel, 05.09.2026]: R und
+  // SL als eigene Tabellenspalten kosteten dem Namen den Platz — die
+  // Kennwerte stehen jetzt klein UNTER dem Namen, je Art die
+  // passenden (Bohrer: ⌀ und Laenge; Stecher: Breite; Dreher:
+  // Radius, SL, Spitzenwinkel), plus Vc und ISO wenn gepflegt.
+  const subInfo=(tool)=>{
+    const p=[];
+    if(tool.art==='bohren'){ if(+tool.dm) p.push('⌀ '+tool.dm); if(+tool.len) p.push('L '+tool.len); }
+    else if(tool.art==='stechen'){ if(+tool.len) p.push('B '+tool.len); p.push('R '+tool.r); if(tool.sl) p.push('SL '+tool.sl); }
+    else { p.push('R '+tool.r); if(tool.sl) p.push('SL '+tool.sl); if(+tool.sw) p.push(tool.sw+'°'); }
+    if(+tool.vc) p.push('Vc '+tool.vc);
+    if(tool.iso) p.push(tool.iso);
+    return p.join(' · ');
+  };
+  const belegtZahl=toolTable.filter(t=>t.platz).length;
   const kopf1=document.createElement('tr');
-  kopf1.innerHTML='<td colspan="7" style="background:#e8eef3;font-weight:700;font-size:11px;padding:5px 8px;">REVOLVER — 16 Plätze</td>';
+  kopf1.className='wzkopf';
+  kopf1.innerHTML='<td colspan="5">REVOLVER — '+belegtZahl+' von 16 Plätzen belegt</td>';
   body.appendChild(kopf1);
   for(let pn=1; pn<=16; pn++){
     const i=toolTable.findIndex(t=>t.platz===pn);
     const tr=document.createElement('tr');
     if(i>=0){
       const tool=toolTable[i];
-      tr.innerHTML = `<td><canvas class="toolicon" data-idx="${i}" width="44" height="34"
-          style="width:44px;height:34px;vertical-align:middle;"></canvas></td>
-        <td>T${pn}</td><td style="font-size:11.5px;">${tool.name}</td>
-        <td>${tool.r}</td><td>${tool.sl||'-'}</td>
-        <td><button class="ap-edit" data-tedit="${i}">✎</button></td>
+      tr.innerHTML = `<td><canvas class="toolicon" data-idx="${i}" width="54" height="40"
+          style="width:54px;height:40px;vertical-align:middle;"></canvas></td>
+        <td><b>T${pn}</b></td>
+        <td><div class="wzname">${tool.name}</div><div class="wzsub">${subInfo(tool)}</div></td>
+        <td style="white-space:nowrap;"><button class="ap-edit" data-tedit="${i}">✎</button><button class="ap-edit" data-tunload="${i}" title="vom Platz nehmen — zurück ins Lager">⤓</button></td>
         <td><button data-ti="${i}">✕</button></td>`;
     } else {
-      tr.innerHTML = `<td></td><td style="color:#9aa7b1;">T${pn}</td>
-        <td style="color:#9aa7b1;font-size:11.5px;">— frei —</td><td></td><td></td>
-        <td><button class="ap-edit" data-tneu="${pn}" title="Werkzeug auf Platz ${pn} anlegen">＋</button></td><td></td>`;
+      tr.innerHTML = `<td></td><td class="wzfrei">T${pn}</td>
+        <td class="wzfrei wzname">— frei —</td>
+        <td style="white-space:nowrap;"><button class="ap-edit" data-tneu="${pn}" title="Werkzeug auf Platz ${pn} anlegen">＋</button><button class="ap-edit" data-tlade="${pn}" title="aus dem Lager auf Platz ${pn} laden">⤒</button></td><td></td>`;
     }
     body.appendChild(tr);
   }
   const lager=toolTable.map((t,i)=>({t,i})).filter(q=>!q.t.platz);
   if(lager.length){
     const kopf2=document.createElement('tr');
-    kopf2.innerHTML='<td colspan="7" style="background:#e8eef3;font-weight:700;font-size:11px;padding:5px 8px;">LAGER — ohne Revolverplatz</td>';
+    kopf2.className='wzkopf';
+    kopf2.innerHTML='<td colspan="5">LAGER — '+lager.length+' Werkzeuge ohne Revolverplatz</td>';
     body.appendChild(kopf2);
   }
   lager.forEach(q=>{
     const tool=q.t, i=q.i;
     const idAnz = /^L/.test(String(tool.t)) ? String(tool.t) : 'Nr. '+tool.t;
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td><canvas class="toolicon" data-idx="${i}" width="44" height="34"
-        style="width:44px;height:34px;vertical-align:middle;"></canvas></td>
-      <td style="color:#5b6b78;">${idAnz}</td><td style="font-size:11.5px;">${tool.name}</td>
-      <td>${tool.r}</td><td>${tool.sl||'-'}</td>
-      <td><button class="ap-edit" data-tedit="${i}">✎</button></td>
+    tr.innerHTML = `<td><canvas class="toolicon" data-idx="${i}" width="54" height="40"
+        style="width:54px;height:40px;vertical-align:middle;"></canvas></td>
+      <td style="color:#5b6b78;">${idAnz}</td>
+      <td><div class="wzname">${tool.name}</div><div class="wzsub">${subInfo(tool)}</div></td>
+      <td style="white-space:nowrap;"><button class="ap-edit" data-tedit="${i}">✎</button><button class="ap-edit" data-tauf="${i}" title="auf einen Revolverplatz laden">⤒</button></td>
       <td><button data-ti="${i}">✕</button></td>`;
     body.appendChild(tr);
+  });
+  // ------- LADEN UND ENTLADEN [Daniel, 05.09.2026] -------
+  // prompt() ist im Artefakt stumm — die Platz- bzw. Werkzeugwahl
+  // laeuft deshalb als INLINE-Select in der jeweiligen Zeile.
+  const wahlZeile=(tr, text, optionen, onOk)=>{
+    tr.innerHTML='';
+    tr.className='wzwahl';
+    const td=document.createElement('td'); td.colSpan=5;
+    const sel=document.createElement('select');
+    optionen.forEach(o=>{ const op=document.createElement('option');
+      op.value=o.v; op.textContent=o.txt; sel.appendChild(op); });
+    const ok=document.createElement('button'); ok.textContent='✓ laden';
+    ok.className='ap-edit'; ok.style.marginLeft='8px';
+    const ab=document.createElement('button'); ab.textContent='✕';
+    ab.className='ap-edit'; ab.style.marginLeft='4px';
+    ok.addEventListener('click',()=>onOk(sel.value));
+    ab.addEventListener('click',()=>renderToolTable());
+    td.append(text+' ', sel, ok, ab);
+    tr.appendChild(td);
+  };
+  const freiePlaetze=()=>{ const f=[]; for(let p2=1;p2<=16;p2++)
+    if(!toolTable.some(t=>t.platz===p2)) f.push({v:p2, txt:'T'+p2}); return f; };
+  body.querySelectorAll('button[data-tunload]').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      if(werkzeugPlatzAendern(+e.target.dataset.tunload, null)){
+        renderToolTable(); populateToolSelects();
+      }
+    });
+  });
+  body.querySelectorAll('button[data-tauf]').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const i2=+e.target.dataset.tauf;
+      const frei=freiePlaetze();
+      if(!frei.length){ alert('Kein Revolverplatz frei — erst ein Werkzeug entladen.'); return; }
+      wahlZeile(e.target.closest('tr'), toolTable[i2].name+' auf', frei, (v)=>{
+        if(werkzeugPlatzAendern(i2, +v)){ renderToolTable(); populateToolSelects(); }
+      });
+    });
+  });
+  body.querySelectorAll('button[data-tlade]').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const pn2=+e.target.dataset.tlade;
+      const lag=toolTable.map((t,i2)=>({t,i2})).filter(q=>!q.t.platz);
+      if(!lag.length){ alert('Das Lager ist leer.'); return; }
+      wahlZeile(e.target.closest('tr'), 'Auf T'+pn2+':',
+        lag.map(q=>({v:q.i2, txt:(/^L/.test(String(q.t.t))?q.t.t:'Nr. '+q.t.t)+' — '+q.t.name})),
+        (v)=>{ if(werkzeugPlatzAendern(+v, pn2)){ renderToolTable(); populateToolSelects(); } });
+    });
   });
   body.querySelectorAll('button[data-tneu]').forEach(btn=>{
     btn.addEventListener('click',(e)=>{
@@ -12789,6 +12974,7 @@ function renderToolTable(){
       document.getElementById('twT').value=e.target.dataset.tneu;
       document.getElementById('twName').value='';
       document.getElementById('twFormTitle').textContent='Neues Werkzeug auf Platz '+e.target.dataset.tneu;
+      twFormAuf();
     });
   });
   body.querySelectorAll('canvas.toolicon').forEach(cv=>{
@@ -12803,6 +12989,7 @@ function renderToolTable(){
       zweiklickBestaetigen(e.target, (/^[0-9]+$/.test(String(toolTable[i].t))?'T':'')+toolTable[i].t+' wirklich?', ()=>{
       toolTable.splice(i,1);
       if(toolEditIdx===i) cancelToolEdit();
+      werkzeugeSpeichern();
       renderToolTable();
       populateToolSelects();
       });
@@ -13036,7 +13223,15 @@ function startToolEdit(i){
   document.getElementById('twFormTitle').textContent='Werkzeug T'+t.t+' bearbeiten';
   document.getElementById('btnToolAdd').textContent='✓ Änderung übernehmen';
   document.getElementById('btnToolCancelEdit').style.display='';
+  twFormAuf();
   updateToolPreview();
+}
+// Die Formulargruppe oeffnen, wenn ✎ oder ＋ sie brauchen — eine
+// zugeklappte Gruppe, in die gerade Werte geschrieben wurden, waere
+// dieselbe Falle wie beim Bohren (Tiefloch-Felder unsichtbar).
+function twFormAuf(){
+  const g=document.getElementById('twGrpForm');
+  if(g){ g.classList.add('auf'); try{ g.scrollIntoView({block:'nearest'}); }catch(e){} }
 }
 function cancelToolEdit(){
   toolEditIdx=-1;
@@ -14063,7 +14258,7 @@ function demoAufVc(steps){
   if(typeof orig!=='function') return;
   globalThis[nm]=function(){
     const r=orig.apply(this,arguments);
-    try{ demoAufVc(programSteps); refreshAll(); }catch(e){}
+    try{ demoAufVc(programSteps); werkzeugRefAufloesen(programSteps); refreshAll(); }catch(e){}
     return r;
   };
 });
@@ -18279,9 +18474,22 @@ document.getElementById('btnToolAdd').onclick=()=>{
     document.getElementById('twT').value = String((+data.t||0)+1);
     document.getElementById('twName').value='';
   }
+  werkzeugeSpeichern();
   renderToolTable();
   populateToolSelects();
   updateToolPreview();
+};
+// Auf die eingebaute Vorgabetabelle zurueck — der einzige Weg aus
+// einem zerpflegten Bestand, deshalb ausdruecklich und mit
+// Zweiklick. Loescht auch den Slot: sonst kaeme der alte Stand beim
+// naechsten Laden wieder.
+document.getElementById('btnToolReset').onclick=(e)=>{
+  zweiklickBestaetigen(e.target, 'Alle Werkzeuge auf Vorgabe?', ()=>{
+    try{ localStorage.removeItem(WZ_SLOT); }catch(err){}
+    toolTable=JSON.parse(JSON.stringify(WZ_VORGABE));
+    toolSortiere(); cancelToolEdit();
+    renderToolTable(); populateToolSelects();
+  });
 };
 populateToolSelects();
 updateToolFormFields();
@@ -18375,6 +18583,9 @@ function loadProgram(prog){
             'Programm die neue Kennung.');
   }
   if(prog.name) document.getElementById('pmSaveName').value=prog.name;
+  // Werkzeuge koennen seit dem Speichern auf einen Revolverplatz
+  // geladen worden sein — die Schrittreferenzen folgen ihnen.
+  try{ werkzeugRefAufloesen(programSteps); }catch(e){}
   applySettings(prog.settings||{});
   selectedIdx=-1; selStepIdx=-1;
   userAdjustedView=false; fitPending=true;
@@ -18489,7 +18700,7 @@ document.getElementById('progImportFile').addEventListener('change',(e)=>{
               toolTable.push(JSON.parse(JSON.stringify(wz))); neu++;
             }
           });
-          if(neu){ renderToolTable(); populateToolSelects(); }
+          if(neu){ werkzeugeSpeichern(); renderToolTable(); populateToolSelects(); }
         }
         loadProgram(imported);
         document.getElementById('maskProgramme').classList.remove('show');
