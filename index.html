@@ -2207,7 +2207,7 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
             <div class="mrow"><label>Lage</label>
               <div class="radiobtns" id="akLageBtns">
                 <button data-v="aussen" class="sel">außen</button>
-                <button data-v="innen">innen (nur Z-parallel)</button>
+                <button data-v="innen">innen (Bohrung)</button>
               </div>
             </div>
             <div class="msec">Konturen</div>
@@ -11125,8 +11125,10 @@ document.getElementById('akRichtBtns').addEventListener('click',(e)=>{
   const btn = e.target.closest ? e.target.closest('button') : (e.target.tagName==='BUTTON'?e.target:null);
   if(!btn || !btn.dataset || !btn.dataset.v) return;
   const isInnen = document.querySelector('#akLageBtns .sel').dataset.v==='innen';
-  if(isInnen && btn.dataset.v!=='z-parallel'){
-    alert('Bei "innen" ist aktuell nur Z-parallel (längs) unterstützt.');
+  // Seit dem 05.09.2026 kann innen auch Z-KONTURPARALLEL (Daniels
+  // Freigabe) — gesperrt bleiben X-parallel und X-konturparallel.
+  if(isInnen && btn.dataset.v!=='z-parallel' && btn.dataset.v!=='konturparallel'){
+    alert('Bei "innen" sind Z-parallel (längs) und Z-konturparallel unterstützt.');
     document.querySelectorAll('#akRichtBtns button').forEach(b=>b.classList.remove('sel'));
     document.querySelector('#akRichtBtns button[data-v="z-parallel"]').classList.add('sel');
   }
@@ -11147,7 +11149,7 @@ document.getElementById('akLageBtns').addEventListener('click',(e)=>{
   // Kompensationsseite folgt der Lage, solange der Anwender sie nicht selbst umstellt
   const hint=document.getElementById('akRichtHint');
   if(v==='innen'){
-    hint.textContent='(bei innen nur Z-parallel unterstützt)';
+    hint.textContent='(innen: längs oder konturparallel)';
     document.querySelectorAll('#akRichtBtns button').forEach(b=>b.classList.remove('sel'));
     document.querySelector('#akRichtBtns button[data-v="z-parallel"]').classList.add('sel');
   } else {
@@ -17309,12 +17311,12 @@ function syncLageRichtung(){
   const grp=document.getElementById('akRichtBtns');
   if(!grp) return;
   grp.querySelectorAll('button').forEach(b=>{
-    const gesperrt = innen && b.dataset.v!=='z-parallel';
+    const gesperrt = innen && b.dataset.v!=='z-parallel' && b.dataset.v!=='konturparallel';
     b.disabled=gesperrt;
     b.style.opacity=gesperrt?'0.38':'';
     if(gesperrt) b.classList.remove('sel');
   });
-  if(innen){
+  if(innen && !grp.querySelector('button.sel')){
     grp.querySelectorAll('button').forEach(b=>b.classList.toggle('sel', b.dataset.v==='z-parallel'));
   }
 }
@@ -21307,8 +21309,122 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   }
   if(doRough){
     const passes=[]; let zSkin=0; let restCutsMoeglich=false;
-    if(innen && p.richtung!=='z-parallel'){
-      warnings.push('Konturabspanen innen ist nur für Z-parallel (längs) implementiert — Schrupp-Bahnerzeugung für diese Richtung/Lage-Kombination wurde unterdrückt, um keine falsche Innenbearbeitung zu erzeugen.');
+    if(innen && p.richtung!=='z-parallel' && p.richtung!=='konturparallel'){
+      warnings.push('Konturabspanen innen ist für Z-parallel und Z-konturparallel implementiert — die '+p.richtung+'-Bahnerzeugung wurde unterdrückt, um keine falsche Innenbearbeitung zu erzeugen.');
+    } else if(innen && p.richtung==='konturparallel'){
+      // =============================================================
+      // KONTURPARALLEL INNEN [Daniels Freigabe 05.09.2026]: das
+      // Spiegelbild der Aussen-Abstandsschalen fuers AUSDREHEN.
+      // Basis ist die INNEN-Sollkontur minus Aufmass (im Radius);
+      // Material steht von der Vorbohrung (p.stock) bis zur Basis.
+      // Die Kreisscheiben-Dilatation laeuft nach UNTEN (Richtung
+      // Achse, min statt max), die Schalen wachsen von der
+      // Vorbohrung zur Kontur; Ein- und Ausstieg folgen dem
+      // z-parallelen Innen-Zweig: axial durch die Bohrung anfahren,
+      // freifahren zur Mitte, axial zurueck. NICHT an einem realen
+      // Innenzyklus verifiziert — dieselbe Doktrin-Warnung wie
+      // z-parallel innen.
+      // =============================================================
+      warnings.push('Konturabspanen innen: Zustellung/Freifahren sind für Ausdrehen gespiegelt, Kompensationsseite (G41/G42) nach Konvention angenommen — NICHT an einem realen Innenzyklus verifiziert, ersten Testlauf im Einzelsatz fahren.');
+      warnings.push('Konturparallel innen: Bahnabstand = D im Radius (eigene Regel wie außen — Siemens veröffentlicht die Schalenlage nicht).');
+      const step=0.05;
+      const zTop=zStart, zBot=zEnd;
+      const nG=Math.max(2, Math.round((zTop-zBot)/step)+1);
+      const gz=(i)=>zTop-i*step;
+      const rVor=d2r(p.stock);                     // Vorbohrung im Radius
+      // Basis: Sollkontur MINUS Aufmass, nie unter die Vorbohrung.
+      // contourXatZ liefert das x(z)-Profil der gewaehlten Kontur —
+      // dieselbe Quelle wie der z-parallele Innen-Zweig.
+      const base=new Float64Array(nG);
+      for(let i=0;i<nG;i++){
+        base[i]=Math.max(rVor, d2r(contourXatZ(gz(i),pts) - 2*p.ux));
+      }
+      let maxDepth=0;
+      for(let i=0;i<nG;i++) maxDepth=Math.max(maxDepth, base[i]-rVor);
+      if(maxDepth>0.01){
+        const dNorm=Math.max(0.05, p.d);           // D ist ap = Radiusmass
+        const nShells=Math.max(1, Math.ceil(maxDepth/dNorm - 1e-9));
+        const dEff=maxDepth/nShells;
+        const dilate=(dist)=>{                     // nach UNTEN: min statt max
+          const out=new Float64Array(nG);
+          const w=Math.ceil(dist/step);
+          for(let i=0;i<nG;i++){
+            let m=base[i]-dist;
+            for(let k2=1;k2<=w;k2++){
+              const dz=k2*step;
+              if(dz>=dist) break;
+              const drop=Math.sqrt(dist*dist-dz*dz);
+              if(i-k2>=0) m=Math.min(m, base[i-k2]-drop);
+              if(i+k2<nG) m=Math.min(m, base[i+k2]-drop);
+            }
+            out[i]=Math.max(rVor, m);
+          }
+          return out;
+        };
+        for(let sh=nShells-1; sh>=1; sh--){        // Vorbohrung -> Kontur
+          const shell=dilate(sh*dEff);
+          // Bahnbereich: wo die Schale ueber der Vorbohrung liegt
+          let i0=-1, i1=-1;
+          for(let i=0;i<nG;i++){
+            if(shell[i] > rVor+1e-3){ if(i0<0) i0=i; i1=i; }
+          }
+          if(i0<0) continue;
+          const bahn=[]; let aI=i0, lI=i0;
+          const abw=(ia,ib)=>{
+            let m=0;
+            for(let k2=ia+1;k2<ib;k2++){
+              const t=(k2-ia)/(ib-ia);
+              m=Math.max(m, Math.abs(shell[ia]+(shell[ib]-shell[ia])*t - shell[k2]));
+            }
+            return m;
+          };
+          for(let i=i0+1;i<=i1;i++){
+            if(abw(aI,i)>0.02){ bahn.push(lI); aI=lI; }
+            lI=i;
+          }
+          bahn.push(i1);
+          lines.push(`(--- SCHALE ${nShells-sh} VON ${nShells-1} INNEN: ABSTAND ${fmt(r2d(sh*dEff))} ZUM AUFMASS ---)`);
+          // Anfahrt wie z-parallel innen: X in der Bohrungsluft auf
+          // Schalenstart, dann axial hinein.
+          lines.push(`${N()} (SCHRAEG ) G94 G00 G90 X${fmt(r2d(shell[i0]))} Z${fmt(rueckzugZ(undefined,true))}`); bump();
+          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(gz(i0))}`); bump();
+          bahn.forEach(bi=>{
+            const bx=r2d(shell[bi]);
+            const schraeg=Math.abs(shell[bi]-shell[i0])>0.0005;
+            lines.push(`${N()} (${schraeg?'SCHRAEG ':'GERADE  '}) G01 X${fmt(bx)} Z${fmt(gz(bi))}`); bump();
+          });
+          // Freifahren zur Bohrungsmitte, dann axial zurueck (das
+          // Muster des z-parallelen Innen-Zweigs — nie unter ⌀0,2).
+          lines.push(`${N()} (GERADE  ) G01 X${fmt(Math.max(0.2, p.stock-1))}`); bump();
+          lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(rueckzugZ(undefined,true))}`); bump();
+        }
+        // Letzte Bahn: konturparalleler Zug direkt auf der Aufmasshuelle.
+        {
+          const bahn=[]; let aI=0, lI=0;
+          const abw=(ia,ib)=>{
+            let m=0;
+            for(let k2=ia+1;k2<ib;k2++){
+              const t=(k2-ia)/(ib-ia);
+              m=Math.max(m, Math.abs(base[ia]+(base[ib]-base[ia])*t - base[k2]));
+            }
+            return m;
+          };
+          for(let i=1;i<nG;i++){
+            if(abw(aI,i)>0.02){ bahn.push(lI); aI=lI; }
+            lI=i;
+          }
+          bahn.push(nG-1);
+          lines.push(`(--- KONTURPARALLEL INNEN AUF AUFMASS UX${fmt(p.ux)} UZ${fmt(p.uz)} ---)`);
+          lines.push(`${N()} (SCHRAEG ) G94 G00 G90 X${fmt(r2d(base[0]))} Z${fmt(rueckzugZ(undefined,true))}`); bump();
+          lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 Z${fmt(gz(0))}`); bump();
+          bahn.forEach(bi=>{
+            const schraeg=Math.abs(base[bi]-base[0])>0.0005;
+            lines.push(`${N()} (${schraeg?'SCHRAEG ':'GERADE  '}) G01 X${fmt(r2d(base[bi]))} Z${fmt(gz(bi))}`); bump();
+          });
+          lines.push(`${N()} (GERADE  ) G01 X${fmt(Math.max(0.2, p.stock-1))}`); bump();
+          lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(rueckzugZ(undefined,true))}`); bump();
+        }
+      }
     } else if(innen){
       warnings.push('Konturabspanen innen: Zustellung/Freifahren sind für Ausdrehen gespiegelt, Kompensationsseite (G41/G42) nach Konvention angenommen — NICHT an einem realen Innenzyklus verifiziert, ersten Testlauf im Einzelsatz fahren.');
       // z-parallel innen: Zustellung von der Vorbohrung (klein) nach außen zur Kontur (groß),
