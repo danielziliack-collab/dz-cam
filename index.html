@@ -5061,78 +5061,97 @@ function toolSortiere(){
 // =================================================================
 const WZ_SLOT='et_werkzeuge';
 const WZ_VORGABE=JSON.parse(JSON.stringify(toolTable));
+// BELEGUNG JE MASCHINE [Daniel, 05.09.2026: "natuerlich macht's
+// Sinn, je Maschine eine eigene Werkzeugtabelle"]: das LAGER ist
+// gemeinsam (ein Werkzeugschrank), die PLATZBELEGUNG haengt am
+// Maschinenprofil. wzBelegungen haelt je Profil-Id die Zuordnung
+// Platz -> Werkzeugnummer; der Profilwechsel tauscht nur die
+// platz-Felder.
+let wzBelegungen = {};
 function werkzeugeSpeichern(){
-  try{ localStorage.setItem(WZ_SLOT, JSON.stringify(toolTable)); }catch(e){}
+  try{ localStorage.setItem(WZ_SLOT, JSON.stringify(
+    {v:2, werkzeuge:toolTable, belegungen:wzBelegungen})); }catch(e){}
 }
 function werkzeugeAusSlot(){
   try{
     const s=localStorage.getItem(WZ_SLOT); if(!s) return;
-    const arr=JSON.parse(s);
+    const roh=JSON.parse(s);
+    // v2 = {werkzeuge, belegungen}; das erste Format (05.09. vormittags)
+    // war das blanke Array.
+    const arr=Array.isArray(roh)? roh : (roh && Array.isArray(roh.werkzeuge)? roh.werkzeuge : null);
     // Nur eine PLAUSIBLE Tabelle uebernehmen: jedes Element braucht
     // t und name — sonst bliebe nach einem kaputten Slot eine leere
     // Tabelle stehen und keine Maske faende ihr Werkzeug.
-    if(Array.isArray(arr) && arr.length &&
-       arr.every(w=>w && typeof w.t!=='undefined' && typeof w.name==='string'))
+    if(arr && arr.length &&
+       arr.every(w=>w && typeof w.t!=='undefined' && typeof w.name==='string')){
+      // MIGRATION des Vormittagsstands: dort wurde die T-Nummer beim
+      // Laden zur Platznummer und die Lagernummer in lagerId gemerkt.
+      // Seit dem Nachmittag ist t STABIL (die NC mappt auf den Platz)
+      // — lagerId-Werkzeuge drehen auf ihre Nummer zurueck.
+      arr.forEach(w=>{ if(w.lagerId!==undefined){ w.t=String(w.lagerId); delete w.lagerId; } });
       toolTable=arr;
+      if(roh && roh.belegungen && typeof roh.belegungen==='object') wzBelegungen=roh.belegungen;
+    }
   }catch(e){}
 }
 werkzeugeAusSlot();
 toolSortiere();
-// LADEN UND ENTLADEN [Daniel, 05.09.2026: "aus dem Lager in die
-// Plaetze 1-16 einfuegen ... und entladen"]. EINE Funktion fuer
-// beide Richtungen. Die Lagernummer bleibt STABIL: beim Laden wird
-// sie in lagerId gemerkt (T-Nummer wird die Platznummer — so ruft
-// die Maschine), beim Entladen bekommt das Werkzeug sie zurueck.
-// Offene Programmschritte ziehen mit (dasselbe Muster wie die
-// T-Aenderung im Formular); gespeicherte Programme der Ablage
-// bleiben unangetastet — sie tragen ihre T-Nummern selbst.
+// LADEN UND ENTLADEN [Daniel, 05.09.2026]. UMGEBAUT am selben Tag:
+// der Vormittagsstand machte die T-Nummer beim Laden zur
+// Platznummer und zog alle Programmreferenzen mit — das trug die
+// Zwei-Maschinen-Belegung nicht (der entladene 1000er-T4 haette
+// als "Nr. 4" den Platz 4 der 1500er gesperrt, und Programme
+// truegen maschinenspezifische T-Nummern). Jetzt ist die
+// WERKZEUGNUMMER t STABIL — Programme referenzieren das WERKZEUG —
+// und die NC-Ausgabe mappt beim T-Satz auf den aktuellen Platz
+// (wzPlatzNr in tSatz): dasselbe Programm ruft auf der 1000er T3
+// und auf der 1500er T7, je nachdem, wo das Werkzeug steckt.
 function werkzeugPlatzAendern(idx, platz){
   const w=toolTable[idx]; if(!w) return false;
-  const altT=String(w.t);
   if(platz){
     if(toolTable.some((x,i2)=>i2!==idx && x.platz===platz)){
       alert('Platz '+platz+' ist bereits belegt.'); return false;
     }
-    // Die Platznummer wird die T-Nummer. Traegt ein ANDERES
-    // Lagerwerkzeug genau diese Nummer, gaebe es zwei gleiche
-    // Schluessel und die Zyklen faenden das falsche Werkzeug.
-    if(toolTable.some((x,i2)=>i2!==idx && String(x.t)===String(platz))){
-      alert('Im Lager gibt es schon die Nr. '+platz+' — erst dort umbenennen, dann laden.');
-      return false;
-    }
-    if(!w.platz) w.lagerId = w.lagerId || altT;
-    w.platz=platz; w.t=String(platz);
+    w.platz=platz;
   } else {
     if(!w.platz) return false;
     delete w.platz;
-    let ziel = w.lagerId || altT;
-    if(toolTable.some((x,i2)=>i2!==idx && String(x.t)===String(ziel))){
-      let n2=1; while(toolTable.some(x=>String(x.t)==='L'+n2)) n2++; ziel='L'+n2;
-    }
-    w.t=String(ziel); delete w.lagerId;
-  }
-  if(altT!==String(w.t)){
-    programSteps.forEach(st=>{ if(st.params && String(st.params.t)===altT) st.params.t=w.t; });
   }
   werkzeugeSpeichern();
   return true;
 }
-// Referenz-Aufloesung fuer LADEPFADE: Testvorlagen und gespeicherte
-// Programme referenzieren Werkzeuge ueber ihre Nummer zum
-// SPEICHERZEITPUNKT. Liegt so ein Werkzeug inzwischen auf einem
-// Revolverplatz (t = Platznummer, alte Nummer in lagerId), faende
-// der Schritt sein Werkzeug nicht mehr — die Nut der Rotorwelle
-// verloere z. B. ihren 6-mm-Stecher, sobald Nr. 21 geladen ist.
-// Aufgeloest wird NUR, wenn die Nummer selbst nicht (mehr)
-// existiert: eine vorhandene Nummer gewinnt immer.
-function werkzeugRefAufloesen(steps){
-  (steps||[]).forEach(st=>{
-    const q=st&&st.params; if(!q || q.t===undefined) return;
-    const tn=String(q.t);
-    if(toolTable.some(x=>String(x.t)===tn)) return;
-    const verlegt=toolTable.find(x=>String(x.lagerId)===tn);
-    if(verlegt) q.t=String(verlegt.t);
-  });
+// Werkzeugnummer -> T-Nummer des MASCHINENRUFS: liegt das Werkzeug
+// auf einem Revolverplatz, ruft die NC den PLATZ; sonst die Nummer
+// selbst (Lagerwerkzeuge — das Einrichteblatt kennzeichnet sie).
+// Die eine Aufloesestelle sitzt in tSatz, damit alle 13
+// Generatoren und die Sim-Rueckaufloesung dieselbe Antwort sehen.
+function wzPlatzNr(tnum){
+  const w=(typeof toolTable!=='undefined') && toolTable.find(x=>String(x.t)===String(tnum));
+  return (w && w.platz) ? String(w.platz) : String(tnum);
+}
+// Profilwechsel: Belegung der alten Maschine sichern, die der neuen
+// anwenden. ERSTE NUTZUNG: gibt es fuer die neue Maschine noch
+// keine gespeicherte Belegung, bleibt die aktuelle stehen — beide
+// Maschinen starten mit derselben Bestueckung, und bis zur ersten
+// Aenderung verhaelt sich alles wie vorher (die NC-Baselines
+// wechseln die Profile in jedem Pruefstandslauf).
+function werkzeugBelegungWechseln(altId, neuId){
+  if(!altId || !neuId || altId===neuId) return;
+  const alt={};
+  toolTable.forEach(w=>{ if(w.platz) alt[w.platz]=String(w.t); });
+  wzBelegungen[altId]=alt;
+  const neu=wzBelegungen[neuId];
+  if(neu){
+    toolTable.forEach(w=>{ delete w.platz; });
+    Object.keys(neu).forEach(pn=>{
+      const w=toolTable.find(x=>String(x.t)===String(neu[pn]));
+      if(w && !toolTable.some(x=>x!==w && x.platz===+pn)) w.platz=+pn;
+    });
+    toolSortiere();
+  }
+  werkzeugeSpeichern();
+  try{ if(document.getElementById('maskWerkzeuge').classList.contains('show')) renderToolTable(); }catch(e){}
+  try{ populateToolSelects(); }catch(e){}
 }
 let programs = []; // {name, contour, programSteps, settings:{...}}
 // Zuordnung der NC-Schrittnummer auf den Platz in programSteps.
@@ -12557,6 +12576,9 @@ function drawToolShape(c, px, py, scale, tool, opts){
       if(opts.nurPlatte){ delete c.fill; delete c.stroke; }
       c.restore();
       if(opts.dot){ c.fillStyle=opts.dotColor||'#c8281f'; c.beginPath(); c.arc(px,py,opts.dot,0,7); c.fill(); }
+      // Der Zentrierer kehrt frueh zurueck — ohne diese Zeile bekaeme
+      // er als einziges Werkzeug keinen Schneidenring im Icon.
+      if(opts.ring){ c.strokeStyle='#c8281f'; c.lineWidth=1.2; c.beginPath(); c.arc(px,py,opts.ring,0,7); c.stroke(); }
       return;
     }
     const lenPx=Math.max(24, Math.max(25,(+tool.len||40))*scale*0.5);
@@ -12803,6 +12825,14 @@ function drawToolShape(c, px, py, scale, tool, opts){
   c.beginPath(); c.arc(px,py,Math.max(1.5,opts.dot||2),0,7);
   c.fillStyle=opts.dotColor||'#c8281f'; c.fill();
   c.strokeStyle='#fff'; c.lineWidth=Math.max(0.7,lw*0.7); c.stroke();
+  // SCHNEIDENRING [ShopTurn-Vorbild, S. 0739: die Werkzeuglage wird
+  // durch die markierte Schneidenecke gezeigt]. Nur ein Punkt ging im
+  // 54-px-Icon unter; der offene Ring bleibt lesbar und deckt die
+  // Plattenecke nicht zu.
+  if(opts.ring){
+    c.strokeStyle='#c8281f'; c.lineWidth=Math.max(1.1,lw*1.3);
+    c.beginPath(); c.arc(px,py,opts.ring,0,7); c.stroke();
+  }
   if(opts.nurPlatte){ delete c.fill; delete c.stroke; }
   c.restore();
 }
@@ -12822,14 +12852,22 @@ function drawToolIcon(canvas, tool){
   // Automatisch einpassen: Werkzeug einmal unsichtbar in Weltmaß zeichnen ist teuer —
   // stattdessen die bekannte Ausdehnung je Art abschätzen und den Maßstab daraus wählen.
   const isTurn = tool.art==='aussen'||tool.art==='innen'||tool.art==='gewinde';
+  const small = w<70;                  // Tabellen-Icon vs. große Vorschau
+  // SCHNEIDENGRAFIK NACH SHOPTURN [Daniel, 05.09.2026; Bedienhandbuch
+  // 840D sl Drehen 12/2019 S. 0747: "Die Schneidengrafik gibt die
+  // durch Halterwinkel, Schnittrichtung und Plattenwinkel festgelegte
+  // Positionierung wieder", Typenbilder S. 0739]: im LISTEN-Icon
+  // dominiert die PLATTE, nicht der Halter — der Massstab zoomt enger
+  // auf die Schneide, und die aktive Schneidenecke traegt einen
+  // deutlichen roten RING (ShopTurns Lagenmarkierung). Die grosse
+  // Vorschau bleibt die vermasste Gesamtdarstellung.
   let extMM;
-  if(tool.art==='bohren')       extMM = Math.max(24,(+tool.len||40)*0.55);
-  else if(tool.art==='stechen') extMM = Math.max(10,(+tool.len||3)*6);
+  if(tool.art==='bohren')       extMM = Math.max(24,(+tool.len||40)*0.55)*(small?0.6:1);
+  else if(tool.art==='stechen') extMM = Math.max(10,(+tool.len||3)*6)*(small?0.72:1);
   else {
     const L=Math.max(4,+tool.len||12)*0.75;
-    extMM = L*2.6;                     // Platte + Schaftansatz
+    extMM = L*(small?1.7:2.6);         // klein: Platte fuellt das Bild
   }
-  const small = w<70;                  // Tabellen-Icon vs. große Vorschau
   const scale = Math.min(w,h)*(small?0.92:0.78)/extMM;
 
   let px=w*0.5, py=h*0.5;
@@ -12838,13 +12876,15 @@ function drawToolIcon(canvas, tool){
   else if(tool.art==='gewinde'){ px=w*0.5; py=h*0.78; }
   else {
     const d=slDirection(tool.sl);
-    px = w*0.5 - d.dx*w*0.26;
-    py = h*0.5 - d.dy*h*0.26;
+    const off=small?0.18:0.26;
+    px = w*0.5 - d.dx*w*off;
+    py = h*0.5 - d.dy*h*off;
   }
   drawToolShape(c, px, py, scale, tool, {
     bodyLen: small? extMM*0.5 : extMM*0.62,
     dot: small?1.8:2.4,
     lw: small?0.8:1,
+    ring: small? 6 : 0,
   });
   if(!small && isTurn && tool.art!=='gewinde'){
     const g=insertGeometry(tool, 9);
@@ -12890,7 +12930,7 @@ function renderToolTable(){
       tr.innerHTML = `<td><canvas class="toolicon" data-idx="${i}" width="54" height="40"
           style="width:54px;height:40px;vertical-align:middle;"></canvas></td>
         <td><b>T${pn}</b></td>
-        <td><div class="wzname">${tool.name}</div><div class="wzsub">${subInfo(tool)}</div></td>
+        <td><div class="wzname">${tool.name}</div><div class="wzsub">${String(tool.t)!==String(pn)?('Nr. '+tool.t+' · '):''}${subInfo(tool)}</div></td>
         <td style="white-space:nowrap;"><button class="ap-edit" data-tedit="${i}">✎</button><button class="ap-edit" data-tunload="${i}" title="vom Platz nehmen — zurück ins Lager">⤓</button></td>
         <td><button data-ti="${i}">✕</button></td>`;
     } else {
@@ -12986,7 +13026,7 @@ function renderToolTable(){
   body.querySelectorAll('button[data-ti]').forEach(btn=>{
     btn.addEventListener('click',(e)=>{
       const i=+e.target.dataset.ti;
-      zweiklickBestaetigen(e.target, (/^[0-9]+$/.test(String(toolTable[i].t))?'T':'')+toolTable[i].t+' wirklich?', ()=>{
+      zweiklickBestaetigen(e.target, (toolTable[i].platz?('T'+toolTable[i].platz):((/^[0-9]+$/.test(String(toolTable[i].t))?'Nr. ':'')+toolTable[i].t))+' wirklich?', ()=>{
       toolTable.splice(i,1);
       if(toolEditIdx===i) cancelToolEdit();
       werkzeugeSpeichern();
@@ -14258,7 +14298,7 @@ function demoAufVc(steps){
   if(typeof orig!=='function') return;
   globalThis[nm]=function(){
     const r=orig.apply(this,arguments);
-    try{ demoAufVc(programSteps); werkzeugRefAufloesen(programSteps); refreshAll(); }catch(e){}
+    try{ demoAufVc(programSteps); refreshAll(); }catch(e){}
     return r;
   };
 });
@@ -18446,12 +18486,14 @@ document.getElementById('btnCloseTools').onclick=()=>{
 };
 document.getElementById('btnToolAdd').onclick=()=>{
   const data=readToolForm();
-  // PLATZLOGIK [Daniel]: Revolverwerkzeug -> T-Nummer = Platz (Maschine!);
-  // Lagerwerkzeug ohne Nummer -> automatische L-Kennung.
+  // PLATZLOGIK [umgestellt 05.09.2026]: die Werkzeugnummer t ist
+  // STABIL und unabhaengig vom Platz (die NC mappt beim T-Satz).
+  // Ohne eigene Nummer bekommt ein Platzwerkzeug die Platznummer
+  // als bequeme Vorgabe, ein Lagerwerkzeug die L-Kennung.
   if(data.platz){
     const belegt=toolTable.findIndex(x=>x.platz===data.platz);
     if(belegt>=0 && belegt!==toolEditIdx){ alert('Platz '+data.platz+' ist bereits belegt ('+toolTable[belegt].name+').'); return; }
-    data.t=String(data.platz);
+    if(!data.t) data.t=String(data.platz);
   } else if(!data.t){
     let n=1; while(toolTable.some(x=>String(x.t)==='L'+n)) n++;
     data.t='L'+n;
@@ -18487,6 +18529,7 @@ document.getElementById('btnToolReset').onclick=(e)=>{
   zweiklickBestaetigen(e.target, 'Alle Werkzeuge auf Vorgabe?', ()=>{
     try{ localStorage.removeItem(WZ_SLOT); }catch(err){}
     toolTable=JSON.parse(JSON.stringify(WZ_VORGABE));
+    wzBelegungen={};   // sonst holte der naechste Profilwechsel den alten Stand zurueck
     toolSortiere(); cancelToolEdit();
     renderToolTable(); populateToolSelects();
   });
@@ -18583,9 +18626,10 @@ function loadProgram(prog){
             'Programm die neue Kennung.');
   }
   if(prog.name) document.getElementById('pmSaveName').value=prog.name;
-  // Werkzeuge koennen seit dem Speichern auf einen Revolverplatz
-  // geladen worden sein — die Schrittreferenzen folgen ihnen.
-  try{ werkzeugRefAufloesen(programSteps); }catch(e){}
+  // KEINE Referenz-Aufloesung mehr noetig [05.09.2026 nachmittags]:
+  // die Werkzeugnummer ist stabil, den Platz loest erst der T-Satz
+  // auf — gespeicherte Programme bleiben unabhaengig davon gueltig,
+  // wo das Werkzeug gerade steckt.
   applySettings(prog.settings||{});
   selectedIdx=-1; selStepIdx=-1;
   userAdjustedView=false; fitPending=true;
@@ -18806,8 +18850,13 @@ function _profilBasis(){
       });
     },
     tSatz(t){
-      if(!this.tLang) return 'T'+String(parseInt(t,10)||0);
-      const n=String(parseInt(t,10)||0).padStart(2,'0');
+      // Die WERKZEUGNUMMER ist stabil, der MASCHINENRUF ist der
+      // Platz [05.09.2026]: hier ist die eine Aufloesestelle fuer
+      // alle Generatoren. Lagerwerkzeuge (ohne Platz) rufen weiter
+      // ihre Nummer — die Testvorlagen bleiben dadurch bitgenau.
+      const tn=(typeof wzPlatzNr==='function')? wzPlatzNr(t) : t;
+      if(!this.tLang) return 'T'+String(parseInt(tn,10)||0);
+      const n=String(parseInt(tn,10)||0).padStart(2,'0');
       return 'T'+n+n+'01';
     },
   };
@@ -19194,12 +19243,18 @@ function ppInfoMalen(){
 function setMaschinenProfil(id){
   const p = MASCHINEN_PROFILE[id];
   if(!p || p===MASCHINENPROFIL) return [];
+  const altProfilId = MASCHINENPROFIL && MASCHINENPROFIL.id;
   MASCHINENPROFIL = p;
   // Das Spannfutter wechselt mit der Maschine (Daniels Messungen
   // 03.09.2026: 1500er Spiralfutter Bauhoehe 95, 1000er Keilstange
   // 117) — dieselbe FUTTER-Referenz, neue Masse, damit alle 14
   // Lesestellen (Zeichnung, 3D, Kollision) mitgehen.
   Object.assign(FUTTER, FUTTER_JE_MASCHINE[id]||FUTTER_JE_MASCHINE.MONFORTS_1500_EUROTURN);
+  // Die REVOLVERBELEGUNG wechselt mit [Daniel, 05.09.2026]: das
+  // Lager ist gemeinsam, die Plaetze je Maschine. Bewusst IN dieser
+  // Funktion statt als zweiter change-Listener — der liefe vor dem
+  // Original-Handler (die ppMerkmale-Lehre aus Pruefung 138).
+  try{ werkzeugBelegungWechseln(altProfilId, id); }catch(e){}
   try{ const b=document.getElementById('ppInfo');
     if(b && b.style.display!=='none') ppInfoMalen(); }catch(e){}
   const meldungen = ['Maschinenprofil: '+p.label];
@@ -24862,7 +24917,11 @@ function buildProgram(){
       name = 'GEWINDE';
       info = '\u2300'+fmt(q.x0)+' x P'+fmt(q.p)+' · Z'+fmt(q.z0)+' -> Z'+fmt(q.z1);
     }
-    const wz = q.t!==undefined ? ' | T'+q.t : '';
+    // Der Kopfkommentar nennt die T-Nummer des MASCHINENRUFS (Platz),
+    // dieselbe Aufloesung wie der T-Satz — sonst stuende im Kopf T21
+    // und im Satz T14 [05.09.2026]. Fuer Lagerwerkzeuge (alle Demos)
+    // ist wzPlatzNr die Identitaet und die Baseline bleibt bitgenau.
+    const wz = q.t!==undefined ? ' | T'+wzPlatzNr(q.t) : '';
     return '(=== SCHRITT '+nr+': '+name+wz+(info?' | '+info:'')+' ===)';
   };
   let vorherigerSchritt = null;
@@ -26191,7 +26250,10 @@ function einrichteBlattText(){
   L.push('WERKZEUGE');
   L.push(dünn);
   D.liste.forEach(w=>{
-    L.push('  T'+w.t+(w.platz?('  (Platz '+w.platz+')'):'  (Lager, kein Revolverplatz)'));
+    // T-Nummer des Maschinenrufs = Platz; die stabile Werkzeugnummer
+    // steht daneben, wenn sie abweicht [05.09.2026].
+    L.push('  T'+(w.platz||w.t)
+      +(w.platz? ((String(w.t)!==String(w.platz)?('  (Werkzeug Nr. '+w.t+')'):'')) : '  (Lager, kein Revolverplatz)'));
     L.push('     '+w.name);
     const geo=[];
     if(w.iso) geo.push('ISO '+w.iso);
