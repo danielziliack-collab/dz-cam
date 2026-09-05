@@ -10783,15 +10783,10 @@ function aeFormAusWerten(){
 // Form anwenden: Winkelzeilen zeigen/verbergen. Beim Zurueckschalten
 // auf "Ecke" gehen die Winkel auf 90 - sonst fuehre der Zyklus
 // Schraegen, die die Maske nicht mehr zeigt (Regel wie esFormSetzen).
-// INNEN gibt es die Winkelform noch nicht: der Generator ist aussen
-// gebaut und gemessen; innen wuerde still Falsches entstehen.
+// Seit dem 05.09.2026 abends gibt es die Winkelform auch INNEN
+// (Spiegelrechnung im Generator) — die fruehere Formsperre ist raus.
 function aeFormSetzen(form){
   let f=String(form||'ecke');
-  const innen=(typeof selBtnVal==='function' && selBtnVal('aeLageBtns'))==='innen';
-  if(innen && f==='winkel'){
-    f='ecke';
-    try{ setRadio('aeFormBtns','ecke'); }catch(e){}
-  }
   const setz90=(id)=>{ const e=document.getElementById(id); if(e && e.value!=='90') e.value='90'; };
   if(f!=='winkel'){ setz90('aeW1'); setz90('aeW2'); }
   ['aeW1Row','aeW2Row'].forEach(id=>{
@@ -11145,14 +11140,9 @@ document.getElementById('esAusrBtns').addEventListener('click',(e)=>{
 document.getElementById('akRichtBtns').addEventListener('click',(e)=>{
   const btn = e.target.closest ? e.target.closest('button') : (e.target.tagName==='BUTTON'?e.target:null);
   if(!btn || !btn.dataset || !btn.dataset.v) return;
-  const isInnen = document.querySelector('#akLageBtns .sel').dataset.v==='innen';
-  // Seit dem 05.09.2026 kann innen auch Z-KONTURPARALLEL (Daniels
-  // Freigabe) — gesperrt bleiben X-parallel und X-konturparallel.
-  if(isInnen && btn.dataset.v!=='z-parallel' && btn.dataset.v!=='konturparallel'){
-    alert('Bei "innen" sind Z-parallel (längs) und Z-konturparallel unterstützt.');
-    document.querySelectorAll('#akRichtBtns button').forEach(b=>b.classList.remove('sel'));
-    document.querySelector('#akRichtBtns button[data-v="z-parallel"]').classList.add('sel');
-  }
+  // Seit dem 05.09.2026 abends sind ALLE vier Richtungen auch innen
+  // frei (X-parallel/X-konturparallel schruppen als Spiegelrechnung,
+  // Schlichten direkt) — die fruehere Sperre samt alert ist raus.
 });
 document.getElementById('gwLageBtns').addEventListener('click',(e)=>{
   const btn = e.target.closest ? e.target.closest('button') : (e.target.tagName==='BUTTON'?e.target:null);
@@ -17348,7 +17338,9 @@ function syncLageRichtung(){
   const grp=document.getElementById('akRichtBtns');
   if(!grp) return;
   grp.querySelectorAll('button').forEach(b=>{
-    const gesperrt = innen && b.dataset.v!=='z-parallel' && b.dataset.v!=='konturparallel';
+    // Seit dem 05.09.2026 abends innen KEINE Richtungssperre mehr —
+    // X-parallel/X-konturparallel schruppen als Spiegelrechnung.
+    const gesperrt = false;
     b.disabled=gesperrt;
     b.style.opacity=gesperrt?'0.38':'';
     if(gesperrt) b.classList.remove('sel');
@@ -19687,6 +19679,63 @@ function svKette(lines, N, bump, sv, s0, pts, fWert, xOff, zOff){
   });
 }
 function genAbspanenEinfach(p, N, bump, lines, warnings){
+  // =================================================================
+  // SCHENKELWINKEL INNEN ALS SPIEGELRECHNUNG [05.09.2026 abends,
+  // Daniels "macht erst mal unsere Luecken fertig" — letzte Zelle der
+  // Innen-Matrix]. Der Winkelzweig ist aussen gerechnet und am Feld
+  // gemessen; innen entsteht er als Spiegelung (173/174er-Mechanik):
+  // x0/x1 an XM gespiegelt, Aussen-Winkelzweig in tmp, X/I-Worte und
+  // G02<->G03, G41<->G42 zurueckgekippt, das Werkzeug als
+  // Aussen-Klon (SL 4->3) mitgespiegelt. Winkel-SEMANTIK innen: W1
+  // oeffnet die Bohrung zur STIRN (Senkungskegel — das Spiegelbild
+  // von "Einstiegs-⌀ wird kleiner"), W2 legt den Absatz zum FUTTER.
+  // Die 90/90-Innen-Ecke laeuft unveraendert am direkten Pfad.
+  // Kein RZ_RELATIV: die Ecke nutzt rueckzugX/Z nirgends (geprueft).
+  // =================================================================
+  {
+    const w1W=(p.w1===undefined||isNaN(+p.w1))?90:+p.w1;
+    const w2W=(p.w2===undefined||isNaN(+p.w2))?90:+p.w2;
+    if(p.lage==='innen' && !p.__spiegel &&
+       (Math.abs(w1W-90)>0.001 || Math.abs(w2W-90)>0.001)){
+      const XM = Math.max(+p.x0,+p.x1) + 10;
+      const spE=(v)=> 2*XM - v;
+      { const tw=toolTable.find(x=>String(x.t)===String(p.t));
+        if(tw && tw.art!=='innen')
+          warnings.push('Ecke mit Schenkelwinkeln innen mit T'+p.t+' (Art "'+(tw?tw.art:'?')+'"): fuer die Bohrung gehoert eine BOHRSTANGE (Art "Innendrehen") in den Zyklus.'); }
+      warnings.push('Ecke mit Schenkelwinkeln INNEN: spiegelgerechnet aus dem Aussenzweig — NICHT an einem realen Innenzyklus verifiziert, ersten Testlauf im Einzelsatz fahren. W1 oeffnet die Bohrung zur Stirn (Senkungskegel), W2 legt den Absatz zum Futter.');
+      const p2=Object.assign({}, p, {lage:'aussen', __spiegel:1, x0:spE(+p.x0), x1:spE(+p.x1)});
+      if(p.ausg==='zyklus'){ p2.ausg='gcode';
+        warnings.push('G72-Zyklussatz bei Schenkelwinkeln innen: die Satz-Kodierung der gespiegelten Nebenwoerter ist unbelegt — Ausgabe erfolgt als G-Einzelsaetze.'); }
+      // Werkzeug fuer die Dauer des Spiegellaufs auf aussen/SL3 —
+      // KEIN Klon mit Fantasienummer (tSatz loeste 'SP8' zu T0 auf,
+      // Daniels Sim-Befund; s. Kontur-Wrapper).
+      const twIdxSp=toolTable.findIndex(x=>String(x.t)===String(p.t));
+      let tOrig=null;
+      if(twIdxSp>=0){ const tw=toolTable[twIdxSp];
+        tOrig={art:tw.art, sl:tw.sl};
+        tw.art='aussen'; tw.sl = tw.sl===4?3:tw.sl; }
+      const tmp=[];
+      try{ genAbspanenEinfach(p2, N, bump, tmp, warnings); }
+      finally{ if(tOrig){ toolTable[twIdxSp].art=tOrig.art; toolTable[twIdxSp].sl=tOrig.sl; } }
+      if(!tmp.length) return;
+      let xKleinst=Infinity;
+      const raus=tmp.map(z=>{
+        if(!/^N\d+/.test(z)) return z;
+        let s2=z.replace(/X(-?\d+(?:\.\d+)?)/g, (m,v)=>{ const nv=spE(+v); if(nv<xKleinst) xKleinst=nv; return 'X'+fmt(nv); });
+        s2=s2.replace(/I(-?\d+(?:\.\d+)?)/g, (m,v)=>'I'+fmt(spE(+v)));
+        s2=s2.replace(/\bG02\b/g,'G0@').replace(/\bG03\b/g,'G02').replace(/G0@/g,'G03');
+        s2=s2.replace(/\bG41\b/g,'G4@').replace(/\bG42\b/g,'G41').replace(/G4@/g,'G42');
+        return s2;
+      });
+      if(xKleinst < 0.4){
+        warnings.push('ECKE SCHENKELWINKEL INNEN: eine Bahn kaeme der Drehachse zu nahe (⌀'+fmt(xKleinst)+') — Masse pruefen. Zyklus uebersprungen.');
+        return;
+      }
+      lines.push('(--- ECKE SCHENKELWINKEL INNEN: Bahnen spiegelgerechnet, Spiegelebene ⌀'+fmt(XM)+' ---)');
+      raus.forEach(z=>lines.push(z));
+      return;
+    }
+  }
   const doRough = p.bearbeitung!=='schlichten';
   const sbAe = sbLesen(p, doRough, warnings);   // Spanbrechen, nur Schruppen
   const svAe = svNeu(p, p.bearbeitung!=='schruppen', warnings);   // Drehzahlvariation, nur Schlichten
@@ -20361,8 +20410,18 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
       const anW = srkWeg(toolRadius(p.t));
       lines.push(`(--- SCHLICHTEN LINKS->RECHTS ---)`);
       lines.push(`${N()} (GERADE  ) G00 G90 X${fmt(Math.max(0.5, xi-anW))} Z${fmt(zAnf)}`); bump();
-      lines.push(`${N()} (GERADE  ) G00 Z${fmt(k3? zi-k3 : zi)}`); bump();
-      lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compL} X${fmt(xi)}`); bump();
+      // [Daniels Sim-Befund 05.09.2026, 21:01: KOLLISION am
+      // SACKLOCH-Grund] Der Eilgang tauchte bis HINTER das Konturende
+      // (zi-k3) — endet die Vorbohrung dort (Bohrgrundkegel), fuhr er
+      // durch Material; am Hoehenfeld reproduziert (1 Treffer @z-60,8/
+      // ⌀47,9, Durchgangsbohrung frei). Jetzt: Eilgang nur bis 1 mm
+      // VOR die Ecke (derselbe Korridor, den der rl-Endrueckzug seit
+      // jeher nutzt), der Rest im VORSCHUB — steht am Sackgrund
+      // Material, wird es geschnitten statt gecrasht.
+      lines.push(`${N()} (GERADE  ) G00 Z${fmt(zi+1)}`); bump();
+      lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 Z${fmt(k3? zi-k3 : zi)}`); bump();
+      warnings.push('Ecke innen links→rechts: die Anfahrt zur Vorbohrkante faehrt die letzten '+fmt(1+(k3||0))+' mm im Vorschub — reicht die Vorbohrung nicht mindestens '+fmt(k3||0)+' mm hinter das Konturende (Sackloch), schneidet sie dort frei.');
+      lines.push(`${N()} (GERADE  ) G01 ${compL} X${fmt(xi)}`); bump();
       if(k3){
         if(p.k3Typ==='fase'){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi+2*k3)} Z${fmt(zi)}`); bump();
@@ -20854,32 +20913,55 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   // G41<->G42 zurueckgekippt; RZ_RELATIV neutralisiert die absolute
   // Kopf-Rueckzugsebene.
   // =================================================================
-  if(p.lage==='innen' && p.bearbeitung==='rest' && !p.__spiegel){
+  // Seit dem 05.09.2026 abends traegt derselbe Wrapper auch die
+  // X-RICHTUNGEN innen (Daniels "macht erst mal unsere Luecken
+  // fertig"): Planschruppen und X-konturparallel entstehen als
+  // Spiegel-SCHRUPPLAUF, das Schlichten faehrt danach DIREKT der
+  // abgenommene Innen-Schlichtzug (z-parallel-Pfad) — so gibt es
+  // nur EINE Schlichtzug-Semantik innen.
+  const xRichtSp = (p.richtung==='x-parallel' || p.richtung==='x-konturparallel');
+  if(p.lage==='innen' && !p.__spiegel &&
+     (p.bearbeitung==='rest' || (xRichtSp && p.bearbeitung!=='schlichten'))){
+    const istRest = p.bearbeitung==='rest';
+    const wrName = istRest ? 'RESTMATERIAL INNEN' : String(p.richtung).toUpperCase()+' INNEN';
     const cEls = contour;
     const xs = cEls.filter(e=>e.kind!=='start' && isFinite(e.x)).map(e=>+e.x);
-    if(!xs.length){ warnings.push('RESTMATERIAL INNEN: Kontur ohne X-Werte.'); return; }
+    if(!xs.length){ warnings.push(wrName+': Kontur ohne X-Werte.'); return; }
     const maxX = Math.max.apply(null, xs), minX = Math.min.apply(null, xs);
     if(!(+p.stock>0) || +p.stock >= minX - 0.01){
-      warnings.push('RESTMATERIAL INNEN: die Vorbohrung ⌀'+fmt(p.stock)+' muss KLEINER sein als der kleinste Kontur-⌀ ('+fmt(minX)+'). Zyklus uebersprungen.');
+      warnings.push(wrName+': die Vorbohrung ⌀'+fmt(p.stock)+' muss KLEINER sein als der kleinste Kontur-⌀ ('+fmt(minX)+'). Zyklus uebersprungen.');
       return;
     }
     { const tw=toolTable.find(x=>String(x.t)===String(p.t));
       if(tw && tw.art!=='innen')
-        warnings.push('Restmaterial innen mit T'+p.t+' (Art "'+(tw?tw.art:'?')+'"): fuer die Kammer in der Bohrung gehoert eine BOHRSTANGE (Art "Innendrehen") in den Zyklus — der Halter eines Aussenwerkzeugs laeuft durch die Bohrungswand.'); }
-    warnings.push('Restmaterial INNEN: spiegelgerechnet aus dem Aussenzweig — NICHT an einem realen Innenzyklus verifiziert, ersten Testlauf im Einzelsatz fahren. Kommentar-Masse in Klartextzeilen stammen aus der Spiegelrechnung.');
+        warnings.push(wrName+' mit T'+p.t+' (Art "'+(tw?tw.art:'?')+'"): fuer die Bearbeitung in der Bohrung gehoert eine BOHRSTANGE (Art "Innendrehen") in den Zyklus — der Halter eines Aussenwerkzeugs laeuft durch die Bohrungswand.'); }
+    warnings.push(wrName+': spiegelgerechnet aus dem Aussenzweig — NICHT an einem realen Innenzyklus verifiziert, ersten Testlauf im Einzelsatz fahren. Kommentar-Masse in Klartextzeilen stammen aus der Spiegelrechnung.');
     if(p.blankContourId!==undefined)
-      warnings.push('Restmaterial innen: eine ROHTEILKONTUR wird nicht gespiegelt — gerechnet wird mit der Vorbohrung ⌀'+fmt(p.stock)+'.');
+      warnings.push(wrName+': eine ROHTEILKONTUR wird nicht gespiegelt — gerechnet wird mit der Vorbohrung ⌀'+fmt(p.stock)+'.');
     const XM = maxX + 10;
     const sp=(v)=> 2*XM - v;
     const gespiegelt = cEls.map(e=>{
       const c2 = Object.assign({}, e);
-      if(c2.kind==='start') return c2;
+      if(c2.kind==='start'){
+        // start x=0 (Achse) bleibt — gespiegelt waere er die
+        // ⌀2XM-Planwand (173er-Debugbefund). Ein REALER Startpunkt
+        // MUSS aber mitspiegeln: Innenkonturen beginnen an der
+        // Stirn-Oeffnung (Buchse: x 48,4), und ungespiegelt zog
+        // expandContour eine RAMPE vom alten Start zur gespiegelten
+        // Kontur — die Planstiche folgten dem Phantomkegel 2,5 ⌀
+        // durch die Sollwand (Gleichheitsbeweis-Befund 92 statt 98 %).
+        if(isFinite(c2.x) && +c2.x>0.001) c2.x = sp(+c2.x);
+        return c2;
+      }
       if(isFinite(c2.x)) c2.x = sp(+c2.x);
       if(c2.cw!==undefined) c2.cw = !c2.cw;
       return c2;
     });
     const p2 = Object.assign({}, p, {
       lage:'aussen', __spiegel:1,
+      // X-Richtungen: nur der SCHRUPPTEIL laeuft in der Spiegelwelt —
+      // das Schlichten faehrt danach direkt der Innen-Schlichtzug.
+      bearbeitung: istRest ? 'rest' : 'schruppen',
       stock: sp(+p.stock),
       xmin: undefined, blankContourId: undefined, _rest: undefined,
     });
@@ -20887,24 +20969,26 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
     // echten Innenwerkzeug (SL 4) rechnete der Aussen-Restzyklus den
     // FUSSABDRUCK falsch herum — die Wirkkontur kollabierte auf 6
     // Saetze mit X109,8 UEBER dem Spiegelwelt-Rohteil]. Ein
-    // sl-4-Innendreher IST in der Spiegelwelt ein sl-3-Aussendreher:
-    // temporaerer Klon in der Werkzeugtabelle, die T-Saetze werden in
-    // der Ruecktransformation auf die echte Nummer zurueckgeschrieben.
-    let tTmp=null;
-    { const twIdx=toolTable.findIndex(x=>String(x.t)===String(p.t));
-      if(twIdx>=0){
-        const tw=toolTable[twIdx];
-        tTmp='SP'+tw.t;
-        toolTable.push(Object.assign({}, tw, {t:tTmp, art:'aussen', sl: tw.sl===4?3:tw.sl, platz:undefined}));
-        p2.t=tTmp;
-        if(String(p.t2||p.t)===String(tw.t)) p2.t2=tTmp;
-      } }
+    // sl-4-Innendreher IST in der Spiegelwelt ein sl-3-Aussendreher.
+    // KEIN Tabellen-Klon mit Fantasienummer [Daniels Sim-Befund
+    // 05.09.2026: tSatz loeste 'SP8' zu T0 auf — an der Maschine
+    // stuende T0 im Satz, und die Sim stempelte ein DEFAULT-Werkzeug,
+    // das die Bohrungswand kegelig wegriss]: das ECHTE Werkzeug wird
+    // fuer die Dauer des Spiegellaufs auf aussen/SL3 gestellt und im
+    // finally zurueck — die T-Nummer im Satz bleibt die echte.
+    const twIdxSp=toolTable.findIndex(x=>String(x.t)===String(p.t));
+    let tOrig=null;
+    if(twIdxSp>=0){
+      const tw=toolTable[twIdxSp];
+      tOrig={art:tw.art, sl:tw.sl};
+      tw.art='aussen'; tw.sl = tw.sl===4?3:tw.sl;
+    }
     const saved = contour;
     contour = gespiegelt;
     const tmp=[];
     try{ RZ_RELATIV=true; genAbspanenKontur(p2, N, bump, tmp, warnings); }
     finally{ RZ_RELATIV=false; contour = saved;
-      if(tTmp){ const i2=toolTable.findIndex(x=>x.t===tTmp); if(i2>=0) toolTable.splice(i2,1); } }
+      if(tOrig){ toolTable[twIdxSp].art=tOrig.art; toolTable[twIdxSp].sl=tOrig.sl; } }
     if(!tmp.length) return;
     let xKleinst=Infinity;
     const raus=tmp.map(z=>{
@@ -20913,15 +20997,20 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
       s2=s2.replace(/I(-?\d+(?:\.\d+)?)/g, (m,v)=>'I'+fmt(sp(+v)));
       s2=s2.replace(/\bG02\b/g,'G0@').replace(/\bG03\b/g,'G02').replace(/G0@/g,'G03');
       s2=s2.replace(/\bG41\b/g,'G4@').replace(/\bG42\b/g,'G41').replace(/G4@/g,'G42');
-      if(tTmp) s2=s2.replace(/\bTSP/g,'T');   // Werkzeug-Klon zurueck auf die echte Nummer
       return s2;
     });
     if(xKleinst < 0.4){
-      warnings.push('RESTMATERIAL INNEN: eine Bahn kaeme der Drehachse zu nahe (⌀'+fmt(xKleinst)+') — Kammer/Vorbohrung pruefen. Zyklus uebersprungen.');
+      warnings.push(wrName+': eine Bahn kaeme der Drehachse zu nahe (⌀'+fmt(xKleinst)+') — Kontur/Vorbohrung pruefen. Zyklus uebersprungen.');
       return;
     }
-    lines.push('(--- RESTMATERIAL INNEN: Bahnen spiegelgerechnet, Spiegelebene ⌀'+fmt(XM)+' ---)');
+    lines.push('(--- '+wrName+': Bahnen spiegelgerechnet, Spiegelebene ⌀'+fmt(XM)+' ---)');
     raus.forEach(z=>lines.push(z));
+    // X-Richtungen mit Schlichtanteil: der Schlichtzug laeuft DIREKT
+    // am abgenommenen Innen-Pfad (z-parallel — der Schlichtzug selbst
+    // haengt nicht an der Schruppstrategie). schlRicht bleibt erhalten.
+    if(!istRest && p.bearbeitung!=='schruppen'){
+      genAbspanenKontur(Object.assign({}, p, {bearbeitung:'schlichten', richtung:'z-parallel'}), N, bump, lines, warnings);
+    }
     return;
   }
   // BAHN-AUSDUENNUNG [Daniel, IMG_2605]: konturnahe Schruppbahnen (Schulter-
@@ -24510,7 +24599,14 @@ function genStechdrehen(p, N, bump, lines, warnings){
       // Stirn-Referenz (x=0). Gespiegelt wuerde es zur ⌀2XM-Planwand
       // und der Flankenzug begaenne dort (Debug-Befund: X116 im tmp,
       // ruecktransformiert ⌀0 -> Achswache brach ab).
-      if(c2.kind==='start') return c2;
+      if(c2.kind==='start'){
+        // start x=0 (Achse) bleibt (Planwand-Debugbefund); ein REALER
+        // Startpunkt an der Stirn-Oeffnung spiegelt mit — sonst zieht
+        // expandContour eine Phantomrampe (Buchsen-Befund beim
+        // x-parallel-Wrapper, gleiche Falle).
+        if(isFinite(c2.x) && +c2.x>0.001) c2.x = sp(+c2.x);
+        return c2;
+      }
       if(isFinite(c2.x)) c2.x = sp(+c2.x);
       if(c2.cw!==undefined) c2.cw = !c2.cw;
       return c2;
