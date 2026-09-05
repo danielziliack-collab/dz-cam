@@ -2107,19 +2107,19 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
                     <button data-v="fase" class="sel" data-vorgabe="1">Fase</button>
                     <button data-v="rundung">Radius</button>
                   </div>
-                  <input type="number" id="aeK1" value="0.5" step="any" style="width:51px;"><span class="unit">mm</span></div>
+                  <input type="number" id="aeK1" value="0" step="any" style="width:51px;"><span class="unit">mm</span></div>
                 <div class="mrow"><label>K2 Grundkante innen</label>
                   <div class="radiobtns" id="aeK2Btns">
                     <button data-v="fase" class="sel" data-vorgabe="1">Fase</button>
                     <button data-v="rundung">Radius</button>
                   </div>
-                  <input type="number" id="aeK2" value="0.5" step="any" style="width:51px;"><span class="unit">mm</span></div>
+                  <input type="number" id="aeK2" value="0" step="any" style="width:51px;"><span class="unit">mm</span></div>
                 <div class="mrow"><label>K3 Schulterkante außen</label>
                   <div class="radiobtns" id="aeK3Btns">
                     <button data-v="fase" class="sel" data-vorgabe="1">Fase</button>
                     <button data-v="rundung">Radius</button>
                   </div>
-                  <input type="number" id="aeK3" value="0.5" step="any" style="width:51px;"><span class="unit">mm</span></div>
+                  <input type="number" id="aeK3" value="0" step="any" style="width:51px;"><span class="unit">mm</span></div>
               </div>
             </div>
             <!-- ZUSTELLUNG als Gruppe: die drei Werte stehen zugeklappt in
@@ -9879,9 +9879,15 @@ function editStep(i){
     setVal('aeX0',p.x0); setVal('aeZ0',p.z0); setVal('aeX1',p.x1); setVal('aeZ1',p.z1);
     setVal('aeD',p.d); setVal('aeUX',p.ux); setVal('aeUZ',p.uz); setVal('aeT',p.t);
     setRadio('aeSModeBtns', p.sMode||'n'); syncSMode('ae',false); setVal('aeFR',p.fr); setVal('aeSR',p.sr); setVal('aeFF',p.ff); setVal('aeSF',p.sf);
-    setRadio('aeK1Btns',p.k1Typ||'keine'); setVal('aeK1',p.k1!==undefined?p.k1:0.5);
-    setRadio('aeK2Btns',p.k2Typ||'keine'); setVal('aeK2',p.k2!==undefined?p.k2:0.5);
-    setRadio('aeK3Btns',p.k3Typ||'keine'); setVal('aeK3',p.k3!==undefined?p.k3:0.5);
+    // KANTENMASS-VORGABE 0 [Daniels Befund 05.09.2026: "mit den Kanten
+    // hast Du ueberall 0,5 mm drin ... das muss man jedes Mal
+    // individuell neu eingeben"]. Die 0,5 wurde stumm mitgefertigt,
+    // wenn man sie uebersah — an einer Ecke ohne gewollte Fase ist das
+    // ein Massfehler am Teil. Kanten sind Bauteil-Sache, nicht Vorgabe:
+    // wer eine will, tippt sie ein.
+    setRadio('aeK1Btns',p.k1Typ||'keine'); setVal('aeK1',p.k1!==undefined?p.k1:0);
+    setRadio('aeK2Btns',p.k2Typ||'keine'); setVal('aeK2',p.k2!==undefined?p.k2:0);
+    setRadio('aeK3Btns',p.k3Typ||'keine'); setVal('aeK3',p.k3!==undefined?p.k3:0);
     setRadio('aeAusgBtns', p.ausg||'gcode');
     setVal('aeW1', p.w1!==undefined?p.w1:90); setVal('aeW2', p.w2!==undefined?p.w2:90);
     { const f=aeFormAusWerten(); setRadio('aeFormBtns', f); aeFormSetzen(f); }
@@ -10815,7 +10821,13 @@ function aeGruppenSync(){
   const w=mgZahl;
   const k=[1,2,3].map(n=>{
     const typ=selBtnVal('aeK'+n+'Btns')||'keine';
-    if(typ==='keine') return null;
+    // MASS 0 ZAEHLT ALS KEINE KANTE [Daniel, 05.09.2026]: seit die
+    // Vorgabe 0 ist, stuende sonst "K1 F0 · K2 F0 · K3 F0" im
+    // Gruppenkopf — das liest sich wie drei gesetzte Fasen. Der
+    // Generator rechnet ohnehin Math.max(0, k) = keine Kante.
+    const el=document.getElementById('aeK'+n);
+    const val=el? (parseFloat(el.value)||0) : 0;
+    if(typ==='keine' || !(val>0)) return null;
     return 'K'+n+' '+(typ==='fase'?'F':'R')+w('aeK'+n);
   }).filter(Boolean);
   mgruppeZusammenfassen('aeGrpKanten','aeZusKanten',
