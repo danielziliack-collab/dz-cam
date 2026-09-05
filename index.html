@@ -2299,6 +2299,11 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
               <button data-v="aussen" class="sel">außen</button>
               <button data-v="innen">innen (Bohrung)</button>
               <button data-v="plan">plan (Stirn)</button>
+              <!-- VIERTE STELLUNG [Daniel, 05.09.2026]: die Stirnnut am
+                   GRUND einer Bohrung/Ausdrehung (Sicherungsring, O-Ring
+                   am Absatzgrund). Bis dahin brach der Generator fuer
+                   axial+innen ab und die Stellung war nicht waehlbar. -->
+              <button data-v="planinnen">Stirn in Bohrung</button>
             </div></div>
             <!-- NC-AUSGABE [Daniel, Empfehlung 3, 01.09.2026]: G71 ist der
                  Menue-Zyklus fuer genau diese Maske (DV 610 S. 3-40/41,
@@ -10387,12 +10392,12 @@ function wirkungsloseFelderAusblenden(maskId, zustaende){
 // die Form von Hand nachziehen.
 // LAGE UND AUSRICHTUNG IN EINEM FELD [Daniel, 28.08.2026]
 // -------------------------------------------------------------------
-// Drei Stellungen statt zweier Felder mit vier Kombinationen:
-//   aussen -> radial, aussen      innen -> radial, innen
-//   plan   -> axial,  aussen
-// Die vierte (axial innen) gibt es nicht — eine Stirnnut in einer
-// Bohrung faehrt der Zyklus nicht, und der Generator bricht dafuer ab.
-// Jetzt ist sie gar nicht mehr waehlbar.
+// Vier Stellungen statt zweier Felder:
+//   aussen    -> radial, aussen      innen -> radial, innen
+//   plan      -> axial,  aussen (freie Stirnflaeche)
+//   planinnen -> axial,  innen  (Stirnnut am BOHRUNGSGRUND — bis zum
+//                05.09.2026 nicht waehlbar, weil der Generator fuer
+//                axial+innen abbrach; jetzt gebaut)
 //
 // Dahinter stehen unveraendert ausr und lage. Die Knopfgruppe
 // "Ausrichtung" bleibt die Quelle fuer den Generator und wird von hier
@@ -10400,7 +10405,7 @@ function wirkungsloseFelderAusblenden(maskId, zustaende){
 function esLageSetzen(stellung){
   const st=String(stellung||"aussen");
   try{
-    if(st==="plan"){ setRadio("esAusrBtns","axial"); }
+    if(st==="plan"||st==="planinnen"){ setRadio("esAusrBtns","axial"); }
     else { setRadio("esAusrBtns","radial"); }
   }catch(e){}
   // Die Zeile "Ausrichtung" wird nicht mehr gebraucht — sie steckt in
@@ -10415,7 +10420,9 @@ function esLageSetzen(stellung){
 }
 // Aus dem Zyklus zurueck in die Stellung.
 function esLageAusWerten(ausr, lage){
-  if(String(ausr)==="axial") return "plan";
+  // axial+innen = Stirnnut am Bohrungsgrund (05.09.2026) — vorher
+  // fiel diese Kombination stumm auf 'plan' zurueck.
+  if(String(ausr)==="axial") return (String(lage)==="innen") ? "planinnen" : "plan";
   return (String(lage)==="innen") ? "innen" : "aussen";
 }
 
@@ -11257,14 +11264,15 @@ document.getElementById('btnEsOk').onclick=()=>{
     dp: +document.getElementById('esDP').value,
     a1: +document.getElementById('esA1').value||0, a2: +document.getElementById('esA2').value||0,
     w: +document.getElementById('esW').value||0,
-    // Die Stellung 'plan' bedeutet axial und aussen — eine Stirnnut
-    // in der Bohrung gibt es nicht.
-    ausr: (selBtnVal('esLageBtns')==='plan') ? 'axial' : 'radial',
-    // Die Stellung "plan" ist eine AUSRICHTUNG, keine Lage: eine
-    // Stirnnut sitzt aussen. Wuerde hier 'plan' landen, verstuende
-    // der Generator es nicht und rechnete mit sIn=+1 weiter, ohne
-    // es zu merken.
+    // Die Stellungen sind KOMBINATIONEN aus Ausrichtung und Lage:
+    //   aussen/innen -> radial;  plan -> axial+aussen (freie Stirn);
+    //   planinnen -> axial+innen (Stirnnut am BOHRUNGSGRUND, seit dem
+    //   05.09.2026). Wuerde die Stellung selbst als 'lage' landen,
+    //   verstuende der Generator sie nicht und rechnete mit sIn=+1
+    //   weiter, ohne es zu merken.
+    ausr: (selBtnVal('esLageBtns')==='plan'||selBtnVal('esLageBtns')==='planinnen') ? 'axial' : 'radial',
     lage: (selBtnVal('esLageBtns')==='plan') ? 'aussen'
+        : (selBtnVal('esLageBtns')==='planinnen') ? 'innen'
         : (selBtnVal('esLageBtns') || 'aussen'),
     f1:esEckeLesen(1).f, r1:esEckeLesen(1).r,
     f2:esEckeLesen(2).f, r2:esEckeLesen(2).r,
@@ -14349,7 +14357,8 @@ function helpKonturEinstich(){
   // ist das Bild die STIRNNUT — auch wenn die Lage (z. B. in einem
   // alten Zyklus) noch 'aussen' sagt [Daniels Fund, 29.08.2026].
   let lage=(typeof selBtnVal==='function' && selBtnVal('esLageBtns'))||'aussen';
-  if(typeof selBtnVal==='function' && selBtnVal('esAusrBtns')==='axial') lage='plan';
+  if(typeof selBtnVal==='function' && selBtnVal('esAusrBtns')==='axial'
+     && lage!=='planinnen') lage='plan';
   // Form 3 = 'am Kegel' [Daniel, 29.08.2026]: die Flaeche, in der
   // die Nut sitzt, ist geneigt — aussen/innen steigt der ⌀ nach
   // links an (Generator: W>0 = ⌀ nimmt Richtung Nutinneres -Z zu),
@@ -14377,6 +14386,27 @@ function helpKonturEinstich(){
     // 3D-Ringspalt: beim Kegel nur die grobe Huelle (min/max in z) —
     // der Halbschnitt zeigt die Schraege exakt.
     teil.stirn={z0:zG, z1:L, rI:rI, rA:rA, rWand:rW};
+    return teil;
+  }
+  if(lage==='planinnen'){
+    // STIRNNUT AM BOHRUNGSGRUND [05.09.2026]: dieselbe Nut wie beim
+    // freien Stirnstich, aber am Grund einer Ausdrehung — im Umriss
+    // laeuft der Zug von der Stirn in die Ausdrehung hinein, die Nut
+    // sitzt in deren Grundflaeche. Beim Kegel ist wie beim freien
+    // Planstich die FLAECHE AUSSERHALB der Nut geneigt, der Nutgrund
+    // bleibt plan (Daniels Regel vom 29.08.2026 gilt hier genauso).
+    const rW=30, rB=22, rA=17, rI=8, T=15, L=70, zA=L-24;
+    const neig=kegel? 0.45 : 0;
+    const zG=(r)=>zA - neig*(rB-r);             // Grundflaeche der Ausdrehung
+    const zN=zG(rA)-T;                          // Nutgrund: konstantes z
+    const teil=helpKontur(
+      [[0,rW],[L,rW],[L,rB],[zG(rB),rB],[zG(rA),rA],[zN,rA],[zN,rI],[zG(rI),rI],[zG(0.0001),0.0001]],
+      {4:kanten[1], 5:kanten[2], 6:kanten[4], 7:kanten[3]},
+      {E1:[zG(rA),rA], E2:[zN,rA], E3:[zG(rI),rI], E4:[zN,rI],
+       Mantel:[L*0.3,rW], Grund:[zN,(rA+rI)/2], Mitte:[zG((rA+rI)/2),(rA+rI)/2],
+       Wand:[(zA+L)/2,rB]});
+    teil.zMax=L; teil.rMax=rW;
+    teil.stirn={z0:zN, z1:zA, rI:rI, rA:rA, rWand:rB};
     return teil;
   }
   if(lage==='innen'){
@@ -15960,10 +15990,14 @@ const MASK_HELP = {
     let lage=(typeof selBtnVal==='function' && selBtnVal('esLageBtns'))||'aussen';
     // Ausrichtung axial schlaegt die Lage-Gruppe — wie in
     // helpKonturEinstich, sonst zeigten Kontur und Masse verschiedene
-    // Lagen.
-    if(typeof selBtnVal==='function' && selBtnVal('esAusrBtns')==='axial') lage='plan';
+    // Lagen. planinnen ist selbst schon axial und bleibt stehen.
+    if(typeof selBtnVal==='function' && selBtnVal('esAusrBtns')==='axial'
+       && lage!=='planinnen') lage='plan';
     // selBtnVal liefert die Knopfwerte ohne Umlaut ("aussen").
-    const lageWort={aussen:'außen', innen:'innen', plan:'plan'}[lage]||lage;
+    const lageWort={aussen:'außen', innen:'innen', plan:'plan', planinnen:'Stirn in Bohrung'}[lage]||lage;
+    // Beide Stirnstich-Lagen teilen sich Bahnen und Masse — die Nut
+    // liegt gleich, nur die Umgebung (freie Stirn / Ausdrehung) anders.
+    const axialBild = (lage==='plan'||lage==='planinnen');
     helpLabel(c, 'Lage '+lageWort, 12, 15, false, 'left');
 
     // --- Stichfolge: Zustellungen im Nutbereich --------------------
@@ -15971,7 +16005,7 @@ const MASK_HELP = {
     // Bild nach unten), innen zum groesseren (nach oben), plan in -Z
     // (nach links). Das Vorzeichen s macht aussen und innen zu EINER
     // Rechnung — bei aussen ist es +1 und alles bleibt wie zuvor.
-    if(lage==='plan' && E1&&E2&&E3){
+    if(axialBild && E1&&E2&&E3){
       const n=5;
       for(let k=0;k<n;k++){
         const y=E1.y + (E3.y-E1.y)*(k+0.5)/n;
@@ -16011,8 +16045,13 @@ const MASK_HELP = {
     // aussen: X0 = Mantel (rMax), T1 nach unten.  innen: X0 = Bohrung
     // (die Marke "Mantel" sitzt dort auf der Bohrungswand), T1 nach
     // oben, Z0 von der Achse aus.  plan: B1 radial, T1 axial.
-    if(lage==='plan'){
-      if(E1) helpDim(c, M.zx(M.zMax)+16,M.axY, M.zx(M.zMax)+16,E1.y, 0.001, '⌀X0'+V('esX0'), A('esX0'),'in');
+    if(axialBild){
+      // Bei der Bohrungs-Stirnnut liegt die Nut weiter links im Bild —
+      // die rechts gefuehrte X0-Masslinie schob ihre Pille genau auf
+      // die Eckenmarke 3 (am Bild gemessen, 05.09.2026). Links der Nut
+      // ist Material und Platz: dort steht das Mass frei.
+      const xM=(lage==='planinnen' && E2)? E2.x-26 : M.zx(M.zMax)+16;
+      if(E1) helpDim(c, xM,M.axY, xM,E1.y, 0.001, '⌀X0'+V('esX0'), A('esX0'),'in');
       if(E1&&E3) helpDim(c, M.zx(M.zMax)+34,E1.y, M.zx(M.zMax)+34,E3.y, 0.001, 'B1'+V('esB1'), A('esB1'),'in');
       if(E1&&E2) helpDim(c, E2.x,E1.y-18, E1.x,E1.y-18, -11, 'T1'+V('esT1'), A('esT1'));
       if(E1) helpDim(c, E1.x,M.rx(M.rMax)-30, E1.x,M.rx(M.rMax)-4, 0.001, 'Z0'+V('esZ0'), A('esZ0'),'in');
@@ -16031,6 +16070,7 @@ const MASK_HELP = {
     }
     helpBahnLogik(c,w,h,
       lage==='plan'  ? 'Stirnstich: Stich neben Stich von außen nach innen, Tiefe in Z'
+      : lage==='planinnen' ? 'Stirnstich am BOHRUNGSGRUND: Anfahrt axial durch die Bohrung'
       : lage==='innen' ? 'innen: zugestellt wird nach GRÖSSEREM ⌀, dann Grundzug'
       : 'Stich neben Stich ab der Mitte, dann Grundzug auf Aufmaß',
                   A('esD')||A('esUX')||A('esUZ'));
@@ -22463,15 +22503,24 @@ function genEinstechen(p, N, bump, lines, warnings){
   const sIn = innen ? -1 : 1;
   const weg  = (d,a)=> d + sIn*a;
   const zuTief = (d,ziel)=> innen ? (d < ziel-0.001) : (d > ziel+0.001);
+  // STIRNNUT IN DER BOHRUNG [Daniel, 05.09.2026]: axial+innen bricht
+  // nicht mehr ab — die Nutgeometrie ist dieselbe wie beim freien
+  // Stirnstich (z0 ist dann der BOHRUNGSGRUND), anders sind nur die
+  // Anfahrt (durch die Bohrung statt frei vor der Stirn, s. u. im
+  // axialen Zweig) und die Werkzeugwechsel-Abfahrt (lage 'innen'
+  // laesst sie lagerichtig erst Z herausfahren, dann X).
   if(innen && p.ausr==='axial'){
-    warnings.push('Einstich: Lage INNEN ist nur radial umgesetzt — eine Stirnnut in der Bohrung wird nicht erzeugt.');
-    return;
+    warnings.push('Stirnnut in der Bohrung: an keiner der beiden Maschinen verifiziert — die Bahnen sind geometrisch geprüft, kein Maschinenbeleg.');
+    warnings.push('Stirnnut in der Bohrung: An- und Rückfahrt laufen axial DURCH die Bohrung — sie muss die Nutöffnung bis ⌀'+fmt(p.x0)+' freigeben (Halterschaft beachten). Die Simulation prüft jeden Eilgang gegen den Materialstand.');
   }
-  if(innen && p.t1 <= p.x0){
+  // Die T1/X0-Plausibilitaet gilt nur RADIAL: beim axialen Stich ist
+  // T1 die TIEFE in mm, kein Durchmesser — der Vergleich mit X0 waere
+  // dort sinnlos (und braeche die Bohrungs-Stirnnut grundlos ab).
+  if(innen && p.ausr!=='axial' && p.t1 <= p.x0){
     warnings.push('Einstich innen: T1 (Nutgrund ⌀'+fmt(p.t1)+') muss GRÖSSER sein als X0 (Bohrungswand ⌀'+fmt(p.x0)+') — in einer Bohrung liegt der Nutgrund außen.');
     return;
   }
-  if(!innen && p.t1 >= p.x0){
+  if(!innen && p.ausr!=='axial' && p.t1 >= p.x0){
     warnings.push('Einstich: T1 (Nutgrund ⌀'+fmt(p.t1)+') muss KLEINER sein als X0 (⌀'+fmt(p.x0)+'). Für eine Nut in einer Bohrung die Lage auf „innen" stellen.');
     return;
   }
@@ -22482,7 +22531,12 @@ function genEinstechen(p, N, bump, lines, warnings){
   // Das ist keine Geschmacksfrage, sondern ein Crash.
   if(stTool){
     const koerper=slDirection(stTool.sl).dy;    // >0 = Richtung kleinerer ⌀
-    if(innen && koerper<0)
+    // Beim AXIALEN Innenstich (Stirnnut am Bohrungsgrund) greift die
+    // radiale Schneidenlagen-Logik nicht — der Halter eines
+    // Axialstechers zeigt in Z, nicht radial. Die SL-4-Forderung
+    // waere dort falsch; die Werkzeug-Warnung uebernimmt der
+    // Kruemmungsbereichs-Hinweis im axialen Zweig.
+    if(innen && koerper<0 && p.ausr!=='axial')
       warnings.push('Einstich innen mit T'+p.t+' (Schneidenlage '+stTool.sl+'): der Werkzeugkörper liegt Richtung GRÖSSEREN Durchmesser und läuft damit durch die Bohrungswand. Ein Innen-Stecher hat Schneidenlage 4.');
     if(!innen && koerper>0)
       warnings.push('Einstich außen mit T'+p.t+' (Schneidenlage '+stTool.sl+'): der Werkzeugkörper liegt Richtung Drehachse — das ist ein Innen-Stecher.');
@@ -22531,7 +22585,11 @@ function genEinstechen(p, N, bump, lines, warnings){
                  (E3.r+E3.f) + (E4.r+E4.f) <= tiefeR + 0.01 &&
                  (E1.r+E1.f) + (E3.r+E3.f) <= p.b1 + 0.01 &&
                  (E2.r+E2.f) + (E4.r+E4.f) <= p.b1 + 0.01;
-  if(!kantOK) warnings.push('Einstich: Kantenmasse (R1-R4/F1-F4) passen nicht in Tiefe '+fmt(tiefeR)+' / Breite '+fmt(p.b1)+' — der Einstich wird OHNE Kantenbearbeitung rechteckig geschlichtet (Masse verkleinern).');
+  // Die radiale Kantenpruefung rechnet mit tiefeR aus kantX — beim
+  // AXIALEN Stich ist das Unsinn (T1 ist dort die Tiefe in mm) und
+  // erzeugte eine Doppelwarnung neben der eigenen kantAxOK-Pruefung
+  // des axialen Zweigs. Deshalb nur radial melden [05.09.2026].
+  if(!kantOK && p.ausr!=='axial') warnings.push('Einstich: Kantenmasse (R1-R4/F1-F4) passen nicht in Tiefe '+fmt(tiefeR)+' / Breite '+fmt(p.b1)+' — der Einstich wird OHNE Kantenbearbeitung rechteckig geschlichtet (Masse verkleinern).');
   const kanten = (E1.r+E1.f+E2.r+E2.f+E3.r+E3.f+E4.r+E4.f) > 0.01;
 
   // ================= AXIALER EINSTICH (Stirnnut) [Daniel] =================
@@ -22560,7 +22618,21 @@ function genEinstechen(p, N, bump, lines, warnings){
   lines.push(`${N()} (M-BEFEHL) M07`); bump();
     // Vorposition über dem Rohteil (gleiche Verkettungsfalle wie radial:
     // der Vorgängerschritt kann in der Mitte enden)
-    lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(p.safeX || (p.x0 + 6))} Z${fmt(p.z0 + 2)}`); bump();
+    if(innen){
+      // STIRNNUT IN DER BOHRUNG [05.09.2026]: x0+6 laege in der
+      // Bohrungswand. X wird auf den AUSSENRAND DER NUT gestellt,
+      // solange das Werkzeug noch VOR dem Teil steht (die Abfahrt des
+      // Vorgaengers endet am Wechselpunkt bzw. auf der Rueckzugsebene),
+      // erst DANN faehrt ein eigener Satz axial durch die Bohrungsluft
+      // hinein — dieselbe lagerichtige Reihenfolge wie beim
+      // Innenausdrehen. Ein Diagonalsatz koennte die Bohrungskante
+      // schneiden; die Eilgangpruefung der Simulation misst beide
+      // Saetze gegen den Materialstand zu ihrem Zeitpunkt.
+      lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(p.x0)}`); bump();
+      lines.push(`${N()} (GERADE  ) G00 Z${fmt(p.z0 + 2)}`); bump();
+    } else {
+      lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(p.safeX || (p.x0 + 6))} Z${fmt(p.z0 + 2)}`); bump();
+    }
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)} S${p.sr}`); bump();
     // Stichpositionen: Außenschneide von X0 einwärts, Überdeckung 0,6 mm
     const posn=[]; let dia=p.x0;
@@ -24739,7 +24811,15 @@ function buildProgram(){
         restNachZyklus(cRef.els, st.params.bearbeitung, +st.params.ux||0, +st.params.uz||0, 0, Infinity);
       }
     }
-    else if(st.type==='einstechen') genEinstechen({...st.params, safeX: stock + 2}, N, bump, lines, warnings);
+    // safeX (sicher UEBER dem Rohteil) gilt nur AUSSEN. Beim
+    // Innenstich ueberschrieb er den innen-bewussten Rueckfall
+    // weg(x0,6) im Generator — die Vorposition stand ueber dem
+    // Rohteil, und der Diagonalsatz zur Nut kreuzte die STIRN im
+    // vollen Material (Befund 05.09.2026, in keiner Demo sichtbar:
+    // keine faehrt einen radialen Innen-Einstich). Innen faehrt die
+    // Vorposition jetzt in der Bohrung unter der Nutwand.
+    else if(st.type==='einstechen') genEinstechen({...st.params,
+      safeX: (st.params.lage==='innen') ? undefined : stock + 2}, N, bump, lines, warnings);
     else if(st.type==='abstechen') genAbstechen(st.params, N, bump, lines, warnings);
     else if(st.type==='freistich') genFreistich(st.params, N, bump, lines, warnings);
     else if(st.type==='bohren') genBohren(st.params, N, bump, lines, warnings);
