@@ -2434,6 +2434,16 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
                 <button data-v="x">radial (X, Einstich)</button>
               </div>
             </div>
+            <!-- LAGE [Daniels Innen-Paket 05.09.2026]: innen wird als
+                 SPIEGELUNG der fertig gerechneten Aussenbahnen erzeugt
+                 (Kontur an einer Hilfsebene gespiegelt, Aussen-Generator
+                 gerechnet, X/I-Worte und G02/G03, G41/G42
+                 zurueckgespiegelt) — Ebenen, Raeumen und der beidseitige
+                 Schlichtzug erben damit alle Aussen-Korrekturen. -->
+            <div class="mrow" id="stLageRow"><label>Lage</label><div class="radiobtns" id="stLageBtns">
+              <button data-v="aussen" class="sel" data-vorgabe="1">außen</button>
+              <button data-v="innen">innen (Bohrung)</button>
+            </div></div>
             <!-- ERKLAERUNG als Gruppe [Daniel, ShopTurn-Art]: die beiden
                  Absaetze beschreiben, wie der Zyklus arbeitet — das liest
                  man einmal, danach steht es nur im Weg. Zugeklappt eine
@@ -4995,6 +5005,8 @@ let simMoves=[], simActive=false, simProgress=0, simPlaying=false, simRAF=null;
 // der Temporal Dead Zone und der komplette Skriptstart bricht mit „Script error" ab.
 let gcodeFresh=false;   // true = angezeigter NC-Text passt zum aktuellen Stand
 let simSpeed=1; // Simulationsgeschwindigkeit: 0.25 = viertel ... 4 = vierfach
+// Spiegellauf-Schalter (Stechdrehen innen): rueckzugX materialrelativ.
+let RZ_RELATIV=false;
 // =================================================================
 // WERKZEUGVERWALTUNG: REVOLVER + LAGER [Daniel, Monforts-Bestueckung]
 // -----------------------------------------------------------------
@@ -8020,6 +8032,14 @@ function rueckzugStufe(){
 // nach KLEINEREM — sonst faehrt das Innenwerkzeug in die
 // Bohrungswand. Das ist derselbe Fehlerherd wie beim Einstechen innen.
 function rueckzugX(bezug, innen){
+  // SPIEGELLAUF [Stechdrehen innen, 05.09.2026]: die Kopf-Rueckzugs-
+  // ebene ist ein ABSOLUTER ⌀ der echten Welt — in der Spiegelwelt
+  // des Innen-Stechdrehens landete sie ruecktransformiert auf ⌀0
+  // (Stufenbolzen-Kopf: X116 -> 0, Achswache brach ab). Der
+  // Spiegellauf rechnet deshalb materialrelativ (+2); die echten
+  // Rueckzugsebenen gelten unveraendert fuer das Anfahren des
+  // naechsten Zyklus im Rahmen.
+  if(typeof RZ_RELATIV!=='undefined' && RZ_RELATIV) return bezug + (innen ? -2 : 2);
   const st=rueckzugStufe();
   // XRI gibt es erst ab "erweitert"; bei "einfach" gilt XRA fuer beides.
   const nutzeInnen = innen && (st==="erweitert" || st==="alle");
@@ -9995,6 +10015,7 @@ function editStep(i){
     fillStKonturSelect(p.contourId, p.blankContourId);
     setRadio('stBearbBtns',p.bearbeitung);
     setRadio('stRichtBtns', p.richtung||'z');
+    setRadio('stLageBtns', p.lage||'aussen');
     setVal('stStock',p.stock); setVal('stStockZ', p.stockZ!==undefined?p.stockZ:2);
     setVal('stD',p.d); setVal('stDS', p.ds!==undefined?p.ds:'');
     setVal('stTZ', p.tz!==undefined?p.tz:'');
@@ -10099,7 +10120,7 @@ function wireRadioGroup(id){
     btn.classList.add('sel');
   });
 }
-['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stLageBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns','akPlanFertigBtns'].forEach(wireRadioGroup);
 // Kleinumschalter IN einer Feldzeile (wie abs/ink): verdrahtet, aber
 // BEWUSST ohne Auswahlfeld — ein 51-px-Knopfpaar soll Knopfpaar
@@ -10113,7 +10134,7 @@ wireRadioGroup('boWMode');   // man/auto des Bohr-Vorlaufs — war ebenso tot
   if(g) g.addEventListener('click',()=>{ try{ esLabelsSync(); }catch(e){} }); }
 // Dieselben Gruppen bekommen ihr Auswahlfeld. Eine Liste, damit keine
 // Gruppe verdrahtet ist, aber ohne Feld bleibt (oder umgekehrt).
-const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stLageBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns'];
 SELFELD_GRUPPEN.forEach(id=>{ try{ selFeldAufbauen(id); }catch(e){} });
 // Die Rueckzugsstufe schaltet ihre Felder frei — beim Klick und einmal
@@ -11492,6 +11513,7 @@ document.getElementById('btnStOk').onclick=()=>{
     fl: +document.getElementById('stFL').value,
     ff: +document.getElementById('stFF').value, sf: +document.getElementById('stSF').value,
     schlStrat: selBtnVal('stSchlStratBtns') || 'beid',
+    lage: selBtnVal('stLageBtns') || 'aussen',
   };
   commitStep('stechdrehen', params);
   document.getElementById('maskStechdrehen').classList.remove('show');
@@ -16163,6 +16185,8 @@ const MASK_HELP = {
       if(!e || e.value==='' || isNaN(parseFloat(e.value))) return '';
       return ' '+String(+parseFloat(e.value)); };
     const richt=(typeof selBtnVal==='function' && selBtnVal('stRichtBtns'))||'x';
+    const stLage=(typeof selBtnVal==='function' && selBtnVal('stLageBtns'))||'aussen';
+    const stInnen = stLage==='innen';
     // FESTES SCHEMA [Daniel, 29.08.2026]: das Hilfebild erklaert die
     // Felder, es bildet die gewaehlte Kontur nicht ab — dafuer gibt
     // es den Grafik-Schalter. Der Zwischenstand vom selben Tag, der
@@ -16171,20 +16195,32 @@ const MASK_HELP = {
     // Teil ist 260 lang bei Radius 40 (6,5:1) — im Bild eine flache
     // Leiste. Hier 82 zu 30 wie bei den anderen Masken, die Nut
     // nimmt die halbe Breite und zwei Drittel der Hoehe.
-    const M=helpSchnitt(H, {k:[[0,30],[20,30],[25,12],[57,12],[62,30],[82,30]],
-      i:null, m:{E1:[20,30],E2:[25,12],E3:[62,30],E4:[57,12],
-                 Grund:[41,12],Mantel:[9,30]}, zMax:82, rMax:30});
+    // LAGE INNEN [05.09.2026]: dieselbe Kammer als Huelse — die Nut
+    // sticht von der Bohrungswand nach AUSSEN (teil.i wie beim
+    // Einstich-Innenbild), die Stiche zeigen nach oben.
+    const M= stInnen
+      ? helpSchnitt(H, {k:[[0,30],[82,30]],
+          i:[[0,12],[20,12],[20,24],[62,24],[62,12],[82,12]],
+          m:{E1:[20,12],E2:[25,24],E3:[62,12],E4:[57,24],
+             Grund:[41,24],Mantel:[9,12]}, zMax:82, rMax:30})
+      : helpSchnitt(H, {k:[[0,30],[20,30],[25,12],[57,12],[62,30],[82,30]],
+          i:null, m:{E1:[20,30],E2:[25,12],E3:[62,30],E4:[57,12],
+                     Grund:[41,12],Mantel:[9,30]}, zMax:82, rMax:30});
     if(!M) return;
     const P=(n)=>{ const m=M.teil.m[n]; return m? {x:M.zx(m[0]), y:M.rx(m[1])} : null; };
     const E1=P('E1'), E2=P('E2'), E3=P('E3'), E4=P('E4'), Grund=P('Grund'), Mant=P('Mantel');
-    helpLabel(c, richt==='x'?'radial':'längs', 12, 15, false, 'left');
+    helpLabel(c, (richt==='x'?'radial':'längs')+(stInnen?' · innen':''), 12, 15, false, 'left');
 
+    // Vorzeichen der Stichrichtung: aussen nach unten (kleinerer
+    // Radius), innen nach OBEN (die Nut sticht von der Bohrungswand
+    // nach aussen) — dieselbe sIn-Mechanik wie im Einstich-Bild.
+    const sInB = stInnen? -1 : 1;
     if(E1&&E3&&E2){
       if(richt==='x'){
         const n=7;
         for(let k=0;k<n;k++){
           const x=E1.x + (E3.x-E1.x)*(k+0.5)/n;
-          helpBahnStich(c, x, E1.y+7, E2.y-4, A('stDS'));
+          helpBahnStich(c, x, E1.y+7*sInB, E2.y-4*sInB, A('stDS'));
         }
         // RAEUM-SCHEMA [NACHTSCHICHT5 Paket D, Daniels Wunsch vom
         // Stechdreh-Tag]: der gewaehlte Raeumweg wird gezeichnet, nicht
@@ -16197,11 +16233,11 @@ const MASK_HELP = {
             for(let k=1;k<=3;k++){
               const t2=k/4;
               const x=O2.x+(U2.x-O2.x)*t2, y=O2.y+(U2.y-O2.y)*t2;
-              helpBahnStich(c, x, y-9, y-2, A('stRK'));
+              helpBahnStich(c, x, y-9*sInB, y-2*sInB, A('stRK'));
             }
           });
         } else if(raeumB==='zug' && E2 && E4){
-          helpBahn(c, [[E3.x+6,E3.y-4],[E4.x+2,E4.y-4],[E2.x-2,E2.y-4],[E1.x-6,E1.y-4]],
+          helpBahn(c, [[E3.x+6,E3.y-4*sInB],[E4.x+2,E4.y-4*sInB],[E2.x-2,E2.y-4*sInB],[E1.x-6,E1.y-4*sInB]],
                    {on:A('stRK'), pfeil:true});
         }
         // ZWISCHENEBENEN [Daniel, 29.08.2026]: mit TZ zeigt das Bild
@@ -16228,12 +16264,13 @@ const MASK_HELP = {
           helpBahn(c, [[E1.x+5, y],[E3.x-5, y]], {on:A('stD'), pfeil:k===0});
         }
       }
-      helpBahn(c, [[E2.x+5, E2.y-3],[E4.x-5, E4.y-3]], {on:A('stFF')||A('stUZ')});
+      helpBahn(c, [[E2.x+5, E2.y-3*sInB],[E4.x-5, E4.y-3*sInB]], {on:A('stFF')||A('stUZ')});
     }
 
     if(Mant&&Grund) helpDim(c, E1?E1.x-30:40,Mant.y, E1?E1.x-30:40,Grund.y, 0.001, '⌀D'+V('stD'), A('stD'),'in');
-    if(E1&&E3) helpDim(c, E1.x,E1.y-16, E3.x,E3.y-16, -11, 'DS'+V('stDS'), A('stDS'));
-    helpDim(c, M.zx(M.zMax)+16,M.axY, M.zx(M.zMax)+16,M.rx(M.rMax), 0.001, '⌀'+V('stStock'), A('stStock'),'in');
+    if(E1&&E3) helpDim(c, E1.x,E1.y-16*sInB, E3.x,E3.y-16*sInB, -11*sInB, 'DS'+V('stDS'), A('stDS'));
+    // ⌀-Bezug: aussen der Mantel (rMax), innen die VORBOHRUNG (Mant-Marke).
+    helpDim(c, M.zx(M.zMax)+16,M.axY, M.zx(M.zMax)+16, stInnen&&Mant? Mant.y : M.rx(M.rMax), 0.001, '⌀'+V('stStock'), A('stStock'),'in');
     if(Grund) helpDim(c, Grund.x+40,Grund.y, Grund.x+40,Grund.y-9, -0.001, 'UX'+V('stUX'), A('stUX'),'in');
     { const tzV=parseFloat((document.getElementById('stTZ')||{}).value);
       // Raeumen in der Logikzeile mitnennen [Daniel, 29.08.2026]
@@ -24279,6 +24316,85 @@ function schlichteTaschenBeidseitig(pk, pts, bw, xSicher, p, N, bump, lines, war
   });
 }
 function genStechdrehen(p, N, bump, lines, warnings){
+  // =================================================================
+  // STECHDREHEN INNEN ALS SPIEGELUNG [Daniels Innen-Paket 05.09.2026]
+  // -----------------------------------------------------------------
+  // Die Innen-Nut/Kammer in der Bohrung entsteht als SPIEGELUNG der
+  // fertig gerechneten Aussenbahnen (fsLageWandeln-Methodik, auf den
+  // ganzen Zyklus gehoben): die Kontur wird an einer Hilfsebene XM
+  // gespiegelt, der bewaehrte Aussen-Generator rechnet, und die
+  // Saetze werden zurueckgespiegelt — X- und I-Worte (I ist absolut
+  // im ⌀), G02<->G03 und G41<->G42 kippen. Ebenen (TZ), Raeumen
+  // (Ziehen/Nachstechen) und der beidseitige Schlichtzug ERBEN damit
+  // alle Aussen-Korrekturen; die Ueberfluege des Aussenzweigs
+  // (Rohteil+2) werden von selbst zu Fahrten in der Bohrungsluft
+  // (Vorbohrung-2). Kommentar-Masse in Klartextzeilen bleiben die
+  // der Spiegelwelt — die Satzworte sind massgeblich.
+  // =================================================================
+  if(p.lage==='innen' && !p.__spiegel){
+    const cEls = contour;                       // buildProgram hat die Zykluskontur eingewechselt
+    // OHNE das start-Element: dessen x=0 machte minX immer 0 und die
+    // Vorbohrungs-Wache lehnte jede Innenkontur ab (Debug-Befund).
+    const xs = cEls.filter(e=>e.kind!=='start' && isFinite(e.x)).map(e=>+e.x);
+    if(!xs.length){ warnings.push('STECHDREHEN INNEN: Kontur ohne X-Werte.'); return; }
+    const maxX = Math.max.apply(null, xs), minX = Math.min.apply(null, xs);
+    if(!(+p.stock>0) || +p.stock >= minX - 0.01){
+      warnings.push('STECHDREHEN INNEN: die Vorbohrung ⌀'+fmt(p.stock)+' muss KLEINER sein als der kleinste Kontur-⌀ ('+fmt(minX)+') — Feld "Vorbohrung-⌀" pruefen. Zyklus uebersprungen.');
+      return;
+    }
+    // Schneidenlage muss zur Lage passen — dieselbe Wache wie beim
+    // Einstich innen: ein Aussenstecher laeuft mit dem Halter durch
+    // die Bohrungswand.
+    { const tw=toolTable.find(x=>String(x.t)===String(p.t));
+      if(tw && tw.art==='stechen' && slDirection(tw.sl).dy<0)
+        warnings.push('Stechdrehen innen mit T'+p.t+' (Schneidenlage '+tw.sl+'): der Werkzeugkörper liegt Richtung GRÖSSEREN Durchmesser und läuft durch die Bohrungswand. Ein Innen-Stecher hat Schneidenlage 4.'); }
+    warnings.push('Stechdrehen INNEN: spiegelgerechnet aus dem Aussenzweig — NICHT an einem realen Innenzyklus verifiziert, ersten Testlauf im Einzelsatz fahren. Kommentar-Masse in Klartextzeilen stammen aus der Spiegelrechnung.');
+    const XM = maxX + 10;                       // Hilfsebene: alles bleibt satt positiv
+    const sp=(v)=> 2*XM - v;
+    const gespiegelt = cEls.map(e=>{
+      const c2 = Object.assign({}, e);
+      // Das START-Element bleibt an der Achse: es ist die
+      // Stirn-Referenz (x=0). Gespiegelt wuerde es zur ⌀2XM-Planwand
+      // und der Flankenzug begaenne dort (Debug-Befund: X116 im tmp,
+      // ruecktransformiert ⌀0 -> Achswache brach ab).
+      if(c2.kind==='start') return c2;
+      if(isFinite(c2.x)) c2.x = sp(+c2.x);
+      if(c2.cw!==undefined) c2.cw = !c2.cw;
+      return c2;
+    });
+    const p2 = Object.assign({}, p, {
+      lage:'aussen', __spiegel:1,
+      stock: sp(+p.stock),
+      xmin: undefined,                          // Reitstockschutz ist ein Aussen-Begriff
+      blankContourId: undefined,
+      _rest: undefined,
+    });
+    if(p.blankContourId!==undefined)
+      warnings.push('Stechdrehen innen: eine ROHTEILKONTUR wird in dieser Ausbaustufe nicht gespiegelt — gerechnet wird mit der Vorbohrung ⌀'+fmt(p.stock)+'.');
+    const saved = contour;
+    contour = gespiegelt;
+    const tmp=[];
+    try{ RZ_RELATIV=true; genStechdrehen(p2, N, bump, tmp, warnings); }
+    finally{ RZ_RELATIV=false; contour = saved; }
+    if(!tmp.length) return;
+    // Ruecktransformation Satz fuer Satz; Kommentarzeilen unveraendert.
+    let xKleinst=Infinity;
+    const raus=tmp.map(z=>{
+      if(!/^N\d+/.test(z)) return z;
+      let s2=z.replace(/X(-?\d+(?:\.\d+)?)/g, (m,v)=>{ const nv=sp(+v); if(nv<xKleinst) xKleinst=nv; return 'X'+fmt(nv); });
+      s2=s2.replace(/I(-?\d+(?:\.\d+)?)/g, (m,v)=>'I'+fmt(sp(+v)));
+      s2=s2.replace(/\bG02\b/g,'G0@').replace(/\bG03\b/g,'G02').replace(/G0@/g,'G03');
+      s2=s2.replace(/\bG41\b/g,'G4@').replace(/\bG42\b/g,'G41').replace(/G4@/g,'G42');
+      return s2;
+    });
+    if(xKleinst < 0.4){
+      warnings.push('STECHDREHEN INNEN: eine Bahn kaeme der Drehachse zu nahe (⌀'+fmt(xKleinst)+') — Nutgrund/Vorbohrung pruefen. Zyklus uebersprungen.');
+      return;
+    }
+    lines.push('(--- STECHDREHEN INNEN: Bahnen spiegelgerechnet, Spiegelebene ⌀'+fmt(XM)+' ---)');
+    raus.forEach(z=>lines.push(z));
+    return;
+  }
   const doRough = p.bearbeitung!=='schlichten';
   const doFinish = p.bearbeitung!=='schruppen';
   const stTool = toolTable.find(x=>String(x.t)===String(p.t));
@@ -25465,7 +25581,12 @@ function buildProgram(){
         genStechdrehen(st.params, N, bump, lines, warnings);
         delete st.params._rest;
         contour = saved;
-        restNachZyklus(cRef.els, st.params.bearbeitung, +st.params.ux||0, +st.params.uz||0, 0, Infinity);
+        // Die Reststand-Fuehrung rechnet AUSSENhuellen — ein
+        // INNEN-Stechdrehen (Spiegelrechnung, 05.09.2026) darf sie
+        // nicht fortschreiben, sonst saehen Folgezyklen eine falsche
+        // Aussengrenze.
+        if(st.params.lage!=='innen')
+          restNachZyklus(cRef.els, st.params.bearbeitung, +st.params.ux||0, +st.params.uz||0, 0, Infinity);
       }
     }
     // safeX (sicher UEBER dem Rohteil) gilt nur AUSSEN. Beim
