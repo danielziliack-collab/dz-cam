@@ -2023,6 +2023,15 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
                  bildet es in S-Stufen nach. Zeilen-IDs statt
                  FELD_REGELN (selBtnVal im Ersatz-Browser, s. esWRow). -->
             <div class="mrow"><label>Drehzahl variieren (Schlichten)</label><div class="radiobtns" id="aeSvBtns"><button data-v="aus" class="sel" data-vorgabe="1">aus</button><button data-v="an">an (SSV)</button></div></div>
+            <!-- SCHLICHTRICHTUNG [Daniels Wunsch 05.09.2026: "von hinten
+                 nach vorne schlichten kommt immer mal wieder vor"]. Das
+                 Gegenstueck zum akSchlRichtBtns des Konturzyklus; links
+                 nach rechts startet OBEN an der Schulterkante (frei) und
+                 endet vor der Stirn. -->
+            <div class="mrow" id="aeSchlRichtRow"><label>Schlichtrichtung</label><div class="radiobtns" id="aeSchlRichtBtns">
+              <button data-v="rl" class="sel" data-vorgabe="1">rechts → links</button>
+              <button data-v="lr">links → rechts</button>
+            </div></div>
             <div class="mrow" id="aeSvAmpRow" style="display:none;"><label>Amplitude &#177; von S</label><input type="number" step="any" id="aeSvAmp" value="10"><span class="unit">%</span></div>
             <div class="mrow" id="aeSvWegRow" style="display:none;"><label>Periode (Bahnweg)</label><input type="number" step="any" id="aeSvWeg" value="20"><span class="unit">mm</span></div>
             <div class="mrow"><label>Bearbeitung</label>
@@ -9860,6 +9869,7 @@ function editStep(i){
     setVal('aeSbDI', p.sbDI!==undefined?p.sbDI:5); setVal('aeSbU', p.sbU!==undefined?p.sbU:2); setVal('aeSbRD', p.sbRD!==undefined?p.sbRD:0.5);
     sbSetzen('ae', p.sbArt||'aus');
     setRadio('aeSvBtns', p.svArt||'aus');
+    setRadio('aeSchlRichtBtns', p.schlRicht||'rl');
     setVal('aeSvAmp', p.svAmp!==undefined?p.svAmp:10); setVal('aeSvWeg', p.svWeg!==undefined?p.svWeg:20);
     svSetzen('ae', p.svArt||'aus');
     inkReset(['aeX1mode','aeZ1mode']); aeGruppenSync();   // erst NACH allen setVal — sonst fasst sie Altwerte zusammen
@@ -10089,7 +10099,7 @@ function wireRadioGroup(id){
     btn.classList.add('sel');
   });
 }
-['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns','akPlanFertigBtns'].forEach(wireRadioGroup);
 // Kleinumschalter IN einer Feldzeile (wie abs/ink): verdrahtet, aber
 // BEWUSST ohne Auswahlfeld — ein 51-px-Knopfpaar soll Knopfpaar
@@ -10103,7 +10113,7 @@ wireRadioGroup('boWMode');   // man/auto des Bohr-Vorlaufs — war ebenso tot
   if(g) g.addEventListener('click',()=>{ try{ esLabelsSync(); }catch(e){} }); }
 // Dieselben Gruppen bekommen ihr Auswahlfeld. Eine Liste, damit keine
 // Gruppe verdrahtet ist, aber ohne Feld bleibt (oder umgekehrt).
-const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
+const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
 'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns'];
 SELFELD_GRUPPEN.forEach(id=>{ try{ selFeldAufbauen(id); }catch(e){} });
 // Die Rueckzugsstufe schaltet ihre Felder frei — beim Klick und einmal
@@ -11197,6 +11207,7 @@ document.getElementById('btnAeOk').onclick=()=>{
     svArt: selBtnVal('aeSvBtns')||'aus',
     svAmp: +document.getElementById('aeSvAmp').value||10,
     svWeg: +document.getElementById('aeSvWeg').value||20,
+    schlRicht: selBtnVal('aeSchlRichtBtns')||'rl',
   };
   commitStep('abspanen_einfach', params);
   document.getElementById('maskAbspanenEinfach').classList.remove('show');
@@ -20091,6 +20102,11 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
         if(bw!==null){ lines.push(`${N()} (RADIUS  ) G0${C.g} X${fmt(2*C.p2.x)} Z${fmt(C.p2.z)} ${bw}`); bump(); }
         else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(2*C.p2.x)} Z${fmt(C.p2.z)}`); bump(); }
       };
+      // Schlichtrichtung links->rechts gibt es im WINKELZWEIG (noch)
+      // nicht — Ansage statt stiller Rueckfall [05.09.2026].
+      if(p.schlRicht==='lr'){
+        warnings.push('Ecke: Schlichtrichtung links→rechts ist für die Schenkelwinkel-Form in dieser Ausbaustufe nicht umgesetzt — geschlichtet wird rechts→links.');
+      }
       if(C1 && p.k1Typ==='fase'){
         // Fase auf ihrer eigenen Verlaengerung 1 mm vor der Stirn
         // beginnen — dieselbe Regel wie im 90-Grad-Zug (K1-Befund).
@@ -20277,6 +20293,8 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     const k2=(p.k2Typ&&p.k2Typ!=='keine')?Math.max(0,+p.k2||0):0;
     const k3=(p.k3Typ&&p.k3Typ!=='keine')?Math.max(0,+p.k3||0):0;
     if(innen){
+      if(p.schlRicht==='lr')
+        warnings.push('Ecke: Schlichtrichtung links→rechts ist für Lage innen in dieser Ausbaustufe nicht umgesetzt — geschlichtet wird rechts→links.');
       // =========================================================
       // INNEN-SCHLICHTZUG MIT KANTENBELEGUNG [Daniel, Innen-Paket 1]:
       // Spiegelbild des Aussenzugs — Bohrungsoeffnung -> Mantel ->
@@ -20344,6 +20362,8 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
       // auf den Ziel-⌀ — der Mantel wurde nie geschlichtet.
       const xi=xInner, xo=xOuter, zo=zOuter, zi=zInner;
       if(trifftMitte){
+        if(p.schlRicht==='lr')
+          warnings.push('Ecke: Schlichtrichtung links→rechts ist beim Planschnitt auf Mitte nicht umgesetzt (Planschlichten läuft auf den Monforts von oben nach unten — Führungs-Doktrin) — gefahren wird der Standardzug.');
         // REINER PLANSCHNITT AUF MITTE [Daniel, Punkt 23]: es gibt hier
         // keinen Zapfen und keine Stirnkante — der Zug ist die Flaeche
         // selbst. Er beginnt UNTER der Mitte, damit der Schneidenradius die
@@ -20394,6 +20414,63 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
         }
         lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(xo+2)}`); bump();
         lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(zAnf)}`); bump();
+        }
+      } else if(p.schlRicht==='lr'){
+        // =============================================================
+        // SCHLICHTRICHTUNG LINKS -> RECHTS [Daniels Wunsch 05.09.2026,
+        // "von hinten nach vorne kommt immer mal wieder vor"]: dieselbe
+        // Kette exakt RUECKWAERTS. Start OBEN an der Schulterkante —
+        // eine AUSSENecke, dort verschneidet keine SRK (der Anwahl-
+        // Eckrest des Konturzyklus existiert hier nicht). Boegen kippen
+        // G02<->G03, die Korrekturseite kippt auf G41 (crcCode). Am
+        // Stirnende laeuft die K1-Fase auf ihrer eigenen VERLAENGERUNG
+        // in die Luft aus (K1-Regel, gespiegelt), G40 dort; die
+        // K1-Rundung endet tangential in der Stirnebene, Abwahl radial
+        // abwaerts in die Luft vor der Stirn.
+        // =============================================================
+        const compL = crcCode({crc:'', lage:p.lage, schlRicht:'lr'});
+        const anW = srkWeg(toolRadius(p.t));
+        lines.push(`(--- SCHLICHTEN LINKS->RECHTS ---)`);
+        lines.push(`${N()} (SCHRAEG ) G00 G90 X${fmt(xo + anW)} Z${fmt(k3? zi-k3 : zi)}`); bump();
+        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compL} X${fmt(xo)}`); bump();
+        if(k3){
+          if(p.k3Typ==='fase'){
+            lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo-2*k3)} Z${fmt(zi)}`); bump();
+          } else {
+            const bw=bogenWorte(d2r(xo), zi-k3, d2r(xo)-k3, zi, d2r(xo)-k3, zi-k3, true, warnings);
+            if(bw!==null){ lines.push(`${N()} (RADIUS  ) G02 X${fmt(xo-2*k3)} Z${fmt(zi)} ${bw}`); bump(); }
+            else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xo-2*k3)} Z${fmt(zi)}`); bump(); }
+          }
+        }
+        if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xo - (k3?2*k3:0), zi, xi + (k2?2*k2:0), zi); }
+        else { lines.push(`${N()} (GERADE  ) G01 X${fmt(xi + (k2?2*k2:0))}`); bump(); }
+        if(k2){
+          if(p.k2Typ==='fase'){
+            lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi)} Z${fmt(zi+k2)}`); bump();
+          } else {
+            const bw=bogenWorte(d2r(xi)+k2, zi, d2r(xi), zi+k2, d2r(xi)+k2, zi+k2, false, warnings);
+            if(bw!==null){ lines.push(`${N()} (RADIUS  ) G03 X${fmt(xi)} Z${fmt(zi+k2)} ${bw}`); bump(); }
+            else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi)} Z${fmt(zi+k2)}`); bump(); }
+          }
+        }
+        if(svAe){ svStrecke(lines, N, bump, svAe, p.sf, xi, zi + (k2||0), xi, (k1? zo-k1 : zo)); }
+        else { lines.push(`${N()} (GERADE  ) G01 Z${fmt(k1? zo-k1 : zo)}`); bump(); }
+        if(k1 && p.k1Typ==='fase'){
+          const aF1 = Math.max(0, Math.min(1, (xi-2*k1-0.5)/2));
+          const startX = xi-2*k1-2*aF1;
+          lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi-2*k1)} Z${fmt(zo)}`); bump();
+          if(aF1>0){ lines.push(`${N()} (SCHRAEG ) G01 G40 X${fmt(startX)} Z${fmt(zo+aF1)}`); bump(); }
+          else { lines.push(`${N()} (GERADE  ) G01 G40 Z${fmt(zo+anW)}`); bump(); }
+          lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(zAnf)}`); bump();
+        } else if(k1){
+          const bw=bogenWorte(d2r(xi), zo-k1, d2r(xi)-k1, zo, d2r(xi)-k1, zo-k1, true, warnings);
+          if(bw!==null){ lines.push(`${N()} (RADIUS  ) G02 X${fmt(xi-2*k1)} Z${fmt(zo)} ${bw}`); bump(); }
+          else { lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi-2*k1)} Z${fmt(zo)}`); bump(); }
+          lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(Math.max(0.5, xi-2*k1-2))}`); bump();
+          lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(zAnf)}`); bump();
+        } else {
+          lines.push(`${N()} (GERADE  ) G01 G40 Z${fmt(zo+anW)}`); bump();
+          lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(zAnf)}`); bump();
         }
       } else {
       // K1-FASE UEBER DEN ANFANG HINAUS ANFAHREN [Daniel, 29.08.2026,
@@ -20769,6 +20846,16 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   const nurRest = p.bearbeitung==='rest';
   const doRough = !nurRest && p.bearbeitung!=='schlichten';
   const doFinish = !nurRest && p.bearbeitung!=='schruppen';
+  // Schlichtrichtung links->rechts ist INNEN nicht umgesetzt: die
+  // lr-Anfahrt des Aussenzweigs (X stock+2, dann axial hinter das
+  // Konturende) liefe in der Bohrung aussen am Teil vorbei und
+  // radial durch die Absatzwand. Ansage statt stiller Falschbahn;
+  // p wird lokal auf rl normalisiert, damit crcCode und lr-Zweig
+  // dieselbe Antwort sehen [05.09.2026].
+  if(p.schlRicht==='lr' && p.lage==='innen' && doFinish){
+    warnings.push('Konturschlichten links→rechts ist bei Lage INNEN in dieser Ausbaustufe nicht umgesetzt — geschlichtet wird rechts→links.');
+    p = Object.assign({}, p, {schlRicht:'rl'});
+  }
   // Spanbrechen [Daniel, 02.09.2026]: nur die geraden Hauptzuege der
   // achsparallelen Zweige. Konturparallel folgt der Huelle in vielen
   // kurzen Segmenten — dort ist eine saubere DI-Zaehlung ein eigener
@@ -22266,18 +22353,70 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
       // die Schlichtrichtung kippte die Korrekturseite und der Versatz zeigte
       // ins Material (zweiter Fund derselben Prüfung).
       const anVorhalt = noseR;
+      // =============================================================
+      // ANWAHL-ECKREST [Daniels lr-Befund 05.09.2026, gemessen am
+      // Stufenbolzen: +0,655 mm Radius am Konturende, abklingend
+      // ueber genau den Schneidenradius 0,8]: Die radiale Anwahl
+      // endet in einer KONKAVEN Ecke — die SRK der Steuerung
+      // verschneidet dort und laesst den Radius-Rest an der Wand
+      // stehen (dieselbe Klasse wie die K1-Fase vom 29.08.). Der
+      // K1-Fix gilt auch hier: Ist HINTER dem Konturende Luft (kein
+      // Rohteil/Reststand auf Mantelhoehe), faehrt die Anwahl auf
+      // der VERLAENGERUNG des ersten Elements an — tangential, ohne
+      // Ecke, ohne Rest. Steht dort eine WAND, ist der Eckrest
+      // PHYSIK (kein Werkzeug kommt von der anderen Seite): dann
+      // bleibt die radiale Anwahl, und eine Warnung nennt den Rest
+      // beim Namen — der Massbericht zeigt dieselbe Zone.
+      // =============================================================
+      const tangentEnde=(sg)=>{
+        // Vorwaertsrichtung (z1->z2) am z2-Ende, Einheitsvektor im
+        // (z, r)-Raum; die VERLAENGERUNG laeuft in dieser Richtung
+        // ueber z2 hinaus (weiter Richtung Futter).
+        if(sg.type==='arc' && isFinite(sg.cz)){
+          const Rz=sg.z2-sg.cz, Rr=sg.x2-sg.cx;
+          let tz=-Rr, tr=Rz;
+          if(tz*(sg.z2-sg.z1)+tr*(sg.x2-sg.x1) < 0){ tz=-tz; tr=-tr; }
+          const L2=Math.hypot(tz,tr)||1;
+          return {z:tz/L2, r:tr/L2};
+        }
+        const dz=sg.z2-sg.z1, dr=sg.x2-sg.x1;
+        const L2=Math.hypot(dz,dr)||1;
+        return {z:dz/L2, r:dr/L2};
+      };
       revRuns.forEach((r,ri)=>{
         const sgE=segs[r.end];                     // hinterstes Segment = Laufbeginn (rückwärts)
         const sx=r2d(sgE.x2);
         const zAn2 = sgE.z2 + anVorhalt;
+        let tangential=false;
         if(ri===0){
-          lines.push(`${N()} (GERADE  ) G00 Z${fmt(zAn2)}`); bump();
-          lines.push(`${N()} (GERADE  ) G00 X${fmt(limX(sx) + clearSign2*anWeg)}`); bump();
+          const tg=tangentEnde(sgE);
+          const pV={z:sgE.z2 + tg.z*anWeg, r:sgE.x2 + tg.r*anWeg};
+          // Frei nur, wenn der GANZE Verlaengerungsweg in Luft liegt
+          // (Rohteilkontur UND Reststand des Vorgaengers) und der
+          // Reitstockschutz ihn nicht klemmt.
+          const frei = Math.abs(tg.z)>1e-6 && r2d(pV.r)>xmin+0.1 &&
+            [0.34,0.67,1].every(t2=>{
+              const zq=sgE.z2 + tg.z*anWeg*t2, rq=sgE.x2 + tg.r*anWeg*t2;
+              return matAt(zq) < r2d(rq) - 0.4;
+            });
+          if(frei){
+            tangential=true;
+            lines.push(`(ANWAHL AUF DER VERLAENGERUNG - KONTURENDE FREI)`);
+            lines.push(`${N()} (GERADE  ) G00 Z${fmt(pV.z)}`); bump();
+            lines.push(`${N()} (GERADE  ) G00 X${fmt(limX(cx(r2d(pV.r))) )}`); bump();
+            lines.push(`${N()} (SCHRAEG ) G95 F${fmt(p.ff)} G01 ${cc}X${fmt(limX(cx(sx)))} Z${fmt(sgE.z2)}`); bump();
+          } else {
+            warnings.push('Schlichten links→rechts: am Konturende Z'+fmt(sgE.z2)+
+              ' steht Material hinter dem Startpunkt — die radiale Anwahl lässt dort den Schneidenradius-Eckrest (~'
+              +fmt(noseR)+' mm) stehen (Maßbericht zeigt die Zone). Abhilfe: Kontur dort mit Einstich/Freistich beginnen oder rechts→links schlichten.');
+            lines.push(`${N()} (GERADE  ) G00 Z${fmt(zAn2)}`); bump();
+            lines.push(`${N()} (GERADE  ) G00 X${fmt(limX(sx) + clearSign2*anWeg)}`); bump();
+          }
         } else {
           lines.push(`(--- HAUPTKONTUR WEITER VOR HINTERSCHNITT ---)`);
           lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(limX(sx) + clearSign2*anWeg)} Z${fmt(zAn2)}`); bump();
         }
-        lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${cc}X${fmt(limX(sx))}`); bump();
+        if(!tangential){ lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${cc}X${fmt(limX(sx))}`); bump(); }
         for(let si=r.end; si>=r.start; si--) emitSegRev(segs[si]);
         const isLast = ri===revRuns.length-1;
         const endSeg=segs[r.start];
