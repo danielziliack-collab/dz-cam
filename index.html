@@ -20409,19 +20409,23 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
       const compL = crcCode({crc:'', lage:p.lage, schlRicht:'lr'});
       const anW = srkWeg(toolRadius(p.t));
       lines.push(`(--- SCHLICHTEN LINKS->RECHTS ---)`);
-      lines.push(`${N()} (GERADE  ) G00 G90 X${fmt(Math.max(0.5, xi-anW))} Z${fmt(zAnf)}`); bump();
-      // [Daniels Sim-Befund 05.09.2026, 21:01: KOLLISION am
-      // SACKLOCH-Grund] Der Eilgang tauchte bis HINTER das Konturende
-      // (zi-k3) — endet die Vorbohrung dort (Bohrgrundkegel), fuhr er
-      // durch Material; am Hoehenfeld reproduziert (1 Treffer @z-60,8/
-      // ⌀47,9, Durchgangsbohrung frei). Jetzt: Eilgang nur bis 1 mm
-      // VOR die Ecke (derselbe Korridor, den der rl-Endrueckzug seit
-      // jeher nutzt), der Rest im VORSCHUB — steht am Sackgrund
-      // Material, wird es geschnitten statt gecrasht.
-      lines.push(`${N()} (GERADE  ) G00 Z${fmt(zi+1)}`); bump();
-      lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 Z${fmt(k3? zi-k3 : zi)}`); bump();
-      warnings.push('Ecke innen links→rechts: die Anfahrt zur Vorbohrkante faehrt die letzten '+fmt(1+(k3||0))+' mm im Vorschub — reicht die Vorbohrung nicht mindestens '+fmt(k3||0)+' mm hinter das Konturende (Sackloch), schneidet sie dort frei.');
-      lines.push(`${N()} (GERADE  ) G01 ${compL} X${fmt(xi)}`); bump();
+      // ANFAHRT AUF DEM FERTIGMASS DURCH DIE OFFENE AUSDREHUNG
+      // [Daniels Sim-Befund 05.09.2026, 22:12: "er faehrt eine Schraege,
+      // dann in die Wand rein, wenn das Vollmaterial waer"]. Der alte
+      // Zug startete bei X(xi-anW) — UNTER dem Fertigmass xi (Richtung
+      // Achse) und tauchte dort axial ein. Das ist nur frei, weil der
+      // Schruppgang die weite Ausdrehung (xo) schon geoeffnet hat; ohne
+      // Schruppen oder bei kleiner Vorbohrung ist es die RESTWAND unter
+      // der Planflaeche. Daniels Weg ist richtig und jetzt gebaut: auf
+      // dem Innen-Fertigmass xi (immer < xo, also im offenen Hohlraum,
+      // mind. (xo-xi)/2 mm von der Wand) axial zum Grund, dann die
+      // Planflaeche hoch. Der Eilgang taucht nur bis anW UEBER den Grund
+      // (Sackloch-sicher — kein Eilgang hinter das Konturende), die SRK
+      // aktiviert auf dem restlichen Vorschubzug (Weg anW+k3 >= anW).
+      lines.push(`${N()} (GERADE  ) G00 G90 X${fmt(xi)} Z${fmt(zAnf)}`); bump();
+      lines.push(`${N()} (GERADE  ) G00 Z${fmt(zi+anW)}`); bump();
+      lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${compL} Z${fmt(k3? zi-k3 : zi)}`); bump();
+      warnings.push('Ecke innen links→rechts: die Anfahrt faehrt auf dem Innen-Fertigmass ⌀'+fmt(xi)+' durch die offene Ausdrehung; der Eilgang taucht nur bis '+fmt(anW)+' mm ueber den Grund, die letzten '+fmt(anW+(k3||0))+' mm laufen im Vorschub. Reicht die Vorbohrung nicht mindestens '+fmt(k3||0)+' mm hinter das Konturende (Sackloch), schneidet der Vorschub dort frei.');
       if(k3){
         if(p.k3Typ==='fase'){
           lines.push(`${N()} (SCHRAEG ) G01 X${fmt(xi+2*k3)} Z${fmt(zi)}`); bump();
