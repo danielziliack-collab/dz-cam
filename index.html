@@ -3573,7 +3573,8 @@ Viertelkreis r1 sind Satz f&uuml;r Satz nachgerechnet.</dd>
 <dl>
 <dt id="ba-ab-x0z0">X0 &empty; / Z0</dt>
 <dd>Startdurchmesser (&uuml;blich Rohma&szlig;) und Abstechposition &mdash; Z0 ist die
-RECHTE Kante der Klinge; die Klingenbreite steht am Werkzeug.</dd>
+Bezugsschneide der Klinge (siehe Kapitel 11), die Klingenbreite steht am
+Werkzeug.</dd>
 <dt id="ba-ab-kante">Kante: Fase / Rundung / keine</dt>
 <dd>Bricht die Kante des stehenbleibenden Teils vor dem Durchstich. Steht die Kante
 auf &bdquo;keine&ldquo;, ist das Ma&szlig;feld ausgeblendet.</dd>
@@ -4079,6 +4080,26 @@ Profilwechsel sichert die App die Belegung der alten Maschine und holt die der
 neuen. Tabelle und Belegungen &uuml;berleben das Neuladen (Browserspeicher) &mdash;
 vorher war beides nach jedem Schlie&szlig;en weg. Achtung beim R&uuml;cksetzen: der
 Knopf leert Werkzeuge UND Belegungen beider Maschinen.</dd>
+<dt id="ba-wz-refedge">Bezugsschneide bei Stechwerkzeugen (ge&auml;ndert 06.09.2026)</dt>
+<dd>Eine Stechklinge hat zwei Schneidenecken. Die <b>Bezugsschneide</b> ist die,
+auf die der Werkzeug-Nullpunkt eingemessen ist &mdash; also die Ecke, die beim
+Ankratzen an der Planfl&auml;che z&auml;hlt. Bei einer 3-mm-Platte: nimmt man die
+linke Ecke, tr&auml;gt man Z0 ein; nimmt man die rechte, Z3.
+<br><b>Die Angabe folgt der BILDANSICHT</b>, nicht der Beschriftung am Halter:
+&bdquo;links&ldquo; hei&szlig;t, dass der programmierte Punkt die im Bild LINKE
+Klingenkante ist &mdash; die Klinge liegt dann rechts davon. Bis zum 06.09.2026
+war es umgekehrt benannt (Perspektive am Werkzeug, das in der Multifix-Aufnahme
+&uuml;ber Kopf h&auml;ngt); was &bdquo;links&ldquo; hie&szlig;, erschien im Bild
+rechts. Vorhandene Werkzeuge wurden beim ersten Laden automatisch auf die neue
+Bezeichnung gedreht und verhalten sich unver&auml;ndert.
+<br><b>Die Einstellung wirkt jetzt auch auf die NC.</b> Vorher &auml;nderte sie nur
+Bild und Simulation, w&auml;hrend der Zyklus fest mit der rechten Bezugskante
+rechnete &mdash; Bild und Maschine konnten auseinanderlaufen. Steht die
+Bezugsschneide auf &bdquo;links&ldquo;, liegen alle Z-Werte des Einstichzyklus um
+die Stechbreite niedriger; die Nut sitzt physisch an derselben Stelle, nur der
+programmierte Punkt wechselt die Ecke. Das Programm sagt es in einer Warnzeile
+ausdr&uuml;cklich an &mdash; und das Werkzeug muss dann auch so eingemessen
+sein.</dd>
 <dt id="ba-wz-anlegen">Werkzeug anlegen</dt>
 <dd>Nummer (T), Art (Au&szlig;en/Innen/Stechen/Bohren/Gewinde), Plattenform mit
 Spitzenwinkel (sw) und Einstellwinkel (ew), Schneidenradius, bei Stechern die
@@ -5182,7 +5203,7 @@ let toolTable = [
   {platz:1, t:'1',  name:'Außen Schruppen CNMG 80°', art:'aussen', r:0.8, sl:3, ew:95, sw:80, len:12, vc:180},
   {platz:2, t:'2',  name:'Außen Schlichten DNMG 55°', art:'aussen', r:0.4, sl:3, ew:93, sw:55, len:10, vc:200},
   {platz:3, t:'3',  name:'Außen Kopierschlichten VNMG 35°', art:'aussen', r:0.4, sl:3, ew:93, sw:35, len:8, vc:200},
-  {platz:4, t:'4',  name:'Stechdrehmeißel außen 3mm', art:'stechen', r:0.2, sl:3, ew:90, sw:0, len:3, refEdge:'links', vc:140},
+  {platz:4, t:'4',  name:'Stechdrehmeißel außen 3mm', art:'stechen', r:0.2, sl:3, ew:90, sw:0, len:3, refEdge:'rechts', vc:140},
   {platz:6, t:'6',  name:'Zentrierbohrer', art:'bohren', r:0, sl:9, ew:0, sw:118, len:8, dm:3.15},
   {platz:7, t:'7',  name:'Spiralbohrer 10mm', art:'bohren', r:0, sl:9, ew:0, sw:118, len:60, dm:10},
   // SL 4 [Daniel]: Bohrstange kommt von rechts — Koerper rechts,
@@ -5194,16 +5215,16 @@ let toolTable = [
   {t:'11', name:'Außendrehmeißel Schlichten 55°', art:'aussen', r:0.4, sl:3, ew:93, sw:55, len:10, vc:200},
   {t:'12', name:'Schlichtdrehmeißel 35° VBMT', art:'aussen', r:0.4, sl:3, ew:93, sw:35, len:8, vc:200},
   {t:'13', name:'Runddrehmeißel R4', art:'aussen', r:4, sl:3, ew:90, sw:0, len:8, rund:true, vc:200},
-  {t:'20', name:'Stechdrehmeißel 3mm', art:'stechen', r:0.2, sl:3, ew:90, sw:0, len:3, refEdge:'links', vc:140},
+  {t:'20', name:'Stechdrehmeißel 3mm', art:'stechen', r:0.2, sl:3, ew:90, sw:0, len:3, refEdge:'rechts', vc:140},
   // 6 mm fuer grosse Teile [Daniel, Punkt 3]: die Rotorwelle hat Nuten
   // von 10 und 20 mm Breite auf ⌀184 und ⌀300. Mit der 3-mm-Platte
   // braucht das dreimal so viele Stiche, und eine 3-mm-Klinge auf ⌀300
   // wuerde an der Maschine niemand einsetzen.
-  {t:'21', name:'Stechdrehmeißel 6mm', art:'stechen', r:0.4, sl:3, ew:90, sw:0, len:6, refEdge:'links', vc:140},
+  {t:'21', name:'Stechdrehmeißel 6mm', art:'stechen', r:0.4, sl:3, ew:90, sw:0, len:6, refEdge:'rechts', vc:140},
   // INNEN-STECHER [Einstechen innen]: SL4 wie die Bohrstangen — der
   // Koerper liegt Richtung KLEINERER Durchmesser, also in der Bohrung.
   // Mit einem Aussenstecher (SL3) waere der Halter dort in der Wand.
-  {t:'22', name:'Stechdrehmeißel innen 3mm (Bohrstange)', art:'stechen', r:0.2, sl:4, ew:90, sw:0, len:3, refEdge:'links', vc:140},
+  {t:'22', name:'Stechdrehmeißel innen 3mm (Bohrstange)', art:'stechen', r:0.2, sl:4, ew:90, sw:0, len:3, refEdge:'rechts', vc:140},
   {t:'30', name:'Zentrierbohrer', art:'bohren', r:0, sl:9, ew:0, sw:118, len:8, dm:3.15},
   {t:'31', name:'Spiralbohrer 10mm', art:'bohren', r:0, sl:9, ew:0, sw:118, len:60, dm:10},
   // INNENBEARBEITUNG [Daniel, Testteil "Buchse"]: fuer ein Teil mit
@@ -5250,8 +5271,11 @@ const WZ_VORGABE=JSON.parse(JSON.stringify(toolTable));
 // platz-Felder.
 let wzBelegungen = {};
 function werkzeugeSpeichern(){
+  // refEdgeV2 markiert, dass die Bezugsschneide bereits in der neuen
+  // Bedeutung (BILDANSICHT statt Werkzeug-Eigenperspektive) vorliegt —
+  // sonst wuerde werkzeugeAusSlot sie bei jedem Laden erneut drehen.
   try{ localStorage.setItem(WZ_SLOT, JSON.stringify(
-    {v:2, werkzeuge:toolTable, belegungen:wzBelegungen})); }catch(e){}
+    {v:2, refEdgeV2:true, werkzeuge:toolTable, belegungen:wzBelegungen})); }catch(e){}
 }
 function werkzeugeAusSlot(){
   try{
@@ -5270,6 +5294,20 @@ function werkzeugeAusSlot(){
       // Seit dem Nachmittag ist t STABIL (die NC mappt auf den Platz)
       // — lagerId-Werkzeuge drehen auf ihre Nummer zurueck.
       arr.forEach(w=>{ if(w.lagerId!==undefined){ w.t=String(w.lagerId); delete w.lagerId; } });
+      // MIGRATION DER BEZUGSSCHNEIDE [Daniels Befund 06.09.2026: "da
+      // gibst Du an rechte Schneide und in der Blickrichtung auf das
+      // Bild ist sie aber links"]. Bis dahin benannte refEdge die Ecke
+      // aus der WERKZEUG-Eigenperspektive (Multifix, das Werkzeug
+      // haengt ueber Kopf) — im Bild erschien sie auf der anderen
+      // Seite. Ab jetzt gilt die BILDANSICHT, wie Daniel es einmisst:
+      // "links" = der programmierte Punkt ist die im Bild linke
+      // Klingenkante. Damit gespeicherte Werkzeuge ihr VERHALTEN
+      // behalten (und die NC bitgenau bleibt), wird der Wert beim
+      // Laden einmalig gedreht; refEdgeV2 merkt, dass das erledigt ist.
+      if(!(roh && roh.refEdgeV2)){
+        arr.forEach(w=>{ if(w.refEdge==='links') w.refEdge='rechts';
+                         else if(w.refEdge==='rechts') w.refEdge='links'; });
+      }
       toolTable=arr;
       if(roh && roh.belegungen && typeof roh.belegungen==='object') wzBelegungen=roh.belegungen;
     }
@@ -12810,12 +12848,12 @@ function drawToolShape(c, px, py, scale, tool, opts){
     // programmierten Punkt.
     const bw=Math.max(3,(+tool.len||3)*scale);
     const ref=(tool.refEdge==='rechts')?'rechts':'links';
-    // [Daniel, Multifix vordere Werkzeuglage]: das Werkzeug haengt ueber
-    // Kopf — seine 'linke' Bezugsschneide erscheint in der Zeichnungs-
-    // ansicht RECHTS. Generator und Abtrag rechnen die Klinge als
-    // [z-bw, z]; die Zeichnung muss deckungsgleich stehen, sonst wirkt
-    // die rechte Nuthaelfte unerodiert (Screenshot-Befund).
-    const left=px-(ref==='links'?bw:0);
+    // BEZUGSSCHNEIDE IN DER BILDANSICHT [Daniels Ansage 06.09.2026,
+    // s. Schneidpolygon]: "links" heisst jetzt, dass der programmierte
+    // Punkt die im Bild LINKE Klingenkante ist — die Klinge liegt dann
+    // rechts davon. Frueher war es die Werkzeug-Eigenperspektive und
+    // damit im Bild spiegelverkehrt zur Beschriftung.
+    const left=px-(ref==='rechts'?bw:0);
     const bladeH=Math.max(26, bw*4.5);
     const blockH=Math.max(12, bladeH*0.4);
     const rIns=Math.max(0.05,+tool.r||0.2)*scale;
@@ -13370,8 +13408,8 @@ const WERKZEUG_VORLAGEN = [
   { id:'d55',   label:'55° Platte (D)',  name:'Außendrehmeißel 55° Schlichten', art:'aussen', r:0.4, sl:3, ew:93, sw:55, len:10 },
   { id:'v35',   label:'35° Platte (V)',  name:'Kopierdrehmeißel 35°',           art:'aussen', r:0.2, sl:3, ew:93, sw:35, len:8  },
   { id:'rund',  label:'Rundplatte (R)',  name:'Runddrehmeißel R4',              art:'aussen', r:4,   sl:3, ew:90, sw:0,  len:8, rund:true },
-  { id:'stech', label:'Stechplatte',     name:'Stechdrehmeißel 3mm',            art:'stechen',r:0.2, sl:3, ew:90, sw:0,  len:3, refEdge:'links' },
-  { id:'steI',  label:'Stech innen',    name:'Stechdrehmeißel innen 3mm',      art:'stechen',r:0.2, sl:4, ew:90, sw:0,  len:3, refEdge:'links' },
+  { id:'stech', label:'Stechplatte',     name:'Stechdrehmeißel 3mm',            art:'stechen',r:0.2, sl:3, ew:90, sw:0,  len:3, refEdge:'rechts' },
+  { id:'steI',  label:'Stech innen',    name:'Stechdrehmeißel innen 3mm',      art:'stechen',r:0.2, sl:4, ew:90, sw:0,  len:3, refEdge:'rechts' },
   { id:'gew',   label:'Gewinde 60°',     name:'Gewindedrehmeißel 60°',          art:'gewinde',r:0.1, sl:3, ew:90, sw:60, len:4 },
   { id:'i80',   label:'Innen 80° (C)',   name:'Innendrehmeißel 80°',            art:'innen',  r:0.4, sl:4, ew:93, sw:80, len:8 },
   { id:'bohr',  label:'Spiralbohrer',    name:'Spiralbohrer 10mm',              art:'bohren', r:0,   sl:9, ew:0,  sw:118,len:60, dm:10 },
@@ -13381,79 +13419,6 @@ function naechsteFreieT(){
   let t=10;
   while(toolTable.some(x=>String(x.t)===String(t))) t+=1;
   return String(t);
-}
-// Kachel-Glyphen: kompakte, saubere Plattensymbole
-function drawVorlagenGlyph(cv, v){
-  const dpr=window.devicePixelRatio||1;
-  const W=cv.clientWidth||64, H=cv.clientHeight||40;
-  if(cv.width!==Math.round(W*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); }
-  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
-  c.clearRect(0,0,W,H);
-  const gold=c.createLinearGradient(0,4,0,H-4);
-  gold.addColorStop(0,'#f0cf7e'); gold.addColorStop(1,'#b8862c');
-  c.lineWidth=1.4; c.strokeStyle='#6b4e12'; c.fillStyle=gold;
-  const cx=W/2, cy=H/2;
-  const rhombus=(sw)=>{
-    // Rhombus mit Spitzenwinkel sw, Spitze nach links-unten (Schneidecke)
-    const a=(sw/2)*Math.PI/180, L=H*0.62;
-    const p0=[cx-W*0.30, cy+H*0.30];
-    const e1=[Math.cos(-a+0.5), Math.sin(-a+0.5)], e2=[Math.cos(a+0.5), Math.sin(a+0.5)];
-    const P=[p0,[p0[0]+e1[0]*L, p0[1]-e1[1]*L],[p0[0]+(e1[0]+e2[0])*L, p0[1]-(e1[1]+e2[1])*L],[p0[0]+e2[0]*L, p0[1]-e2[1]*L]];
-    c.beginPath(); P.forEach((q,i)=> i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1])); c.closePath();
-    c.fill(); c.stroke();
-    // Schraubenloch
-    c.beginPath(); c.arc((P[0][0]+P[2][0])/2,(P[0][1]+P[2][1])/2, 3, 0, 7);
-    c.fillStyle='#38454f'; c.fill(); c.fillStyle=gold;
-    // aktive Ecke rot markieren
-    c.strokeStyle='#c8281f'; c.lineWidth=2;
-    c.beginPath(); c.arc(P[0][0],P[0][1], 4, Math.PI*0.15, Math.PI*1.1); c.stroke();
-    c.strokeStyle='#6b4e12'; c.lineWidth=1.4;
-  };
-  if(v.id==='rund'){
-    c.beginPath(); c.arc(cx, cy, H*0.34, 0, 7); c.fill(); c.stroke();
-    c.beginPath(); c.arc(cx, cy, 3.2, 0, 7); c.fillStyle='#38454f'; c.fill();
-  } else if(v.id==='stech'){
-    // schmale Klinge mit Schneidplatte oben
-    c.fillStyle='#5c6a76';
-    c.fillRect(cx-4, cy-H*0.34+7, 8, H*0.66);
-    c.strokeRect(cx-4, cy-H*0.34+7, 8, H*0.66);
-    c.fillStyle=gold;
-    c.fillRect(cx-5, cy-H*0.34, 10, 8); c.strokeRect(cx-5, cy-H*0.34, 10, 8);
-    c.strokeStyle='#c8281f'; c.lineWidth=2;
-    c.beginPath(); c.moveTo(cx-5, cy-H*0.34); c.lineTo(cx+5, cy-H*0.34); c.stroke();
-  } else if(v.id==='gew'){
-    // 60°-Profilspitze
-    c.beginPath();
-    c.moveTo(cx-W*0.22, cy-H*0.26); c.lineTo(cx, cy+H*0.30); c.lineTo(cx+W*0.22, cy-H*0.26);
-    c.lineTo(cx+W*0.13, cy-H*0.26); c.lineTo(cx, cy+H*0.02); c.lineTo(cx-W*0.13, cy-H*0.26);
-    c.closePath(); c.fill(); c.stroke();
-    c.strokeStyle='#c8281f'; c.lineWidth=2;
-    c.beginPath(); c.moveTo(cx-W*0.10, cy+H*0.06); c.lineTo(cx, cy+H*0.30); c.lineTo(cx+W*0.10, cy+H*0.06); c.stroke();
-  } else if(v.id==='bohr' || v.id==='zent'){
-    const halb=v.id==='zent';
-    c.fillStyle='#5c6a76';
-    const bl=W*(halb?0.34:0.52), bw2=H*(halb?0.16:0.13);
-    // Spitze zeigt nach LINKS (gearbeitet wird von rechts nach links)
-    c.save(); c.translate(cx+bl/2, cy); c.scale(-1,1);
-    c.fillRect(0,-bw2, bl, 2*bw2); c.strokeRect(0,-bw2, bl, 2*bw2);
-    // Spitze 118°
-    c.beginPath(); c.moveTo(bl,-bw2); c.lineTo(bl+bw2*1.2,0); c.lineTo(bl,bw2); c.closePath(); c.fill(); c.stroke();
-    // Wendel andeuten
-    c.strokeStyle='#2c353d';
-    for(let k=1;k<=3;k++){ c.beginPath(); c.moveTo(bl*k/4, -bw2); c.lineTo(bl*(k-0.5)/4, bw2); c.stroke(); }
-    c.restore();
-  } else if(v.id==='i80'){
-    // Bohrstange mit Platte — Schneide OBEN LINKS (Innenbearbeitung)
-    c.fillStyle='#5c6a76';
-    c.fillRect(cx-W*0.32, cy-5, W*0.6, 10); c.strokeRect(cx-W*0.32, cy-5, W*0.6, 10);
-    c.fillStyle=gold;
-    c.beginPath(); c.moveTo(cx-W*0.32, cy-5); c.lineTo(cx-W*0.20, cy-5); c.lineTo(cx-W*0.30, cy+4); c.closePath();
-    c.fill(); c.stroke();
-    c.strokeStyle='#c8281f'; c.lineWidth=2;
-    c.beginPath(); c.arc(cx-W*0.31, cy-4.5, 3, Math.PI*0.8, Math.PI*1.8); c.stroke();
-  } else {
-    rhombus(v.sw);
-  }
 }
 // VORLAGENKACHELN ZEICHNEN WIE DIE LISTE [Daniels Befund 06.09.2026:
 // "da ist nicht alles so, wie's auch nach einer Werkzeugtabelle
@@ -26030,8 +25995,38 @@ function buildProgram(){
     // vollen Material (Befund 05.09.2026, in keiner Demo sichtbar:
     // keine faehrt einen radialen Innen-Einstich). Innen faehrt die
     // Vorposition jetzt in der Bohrung unter der Nutwand.
-    else if(st.type==='einstechen') genEinstechen({...st.params,
-      safeX: (st.params.lage==='innen') ? undefined : stock + 2}, N, bump, lines, warnings);
+    else if(st.type==='einstechen'){
+      // =========================================================
+      // BEZUGSSCHNEIDE [Daniels Ansage 06.09.2026]. Die Stechzyklen
+      // rechnen durchgehend mit "Bezugspunkt = im Bild RECHTE
+      // Klingenkante", die Klinge liegt also links davon [z-bw, z]
+      // (an der Rotorwellen-Nut nachgemessen: z0 -140, Breite 10,
+      // Klinge 6 -> Stiche bei -140/-142/-144, fertige Nut -150..-140).
+      // Ist am Werkzeug die LINKE Kante eingemessen, entsteht dieselbe
+      // Nut mit um die Klingenbreite KLEINEREN Z-Werten — Daniels
+      // Beispiel: 3-mm-Platte an der Planflaeche, linke Ecke Z0,
+      // rechte Ecke Z3. Deshalb wird der fertige Zyklus als Ganzes
+      // versetzt, statt die bewaehrte Stichlogik anzufassen: das
+      // physische Ergebnis bleibt identisch, nur der programmierte
+      // Punkt wechselt die Klingenecke. Mitversetzt wird auch das
+      // K-Wort (absolute Bogenmitte in Z bei I/K-Ausgabe); das R-Wort
+      // hat keine Z-Komponente und bleibt.
+      // Vorgabe ist "rechts" — damit sind alle Bestandsprogramme und
+      // die zwanzig NC-Baselines bitgenau unveraendert.
+      // =========================================================
+      const esVon = lines.length;
+      genEinstechen({...st.params,
+        safeX: (st.params.lage==='innen') ? undefined : stock + 2}, N, bump, lines, warnings);
+      const esTool = toolTable.find(x=>String(x.t)===String(st.params.t));
+      if(esTool && esTool.refEdge==='links'){
+        const esBw = Math.max(0.5, +esTool.len||3);
+        for(let li=esVon; li<lines.length; li++){
+          if(!/^N\d+/.test(lines[li])) continue;
+          lines[li]=lines[li].replace(/([ZK])(-?\d+(?:\.\d+)?)/g, (m,w,v)=>w+fmt(+v-esBw));
+        }
+        warnings.push('Einstechen mit T'+st.params.t+': Bezugsschneide ist die LINKE Klingenkante — alle Z-Werte des Zyklus liegen um die Stechbreite ('+fmt(esBw)+' mm) niedriger als bei rechter Bezugskante. Die Nut selbst sitzt unveraendert; Werkzeug entsprechend eingemessen haben.');
+      }
+    }
     else if(st.type==='abstechen') genAbstechen(st.params, N, bump, lines, warnings);
     else if(st.type==='freistich') genFreistich(st.params, N, bump, lines, warnings);
     else if(st.type==='bohren') genBohren(st.params, N, bump, lines, warnings);
@@ -27454,11 +27449,18 @@ function toolCutPolygon(tool){
     // Klinge als Rechteck: Breite = Stechbreite, Ecken mit Schneidenradius.
     const bw=Math.max(0.5,+tool.len||3), H=Math.max(6,bw*4);
     const r=Math.min(Math.max(0,+tool.r||0), bw/2);
-    // Bezugsschneide links: programmiert wird die LINKE Kante, der Klingen-
-    // körper liegt RECHTS davon (Richtung Futter, −z / negatives q.z). Das war
-    // invertiert — die Simulation trug jeden Stich um Klingenbreite nach links
-    // versetzt ab (vom Einstech-Prüfstand über die mz-Abbildung gefunden).
-    const ref=(tool.refEdge==='rechts')?-1:1;
+    // BEZUGSSCHNEIDE IN DER BILDANSICHT [Daniels Ansage 06.09.2026]:
+    // Frueher benannte refEdge die Ecke aus der WERKZEUG-Eigenperspektive
+    // (Multifix, das Werkzeug haengt ueber Kopf) — was "links" hiess,
+    // erschien im Bild rechts. Jetzt gilt, was man SIEHT und was Daniel
+    // beim Einmessen meint: "links" = der programmierte Punkt ist die im
+    // Bild LINKE Klingenkante, die Klinge liegt also RECHTS davon
+    // (+z, Richtung Stirn); "rechts" umgekehrt.
+    // Sein Beispiel: 3-mm-Platte an der Planflaeche angekratzt — mit der
+    // linken Ecke als Bezug traegt er Z0 ein, mit der rechten Z3.
+    // Bestehende Werkzeuge wurden beim Laden einmalig gedreht
+    // (werkzeugeAusSlot), damit ihr Verhalten und die NC gleich bleiben.
+    const ref=(tool.refEdge==='links')?-1:1;
     const z0=(ref>0)?-bw:0, z1=z0+bw;
     const pts=[];
     const corner=(cz,cx,a0,a1)=>{
