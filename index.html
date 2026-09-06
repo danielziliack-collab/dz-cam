@@ -3760,7 +3760,17 @@ Vollansicht sieht man den Bohrer durch die Wand. Grund ist, dass die 3D-Ansicht
 keinen Tiefenpuffer hat, sondern Fl&auml;chen von Hand sortiert. Und: als
 Kollisionsk&ouml;rper ist der Halter weiterhin nicht gepr&uuml;ft (offener Punkt,
 wartet auf Ma&szlig;e) &mdash; die Darstellung dient der Vorstellung, nicht der
-&Uuml;berwachung.</dd>
+&Uuml;berwachung.
+<br><b>Abtrag und Werkzeug laufen im gleichen Takt (seit 06.09.2026).</b> Vorher
+hinkte das Material der Schneidplatte sichtbar nach und sprang in Stufen: die
+Platte wurde in jedem Bild an ihrer Zwischenstellung gemalt, die Materialkontur
+aber nur alle 140 ms neu aufgebaut &mdash; gemessen 16,6 Bilder je Sekunde f&uuml;r
+das Werkzeug gegen 7,1 f&uuml;r den Abtrag. Ursache waren zwei Bremsen, die beide
+die falsche Arbeit trafen: die 3D-Ansicht hing am Takt des 2D-Materialbildes, das
+sie gar nicht ansieht (sie holt ihre Kontur direkt aus dem H&ouml;henfeld), und
+darauf lag noch eine eigene Zeitsperre &mdash; f&uuml;r einen Neuaufbau, der
+2,3 ms kostet. Beide sind weg; das Bild wurde dadurch nebenbei schneller
+(rund 22 statt 16,6 Bilder je Sekunde an der Rotorwelle).</dd>
 <dt id="ba-sim-kollision">Kollisionspr&uuml;fung</dt>
 <dd>Jede Bahn &mdash; nicht nur Eilg&auml;nge &mdash; wird gegen Futter und Backen
 gepr&uuml;ft; Eilg&auml;nge zus&auml;tzlich gegen den Materialstand ZU IHREM
@@ -6709,7 +6719,18 @@ function draw(){
 
   // Materialsilhouette liegt unter allem: erst Werkstoff, dann Kontur und Bahnen
   if(simActive && window.__sim3d){
-    ensureMaterial();          // treibt den Materialstand bis simProgress voran
+    // NUR DAS FELD FORTSCHREIBEN, KEIN 2D-BILD MALEN [Daniel, 06.09.2026].
+    // Hier stand ensureMaterial(): das treibt den Materialstand zwar
+    // richtig voran, malt aber als Nebenwirkung matCv samt Vollbild-
+    // Schattierung neu — ein Bild, das die 3D-Ansicht nie ansieht (sie
+    // holt ihre Kontur aus dem Feld). Bezahlt wurde es doppelt: einmal
+    // mit Rechenzeit je Bild, einmal mit der 80-ms-Drossel, die diese
+    // Arbeit begrenzt und deren Takt die 3D-Kontur geerbt hat.
+    // ensureHoehenfeld() leistet den ganzen Materialstand einschliesslich
+    // der anteiligen Mitschneidung des laufenden Satzes und der
+    // Eilgang-Kollisionspruefung. Beim Zurueckschalten auf 2D malt
+    // ensureMaterial() von selbst neu — sein Schluessel hat sich geaendert.
+    ensureHoehenfeld();
     // Halbschnitt und Futter haengen an den Knoepfen der Leiste.
     draw3D({halbschnitt: !!window.__sim3dHalb,
             ohneFutter:  !!window.__sim3dOhneFutter});
@@ -27404,6 +27425,15 @@ let matCv=null, matCtx=null, matUpTo=-1, matKey='';
 // Schattierung, die sonst am satzweisen matUpTo klebte und den
 // Zwischenstand nicht mitbekaeme.
 let matStandFein=-1, matTakt=0, matGen=0;
+// hfGen zaehlt jede AENDERUNG AM HOEHENFELD selbst — unabhaengig davon,
+// ob daraus ein 2D-Bild gemalt wurde [Daniel, 06.09.2026: "der
+// Materialabtrag hinkt der Schneidplatte hinterher"]. Die 3D-Ansicht
+// liest ihre Kontur direkt aus dem Feld und braucht matCv nicht; haengte
+// ihr Zwischenspeicher trotzdem an matGen, erbte sie dessen 80-ms-Takt
+// und stand zusaetzlich hinter der eigenen 140-ms-Drossel: das Bild lief
+// mit 16,6, das Material mit 7,1 Bildern je Sekunde — sichtbar als
+// nachhinkender Abtrag unter einer fluessig laufenden Schneidplatte.
+let hfGen=0;
 let leftCv=null, leftCtx=null, leftUpTo=-2, layerTakt=0;
 
 function stockModel(){
@@ -27764,6 +27794,7 @@ const hfAbzTmp=new Float32Array((HF_RINGE+2)*2);
 // Spiegelbild dieselbe Quelle, aus der auch resetMaterial() die Silhouette
 // malt: sonst driften Pixelwelt und Feld schon vor dem ersten Schnitt.
 function hfNeu(raster){
+  hfGen++;                       // Feldstand hat sich geaendert, s. hfGen
   const rst=Math.max(0.002, raster||HF_RASTER);
   const st=stockModel();
   let zLo, zHi, aussenAt=null;
@@ -27940,6 +27971,7 @@ function hfBahnStempeln(hf, mv, fallback, schritt, maxSteps, tMax){
   if(!poly) return;
   const bis=(tMax===undefined)?1:Math.max(0,Math.min(1,tMax));
   if(bis<=0) return;
+  hfGen++;                       // Feldstand hat sich geaendert, s. hfGen
   const len=(Math.hypot(mv.z2-mv.z1, d2r(mv.x2-mv.x1)) || 0.1)*bis;
   // Schritt ohne Vorgabe: aus der Restkammhoehe rechnen statt raten.
   // Zwischen zwei Werkzeugpositionen bleibt ein Kamm von s²/(8r) stehen
@@ -28956,19 +28988,22 @@ let sil3d={key:'', z:[], ra:[], ri:[]};
 // operation im 3D-Weg weg.
 function silhouette3d(){
   const hf=hfFeld;
-  const key=hf ? (hf.n+'/'+hf.dz.toFixed(4)+'@'+matGen) : 'leer';
+  // SCHLUESSEL AM FELD, NICHT AM 2D-BILD [Daniel, 06.09.2026]: stand hier
+  // matGen, wurde die 3D-Kontur nur dann neu gebaut, wenn das 2D-Material-
+  // bild neu gemalt worden war — und das ist waehrend des Laufs auf 80 ms
+  // gedrosselt. Die 3D-Ansicht liest matCv aber gar nicht; sie erbte den
+  // fremden Takt ohne Gegenwert. hfGen zaehlt die Feldaenderung selbst.
+  const key=hf ? (hf.n+'/'+hf.dz.toFixed(4)+'@'+hfGen) : 'leer';
   if(sil3d.key===key) return sil3d;
   const jetzt=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
-  // Drossel bleibt: waehrend des Laufs muss die Stuetzstellenliste nicht
-  // in jedem Bild neu aufgebaut werden.
-  //
-  // NUR WAEHREND DIE SIMULATION LAEUFT. Sie stand vorher hinter dem
-  // Schluesselvergleich, griff also auch dann, wenn sich das Programm
-  // GEAENDERT hatte — nach einem Demowechsel kam 140 ms lang die
-  // Kontur des vorherigen Teils zurueck. Im Stand ist das Neubauen
-  // billig genug, und der falsche Stand waere hier besonders
-  // irrefuehrend: an dieser Kontur haengt, wo die Spannbacken sitzen.
-  if(simPlaying && sil3d.time && jetzt-sil3d.time<140 && sil3d.z.length){ return sil3d; }
+  // DROSSEL ENTFERNT [Daniel, 06.09.2026]. Sie hielt die Stuetzstellen-
+  // liste waehrend des Laufs 140 ms lang fest — bei gemessenen 2,3 ms
+  // Bauzeit gegen 60 ms fuers ganze Bild. Sie bremste also 4 % der Arbeit
+  // auf ein Siebtel der Bildrate herunter und war damit die Hauptursache
+  // des nachhinkenden Abtrags: die Schneidplatte wurde in jedem Bild an
+  // ihrer interpolierten Stelle gemalt, das Material nur alle 140 ms.
+  // Der Schluesselvergleich darueber genuegt als Bremse — er baut nur
+  // neu, wenn sich am Feld wirklich etwas geaendert hat.
   const z=[], ra=[], ri=[];
   // RINGE EINZELN: je Stuetzstelle [rin0,raus0, rin1,raus1, ...].
   // Ohne sie faellt jeder Hinterschnitt in der Ansicht zu.
