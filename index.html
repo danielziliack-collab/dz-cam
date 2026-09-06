@@ -3770,7 +3770,24 @@ die falsche Arbeit trafen: die 3D-Ansicht hing am Takt des 2D-Materialbildes, da
 sie gar nicht ansieht (sie holt ihre Kontur direkt aus dem H&ouml;henfeld), und
 darauf lag noch eine eigene Zeitsperre &mdash; f&uuml;r einen Neuaufbau, der
 2,3 ms kostet. Beide sind weg; das Bild wurde dadurch nebenbei schneller
-(rund 22 statt 16,6 Bilder je Sekunde an der Rotorwelle).</dd>
+(rund 22 statt 16,6 Bilder je Sekunde an der Rotorwelle).
+<br><b>Bohrung und Ausdrehung werden vollst&auml;ndig gezeigt (seit
+06.09.2026).</b> Die 3D-Ansicht w&auml;hlt ihre L&auml;ngs-St&uuml;tzstellen
+dort, wo sich der Durchmesser &auml;ndert &mdash; sie sah dabei aber nur den
+AUSSENdurchmesser. &Auml;ndert sich allein die Innenkontur, entstand deshalb
+keine einzige St&uuml;tzstelle, und genau das ist beim Bohren und Ausdrehen
+der Normalfall: Am Bohrgrundkegel bleibt au&szlig;en alles gleich, w&auml;hrend
+innen der Durchmesser auf null l&auml;uft. Die Bohrungswand wurde dann
+&uuml;ber den ganzen Kegel hinweg abgek&uuml;rzt, w&auml;hrend die
+Schnittfl&auml;che ihm fein folgte &mdash; dazwischen klaffte eine
+keilf&ouml;rmige L&uuml;cke, durch die man den Hintergrund sah. Das sah aus
+wie zwei verschiedene Farben f&uuml;r Bohren und Ausdrehen, war aber
+Fl&auml;che gegen Loch. Aus demselben Grund fehlte ein reiner
+Bohrungsabsatz (z.&nbsp;B. &empty;30,4 auf &empty;28) in der Ansicht ganz.
+Der Test sieht jetzt beide Konturen; die ausger&auml;umte Innenform ist
+vollst&auml;ndig und in einem St&uuml;ck zu sehen. Tempo kostet das nichts
+&mdash; das Fl&auml;chenbudget verteilt sich um, statt zu wachsen
+(gemessen 8,5 gegen 8,7 Bilder je Sekunde am Mastertestteil).</dd>
 <dt id="ba-sim-kollision">Kollisionspr&uuml;fung</dt>
 <dd>Jede Bahn &mdash; nicht nur Eilg&auml;nge &mdash; wird gegen Futter und Backen
 gepr&uuml;ft; Eilg&auml;nge zus&auml;tzlich gegen den Materialstand ZU IHREM
@@ -29298,10 +29315,28 @@ function draw3D(opt){
     // HINSCHAUT): sichtbare Spalten fein, unsichtbare 8x groeber.
     {
       let l=0, sMin=-Infinity, sMax=Infinity;
+      // ZWEITE SPANNE FUER DIE INNENKONTUR [Daniel, 06.09.2026:
+      // "Darstellungsprobleme an der Bohrung der Masterwelle"].
+      // Der Sehnentest sah bis dahin NUR S.ra. Eine Innenkontur, die
+      // sich aendert, waehrend der Aussendurchmesser gleich bleibt,
+      // erzeugte deshalb KEINE EINZIGE Stuetzstelle — und genau das
+      // ist der Normalfall beim Bohren und Ausdrehen:
+      //   - Bohrgrundkegel: aussen ⌀36 konstant, innen 28 -> 0 ueber
+      //     8 mm. Die Innenwand wurde ueber den ganzen Kegel hinweg
+      //     interpoliert, die Schnittflaeche (die ALLE Stuetzstellen
+      //     nutzt) zeichnete ihn fein. Zwischen beiden klaffte eine
+      //     keilfoermige Luecke, durch die man den Hintergrund sah —
+      //     gemessen 39 px am Master, mit der exakten Form des Kegels.
+      //   - Bohrungsabsatz ⌀30,4 -> ⌀28: dieselbe Ursache, der Absatz
+      //     fehlte in der Ansicht ganz.
+      // Der Ringzahl-Anker von 30.08. fing nur den Fall, dass die
+      // ANZAHL der Ringe wechselt — nicht die Form der Innenkontur.
+      let sMinI=-Infinity, sMaxI=Infinity;
       for(let i=1;i<zn;i++){
         const tol=(sichtbarZ[i]? dRad : dRad*8);
         const dz=S.z[i]-S.z[l];
         const dr=S.ra[i]-S.ra[l];
+        const dri=(S.ri[i]||0)-(S.ri[l]||0);
         let bruch=false;
         // BRUCH AUCH BEI RINGZAHL-WECHSEL [Daniel, 30.08.2026,
         // Planer-Test 3: "Phantomschraege zu den Backen"]. Der
@@ -29326,24 +29361,33 @@ function draw3D(opt){
           if(lo>sMin) sMin=lo;
           if(hi<sMax) sMax=hi;
           if(sMin>sMax+1e-12) bruch=true;
+          // Dasselbe fuer die INNENKONTUR, mit eigener Spanne.
+          const loI=(dri-tol)/dz, hiI=(dri+tol)/dz;
+          const stI=dri/dz;
+          if(stI<sMinI-1e-12 || stI>sMaxI+1e-12) bruch=true;
+          if(loI>sMinI) sMinI=loI;
+          if(hiI<sMaxI) sMaxI=hiI;
+          if(sMinI>sMaxI+1e-12) bruch=true;
           // Notbremse gegen sehr lange Einzelflaechen (Beleuchtung).
           if(dz>=dLaeng) bruch=true;
         }
         if(bruch && i-1>l){
           ids.push(i-1);
-          l=i-1; sMin=-Infinity; sMax=Infinity;
+          l=i-1; sMin=-Infinity; sMax=Infinity; sMinI=-Infinity; sMaxI=Infinity;
           // Spanne gleich mit der aktuellen Spalte initialisieren,
           // sonst wuerde sie erst ab i+1 wirken.
           const dz2=S.z[i]-S.z[l];
           if(dz2>1e-12){
             sMin=(S.ra[i]-S.ra[l]-tol)/dz2;
             sMax=(S.ra[i]-S.ra[l]+tol)/dz2;
+            sMinI=((S.ri[i]||0)-(S.ri[l]||0)-tol)/dz2;
+            sMaxI=((S.ri[i]||0)-(S.ri[l]||0)+tol)/dz2;
           }
         } else if(bruch){
           // Senkrechter Sprung direkt nach einer Stuetzstelle: die
           // Spalte selbst wird der naechste Ankerpunkt.
           ids.push(i);
-          l=i; sMin=-Infinity; sMax=Infinity;
+          l=i; sMin=-Infinity; sMax=Infinity; sMinI=-Infinity; sMaxI=Infinity;
         }
       }
     }
@@ -29798,6 +29842,12 @@ function draw3D(opt){
   if(typeof window!=='undefined' && window.__sim3dQuadLog){
     window.__sim3dQuads=quads.map((q,ix)=>({ix, d:q.d, pts:q.pts, hell:q.hell}));
     window.__sim3dGrenzen={mantel:__gMantel, stirnR:__gStirnR, stirnL:__gStirnL};
+    // STUETZSTELLEN OFFENLEGEN [06.09.2026]: an ihnen haengt, ob eine
+    // Innenkontur ueberhaupt gezeichnet wird. Ohne diese Liste liesse
+    // sich der Innenkontur-Sehnentest nur ueber Pixel pruefen — und
+    // domstub rastert nicht.
+    window.__sim3dIds=ids.slice();
+    window.__sim3dNP=NP;
   }
   quads.sort((a,b)=>a.d-b.d);
   C.save();
