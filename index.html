@@ -1766,6 +1766,46 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
     }
     .zonelink:hover{background:rgba(24,88,160,.10);}
     .pointlist tbody tr:hover{background:hsl(var(--ton), 53.3%, 94.1%);}
+
+    /* =================================================================
+       KACHELANSICHT AM DESKTOP [Daniels Auftrag 06.09.2026, vorher am
+       Laptop gemessen]. Die Kachelansicht ist fuer 375 px gebaut: zwei
+       Spalten zu je rund 170 px. Am Laptop (1366 px) streckte sie sich
+       einfach mit — die Maske wurde 940 px breit, die Kachelzeilen 440
+       bis 887 px, und EINZELNE EINGABEFELDER BIS ZU 870 px. Ein
+       Zahlenfeld, in das "1,5" getippt wird, lief damit ueber den
+       halben Bildschirm; das Auge wandert fuer jeden Wert quer.
+       Es ist bewusst EINE zentrale Regel und keine Anpassung je Maske:
+       alle acht Zyklusmasken benutzen denselben Mechanismus, also
+       greift sie ueberall gleichzeitig — und kann auch nur an einer
+       Stelle wieder falsch werden.
+       Die Handy-Ansicht bleibt davon unberuehrt (steht in der
+       900-px-Query).
+       ================================================================= */
+    /* Drei statt zwei Spalten: haelt die Kachel in derselben
+       Groessenordnung wie am Handy, statt sie auf Maskenbreite zu
+       ziehen. Abschnitte, Gruppen und k-breit-Zeilen behalten ihre
+       volle Breite (grid-column:1/-1 aus der Basisregel). */
+    .mask.kachelpilot .mask-body{grid-template-columns:repeat(3, minmax(0,1fr));}
+
+    /* Der Wert steht links in der Kachel, rechts bleibt Luft fuer die
+       Einheit — ohne Deckel dehnt flex:1 1 40px das Feld bis an den
+       Kachelrand. Der Deckel gilt NICHT fuer die Werkzeugauswahl: dort
+       steht ein langer Klartextname ("Nr.30 - Zentrierbohrer"), der
+       sonst mitten im Wort abgeschnitten wuerde. */
+    .mask.kachelpilot .mrow input,
+    .mask.kachelpilot .mrow select{max-width:150px;}
+    .mask.kachelpilot .mrow select.tool-select{max-width:none;}
+    /* Auswahlfelder (Punkt 22) tragen laengere Klartexte als Zahlen —
+       etwas mehr Luft, aber ebenfalls gedeckelt. */
+    .mask.kachelpilot .mrow > .selwert{max-width:230px;}
+
+    /* Das Hilfebild lief ueber die ganze Maskenbreite und dominierte
+       die Maske. Auf Bildgroesse begrenzt und mittig gesetzt — es ist
+       Erklaerung, nicht Hauptdarsteller. */
+    .mask.kachelpilot .mask-body > canvas.mask-help{
+      max-width:440px;justify-self:center;
+    }
   }
 </style>
 </head>
