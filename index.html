@@ -3742,13 +3742,25 @@ laufenden Schritt samt Restzeit.</dd>
 <dt id="ba-sim-3d">3D-Ansicht</dt>
 <dd>Gleiche Daten, andere Sicht: Ziehen dreht, Pfeiltasten bewegen das TEIL,
 L&auml;ngsschnitt und Halbschnitt zeigen das Innere, Hinterschnitte werden als Ringe
-mit Abschlussscheiben gezeichnet. Das Werkzeug wird im 3D bewusst nicht dargestellt.
+mit Abschlussscheiben gezeichnet.
 Die Anzeige vereinfacht ab 0,02 mm &empty; &mdash; Ma&szlig;e liest man im
 Ma&szlig;bericht, nicht am Bild.</dd>
-<dt id="ba-sim-halter">Halter / Platte</dt>
-<dd>Der Schalter zeigt das Werkzeug mit ISO-Schaft oder nur die Platte &mdash; reine
-Darstellung; als Kollisionsk&ouml;rper ist der Halter noch nicht gepr&uuml;ft (offener
-Punkt, wartet auf Ma&szlig;e).</dd>
+<dt id="ba-sim-halter">Halter / Platte &mdash; die Werkzeugdarstellung</dt>
+<dd>Der Schalter zeigt das Werkzeug mit ISO-Schaft oder nur die Platte. <b>Seit dem
+06.09.2026 sind es K&ouml;rper statt Fl&auml;chen:</b> Die Wendeplatte hat eine
+Dicke (4,76 mm nach der CNMG/DNMG-Reihe; beim Stecher richtet sie sich nach der
+Klingenbreite) und eine Befestigungsschraube in der Mitte &mdash; Stechplatten
+bekommen keine, die sind geklemmt. <b>Bohrer werden als ROTATIONSK&Ouml;RPER
+gezeichnet</b>: Schaft aus dem Durchmesser, Kegelspitze aus dem Spitzenwinkel, die
+Schneidenkante angedeutet. Vorher lag auch dort nur der flache Schnittumriss &mdash;
+ein Blatt Papier in der Bohrung.
+<br><b>Was die Darstellung NICHT kann:</b> Das Werkzeug wird immer VOR dem Material
+gemalt, steckt also optisch nicht darin. Im Halbschnitt stimmt das Bild; in der
+Vollansicht sieht man den Bohrer durch die Wand. Grund ist, dass die 3D-Ansicht
+keinen Tiefenpuffer hat, sondern Fl&auml;chen von Hand sortiert. Und: als
+Kollisionsk&ouml;rper ist der Halter weiterhin nicht gepr&uuml;ft (offener Punkt,
+wartet auf Ma&szlig;e) &mdash; die Darstellung dient der Vorstellung, nicht der
+&Uuml;berwachung.</dd>
 <dt id="ba-sim-kollision">Kollisionspr&uuml;fung</dt>
 <dd>Jede Bahn &mdash; nicht nur Eilg&auml;nge &mdash; wird gegen Futter und Backen
 gepr&uuml;ft; Eilg&auml;nge zus&auml;tzlich gegen den Materialstand ZU IHREM
