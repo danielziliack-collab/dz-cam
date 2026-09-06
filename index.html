@@ -3278,8 +3278,29 @@ den Schenkel-Schnittpunkt &mdash; am gezogenen Maschinensatz entschl&uuml;sselt
 und nachgerechnet); ebenso die Innenlage (X&lt;I, PK positiv). Auf
 G-Einzels&auml;tze f&auml;llt die Ausgabe nur noch mit Ansage zur&uuml;ck, wo der
 Satz kein belegtes Wort hat: Eck&uuml;bergang K2, Rundungs-Endkanten, plan,
-&uuml;ber Mitte, innen+Winkel kombiniert. Innen gibt es die Winkelform weiter
-nicht.</dd>
+&uuml;ber Mitte, innen+Winkel kombiniert.
+<br><b>Innen gibt es die Winkelform seit dem 05.09.2026 auch.</b> Sie entsteht als
+SPIEGELRECHNUNG: die Ma&szlig;e werden an einer Hilfsebene gespiegelt, der
+erprobte Au&szlig;enzweig rechnet, danach werden X- und I-Worte sowie G02/G03 und
+G41/G42 zur&uuml;ckgekippt (dieselbe Methodik wie beim Stechdrehen und
+Restmaterial innen). Die Winkel bedeuten innen sinngem&auml;&szlig;: <b>W1</b>
+&ouml;ffnet die Bohrung zur Stirn hin (Senkungskegel), <b>W2</b> legt den Absatz
+zum Futter. Der G72-Zyklussatz f&auml;llt bei Winkeln innen mit Ansage auf
+Einzels&auml;tze zur&uuml;ck &mdash; wie die gespiegelten Nebenw&ouml;rter im Satz
+kodiert w&auml;ren, ist an keinem Maschinensatz belegt. 90/90 innen l&auml;uft
+unver&auml;ndert am direkten Pfad, nicht &uuml;ber die Spiegelung.</dd>
+<dt id="ba-ae-schlrichtung">Schlichtrichtung rechts&rarr;links / links&rarr;rechts</dt>
+<dd>Seit dem 05.09.2026 auch beim Ecke-Zyklus. Normalfall ist von der Stirn zum
+Futter; <b>links&rarr;rechts</b> f&auml;hrt die Kette r&uuml;ckw&auml;rts, beginnt
+also an der Schulter und endet an der Stirn. Die Korrekturseite kippt mit, B&ouml;gen
+drehen den Sinn, und die Stirnfase l&auml;uft am Ende auf ihrer eigenen
+Verl&auml;ngerung in die Luft aus. <b>Innen</b> f&auml;hrt die Anwahl auf dem
+Innen-Fertigma&szlig; durch die offene Ausdrehung axial an die Z-Endposition und
+zieht dann die Planfl&auml;che hoch &mdash; sie taucht nie unter das Fertigma&szlig;
+(dort w&auml;re die Restwand), und die letzten Millimeter an den Grund laufen im
+Vorschub, damit ein zu flaches Sackloch geschnitten statt gerammt wird.
+Zur&uuml;ck auf rechts&rarr;links f&auml;llt der Zyklus mit eigener Ansage bei
+Schenkelwinkeln und beim Planschnitt auf Mitte.</dd>
 <dt id="ba-ae-spanbruch">Spanbrechen (nur Schruppen)</dt>
 <dd>F&uuml;r langspanende Werkstoffe (Kunststoff, Alu-Knetlegierungen). Vorbild ist
 das Abspanen der Siemens-Steuerung (Bedienhandbuch 12/2019, S.&nbsp;474): der
@@ -3327,7 +3348,13 @@ Variation f&auml;llt die Ausgabe mit Ansage auf G-Einzels&auml;tze zur&uuml;ck.<
 zwei Werte, die Maske zeigt nur den gesetzten. Beim Schlichten beginnt die
 K1-Fasengerade bewusst 1 mm vor der Stirn auf ihrer eigenen Verl&auml;ngerung: an der
 Bahnecke davor w&uuml;rde G42 sonst verschneiden und &mdash; an der Maschine wie im
-Bild &mdash; gut einen halben Millimeter stehen lassen.</dd>
+Bild &mdash; gut einen halben Millimeter stehen lassen.
+<br><b>Die Kantenma&szlig;e stehen ab Werk auf 0</b> (seit 06.09.2026). Vorher waren
+0,5&nbsp;mm vorbelegt und wurden stillschweigend mitgefertigt, wenn man sie
+&uuml;bersah &mdash; an einer Ecke, die scharfkantig bleiben soll, ist das ein
+Ma&szlig;fehler am Teil. Kanten sind Bauteilsache: wer eine will, tr&auml;gt sie ein.
+Ein Ma&szlig; 0 z&auml;hlt &uuml;berall als &bdquo;keine Kante&ldquo;, auch in der
+Zusammenfassung der zugeklappten Gruppe.</dd>
 <dt id="ba-ak-planfertig">Stirn schon fertig? (planFertig)</dt>
 <dd>Tr&auml;gt der Schritt die Markierung &bdquo;Stirn fertig&ldquo; (der
 Programmvorschlag setzt sie), l&auml;sst der Zyklus das f&uuml;hrende Planelement samt
@@ -3362,16 +3389,48 @@ Radial-Konvention oben &mdash; D 1,5 nimmt je Schnitt 3 mm im Durchmesser.</dd>
 <dd>Schlichten ist in Daniels Arbeitsweise ein EIGENER Schritt mit eigenem Werkzeug
 (35&deg;-Platte). Der konturparallele Schlichtzug f&auml;hrt die Kontur in einem Zug
 mit G41/G42; kleine Einst&uuml;che (Mund &le; 12 mm bei etwa gleich hohen Kanten)
-&uuml;berf&auml;hrt er &mdash; die fertigt ihr Einstechzyklus.</dd>
+&uuml;berf&auml;hrt er &mdash; die fertigt ihr Einstechzyklus.
+<br><b>Richtung rechts&rarr;links / links&rarr;rechts:</b> Normalfall ist von der
+Stirn zum Futter. <b>Links&rarr;rechts</b> f&auml;hrt die Kette r&uuml;ckw&auml;rts
+(vom Futter zur Stirn), die Korrekturseite kippt mit (G41 statt G42, innen
+umgekehrt) und B&ouml;gen drehen den Sinn. Das ist kein Schmuck: Bei d&uuml;nnen
+Wellen zieht man lieber vom Futter weg, und manche Kontur l&auml;sst sich nur so
+ohne aufsteigende Schneide fertigen. <b>Der Preis steht am Konturende:</b> Steht
+dort eine Wand, l&auml;sst die radiale Anwahl einen Schneidenradius-Eckrest stehen
+&mdash; die App sagt das mit Zahl an, und der Ma&szlig;bericht zeigt dieselbe Zone.
+Ist das Ende frei, f&auml;hrt sie stattdessen auf der VERL&Auml;NGERUNG des ersten
+Elements an, dann gibt es keinen Rest. Innen wird nie tangential angew&auml;hlt:
+wie tief die Bohrung hinter dem Konturende reicht, steht in keinem
+Zyklusparameter.</dd>
 <dt id="ba-akk-planfertig2">Stirn fertig (planFertig) / axiale Anwahl innen</dt>
 <dd>Wie beim Ecke-Zyklus: fertige Stirn wird nicht noch einmal angefahren. Innen
 bedeutet das eine AXIALE G41-Anwahl statt der radialen bei Z0 &mdash; die radiale
 schnitt einen Halbmond in die fertige Planfl&auml;che.</dd>
-<dt id="ba-akk-innen">Lage innen</dt>
+<dt id="ba-akk-innen">Lage innen &mdash; alle vier Richtungen</dt>
 <dd>Innen ist die Welt gespiegelt: zugestellt wird nach GR&Ouml;SSEREM Durchmesser,
 freigefahren nach kleinerem, das Aufma&szlig; liegt unter dem Fertigma&szlig;.
-Konturabspanen innen kann z-parallel; plan- und konturparallel sind innen bewusst
-gesperrt statt falsch gerechnet.</dd>
+<b>Seit dem 05./06.09.2026 sind innen ALLE vier Bearbeitungsrichtungen frei</b>
+&mdash; die fr&uuml;here Sperre auf Z-parallel ist samt Warnhinweis entfallen:
+<br>&bull; <b>Z-parallel</b> (l&auml;ngs) &mdash; der Normalfall beim Ausdrehen.
+<br>&bull; <b>Z-konturparallel</b> &mdash; Abstandsschalen zur Innenkontur, von der
+Vorbohrung zur Wand; freigefahren wird immer in die Vorbohrung, dort ist garantiert
+Luft. Der Nachweis war ein Gleichheitsbeweis an der Buchse: identischer
+Ma&szlig;bericht wie das abgenommene Z-parallel.
+<br>&bull; <b>X-parallel</b> (Planschruppen) und <b>X-konturparallel</b> &mdash;
+diese beiden entstehen als SPIEGELRECHNUNG: gespiegelt wird nur der Schruppteil,
+das Schlichten f&auml;hrt danach der gew&ouml;hnliche Innen-Schlichtzug. So gibt es
+innen nur EINE Schlichtzug-Semantik.
+<br>Bei allen gespiegelten Wegen gilt: die Vorbohrung muss kleiner sein als der
+kleinste Kontur-Durchmesser (sonst lehnt der Zyklus mit Ansage ab), und es geh&ouml;rt
+eine Bohrstange in den Zyklus &mdash; ein Au&szlig;enwerkzeug liefe mit dem Halter
+durch die Bohrungswand.</dd>
+<dt id="ba-akk-restinnen">Restmaterial innen</dt>
+<dd>Der Restmaterial-Zyklus (Taschen, die das achsparallele Abspanen nicht erreicht)
+l&auml;uft seit dem 05.09.2026 auch innen. Eine Kammer hinter einem engeren Hals ist
+in der Spiegelwelt eine gew&ouml;hnliche Au&szlig;entasche &mdash; damit erbt der
+Innenweg die Taschenerkennung, die Eintauchrampe und die Wirkkontur-Rechnung
+unver&auml;ndert vom Au&szlig;enzweig. Auch hier: Bohrstange, Vorbohrung kleiner als
+der kleinste Kontur-&empty;, und die Bahnen sind an keiner Maschine gefahren.</dd>
 <dt id="ba-akk-spanbruch">Spanbrechen (nur Schruppen)</dt>
 <dd>Wie beim Abspanen Ecke (Kapitel 5.1): DI-Weg plus Pause (G04 in
 Spindelumdrehungen) oder R&uuml;ckzug auf der Bahn. Wirkt in den achsparallelen
@@ -3398,12 +3457,19 @@ in Spuren und schlichtet die Nut beidseitig. Zwei Formen wie bei ShopTurn:
 (zus&auml;tzlich W Kegelwinkel) &mdash; die Rechtecknut ohne Kantenbruch ist der
 Sonderfall, daf&uuml;r tr&auml;gt man 0 ein.</p>
 <dl>
-<dt id="ba-es-lage">Lage au&szlig;en / innen / plan</dt>
-<dd>EIN Feld mit drei Stellungen. Innen l&auml;uft alles gespiegelt (zustellen nach
+<dt id="ba-es-lage">Lage au&szlig;en / innen / plan / Stirn in Bohrung</dt>
+<dd>EIN Feld mit VIER Stellungen. Innen l&auml;uft alles gespiegelt (zustellen nach
 gr&ouml;&szlig;erem &empty;, freifahren nach kleinerem); die App pr&uuml;ft die
 Schneidenlage des Stechers gegen die Lage &mdash; ein Au&szlig;enstecher liefe innen
-mit dem Halter durch die Bohrungswand. Axial innen (Stirnnut in der Bohrung) ist noch
-nicht umgesetzt.</dd>
+mit dem Halter durch die Bohrungswand. <b>Stirn in Bohrung</b> (seit 05.09.2026) ist
+die Stirnnut am Grund einer Bohrung oder Ausdrehung &mdash; etwa f&uuml;r einen
+Sicherungsring am Absatzgrund. Die Nutgeometrie ist dieselbe wie beim freien
+Stirnstich (Z0 ist der Bohrungsgrund); neu sind nur An- und Abfahrt: radial auf den
+Nut-Au&szlig;enrand, solange das Werkzeug noch VOR dem Teil steht, dann ein eigener
+Eilgangsatz axial durch die Bohrungsluft &mdash; kein Diagonalsatz, der die Stirn
+kreuzen w&uuml;rde. Abgefahren wird umgekehrt: erst Z heraus, dann X. Die Bohrung
+muss die Nut&ouml;ffnung bis X0 freigeben; an keiner Maschine verifiziert, ersten
+Lauf im Einzelsatz fahren.</dd>
 <dt id="ba-es-x0">X0 Bezugspunkt &empty; / Z0 Bezugskante</dt>
 <dd>X0 ist der Nutrand-Durchmesser (die Kante, von der die Tiefe z&auml;hlt), Z0 die
 w&auml;hlbare Bezugskante rechts/links. Beim axialen Stich dreht der ob/un-Bezug den
@@ -3446,6 +3512,19 @@ Z-Fenster ZA&hellip;ZB &mdash; so wird eine einzelne Tasche gefertigt, ohne den 
 anzufassen.</dd>
 <dt id="ba-st-richtung">Richtung radial / l&auml;ngs</dt>
 <dd>Radial ist der Normalfall (stechen von oben). DS und TZ gibt es nur radial.</dd>
+<dt id="ba-st-lage">Lage au&szlig;en / innen</dt>
+<dd>Seit dem 05.09.2026 sticht der Zyklus auch INNEN &mdash; breite Nuten und
+Freidrehungen in einer Bohrung. Gebaut ist das als SPIEGELRECHNUNG: die Kontur wird
+an einer Hilfsebene gespiegelt, der erprobte Au&szlig;enzweig rechnet, danach werden
+X- und I-Worte sowie die Drehsinne und Korrekturseiten zur&uuml;ckgekippt. Der
+Vorteil dieser Bauweise: Zwischenebenen, Flankenr&auml;umen und der beidseitige
+Schlichtzug erben s&auml;mtliche Korrekturen des Au&szlig;enzweigs, ohne dass sie
+zweimal gepflegt werden m&uuml;ssten; &Uuml;berfl&uuml;ge werden von selbst zu
+Fahrten in der Bohrungsluft. Wachen: die Vorbohrung muss kleiner sein als der
+kleinste Kontur-&empty;, ein Au&szlig;enstecher wird angemeckert, und Bahnen zu nah
+an der Drehachse brechen den Zyklus ab. Der Nachweis ist eine Spiegelprobe &mdash;
+dieselbe Kammer innen und au&szlig;en gerechnet liegt Punkt f&uuml;r Punkt
+spiegelbildlich. An keiner Maschine gefahren.</dd>
 <dt id="ba-st-d-ds">D Spanbrecher / DS Spurversatz</dt>
 <dd>D ist der Spanbruch IM Stich (radial, wie beim Einstechen), DS der seitliche
 Versatz von Spur zu Spur (&uuml;blich knapp unter Klingenbreite).</dd>
@@ -3979,6 +4058,22 @@ Die Restliste liegt in MASCHINENTERMIN.md.</dd>
 
 <h2 id="ba-k11">11 &nbsp;Werkzeugverwaltung</h2>
 <dl>
+<dt id="ba-wz-lager">Lager und Maschinenpl&auml;tze (seit 05.09.2026)</dt>
+<dd>Die Tabelle hat zwei Ebenen. Im <b>Lager</b> steht alles, was du besitzt &mdash;
+unabh&auml;ngig davon, ob es gerade eingebaut ist. Die <b>Pl&auml;tze 1&hellip;16</b>
+sind das, was in der Maschine steckt; mit &#10514; und &#10515; wird ein Werkzeug
+geladen oder entladen, den Platz w&auml;hlst du direkt in der Zeile. Neue Werkzeuge
+lassen sich auch bei voll best&uuml;cktem Revolver anlegen &mdash; &uuml;ber das
+Plus im Lagerkopf, nicht &uuml;ber einen freien Platz.
+<br><b>Die Werkzeugnummer bleibt dabei stabil.</b> Das Programm ruft das WERKZEUG,
+nicht den Platz; erst beim NC-Bau setzt die App die Platznummer der aktuell
+gew&auml;hlten Maschine ein. Dasselbe Programm ruft auf der 1000er also T3 und auf
+der 1500er T7, ohne dass du etwas &auml;nderst.
+<br><b>Die Belegung h&auml;ngt an der Maschine</b>, das Lager ist gemeinsam. Beim
+Profilwechsel sichert die App die Belegung der alten Maschine und holt die der
+neuen. Tabelle und Belegungen &uuml;berleben das Neuladen (Browserspeicher) &mdash;
+vorher war beides nach jedem Schlie&szlig;en weg. Achtung beim R&uuml;cksetzen: der
+Knopf leert Werkzeuge UND Belegungen beider Maschinen.</dd>
 <dt id="ba-wz-anlegen">Werkzeug anlegen</dt>
 <dd>Nummer (T), Art (Au&szlig;en/Innen/Stechen/Bohren/Gewinde), Plattenform mit
 Spitzenwinkel (sw) und Einstellwinkel (ew), Schneidenradius, bei Stechern die
