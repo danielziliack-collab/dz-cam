@@ -1800,11 +1800,21 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
        etwas mehr Luft, aber ebenfalls gedeckelt. */
     .mask.kachelpilot .mrow > .selwert{max-width:230px;}
 
-    /* Das Hilfebild lief ueber die ganze Maskenbreite und dominierte
-       die Maske. Auf Bildgroesse begrenzt und mittig gesetzt — es ist
-       Erklaerung, nicht Hauptdarsteller. */
-    .mask.kachelpilot .mask-body > canvas.mask-help{
-      max-width:440px;justify-self:center;
+    /* Das Hilfebild lief ueber die ganze Maskenbreite (918 px bei 940 px
+       Maske) und dominierte die Maske. Auf Bildgroesse begrenzt und
+       mittig — es ist Erklaerung, nicht Hauptdarsteller.
+       ZWEI FALLSTRICKE, beide am Geraet gemessen:
+       (1) Das Bild haengt bei den meisten Masken DIREKT an .mask, nur
+           beim Freistich im .mask-body (dort als Rasterkind). Der erste
+           Selektor ".mask-body > canvas" traf deshalb keine einzige
+           Maske. Jetzt ohne Kindkombinator — und ohne .kachelpilot,
+           damit die Grenze auch in der Zeilenansicht gilt.
+       (2) height:auto ist PFLICHT: das Canvas traegt seine Aufloesung
+           als Attribut (hier 1146 px). Ohne die Angabe behielte es die
+           Attributhoehe in CSS-Pixeln und waere gestaucht. */
+    .mask canvas.mask-help{
+      max-width:440px;height:auto;
+      justify-self:center;display:block;margin-left:auto;margin-right:auto;
     }
   }
 </style>
