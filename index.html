@@ -28419,7 +28419,16 @@ function hfFortschreiben(from, to){
         // eine exakt am Bandrand fliegende Ecke fiele hinein — an der
         // Nutwelle (TZ) vier Scheintreffer bei real 1,7 mm ⌀ Luft.
         // Echte Eintaucher sind mehrere Spalten tief und bleiben.
-        if(bwE>0) hit=checkRapidMove(mv, (z,xd)=>punktSteckt(z-bwE+hfFeld.dz, xd));
+        // SEITE DER KLINGE FOLGT DER BEZUGSSCHNEIDE [Folgefehler der
+        // Umstellung vom 06.09.2026, beim Bau des Maschinentest-
+        // programms T12 aufgefallen]: Der Versatz zeigte fest nach
+        // -z, also zur Klinge bei rechter Bezugskante. Steht das
+        // Werkzeug auf LINKE Bezugskante, liegt die Klinge rechts vom
+        // programmierten Punkt — dann prueft der feste Versatz die
+        // falsche Seite und meldete fuenf Phantom-Kollisionen im
+        // eigenen, laengst freigeraeumten Stichkanal.
+        const bwRi=(twE && twE.refEdge==='links') ? -1 : 1;
+        if(bwE>0) hit=checkRapidMove(mv, (z,xd)=>punktSteckt(z-bwRi*bwE+bwRi*hfFeld.dz, xd));
       }
       if(hit && !simCollisions.some(c=>c.moveIdx===i)){
         simCollisions.push({z:hit.z, x:hit.x, moveIdx:i});
