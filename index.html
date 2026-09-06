@@ -29937,14 +29937,68 @@ function bahn3dZeichnen(ctx, proj, sc, pEbene){
           const dir=slDirection(tool.sl);
           const mz=(dir.dx<0)?-1:1, mx=(dir.dy>0)?-1:1;
           const pr=d2r(pos.x);
-          ctx.globalAlpha=0.85; ctx.fillStyle='#c9a227';
-          ctx.strokeStyle='#6b5610'; ctx.lineWidth=1.1*dpr;
-          ctx.beginPath();
-          poly.forEach((qq,i)=>{
-            const P=projB(pos.z + qq.z*mz, pr + qq.x*mx);
-            if(i===0) ctx.moveTo(P[0],P[1]); else ctx.lineTo(P[0],P[1]);
-          });
-          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // =========================================================
+          // PLATTE ALS KOERPER [Daniels Wunsch 06.09.2026: "in der
+          // Schneidplatte auch noch eine Tiefe geben ... und vielleicht
+          // noch eine Schraube dazu"]. Bis dahin war sie ein FLACHES
+          // Polygon in der Schnittebene — im gedrehten Blick sah man
+          // ein Blatt Papier.
+          // Der Schnittumriss (toolCutPolygon) liegt in der ZX-Ebene;
+          // die Plattendicke geht SENKRECHT dazu, also in
+          // Umfangsrichtung. projB zerlegt den Radius mit (cyE, sdE)
+          // in Bildhoehe und Kameratiefe — die Normale dieser Ebene
+          // ist folglich (-sdE, cyE), und genau daran wird extrudiert.
+          // Das bleibt Pseudo-3D: ein paar Vierecke mehr, kein
+          // Renderer. Reihenfolge nach Malerart (hinten zuerst), die
+          // Seitenflaechen mit Rueckseiten-Aussortierung ueber das
+          // Vorzeichen der projizierten Flaeche — sonst laegen die
+          // abgewandten Kanten faelschlich ueber der Rueckseite.
+          // Staerken nach ISO: Wendeplatten 4,76 mm (CNMG/DNMG-Reihe);
+          // beim Stecher richtet sich die Dicke nach der Klingenbreite,
+          // Bohrer behalten ihre flache Silhouette.
+          // =========================================================
+          const dick = (tool.art==='bohren') ? 0
+                     : (tool.art==='stechen') ? Math.max(2.5, Math.min(6, +tool.len||3))
+                     : 4.76;
+          const projP=(z,r,t)=>proj(z, r*cyE - t*sdE, r*sdE + t*cyE);
+          const eck=(t)=>poly.map(qq=>projP(pos.z + qq.z*mz, pr + qq.x*mx, t));
+          const vorne=eck(0), hinten=dick>0?eck(-dick):null;
+          const flaeche=(pts)=>{ let a=0; for(let i=0;i<pts.length;i++){
+            const p=pts[i], q=pts[(i+1)%pts.length]; a+=p[0]*q[1]-q[0]*p[1]; } return a/2; };
+          const malen=(pts,fill,stroke,alpha)=>{
+            ctx.globalAlpha=alpha; ctx.fillStyle=fill;
+            ctx.beginPath();
+            pts.forEach((P,i)=>{ if(i===0) ctx.moveTo(P[0],P[1]); else ctx.lineTo(P[0],P[1]); });
+            ctx.closePath(); ctx.fill();
+            if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=1.1*dpr; ctx.stroke(); }
+          };
+          ctx.lineJoin='round';
+          if(hinten){
+            malen(hinten, '#7d6416', '#5a4810', 0.85);            // Rueckseite
+            const vorn=flaeche(vorne)>0;                          // Umlaufsinn merken
+            for(let i=0;i<poly.length;i++){
+              const j=(i+1)%poly.length;
+              const seite=[vorne[i], vorne[j], hinten[j], hinten[i]];
+              // nur die der Kamera zugewandten Flanken
+              if((flaeche(seite)>0)===vorn) malen(seite, '#a3831d', '#5a4810', 0.85);
+            }
+          }
+          malen(vorne, '#c9a227', '#6b5610', 0.85);               // Schneidflaeche
+          // BEFESTIGUNGSSCHRAUBE: Wendeplatten sind mittig verschraubt,
+          // Stechplatten dagegen geklemmt — dort waere sie erfunden.
+          if(dick>0 && tool.art!=='stechen'){
+            let sz=0, sx=0;
+            poly.forEach(qq=>{ sz+=qq.z; sx+=qq.x; });
+            const mzP=sz/poly.length, mxP=sx/poly.length;
+            // Radius aus der kleinsten Ausdehnung, damit die Schraube
+            // auch auf einer schmalen 35-Grad-Platte noch hineinpasst.
+            let rmin=Infinity;
+            poly.forEach(qq=>{ rmin=Math.min(rmin, Math.hypot(qq.z-mzP, qq.x-mxP)); });
+            const rs=Math.max(0.4, rmin*0.55);
+            const kreis=[]; for(let a=0;a<12;a++){ const w=a/12*2*Math.PI;
+              kreis.push(projP(pos.z+(mzP+rs*Math.cos(w))*mz, pr+(mxP+rs*Math.sin(w))*mx, 0.05)); }
+            malen(kreis, '#4a4034', '#2b251d', 0.9);
+          }
           platteOk=true;
         }
       }catch(e){}
