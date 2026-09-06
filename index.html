@@ -29961,6 +29961,64 @@ function bahn3dZeichnen(ctx, proj, sc, pEbene){
                      : (tool.art==='stechen') ? Math.max(2.5, Math.min(6, +tool.len||3))
                      : 4.76;
           const projP=(z,r,t)=>proj(z, r*cyE - t*sdE, r*sdE + t*cyE);
+
+          // =========================================================
+          // BOHRER ALS ROTATIONSKOERPER [Daniels Befund 06.09.2026:
+          // "das Bohrwerkzeug sieht nicht realistisch aus ... kannst Du
+          // das als Rotationsbohrwerkzeug darstellen?"]. Bis dahin
+          // bekam auch der Bohrer den flachen Schnittumriss — ein
+          // goldenes Parallelogramm, das im gedrehten Blick wie ein
+          // Blatt Papier in der Bohrung lag.
+          // Ein Bohrer ist aber ein Rotationskoerper um DIESELBE Achse
+          // wie das Werkstueck; er laesst sich mit derselben
+          // Umfangstechnik zeichnen: Kegelspitze aus dem Spitzenwinkel
+          // (118 Grad Standard), dahinter der Schaft. Die Flaechen
+          // werden nach Kameratiefe sortiert (Malerart) — draw3D hat
+          // keinen Tiefenpuffer.
+          // EHRLICHE GRENZE, unveraendert: der Bohrer wird VOR dem
+          // Material gemalt, steckt also optisch nicht darin. Im
+          // Halbschnitt stimmt das Bild, in der Vollansicht sieht man
+          // ihn durch die Wand. Ein Tiefenpuffer waere ein anderes
+          // Projekt (s. 3D-Kern).
+          // =========================================================
+          if(tool.art==='bohren' && +tool.dm>0){
+            const rB=+tool.dm/2;
+            const swB=Math.max(60, Math.min(180, +tool.sw||118));
+            const lk=rB/Math.tan(swB/2*Math.PI/180);          // Kegellaenge
+            const lS=lk+Math.max(6, Math.min(+tool.len||30, 70));
+            const NP=20;
+            const fl=[];
+            const spitze=proj(pos.z, 0, 0);
+            for(let k=0;k<NP;k++){
+              const w0=k/NP*2*Math.PI, w1=(k+1)/NP*2*Math.PI;
+              const c0=Math.cos(w0), s0=Math.sin(w0), c1=Math.cos(w1), s1=Math.sin(w1);
+              const b0=proj(pos.z+lk, rB*c0, rB*s0), b1=proj(pos.z+lk, rB*c1, rB*s1);
+              const m0=proj(pos.z+lS, rB*c0, rB*s0), m1=proj(pos.z+lS, rB*c1, rB*s1);
+              // Helligkeit ueber den Umfang: oben (cos nahe +1) heller —
+              // dieselbe Lesart wie der Metallverlauf des Werkstuecks.
+              const h=(c0+c1)/2;
+              const g=Math.round(88+64*Math.max(0,h));
+              const gr='rgb('+g+','+(g+6)+','+(g+12)+')';
+              fl.push({t:(b0[2]+b1[2])/2, p:[spitze,b0,b1], f:'rgb('+(g+26)+','+(g+30)+','+(g+34)+')'});
+              fl.push({t:(b0[2]+b1[2]+m0[2]+m1[2])/4, p:[b0,b1,m1,m0], f:gr});
+            }
+            fl.sort((a,b)=>b.t-a.t);                          // hinten zuerst
+            ctx.globalAlpha=0.95; ctx.lineJoin='round';
+            fl.forEach(s=>{
+              ctx.fillStyle=s.f;
+              ctx.beginPath();
+              s.p.forEach((P,i)=>{ if(i===0) ctx.moveTo(P[0],P[1]); else ctx.lineTo(P[0],P[1]); });
+              ctx.closePath(); ctx.fill();
+            });
+            // Schneidenkante an der Spitze andeuten (Wendeplatten sitzen dort)
+            ctx.strokeStyle='#b8901f'; ctx.lineWidth=1.6*dpr; ctx.globalAlpha=0.9;
+            ctx.beginPath();
+            const e0=proj(pos.z+lk, rB, 0), e1=proj(pos.z+lk, -rB, 0);
+            ctx.moveTo(e0[0],e0[1]); ctx.lineTo(spitze[0],spitze[1]); ctx.lineTo(e1[0],e1[1]);
+            ctx.stroke();
+            ctx.globalAlpha=1;
+            platteOk=true;
+          } else {
           const eck=(t)=>poly.map(qq=>projP(pos.z + qq.z*mz, pr + qq.x*mx, t));
           const vorne=eck(0), hinten=dick>0?eck(-dick):null;
           const flaeche=(pts)=>{ let a=0; for(let i=0;i<pts.length;i++){
@@ -30000,6 +30058,7 @@ function bahn3dZeichnen(ctx, proj, sc, pEbene){
             malen(kreis, '#4a4034', '#2b251d', 0.9);
           }
           platteOk=true;
+          }
         }
       }catch(e){}
     }
