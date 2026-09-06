@@ -13455,9 +13455,23 @@ function drawVorlagenGlyph(cv, v){
     rhombus(v.sw);
   }
 }
+// VORLAGENKACHELN ZEICHNEN WIE DIE LISTE [Daniels Befund 06.09.2026:
+// "da ist nicht alles so, wie's auch nach einer Werkzeugtabelle
+// angezeigt wird"]. Die Kacheln hatten mit drawVorlagenGlyph eine
+// EIGENE Bildsprache — goldene Plattensymbole ohne Halter, ein
+// Innenstecher als blosser Strich, Spiral- und Zentrierbohrer nahezu
+// gleich. Was der Bediener antippt, sah damit anders aus als das, was
+// danach in der Tabelle stand. Jetzt malt dieselbe Funktion wie die
+// Liste (drawToolIcon): die Kachel zeigt GENAU das Werkzeug, das die
+// Vorlage anlegt — samt Halter, Plattenlage und rotem Ring an der
+// aktiven Schneide. Die Vorlagen tragen dieselben Felder wie ein
+// Tabellenwerkzeug (art, r, sl, ew, sw, len, dm), deshalb genuegt der
+// Funktionstausch; die Kachel ist mit 64x40 px in derselben Groessen-
+// klasse wie das Listen-Icon (54x40) und bekommt so auch denselben
+// engeren Massstab auf die Schneide.
 function renderToolVorlagen(){
   const grid=document.getElementById('twVorlagen');
-  if(!grid || grid.childElementCount) { if(grid) grid.querySelectorAll('canvas').forEach(cv=>drawVorlagenGlyph(cv, WERKZEUG_VORLAGEN[+cv.dataset.vi])); return; }
+  if(!grid || grid.childElementCount) { if(grid) grid.querySelectorAll('canvas').forEach(cv=>drawToolIcon(cv, WERKZEUG_VORLAGEN[+cv.dataset.vi])); return; }
   WERKZEUG_VORLAGEN.forEach((v,i)=>{
     const b=document.createElement('button');
     b.type='button';
@@ -13466,7 +13480,7 @@ function renderToolVorlagen(){
     b.addEventListener('click',()=>applyToolVorlage(v));
     grid.appendChild(b);
   });
-  grid.querySelectorAll('canvas').forEach(cv=>drawVorlagenGlyph(cv, WERKZEUG_VORLAGEN[+cv.dataset.vi]));
+  grid.querySelectorAll('canvas').forEach(cv=>drawToolIcon(cv, WERKZEUG_VORLAGEN[+cv.dataset.vi]));
 }
 function applyToolVorlage(v){
   const set=(id,val)=>{ document.getElementById(id).value=val; };
