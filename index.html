@@ -4036,15 +4036,23 @@ eingefrorene St&auml;nde gepr&uuml;ft.</p>
 &bdquo;Programm senden&ldquo; &mdash; die App wartet auf die Anforderung der
 Maschine (Xon; an der Steuerung EINLESEN starten) und zeigt den Fortschritt.
 &bdquo;Empfangen&ldquo; sichert Programme VON der Maschine als Datei (Ende =
-3&nbsp;Sekunden Stille). Die Parameter kommen aus dem Maschinenprofil; die
-1000er ist asymmetrisch (senden 9600, empfangen 2400 &mdash; zum Empfangen mit
-2400 verbinden). Das geht NUR in Chrome oder Edge am Rechner &mdash; das iPhone
+3&nbsp;Sekunden Stille). Die Parameter kommen aus dem Maschinenprofil &mdash; beide
+Maschinen fahren 9600 Baud in beide Richtungen, aber mit verschiedenem Handshake:
+die 1500er per Xon/Xoff (die App wartet auf ihr Xon), die 1000er per
+<b>RTS/CTS-Hardwareleitung</b> (sie fordert nicht an, die App sendet sofort und
+der Adapter bremst). An die 1000er sendet die App <b>zeilenweise mit 150 ms
+Pause</b> &mdash; das ist gewollt und entspricht dem &bdquo;Line delay 150&ldquo;,
+mit dem die &Uuml;bertragung am 07.09.2026 mit DNC Precision stabil lief; ohne
+Pause l&auml;uft der Empfangspuffer der Steuerung &uuml;ber (ein 242-Zeilen-Programm
+brach bei 197 ab). Ein 200-Zeilen-Programm braucht so etwa 40 Sekunden. Beide
+Wege sind mit DNC Precision belegt, mit Web-Serial aus der App noch nicht
+gefahren. Das geht NUR in Chrome oder Edge am Rechner &mdash; das iPhone
 kann grunds&auml;tzlich nicht direkt seriell; daf&uuml;r ist das
 DNC-Funk-K&auml;stchen geplant. Erster Lauf an der Maschine steht noch aus
 &mdash; mit einem kurzen Testprogramm beginnen.</dd>
 <dt id="ba-ma-dnc">Daten&uuml;bertragung (DNC Precision, V24)</dt>
-<dd>Je Maschine ein EIGENES Profil in DNC Precision anlegen (die 1500er sendet
-und empf&auml;ngt gleich, die 1000er NICHT):<br>
+<dd>Je Maschine ein EIGENES Profil in DNC Precision anlegen (beide senden und
+empfangen mit 9600, aber der Handshake ist verschieden):<br>
 <b>1500 EuroTurn:</b> 9600 Baud &middot; 7 Datenbits &middot; keine Parit&auml;t &middot;
 1 Stopbit &middot; XON/XOFF (Software-Handshake; DTR/DSR und RTS/CTS AUS) &middot;
 Receive timeout 500 &middot; &bdquo;Strip at end of line&ldquo; leer.
@@ -4059,10 +4067,48 @@ Softkey-Symbolik der 1500er: Pfeil von rechts nach links = AUSGEBEN
 Beim Einspielen IMMER erst die Maschine auf D-IN, dann am Laptop senden;
 vorhandene Programmnummern werden nicht &uuml;berschrieben, sondern mit
 Minus-Nummer abgelegt.<br>
-<b>1000 MTC-K (asymmetrisch!):</b> Empfangen 2400 Baud &middot; Senden 9600 Baud,
-jeweils 7 Datenbits &middot; EVEN &middot; 1 Stopbit &middot; XON/XOFF (erprobtes
-Profil; die Auslese-Rate stellt das Transfermen&uuml; der Steuerung, sie steht in
-keiner Parametersicherung).<br>
+<b>1000 MTC-K:</b> 9600 Baud &middot; 7 Datenbits &middot; EVEN &middot; <b>2 Stopbits</b>
+&middot; <b>RTS/CTS EIN</b> (Hardware-Handshake) &middot; XON/XOFF AUS &middot; beide
+Richtungen. <b>Am Ger&auml;t bewiesen 07.09.2026</b> (17 Programme raus,
+Testprogramm rein; Parameter 2000&ndash;2010 per Foto: 2000=9600, 2001=0 EVEN,
+2002=7, 2003=2, 2004=0 Xon/Xoff aus, 2005=1 RTS/CTS, 2006=1 DTR/DSR &mdash;
+Steuerung Version 6.624b, nur EINE Baudrate). Die fr&uuml;here Angabe
+&bdquo;empfangen 2400&ldquo; war eine Fehleinstellung im Transfermen&uuml;. Beim
+SENDEN ist RTS/CTS zwingend: ohne meldet die Steuerung &bdquo;194
+Empfangsspeicher &uuml;berlauf (Hardware)&ldquo; &mdash; sie bremst per Leitung
+und schickt kein XOFF, ein Xon/Xoff-Haken am Laptop ist wirkungslos. Falsche
+Rate zur Wiedererkennung: 4800 = Parit&auml;tsfehler, 2400 = &bdquo;Fehler im
+&Uuml;bertragungsprotokoll&ldquo;. Fehlversuche legen Fragmente mit
+Minus-Nummer an (&bdquo;-00000001&ldquo;) &mdash; l&ouml;schen, der
+Programmspeicher hat nur ~50 kB. Beim Senden au&szlig;erdem <b>DTR/DSR AUS</b>
+und <b>Line delay 150 ms</b> &mdash; mit DTR/DSR dazu und ohne Zeilenpause
+verklemmt sich der Handshake bei gr&ouml;&szlig;eren Programmen (T9 brach bei 197
+von 242 Zeilen ab). Parameter am Ger&auml;t: MENUE &rarr; Konfiguration &rarr;
+2000 ff.; Fehler quittieren mit Softkey &bdquo;Quittung&ldquo;.<br>
+<b>Vier Dateiregeln der 1000er, alle am 07.09.2026 gemessen &mdash; die App
+wendet sie beim &bdquo;NC sichern&ldquo; und beim DNC-Senden selbst an, sobald
+das 1000er-Profil gew&auml;hlt ist:</b> (1) <b>Die letzte Zeile jeder
+&Uuml;bertragung geht verloren</b> &mdash; die Steuerung schlie&szlig;t eine
+Zeile erst mit dem n&auml;chsten Zeilenanfang ab und verwirft den Rest beim
+Timeout (bewiesen: ein Satz HINTER dem M30 wird geschluckt, das M30 bleibt).
+Die App h&auml;ngt deshalb eine Opferzeile <code>(ENDE UEBERTRAGUNG)</code> an.
+(2) <b>Keine Zeile &uuml;ber ~45 Zeichen</b> &mdash; l&auml;ngere rei&szlig;en im
+Empfangspuffer (bei 52 und 72 gemessen; DNC Precision kennt nur Zeilen-, kein
+Zeichen-Delay). Die App bricht lange Kommentarzeilen in mehrere um; ein
+Maschinensatz &uuml;ber 50 Zeichen bekommt eine Warnung. Der 115 Zeichen lange
+G71-Zyklussatz der Steuerung kommt per DNC NICHT durch &mdash; Zyklen an der
+1000er bleiben Handarbeit im Editor, die App schickt Einzels&auml;tze.
+Fortsetzungszeilen ohne N-Nummer setzt die Steuerung nicht zusammen
+(&bdquo;zu viele Interpolationsadressen&ldquo;). (3) Reines ASCII &mdash; ein
+Gedankenstrich im Kommentar wurde in einer Testdatei zum Steuerzeichen XOFF.
+(4) Zeilenenden CR LF, wie die Sicherungen der Maschine. Kommentarzeilen ohne
+N-Nummer und LF-Enden nimmt sie zwar an; die Regeln 1&ndash;3 sind trotzdem
+Pflicht. Kontrolle nach jedem Empfang: &bdquo;Anzahl Zeilen&ldquo; muss die
+Zahl der gesendeten Zeilen minus eins sein; die Meldung &bdquo;198 Gegenseite
+nicht bereit&ldquo; danach ist normal (Parameter 2010 = keine Endekennung).
+Im Editor pr&uuml;fen &bdquo;Zeile Pr&uuml;fen&ldquo; und &bdquo;Prog.
+Pr&uuml;fen&ldquo; die Syntax ohne Verfahren; &bdquo;161 Endekennung
+fehlt&ldquo; hei&szlig;t M30 fehlt.<br>
 WICHTIG beim Senden: Die NC soll die Maschine 1:1 erreichen &mdash; der Haken
 &bdquo;Remove spaces&ldquo; muss RAUS und das Feld &bdquo;Ignore line
 prefix&ldquo; muss LEER sein (sonst verschluckt DNC Leerzeichen bzw. ganze
@@ -4245,7 +4291,7 @@ vorschruppen.</dd>
      TT.MM.JJJJ" ergaenzt, MUSS dieses Datum mitziehen — sonst schlaegt
      der Pruefstand an. [Daniels Befund 06.09.2026: die Anleitung war
      inhaltlich nachgezogen, das Standdatum stand noch auf 31.08.] -->
-<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 06.09.2026. Sie
+<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 07.09.2026. Sie
 w&auml;chst mit der App &mdash; das Inhaltsverzeichnis wird aus den Kapiteln
 erzeugt und ist damit immer vollst&auml;ndig.</p>
 
@@ -19245,7 +19291,14 @@ const MASCHINEN_PROFILE = {
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
     // unter G90 ebenfalls im DURCHMESSERMASS ausgegeben (IBN-belegt).
     ikDurchmesser:true, ikStatus:'confirmed_on_machine', ikBeleg:'P5105=1, IBN',
-    uebertragung:'Empfangen 2400 / Senden 9600 Baud, je 7 Datenbits, EVEN, 1 Stopbit, XON/XOFF — Daniels erprobtes DNC-Profil (asymmetrisch!). Daniels Verdacht (04.09.2026): die 2400 beim Empfangen ist eine Fehleinstellung im Transfermenue der Steuerung, real wohl auch 9600 — am Termin pruefen',
+    // AM GERAET BEWIESEN 07.09.2026 (Parameter 2000-2010 per Foto,
+    // beide Richtungen gefahren): die Steuerung hat nur EINE Baudrate.
+    // Die "2400 empfangen" des alten DNC-Precision-Profils war eine
+    // Fehleinstellung im Transfermenue — Daniels Verdacht vom 04.09.
+    // traf. Sie bremst per RTS/CTS und schickt KEIN XOFF; ohne
+    // Hardware-Handshake am Laptop kommt "194 Empfangsspeicher
+    // ueberlauf". Dazu vier Dateiregeln, alle gemessen (s. BA).
+    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. Dateiregeln: letzte Zeile geht verloren (Opferzeile), keine Zeile ueber ~45 Zeichen, Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an',
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
@@ -26730,19 +26783,23 @@ document.getElementById('btnBett').onclick=()=>{
 // ~33 ms — die Steuerung kann jederzeit anhalten, ohne dass ihr
 // Puffer ueberlaeuft.
 // =================================================================
-// Die 1000er stand im erprobten DNC-Precision-Profil ASYMMETRISCH
-// (senden 9600, empfangen 2400, beides 7/EVEN/1). DANIELS
-// EINSCHAETZUNG 04.09.2026: die 2400 beim Empfangen ist vermutlich
-// eine FEHLEINSTELLUNG im Transfermenue der Steuerung (die
-// Auslese-Rate stellt dort der Bediener) — real wohl auch 9600 wie
-// an der 1500er. Bis zum Beweis am Geraet bleibt 2400 die
-// Empfangs-Vorbelegung (so lief es nachweislich), der Belegtext
-// nennt beides; Pruefpunkt steht in MASCHINENTERMIN.md.
+// DIE 1000er IST AM GERAET BEWIESEN (Termin 07.09.2026, beide
+// Richtungen; Parameter 2000-2010 per Foto): 9600 / 7 / EVEN /
+// 2 Stoppbits mit RTS/CTS, Xon/Xoff AUS. Die Steuerung hat nur EINE
+// Baudrate — die "2400 empfangen" des alten DNC-Precision-Profils war
+// eine Fehleinstellung im Transfermenue, Daniels Verdacht vom 04.09.
+// traf. Ohne RTS/CTS meldet sie "194 Empfangsspeicher ueberlauf
+// (Hardware)": sie bremst per Leitung und schickt KEIN XOFF, sie
+// fordert auch nicht per Xon an.
+//
+// flow: 'xonxoff' = der selbstgebaute Software-Handshake unten
+// (1500er, Web-Serial flowControl 'none'); 'hardware' = Web-Serial
+// flowControl 'hardware', der USB-Adapter haelt an CTS an (1000er).
 const DNC_PROFILE={
-  MONFORTS_1500_EUROTURN:{baud:9600,baudEmpf:9600,bits:7,parity:'none',stop:1,
+  MONFORTS_1500_EUROTURN:{baud:9600,baudEmpf:9600,bits:7,parity:'none',stop:1,flow:'xonxoff',
     beleg:'am Geraet bewiesen (Termin 03.09.2026, beide Richtungen)'},
-  MONFORTS_1000_MTC_K_6624B:{baud:9600,baudEmpf:2400,bits:7,parity:'even',stop:1,
-    beleg:'erprobtes Profil: senden 9600, empfangen 2400 (7/EVEN/1). Daniels Verdacht 04.09.: 2400 war Fehleinstellung im Transfermenue, wohl auch 9600 - am Termin pruefen'}
+  MONFORTS_1000_MTC_K_6624B:{baud:9600,baudEmpf:9600,bits:7,parity:'even',stop:2,flow:'hardware',
+    beleg:'am Geraet bewiesen (Termin 07.09.2026, beide Richtungen; Parameter 2000-2006 per Foto: RTS/CTS, kein Xon/Xoff, 2 Stoppbits)'}
 };
 let dncPort=null, dncXoff=false, dncLeser=null, dncRx=[], dncRxCb=null, dncSendeLauf=false;
 function dncLog(t, warn){
@@ -26797,6 +26854,9 @@ function dncFelderVorbelegen(){
   const p=DNC_PROFILE[MASCHINENPROFIL.id]||DNC_PROFILE.MONFORTS_1500_EUROTURN;
   const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=String(v); };
   set('dncBaud',p.baud); set('dncBits',p.bits); set('dncPar',p.parity); set('dncStop',p.stop);
+  // Die 1000er fordert nicht per Xon an — Warten waere endlos.
+  const wx=document.getElementById('dncWartXon');
+  if(wx){ wx.checked=(p.flow!=='hardware'); wx.disabled=(p.flow==='hardware'); }
   const b=document.getElementById('dncBeleg');
   if(b) b.textContent='· '+MASCHINENPROFIL.name+': '+p.beleg;
 }
@@ -26819,18 +26879,23 @@ async function dncVerbindenTrennen(){
   }
   try{
     const port=await navigator.serial.requestPort();
+    // Handshake aus dem Profil: 1500er Xon-Xoff (selbst gebaut, Treiber
+    // 'none'), 1000er RTS/CTS im Treiber ('hardware') — sie schickt kein
+    // XOFF, ohne CTS-Bremse "194 Empfangsspeicher ueberlauf" (07.09.2026).
+    const prof=DNC_PROFILE[MASCHINENPROFIL.id]||DNC_PROFILE.MONFORTS_1500_EUROTURN;
+    const hw=(prof.flow==='hardware');
     await port.open({
       baudRate:+document.getElementById('dncBaud').value,
       dataBits:+document.getElementById('dncBits').value,
       parity:document.getElementById('dncPar').value,
       stopBits:+document.getElementById('dncStop').value,
-      flowControl:'none'   // Xon-Xoff macht die Leseschleife selbst
+      flowControl: hw ? 'hardware' : 'none'
     });
     dncPort=port; dncXoff=false; dncRx=[];
     dncStatus('verbunden ('+document.getElementById('dncBaud').value+'/'
       +document.getElementById('dncBits').value+'/'
       +document.getElementById('dncPar').value.charAt(0).toUpperCase()+'/'
-      +document.getElementById('dncStop').value+', Xon-Xoff)');
+      +document.getElementById('dncStop').value+', '+(hw?'RTS/CTS':'Xon-Xoff')+')');
     dncLog('Port geoeffnet.');
     dncKnoepfe();
     dncLeseSchleife();
@@ -26867,28 +26932,52 @@ async function dncSenden(){
   if(!dncPort || dncSendeLauf) return;
   const text=document.getElementById('gcodeOut').value;
   if(!text || !text.trim()){ dncStatus('kein Programm — erst „Erzeugen" druecken'); return; }
-  // Zeilenenden auf CR LF — so liegen Daniels .TAP-Sicherungen vor.
-  const bytes=new TextEncoder().encode(text.replace(/\r\n/g,'\n').replace(/\n/g,'\r\n'));
-  const wartXon=document.getElementById('dncWartXon').checked;
+  // Gefiltert wie beim Sichern (Opferzeile, Zeilenlaenge, ASCII, CR LF
+  // — s. ncFuerMaschine). Die Ansicht bleibt das volle Programm.
+  const f=ncFuerMaschine(text);
+  f.warnungen.forEach(w=>dncLog('WARNUNG: '+w, true));
+  const bytes=new TextEncoder().encode(f.text);
+  const prof=DNC_PROFILE[MASCHINENPROFIL.id]||DNC_PROFILE.MONFORTS_1500_EUROTURN;
+  const hardware=(prof.flow==='hardware');
+  const wartXon=document.getElementById('dncWartXon').checked && !hardware;
   const los=async()=>{
     dncSendeLauf=true; dncKnoepfe();
     const w=dncPort.writable.getWriter();
     try{
       let i=0, xoffSeit=0;
-      while(i<bytes.length && dncSendeLauf){
-        if(dncXoff){
-          await new Promise(r=>setTimeout(r,25));
-          xoffSeit+=25;
-          if(xoffSeit>15000){ dncLog('Maschine haelt seit 15 s an (Xoff) — weiter warten...', true); xoffSeit=0; }
-          continue;
+      if(hardware){
+        // 1000er: ZEILENWEISE MIT PAUSE, wie DNC Precision mit "Line
+        // delay 150". Der Hardware-Handshake laeuft im Treiber
+        // (flowControl 'hardware'), aber der Adapter reagiert auf CTS
+        // innerhalb einer Zeile zu spaet — die Pause nach jeder Zeile
+        // gibt der Steuerung Zeit, den Puffer wegzuschreiben. Ohne sie
+        // brach T9 am Termin bei 197 von 242 Zeilen ab. AN DER MASCHINE
+        // MIT WEB-SERIAL UNVERIFIZIERT — mit DNC Precision belegt.
+        const zeilen=f.text.split('\r\n').filter((z,ix,a)=>ix<a.length-1);
+        let n=0;
+        for(const z of zeilen){
+          if(!dncSendeLauf) break;
+          const b=new TextEncoder().encode(z+'\r\n');
+          await w.write(b); i+=b.length; n++;
+          dncStatus('sende... Zeile '+n+' / '+zeilen.length+' ('+i+' Zeichen)');
+          await new Promise(r=>setTimeout(r,150));
         }
-        xoffSeit=0;
-        const stueck=bytes.slice(i, i+32);
-        await w.write(stueck);
-        i+=stueck.length;
-        dncStatus('sende... '+Math.round(100*i/bytes.length)+' % ('+i+' / '+bytes.length+' Zeichen)');
+      } else {
+        while(i<bytes.length && dncSendeLauf){
+          if(dncXoff){
+            await new Promise(r=>setTimeout(r,25));
+            xoffSeit+=25;
+            if(xoffSeit>15000){ dncLog('Maschine haelt seit 15 s an (Xoff) — weiter warten...', true); xoffSeit=0; }
+            continue;
+          }
+          xoffSeit=0;
+          const stueck=bytes.slice(i, i+32);
+          await w.write(stueck);
+          i+=stueck.length;
+          dncStatus('sende... '+Math.round(100*i/bytes.length)+' % ('+i+' / '+bytes.length+' Zeichen)');
+        }
       }
-      if(dncSendeLauf){ dncStatus('gesendet: '+bytes.length+' Zeichen'); dncLog('Programm komplett gesendet.'); }
+      if(dncSendeLauf){ dncStatus('gesendet: '+bytes.length+' Zeichen, '+f.zeilen+' Zeilen'+(hardware?' (die letzte ist die Opferzeile)':'')); dncLog('Programm komplett gesendet.'); }
       else { dncStatus('Senden abgebrochen bei '+i+' Zeichen'); }
     }catch(e){ dncLog('Sendefehler: '+(e&&e.message), true); dncStatus('Sendefehler'); }
     finally{ try{ w.releaseLock(); }catch(e){} dncSendeLauf=false; dncKnoepfe(); }
@@ -27306,12 +27395,98 @@ async function exportEinrichteblatt(){
   await exportiereDatei('O'+O+'_Einrichteblatt.txt', txt, 'Einrichteblatt');
 }
 
+// =================================================================
+// EXPORTFILTER JE MASCHINE [Maschinentermin 07.09.2026, Daniel an der
+// 1000er]. Der Generator bleibt unangetastet — die NC-Ansicht und die
+// Baseline zeigen weiter das volle Programm. Gefiltert wird erst, was
+// die MASCHINE bekommt: "NC sichern" und der DNC-Sendeweg.
+//
+// Die MTC-K 6.624b hat vier Eigenheiten, alle am Geraet GEMESSEN:
+//  1. DIE LETZTE ZEILE JEDER UEBERTRAGUNG GEHT VERLOREN. Bewiesen mit
+//     zwei Vier-Zeilen-Programmen: steht M30 als letzte Zeile, fehlt
+//     es; steht ein Dummy-Satz dahinter, fehlt der Dummy und M30
+//     bleibt. Die Steuerung schliesst eine Zeile erst mit dem
+//     naechsten Zeilenanfang ab und verwirft den Rest beim Timeout
+//     (Parameter 2010 = keine Endekennung). Also: OPFERZEILE anhaengen.
+//  2. ZEILEN UEBER ~45 ZEICHEN REISSEN im Empfangspuffer — der eigene
+//     115-Zeichen-G71-Satz kam beim Roundtrip nach 52 Zeichen
+//     abgeschnitten zurueck, ein 83er-Kommentar nach 72 ("163
+//     Kommentar-Endekennung fehlt"). Der SPEICHER kennt keine Grenze
+//     (sie haelt ihren G71 als eine Zeile), es ist der Empfangsweg:
+//     DNC Precision pausiert nur an Zeilenenden, innerhalb einer
+//     Zeile reagiert der USB-Adapter auf CTS zu spaet. 48er-Saetze
+//     kamen mit 150 ms Line delay an, 52 riss ohne. Kommentarzeilen
+//     werden deshalb bei 45 umgebrochen (verlustfrei, jedes Stueck
+//     eigens geklammert), Maschinensaetze ueber 50 gemeldet — die
+//     duerfen nicht stumm umgebrochen werden: Fortsetzungszeilen
+//     ohne N liest die Steuerung als eigenen Satz ("zu viele
+//     Interpolationsadressen").
+//  3. REINES ASCII. In vier Testdateien stand der Gedankenstrich des
+//     Profilnamens als Byte 0x13 = XOFF — ein Steuerzeichen mitten
+//     im Programm. Harmlos nur, weil die 1000er kein Xon/Xoff faehrt.
+//  4. CR LF wie ihre eigenen Sicherungen; Leerzeilen weg (zaehlt sie
+//     ohnehin nicht, das Bestandsformat hat keine).
+// Die 1500er bekommt nur ASCII und CR LF — dort hat das volle
+// Programm mit Kommentaren und LF drei Tage lang funktioniert.
+// DOM-frei, damit der Pruefstand den Filter direkt rechnen kann.
+const NC_ASCII_ERSATZ=[
+  ['ä','ae'],['ö','oe'],['ü','ue'],['Ä','Ae'],['Ö','Oe'],['Ü','Ue'],['ß','ss'],
+  ['⌀','D'],['Ø','D'],['–','-'],['—','-'],['°','Grad'],['±','+-'],
+  ['„','"'],['“','"'],['”','"'],['‘',"'"],['’',"'"],['»','"'],['«','"'],
+  ['→','->'],['←','<-'],['·','.'],['…','...']
+];
+function ncAscii(s){
+  for(const [a,b] of NC_ASCII_ERSATZ) s=s.split(a).join(b);
+  return s.replace(/[^\x09\x20-\x7E]/g,'');
+}
+const NC_1000_MAX_KOMMENTAR=45, NC_1000_MAX_SATZ=50;
+const NC_1000_OPFERZEILE='(ENDE UEBERTRAGUNG - OPFERZEILE)';
+function ncFuerMaschine(code, profilId){
+  const id=profilId || (typeof MASCHINENPROFIL!=='undefined' && MASCHINENPROFIL ? MASCHINENPROFIL.id : '');
+  const warnungen=[];
+  let zeilen=String(code||'').replace(/\r\n/g,'\n').split('\n').map(z=>ncAscii(z).replace(/\s+$/,''));
+  if(id==='MONFORTS_1000_MTC_K_6624B'){
+    // Alles HINTER dem letzten M30 weg: die Fusskommentare (Einrichter-
+    // Hinweise, Statuszeilen) sind fuer die Maschine wertlos und kosten
+    // Programmspeicher — die 1000er hat ~50 kB frei. Das Bestandsformat
+    // ihrer eigenen Sicherungen endet mit M30; danach kommt nur noch
+    // die Opferzeile. Ohne M30 (Fehlerfall) bleibt alles.
+    let bisM30=-1;
+    zeilen.forEach((z,i)=>{ if(/^N\d+.*\bM30\b/.test(z)) bisM30=i; });
+    const quelle=(bisM30>=0) ? zeilen.slice(0,bisM30+1) : zeilen;
+    const aus=[];
+    for(const t of quelle){
+      if(!t) continue;                                   // Leerzeilen weg
+      if(/^\(/.test(t) && t.length>NC_1000_MAX_KOMMENTAR){
+        // Reine Kommentarzeile: verlustfrei in geklammerte Stuecke
+        const inhalt=t.replace(/^\(/,'').replace(/\)\s*$/,'');
+        const breite=NC_1000_MAX_KOMMENTAR-2;
+        for(let i=0;i<inhalt.length;i+=breite) aus.push('('+inhalt.slice(i,i+breite)+')');
+        continue;
+      }
+      if(/^[NO]/.test(t) && t.length>NC_1000_MAX_SATZ)
+        warnungen.push('Satz mit '+t.length+' Zeichen (Grenze '+NC_1000_MAX_SATZ+', 1000er reisst ab ~52): '+t.slice(0,32)+'...');
+      aus.push(t);
+    }
+    aus.push(NC_1000_OPFERZEILE);
+    zeilen=aus;
+  } else {
+    while(zeilen.length && !zeilen[zeilen.length-1]) zeilen.pop();
+  }
+  return {text: zeilen.join('\r\n')+'\r\n', warnungen, zeilen:zeilen.length};
+}
+
 async function exportGcode(ext){
   const code=document.getElementById('gcodeOut').value;
   if(!code){ alert('Noch kein G-Code erzeugt — erst „Erzeugen“ drücken.'); return; }
   const O=document.getElementById('progNo').value.trim();
   const name='O'+O+'.'+ext;
-  await exportiereDatei(name, code, 'G-Code');
+  // Was die Maschine bekommt, ist gefiltert (s. ncFuerMaschine) — die
+  // Ansicht bleibt das volle Programm.
+  const f=ncFuerMaschine(code);
+  if(f.warnungen.length && typeof exportToast==='function')
+    exportToast(f.warnungen.length+' Satz/Saetze ueber '+NC_1000_MAX_SATZ+' Zeichen — an der 1000er auf Vollstaendigkeit pruefen');
+  await exportiereDatei(name, f.text, 'G-Code');
 }
 // Generische, ROBUSTE Dateiausgabe [Daniel, Export-Paket]: dieselbe
 // Kaskade wie beim G-Code (Teilen -> Download -> Export-Fenster), damit
