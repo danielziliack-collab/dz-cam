@@ -4135,9 +4135,25 @@ Zeile mit dem Generator), Gewinde-U im Werkzeug-Offset (S. 132), fester
 Vorlauf, P-Parameter immer als RADIUS-Werte, SC der Zyklen kommt dort aus einem
 MASCHINENparameter, nicht aus dem NC-Satz. P206 = Schlichtaufma&szlig; ist seit
 dem 03.09.2026 aus Daniels Novembersicherung der Maschine belegt (Parameter
-N5206, maximales Schlichtaufma&szlig;). Die G72-Zyklen der 1000er schreibt die
-Steuerung selbst mit PA/PB-Werten &mdash; extern nicht erzeugbar, deshalb dort
-immer G-Einzels&auml;tze.</dd>
+N5206, maximales Schlichtaufma&szlig;).
+<br><b>Einstechzyklus G71 der 1000er &mdash; seit 07.09.2026 belegt.</b> Daniel hat
+ihn an der Maschine &uuml;ber die ZYKLUS-Maske eingegeben (R1&ndash;R4 bewusst
+0,5/0,6/0,7/0,8, damit jede Ecke im Satz eindeutig ist) und das Programm per DNC
+gezogen. Der Satz: <code>G71 G90 X50 Z-50 G91 I0 K0 PF0.4 PG0.2 PM10 PN10 PO0.5
+PP0.6 PQ0.7 PR0.8 PW3.15 PX1 PY1 P230:3.15 P240:1 P241:1</code> &mdash; PM/PN =
+Breite/Tiefe, PO&ndash;PR = R1&ndash;R4 in unserer Z&auml;hlung, PG = U, BS steht
+DOPPELT (PW und P230), PY = N, P240/P241 = Schruppen/Schlichten. Keine PA/PB.
+Offen sind PF0.4, I/K und PX1, weil die Maskenwerte dazu auf 0 standen; ein
+zweiter Einstich mit D&nbsp;1 und &alpha;1/&alpha;2 kl&auml;rt sie. <b>Die App gibt
+den Einstich an der 1000er trotzdem weiter als Einzels&auml;tze aus</b>: Der
+115&nbsp;Zeichen lange Satz kommt per DNC nicht durch (der Empfangspuffer der
+Steuerung rei&szlig;t ab etwa 45 Zeichen, Roundtrip am selben Tag gemessen), und
+der Generator schreibt das 1000er-Format noch nicht. In den Merkmalen steht er
+darum als &bdquo;Maschinensatz belegt &mdash; Ausgabe noch Einzels&auml;tze&ldquo;.
+<br><b>G72 der 1000er:</b> Die Maschine f&auml;hrt ihn (Bestandsprogramme, alle
+mit steuerungsberechneten PA/PB-Werten). Ob sie den Satz auch OHNE PA/PB
+annimmt, pr&uuml;ft die Datei MINI_G72 am n&auml;chsten Termin; bis dahin
+Einzels&auml;tze. G73 und G77 sind an der 1000er unbelegt.</dd>
 <dt id="ba-ma-offen">Ehrlich offen</dt>
 <dd>Die Programmieranleitung DV 610-0C ist seit dem 31.08.2026 LESBAR (die
 Scan-Seiten werden im Browser gerendert). Damit belegt: P229 = SV Vorhalt vor dem
@@ -19250,7 +19266,7 @@ const MASCHINEN_PROFILE = {
     // steht HEUTE auf 9600/7/N/1 mit Xon/Xoff — die IBN-Diskette von
     // 2004 (4800/8/N/2, RTS/CTS) ist ueberholt; mit ihren Werten kam
     // Kauderwelsch mit Byteverlust (die verlorenen 2025er-Abzuege).
-    uebertragung:'9600 Baud, 7 Datenbits, keine Paritaet, 1 Stopbit, Xon/Xoff — Senden und Empfangen gleich (am Geraet bewiesen 03.09.2026; die IBN-2004-Werte sind ueberholt)',
+    uebertragung:'9600 Baud, 7 Datenbits, keine Paritaet, 1 Stopbit, Xon/Xoff — Senden und Empfangen gleich (am Geraet bewiesen 03.09.2026; die IBN-2004-Werte sind ueberholt). Zeilenlaenge: bis ~40 Zeichen je Satz nachweislich angekommen; der einzige laengere Zyklussatz (G71 in T8, 137 Zeichen) wurde nie nachgesehen — die App meldet Saetze ueber 100 Zeichen beim Sichern als unbelegt, bis der Roundtrip gefahren ist (Nachtrag 07.09.2026)',
     // Freigaben aus IBN.PAR (22.01.2004): N9170=1 Bohrzyklus,
     // N9220/N9230=1 Gewindezyklus samt Schnittaufteilung, N9080=1
     // mehrgaengig, N9150/9160/9180 Einstich/Freistich/Abspanen frei.
@@ -19309,11 +19325,21 @@ const MASCHINEN_PROFILE = {
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
-             /* G71/G72/G73/G77 [01.09.2026]: die MTC-K schreibt ihre
-                Zyklen mit PA/PB-Adressen, deren Werte die Steuerung
-                selbst errechnet (Beleg: Daniels TAP-Programme) —
-                extern nicht erzeugbar, Ausgabe als G-Einzelsaetze. */
-             g71:'disabled', g72:'disabled', g73:'disabled', g77:'disabled' },
+             /* G71 [MASCHINENTERMIN 07.09.2026]: Maske und Satz der 1000er
+                komplett belegt (Daniels Maskeneingabe, Programm O123 per
+                DNC gezogen) — KEINE PA/PB-Adressen, sondern PF/PG/PM/PN/
+                PO-PR/PW/PX/PY/P230/P240/P241. Der Status ist ANZEIGE:
+                die Ausgabe bleibt Einzelsatz, weil der 115-Zeichen-Satz
+                per DNC nicht durchkommt (Empfangspuffer reisst ab ~45)
+                und der Generator das 1000er-Format noch nicht schreibt.
+                G72 [01.09.]: die MTC-K schreibt ihn mit steuerungs-
+                berechneten PA/PB (Daniels TAP); ob sie ihn OHNE annimmt,
+                prueft MINI_G72 am naechsten Termin. G73/G77 unbelegt.
+                Am 07.09. abends stand hier noch "G71 gesperrt" — Daniels
+                Blick in die Merkmale fand es; die Lehre vom 05.09. (nach
+                jedem Termin die Merkmale mitziehen) hatte ich zum zweiten
+                Mal nicht befolgt. */
+             g71:'machine_syntax_1000', g72:'disabled', g73:'disabled', g77:'disabled' },
     statusZeilen:[
       '(PROFIL: Monforts 1000 - MTC-K | IBN-belegt: P4037=0 P5105=1 X-Durchmesser,)',
       '(  P9105=2 kurze T-Aufrufe, P9161=0 degressive Gewindeaufteilung,)',
@@ -19345,6 +19371,10 @@ const PP_STATUS={
   // schwaecher als IBN/gefahren: getippt und gezogen wurde die
   // SYNTAX, ein Lauf am Teil steht noch aus.
   machine_syntax:{txt:'Maschinensatz belegt (Termin 03.09.2026) — Lauf am Teil offen', cls:'ibn'},
+  // MASCHINENTERMIN 07.09.2026: der G71 der 1000er ist ebenso an einem
+  // per DNC gezogenen Maschinensatz belegt — die App gibt ihn trotzdem
+  // noch als Einzelsaetze aus (DNC-Zeilenlaenge, Generatorformat).
+  machine_syntax_1000:{txt:'Maschinensatz belegt (Termin 07.09.2026) — Ausgabe noch Einzelsaetze', cls:'ibn'},
   documented_for_control:{txt:'am Handbuch belegt', cls:'doc'},
   unknown_for_target_machine:{txt:'ANNAHME — nicht belegt', cls:'ann'},
   disabled:{txt:'gesperrt', cls:'aus'},
@@ -19424,8 +19454,17 @@ function ppMerkmale(){
     M.push({t:'Plangewinde G77', s:pr.zyklen.g77,
       w:'per Maske (Gewinde-Form plan) — kein eigenes IBN-Bit, Freigabe unter A016 Gewindezyklus angenommen; Syntax S. 3-58/59'});
   } else {
-    M.push({t:'G71 / G72 / G73 / G77', s:'disabled',
-      w:'an der 1000er nicht erzeugbar — die MTC-K schreibt ihre Zyklen mit steuerungsberechneten PA/PB-Werten (Beleg: Daniels TAP-Programme); Ausgabe als G-Einzelsaetze'});
+    // MASCHINENTERMIN 07.09.2026: die Sammelzeile "G71/G72/G73/G77 nicht
+    // erzeugbar, PA/PB" war danach in zwei Punkten falsch — der G71 hat
+    // keine PA/PB und ist komplett belegt; der G72 laeuft an der
+    // Maschine (Bestandsprogramme), offen ist nur, ob sie ihn OHNE
+    // PA/PB annimmt. Deshalb getrennte Zeilen mit ehrlichem Stand.
+    M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
+      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — offen PF0.4, I/K und PX1 (Maskenwerte standen auf 0). Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC nicht durch (Empfangspuffer reisst ab ~45 Zeichen), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
+    M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
+      w:'die Maschine faehrt ihn (Bestandsprogramme, alle mit steuerungsberechneten PA/PB) — ob sie den Satz OHNE PA/PB annimmt, prueft MINI_G72 am naechsten Termin; bis dahin Ausgabe als Einzelsaetze'});
+    M.push({t:'Freistich G73 / Plangewinde G77', s:pr.zyklen.g73,
+      w:'an der 1000er unbelegt — Ausgabe als Einzelsaetze'});
   }
   // Der Wechselpunkt ist BEDIENERSACHE je Bauteil [Daniel, 31.08.]:
   // die Zeile zeigt das LIVE-Kopffeld, keine Maschinen-Annahme mehr.
