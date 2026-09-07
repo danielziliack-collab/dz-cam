@@ -4142,9 +4142,13 @@ ihn an der Maschine &uuml;ber die ZYKLUS-Maske eingegeben (R1&ndash;R4 bewusst
 gezogen. Der Satz: <code>G71 G90 X50 Z-50 G91 I0 K0 PF0.4 PG0.2 PM10 PN10 PO0.5
 PP0.6 PQ0.7 PR0.8 PW3.15 PX1 PY1 P230:3.15 P240:1 P241:1</code> &mdash; PM/PN =
 Breite/Tiefe, PO&ndash;PR = R1&ndash;R4 in unserer Z&auml;hlung, PG = U, BS steht
-DOPPELT (PW und P230), PY = N, P240/P241 = Schruppen/Schlichten. Keine PA/PB.
-Offen sind PF0.4, I/K und PX1, weil die Maskenwerte dazu auf 0 standen; ein
-zweiter Einstich mit D&nbsp;1 und &alpha;1/&alpha;2 kl&auml;rt sie. <b>Die App gibt
+DOPPELT (PW und P230), PY = N, P240/P241 = Schruppen/Schlichten. <b>Bei
+&alpha;1 = &alpha;2 = 0 keine PA/PB</b> &mdash; ob sie bei Flankenwinkeln
+erscheinen, ist offen: <code>I0 K0</code> hinter G91 sehen aus wie die
+inkrementalen Flankenma&szlig;e, und die G72-S&auml;tze der 1000er tragen alle
+PA/PB (Daniels Einwand vom 07.09.). Offen sind au&szlig;erdem PF0.4 und PX1,
+weil die Maskenwerte dazu auf 0 standen; ein zweiter Einstich mit D&nbsp;1 und
+&alpha;1&nbsp;10 / &alpha;2&nbsp;20 kl&auml;rt beides. <b>Die App gibt
 den Einstich an der 1000er trotzdem weiter als Einzels&auml;tze aus</b>: Der
 115&nbsp;Zeichen lange Satz kommt per DNC nicht durch (der Empfangspuffer der
 Steuerung rei&szlig;t ab etwa 45 Zeichen, Roundtrip am selben Tag gemessen), und
@@ -19327,8 +19331,13 @@ const MASCHINEN_PROFILE = {
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
              /* G71 [MASCHINENTERMIN 07.09.2026]: Maske und Satz der 1000er
                 komplett belegt (Daniels Maskeneingabe, Programm O123 per
-                DNC gezogen) — KEINE PA/PB-Adressen, sondern PF/PG/PM/PN/
-                PO-PR/PW/PX/PY/P230/P240/P241. Der Status ist ANZEIGE:
+                DNC gezogen): PF/PG/PM/PN/PO-PR/PW/PX/PY/P230/P240/P241.
+                Bei alpha1=alpha2=0 KEINE PA/PB — ob sie bei Flanken-
+                winkeln erscheinen, ist OFFEN (Daniels Einwand am Abend:
+                "I0 K0" hinter G91 sehen aus wie die inkrementalen
+                Flankenmasse, und die G72-Bestandssaetze tragen PA/PB;
+                Test mit alpha 10/20 am naechsten Termin). Der Status
+                ist ANZEIGE:
                 die Ausgabe bleibt Einzelsatz, weil der 115-Zeichen-Satz
                 per DNC nicht durchkommt (Empfangspuffer reisst ab ~45)
                 und der Generator das 1000er-Format noch nicht schreibt.
@@ -19460,7 +19469,7 @@ function ppMerkmale(){
     // Maschine (Bestandsprogramme), offen ist nur, ob sie ihn OHNE
     // PA/PB annimmt. Deshalb getrennte Zeilen mit ehrlichem Stand.
     M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
-      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — offen PF0.4, I/K und PX1 (Maskenwerte standen auf 0). Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC nicht durch (Empfangspuffer reisst ab ~45 Zeichen), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
+      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — offen PF0.4, I/K und PX1 (Maskenwerte standen auf 0) und ob bei Flankenwinkeln PA/PB erscheinen (der Beleg hatte alpha 0; Test mit alpha 10/20 am naechsten Termin). Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC nicht durch (Empfangspuffer reisst ab ~45 Zeichen), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
     M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
       w:'die Maschine faehrt ihn (Bestandsprogramme, alle mit steuerungsberechneten PA/PB) — ob sie den Satz OHNE PA/PB annimmt, prueft MINI_G72 am naechsten Termin; bis dahin Ausgabe als Einzelsaetze'});
     M.push({t:'Freistich G73 / Plangewinde G77', s:pr.zyklen.g73,
