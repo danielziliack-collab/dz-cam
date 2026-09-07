@@ -4057,7 +4057,14 @@ empfangen mit 9600, aber der Handshake ist verschieden):<br>
 1 Stopbit &middot; XON/XOFF (Software-Handshake; DTR/DSR und RTS/CTS AUS) &middot;
 Receive timeout 500 &middot; &bdquo;Strip at end of line&ldquo; leer.
 <b>Am Ger&auml;t bewiesen 03.09.2026</b> (42 Programme raus, alle Testprogramme
-rein). ACHTUNG: die IBN-Datendiskette von 2004 sagt 4800/8/N/2 mit RTS/CTS &mdash;
+rein). <b>Offen: lange Zyklussätze.</b> Nachweislich angekommen sind Sätze bis
+etwa 40 Zeichen; der einzige längere, der je per DNC hinging (G71 in T8, 137
+Zeichen), wurde nie nachgesehen, und deine Handeingaben von 96&ndash;108 Zeichen
+hat die Steuerung nur gesendet &mdash; das sagt nichts über den Empfang. Bis der
+Roundtrip gefahren ist, meldet die App beim Sichern und Senden jeden Satz über
+100 Zeichen als &bdquo;nicht belegt&ldquo; (Hinweis, kein Blocker): nach dem
+Einspielen im Editor nachsehen. ACHTUNG: die IBN-Datendiskette von 2004 sagt
+4800/8/N/2 mit RTS/CTS &mdash;
 diese Werte sind &Uuml;BERHOLT und liefern Kauderwelsch mit Byteverlust (daran
 starben die 2025er-Abz&uuml;ge). Im Zweifel die Werte AM GER&Auml;T ablesen:
 SERVICE &rarr; Konfig. &rarr; Parameter &rarr; Param. suchen &rarr; 2000.<br>
@@ -27441,6 +27448,13 @@ function ncAscii(s){
 }
 const NC_1000_MAX_KOMMENTAR=45, NC_1000_MAX_SATZ=50;
 const NC_1000_OPFERZEILE='(ENDE UEBERTRAGUNG - OPFERZEILE)';
+// 1500er: bis ~40 Zeichen je Satz nachweislich angekommen (03.09.2026);
+// der einzige lange Zyklussatz, der je per DNC hinging, ist der G71 in
+// T8 mit 137 Zeichen — nach dem Einspielen nie angesehen. Daniels
+// Handeingaben (96-108) hat die Steuerung nur GESENDET, das sagt
+// nichts ueber den Empfang. Bis der Roundtrip gefahren ist, bekommt
+// jeder Satz ueber dieser Laenge einen HINWEIS (kein Blocker).
+const NC_1500_UNBELEGT_AB=100;
 function ncFuerMaschine(code, profilId){
   const id=profilId || (typeof MASCHINENPROFIL!=='undefined' && MASCHINENPROFIL ? MASCHINENPROFIL.id : '');
   const warnungen=[];
@@ -27472,6 +27486,10 @@ function ncFuerMaschine(code, profilId){
     zeilen=aus;
   } else {
     while(zeilen.length && !zeilen[zeilen.length-1]) zeilen.pop();
+    zeilen.forEach(t=>{
+      if(/^[NO]/.test(t) && t.length>NC_1500_UNBELEGT_AB)
+        warnungen.push('Satz mit '+t.length+' Zeichen: Empfang an der 1500er bei dieser Laenge nicht belegt (bis ~40 gefahren, T8 mit 137 nie geprueft) — nach dem Einspielen im Editor nachsehen: '+t.slice(0,32)+'...');
+    });
   }
   return {text: zeilen.join('\r\n')+'\r\n', warnungen, zeilen:zeilen.length};
 }
@@ -27485,7 +27503,7 @@ async function exportGcode(ext){
   // Ansicht bleibt das volle Programm.
   const f=ncFuerMaschine(code);
   if(f.warnungen.length && typeof exportToast==='function')
-    exportToast(f.warnungen.length+' Satz/Saetze ueber '+NC_1000_MAX_SATZ+' Zeichen — an der 1000er auf Vollstaendigkeit pruefen');
+    exportToast('Satzlaenge: '+f.warnungen[0].slice(0,110)+(f.warnungen.length>1?' (+'+(f.warnungen.length-1)+' weitere)':''));
   await exportiereDatei(name, f.text, 'G-Code');
 }
 // Generische, ROBUSTE Dateiausgabe [Daniel, Export-Paket]: dieselbe
