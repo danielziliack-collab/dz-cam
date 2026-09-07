@@ -1418,6 +1418,13 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   font-variant-numeric:tabular-nums;
 }
 .simstatus b{color:var(--text); font-weight:700;}
+/* NUR WAEHREND DER SIMULATION [Nachtschicht 07./08.09.2026]: die Zeile
+   behielt ihren letzten Text nach dem Schliessen und stand danach im
+   Kontur-Editor ueber der Z-Achse — am Laptop UND am Handy gemessen
+   (375 px: 49 px hoch bei y=601 im Editor). Einzige Regel dieser
+   Nachtschicht, die auch unter 900 px wirkt: sie blendet eine
+   Sim-Anzeige ausserhalb der Simulation aus, sonst nichts. */
+body:not(.simvoll) .simstatus{display:none;}
 /* Die Vorschubart ist die Angabe, auf die es ankommt: Eilgang im
    Material ist ein Crash, Vorschub ist Arbeit. Deshalb farbig —
    dieselben Farben wie die Bahnen im Bild. */
@@ -1816,6 +1823,198 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
       max-width:440px;height:auto;
       justify-self:center;display:block;margin-left:auto;margin-right:auto;
     }
+
+    /* =================================================================
+       NACHTSCHICHT LAPTOP-LAYOUT [Daniels Auftrag 07.09.2026 abends]:
+       saemtliche Ansichten bei 1366x768 im Headless-Browser aufgenommen
+       (scratchpad/laptop/schuss.js, DevTools-Protokoll — der Browser-
+       Pane der Sitzung skaliert 1366 px auf 300 px und taugt dafuer
+       nicht) und nachgemessen. Alles hier steht in der 900-px-Query:
+       unter 900 px aendert sich kein Pixel.
+       ================================================================= */
+
+    /* (1) EDITOR-SOFTKEYS ABGESCHNITTEN. Die Handy-Regel
+       body.mode-grafisch .softkeys{flex-wrap:wrap} ist fuer die
+       WAAGERECHTE Leiste gedacht; am Laptop ist die Softkey-Spalte
+       96 px breit und senkrecht. Mit wrap brach sie in eine ZWEITE
+       Spalte um — gemessen: "Gerade Z" 42 statt 88 px breit, "Neue
+       Kontur", "Import u. Drehen", "Element-Zoom" und "Element
+       loeschen" rechts aus dem Bild (x > 1366). Der erzwungene Umbruch
+       (.sk-umbruch, Daniels Softkey-Sortierung vom 02.09.) ist fuer die
+       Zeile da — in der Spalte trennt die Reihenfolge von selbst. */
+    body.mode-grafisch .softkeys{flex-wrap:nowrap;}
+    .softkeys .sk-umbruch{display:none;}
+
+    /* (2) ZOOMLEISTE DER SIMULATION: padding:0 machte die Knoepfe 15 px
+       hoch (11-px-Schrift ohne Polster) — mit der Maus kaum zu treffen,
+       neben den 30-px-Knoepfen der Sim-Leiste darueber ein Fremdkoerper.
+       Gleiches Polster wie dort. */
+    body.simvoll #simZoomBar.show > button{padding:6px 12px !important;min-height:30px;}
+    body.simvoll #simZoomBar.show > #szMass{padding:6px 18px !important;}
+
+    /* (3) HILFEBILD NEBEN DEN FELDERN (ShopTurn-Anordnung).
+       Am Laptop lag das Bild UEBER dem Formular und nahm 240 px der
+       88-vh-Maske; dem Formular blieben bei 768 px Hoehe noch 391 px
+       (gemessen) — JEDE Zyklusmaske scrollte, die Gewindemaske mit
+       907 px Inhalt am meisten. Jetzt: Kopf oben ueber beide Spalten,
+       links das Formular (scrollt fuer sich), rechts das Bild, oben
+       buendig. Grid statt Flex, weil ein Grid mit max-height seine
+       1fr-Zeile am Deckel klemmt (im Headless-Edge nachgemessen:
+       500-px-Deckel -> Koerper 462 px mit Rollbalken, eine kurze Maske
+       bleibt kompakt). Die Maske wird breiter (1220 statt 940 px), das
+       Formular behaelt mit ~740 px seine drei Kachelspalten.
+       Beim Freistich haengt das Bild im Koerper — hilfebildSeitlich()
+       (60-masken-sync.js) zieht es am Laptop davor. Die ID-Liste ist
+       Absicht: :has() waere kuerzer, aber die Liste laesst sich im
+       Pruefstand nachzaehlen. */
+    #maskAbspanenEinfach, #maskAbspanenKontur, #maskEinstechen,
+    #maskStechdrehen, #maskAbstechen, #maskBohren, #maskGewinde,
+    #maskFreistich, #maskParams{
+      display:grid;grid-template-columns:minmax(0,1fr) 464px;
+      grid-template-rows:auto minmax(0,1fr);
+      width:min(1220px,94vw) !important;
+    }
+    #maskAbspanenEinfach > .mask-head, #maskAbspanenKontur > .mask-head, #maskEinstechen > .mask-head,
+    #maskStechdrehen > .mask-head, #maskAbstechen > .mask-head, #maskBohren > .mask-head, #maskGewinde > .mask-head,
+    #maskFreistich > .mask-head, #maskParams > .mask-head{grid-column:1/-1;}
+    #maskAbspanenEinfach > canvas.mask-help, #maskAbspanenKontur > canvas.mask-help, #maskEinstechen > canvas.mask-help,
+    #maskStechdrehen > canvas.mask-help, #maskAbstechen > canvas.mask-help, #maskBohren > canvas.mask-help, #maskGewinde > canvas.mask-help,
+    #maskFreistich > canvas.mask-help, #maskParams > canvas.mask-help{
+      grid-column:2;grid-row:2;align-self:start;justify-self:center;
+      width:436px;max-width:436px;height:auto;margin:14px 14px 14px 0;
+    }
+    #maskAbspanenEinfach > .mask-body, #maskAbspanenKontur > .mask-body, #maskEinstechen > .mask-body,
+    #maskStechdrehen > .mask-body, #maskAbstechen > .mask-body, #maskBohren > .mask-body, #maskGewinde > .mask-body,
+    #maskFreistich > .mask-body, #maskParams > .mask-body{grid-column:1;grid-row:2;min-height:0;overflow-y:auto;}
+
+    /* (4) EINHEIT AM FELD statt am Dialogrand. Am Handy steht das Feld
+       rechtsbuendig und die Einheit daneben am Rand (absolut, right:0).
+       Am Laptop steht das Feld LINKS hinter dem 230-px-Label — die
+       absolute Einheit blieb am rechten Rand, 480 px vom Feld entfernt
+       (Programmkopf gemessen: Feld endet bei 637, "mm" bei 1120). Nur
+       Zeilenansicht: die Kachelansicht fuehrt die Einheit schon
+       statisch, die Kalkulation hat ihr rechtsbuendiges Blatt. */
+    .mask:not(.kachelpilot):not(#maskKalk) .mrow .unit{position:static;transform:none;width:auto;margin-left:2px;}
+
+    /* (5) ZEILEN MIT UMSCHALTER halten die Feldflucht. .zweiknopf laesst
+       das Label am Handy schrumpfen (Bohrtiefe mit abs + Spitze/Schaft
+       passte sonst nicht in 375 px) und .mit-ink kuerzt das Feld auf
+       69 px; am Laptop begann ihr Feld dadurch bei 349 statt 468 px
+       (Programmkopf XRA/ZRA gemessen) — als einzige Zeilen der Maske. */
+    .mask:not(.kachelpilot) .mrow.zweiknopf > label{flex:0 0 230px;min-width:230px;}
+    .mask:not(.kachelpilot) .mrow.zweiknopf > input,
+    .mask:not(.kachelpilot) .mrow.mit-ink > input{width:170px;}
+
+    /* (6) GEWINDETIEFE H1 IST EINE KACHEL. Die Basisregel
+       .mrow:has(> .gcbtn) haelt jede Zeile mit Knopf fuer die
+       Aktionszeile (Uebernehmen/Abbrechen) und nimmt ihr Rahmen und
+       Grund — der auto-Knopf der Gewindetiefe geriet mit hinein: die
+       Zeile lag rahmenlos zwischen den Kacheln, Wert links, Einheit und
+       Knopf 700 px weiter rechts. Die Aktionszeile traegt seit dem
+       04.09. die JS-Klasse k-aktion, daran haengt die Ausnahme. Am
+       Handy hat die Zeile dieselbe Ursache — dort nicht angefasst, das
+       entscheidet Daniel am Geraet. */
+    .mask.kachelpilot .mrow:has(> .gcbtn):not(.k-aktion){
+      border:1px solid var(--line);background:#fff;min-height:52px;padding:5px 8px 6px;
+    }
+    body.dunkel .mask.kachelpilot .mrow:has(> .gcbtn):not(.k-aktion){background:hsl(var(--ton), 13%, 17%);border-color:var(--line-light);}
+
+
+    /* (7) G-CODE-ANSICHT: AMPEL UND MERKMALE WURDEN ZUSAMMENGEQUETSCHT.
+       Die Maske ist eine Flex-Spalte mit 88-vh-Deckel; der NC-Text
+       (#gcodeView, flex:1) hat als Flex-Basis seine 670 Zeilen. Beim
+       Schrumpfen auf den Deckel verteilt Flex den Abzug nach Basis —
+       die Klappen Ampel/Merkmale/Bett/DNC (Basis = ihr Inhalt) wurden
+       auf 20..31 px gedrueckt (gemessen), vom Pruefergebnis blieb nur
+       das X. Die Klappen behalten jetzt ihre Hoehe (bis zu ihrem
+       eigenen Deckel), der NC-Text nimmt den Rest und scrollt. */
+    /* flex-shrink 1 MIT Mindesthoehe: sind zwei Klappen offen (Pruefen
+       und Merkmale), teilen sie sich den Platz und scrollen in sich —
+       ohne Mindesthoehe faellt eine Klappe als Rollbereich auf 0 zurueck
+       (das war der 31-px-Fehler), ohne Schrumpfen ragt die zweite aus
+       dem Dialog (gemessen: Merkmale bei y=577..853 auf 768 px). */
+    #maskGcode #ampelBox, #maskGcode #ppInfo, #maskGcode #bettPanel, #maskGcode #dncPanel{flex:0 1 auto;min-height:120px;}
+    #maskGcode #warnBox{flex:0 0 auto;max-height:26vh;overflow-y:auto;}
+    #maskGcode #gcodeView{flex:1 1 0;min-height:120px;}
+    /* Deckel der Klappen am Laptop: ihre Handy-Deckel (Ampel 60 vh,
+       Merkmale 48 vh, Bett/DNC 52 vh — als Inline-Stil) sind fuer ein
+       Vollbild-Panel gedacht. Im 88-vh-Dialog blieben mit Kopf, Knopf-
+       raster, Meldungen und Zielmaschine (zusammen ~250 px) fuer die
+       Klappe nur ~300 px = 36 vh bei 768 px, sonst rutscht der NC-Text
+       aus dem Dialog (gemessen: Ampel 461 px, NC-Text bei y=777). */
+    #maskGcode .ampel{max-height:34vh;}
+    #maskGcode #ppInfo, #maskGcode #bettPanel, #maskGcode #dncPanel{max-height:36vh !important;}
+
+    /* (8) DUNKELMODUS DER DESKTOP-TEILE. Die Werkstueck-Vorschau
+       (nur Desktop) stand mit background:#fff als weisser Block im
+       dunklen Arbeitsplan, ihre Kopfdaten in Hellschrift-Toenen; die
+       Programmkopfzeile bekam oben in dieser Query eine Lichtfarbe
+       (17 % / 26,5 %) und war dunkel auf dunkel nicht lesbar; das
+       Meldebanner blieb hell. Die Zeichenflaeche der Vorschau bleibt
+       wie alle Canvas-Flaechen hell — die Formen sind gefuellt
+       (Rohteil sand, Teil hellblau) und lesen sich auf dunklem Grund
+       wie auf weissem. */
+    body.dunkel.mode-arbeitsplan #planVorschau{background:var(--white);}
+    body.dunkel .pv-info{color:var(--text-dim);}
+    body.dunkel .pv-info b{color:var(--text);}
+    body.dunkel .pv-info .pv-dim{color:var(--text-dim);}
+    body.dunkel .ap-row.ap-kopf .ap-detail{color:var(--text-dim);}
+    body.dunkel #meldeBanner{background:var(--panel);border-color:var(--line);color:var(--text);}
+
+
+    /* (9) ZEILENANSICHT AM LAPTOP: HANDY-BREITEN BLIEBEN STEHEN.
+       Wer die Kacheln abschaltet (Kopfknopf), bekommt die Zeilenansicht
+       — und in ihr galten am Laptop noch die 375-px-Breiten: Auswahl-
+       felder 108 px ("Schrupp…", "G-Einzel…", "metrisc…" abgeschnitten),
+       die Werkzeugwahl 170 px ("Nr.41 — Gewinde" ohne Rest), die
+       Paarfelder F/S 51 px INLINE ("0,0" und "12(" statt 0,08 und 1200
+       — beim Bohren gemessen), die per ID gekuerzten Felder der
+       Zusatzknopf-Zeilen (Endbohrtiefe 52, Gewindetiefe 62 px) und die
+       man/auto-Gruppe, die mit 51 px Inline-Breite in zwei Zeilen
+       stapelte. Das Formular ist hier 740 px breit; jede Zeile bekommt
+       die Feldbreite der uebrigen (170 px), Paare je 110 px.
+       flex-basis statt width: gegen die INLINE-Breiten der Paarfelder
+       hilft keine Klasse — aber ein gesetztes flex-basis gewinnt gegen
+       width, ohne !important. */
+    .mask:not(.kachelpilot) .mrow > .selwert{width:170px;min-width:170px;}
+    .mask:not(.kachelpilot) .mrow > select.tool-select{width:430px;}
+    .mask:not(.kachelpilot) .mrow > input + input,
+    .mask:not(.kachelpilot) .mrow > input:has(+ input){flex:0 0 110px;}
+    .mask:not(.kachelpilot) .mrow > #boZ1, .mask:not(.kachelpilot) .mrow > #gwH1,
+    .mask:not(.kachelpilot) .mrow > #abKaWert, .mask:not(.kachelpilot) .mrow > #abKa{width:120px;flex:0 0 120px;}
+    .mask:not(.kachelpilot) .mrow > #sw_aeK1Btns, .mask:not(.kachelpilot) .mrow > #sw_aeK2Btns, .mask:not(.kachelpilot) .mrow > #sw_aeK3Btns,
+    .mask:not(.kachelpilot) .mrow > #sw_esE1Btns, .mask:not(.kachelpilot) .mrow > #sw_esE2Btns, .mask:not(.kachelpilot) .mrow > #sw_esE3Btns, .mask:not(.kachelpilot) .mrow > #sw_esE4Btns,
+    .mask:not(.kachelpilot) .mrow > #sw_abKaBtns{width:110px;min-width:110px;}
+    /* Knopfgruppen einreihig — dieselbe Regel wie in der Kachelansicht,
+       aus demselben Grund (Inline-Breite 51 px an boWMode). */
+    .mask:not(.kachelpilot) .mrow .radiobtns:not(.kopfschalter):not(.selfeld){
+      display:inline-flex;flex-wrap:nowrap;gap:4px;align-items:center;flex:0 0 auto;
+      width:auto !important;min-width:0 !important;
+    }
+
+    /* (10) KOPFZEILE: der Statuskasten in der Mitte war am Laptop ein
+       1070 px breiter Rahmen um 20 Zeichen Text (bei leerem Programm
+       ein leerer Rahmen). Der Rahmen stammt vom Handy, wo der Kasten
+       die Zeile fuellt. Am Laptop steht der Text ohne Kasten. */
+    .msgline{border-color:transparent;background:transparent;}
+
+    /* (11) EDITOR-SPALTE MIT ZEICHNUNGSUNTERLAGE: bei geoeffneter Import-
+       Gruppe stehen 13 Softkeys in der Spalte (Zeichnen 4, Verwalten 7,
+       Element 2). Mit 52 px Mindesthoehe sind das 723 px — bei 768 px
+       Fensterhoehe bleiben der Spalte 690, 'Element loeschen' hing
+       halb unter dem Rand (gemessen). 48 px reichen fuer Symbol und
+       zwei Textzeilen; 13 Knoepfe = 671 px. */
+    /* Die Hoehe kommt aus dem Inhalt (SVG-Symbol 20 + zwei Zeilen 24 +
+       Polster): mit 3 px Polster und 3 px Spaltenabstand blieb es bei
+       52 px je Knopf (nachgemessen, Rand 771 > 768) — Polster und
+       Abstand knapper, 13 Knoepfe = 658 px. */
+    body.mode-grafisch .sk{min-height:46px;padding:1px 3px;gap:2px;}
+    body.mode-grafisch .softkeys{gap:2px;}
+
+    /* (12) MASSABFRAGE DER ZEICHNUNG: ein Feld, 940 px Dialog — der
+       Kopf und die zwei Knoepfe liefen ueber die halbe Bildbreite. */
+    #maskUnterlageWert{width:min(560px,92vw) !important;}
+
   }
 </style>
 </head>
@@ -4251,11 +4450,19 @@ Liste; Leertaste/Enter schalten am Laptop. Gesperrte Werte werden
 <dd>Der Mond in der Kopfzeile. Die ganze Oberfl&auml;che h&auml;ngt an EINEM
 Farbtonregler &mdash; Warn- und Bahnfarben (rot, gr&uuml;n, amber, violett, blau)
 bleiben bewusst fest.</dd>
+<dt id="ba-be-laptop">Am Laptop (ab 900 px Breite)</dt>
+<dd>Masken sind zentrierte Dialoge, das <b>Hilfebild steht rechts neben den
+Feldern</b> (ShopTurn-Anordnung) &mdash; das Formular links rollt f&uuml;r sich. Der
+Kopfknopf ☰/⊞ schaltet zwischen Kachel- und Zeilenansicht. Im Kontur-Editor
+stehen die Softkeys als Spalte rechts, die Elementliste daneben; in der
+Simulation liegen Sim-, Status- und Zoomleiste unter der Zeichnung.
+&bdquo;&larr; Arbeitsplan&ldquo; w&auml;hrend der Simulation beendet sie genauso wie das
+X der Sim-Leiste. Stand 08.09.2026.</dd>
 <dt id="ba-be-hilfe">Diese Anleitung</dt>
 <dd>Das <b>?</b> in der Kopfzeile &ouml;ffnet sie von &uuml;berall;
-&bdquo;Inhalt&ldquo; springt zum Verzeichnis. Geplant: Klick auf einen Wert in einer
-Zyklusmaske springt direkt zum passenden Absatz hier &mdash; die Anker daf&uuml;r
-tr&auml;gt jeder Parameter bereits.</dd>
+&bdquo;Inhalt&ldquo; springt zum Verzeichnis. Ein Tipp auf die <b>Beschriftung</b> eines
+Feldes in einer Zyklusmaske springt direkt zum passenden Absatz hier &mdash;
+jeder Parameter tr&auml;gt seinen Anker.</dd>
 </dl>
 
 <h2 id="ba-k14">Kalkulation &mdash; Angebot in einer Minute</h2>
@@ -4318,7 +4525,7 @@ vorschruppen.</dd>
      TT.MM.JJJJ" ergaenzt, MUSS dieses Datum mitziehen — sonst schlaegt
      der Pruefstand an. [Daniels Befund 06.09.2026: die Anleitung war
      inhaltlich nachgezogen, das Standdatum stand noch auf 31.08.] -->
-<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 07.09.2026. Sie
+<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 08.09.2026. Sie
 w&auml;chst mit der App &mdash; das Inhaltsverzeichnis wird aus den Kapiteln
 erzeugt und ist damit immer vollst&auml;ndig.</p>
 
@@ -11955,6 +12162,35 @@ document.getElementById('btnCloseParams').onclick=()=>{
   refreshAll();
 };
 
+
+// HILFEBILD SEITLICH AM LAPTOP [Nachtschicht 07./08.09.2026] --------
+// Ab 900 px stehen die Hilfebilder RECHTS neben dem Formular (Grid-
+// Regel in 02-stil.html, Punkt 3). Sieben Masken tragen ihr Bild als
+// direktes Kind der Maske, nur der Freistich hat es IM Koerper — am
+// Handy mit Absicht (es steht dort zwischen Werkzeug und Form). Fuer
+// das Seitenlayout muss es Geschwister des Koerpers sein; der Umzug
+// geschieht hier per DOM, nicht im HTML, damit die Handy-Maske
+// unangetastet bleibt. Rueckweg beim Verkleinern unter 900 px, damit
+// ein Fenster, das die Grenze ueberschreitet, beide Layouts sauber
+// zeigt: der Merker _heim haelt das Geschwister, vor dem es stand.
+function hilfebildSeitlich(){
+  try{
+    const m=document.getElementById('maskFreistich'); if(!m) return;
+    const cv=document.getElementById('help_maskFreistich');
+    const body=m.querySelector('.mask-body');
+    if(!cv||!body) return;
+    const breit=window.innerWidth>=900;
+    if(breit && cv.parentNode===body){
+      cv._heim=cv.nextElementSibling||null;
+      m.insertBefore(cv, body);
+    } else if(!breit && cv.parentNode===m){
+      const vor=(cv._heim && cv._heim.parentNode===body)? cv._heim : body.firstChild;
+      body.insertBefore(cv, vor||null);
+    }
+  }catch(e){}
+}
+hilfebildSeitlich();
+window.addEventListener('resize', hilfebildSeitlich);
 // =================================================================
 // Arbeitsplan (program tree) list
 // =================================================================
@@ -12400,13 +12636,21 @@ function enterGrafischView(){
 function backToArbeitsplan(){
   viewMode='arbeitsplan';
   setBodyMode('mode-arbeitsplan');
-  if(simActive){
-    simActive=false; simPlaying=false;
-    if(simRAF) cancelAnimationFrame(simRAF);
-    document.getElementById('simBar').classList.remove('show');
-  document.getElementById('simZoomBar').classList.remove('show');
-    resizeCanvas();
-  document.getElementById('zoomCtrl').classList.remove('hidden');
+  // Laeuft die Simulation noch, geht es ueber DENSELBEN Ausgang wie
+  // das X der Sim-Leiste (simSchliessen, 97-bericht-kalk.js) — der
+  // alte Kurzweg liess simvoll/sim3dan am body stehen [Nachtschicht
+  // 07./08.09.2026, am Laptop gemessen]. Rueckfall fuer den Fall, dass
+  // die Funktion (spaeteres Modul) nicht geladen ist.
+  if(simActive || document.body.classList.contains('simvoll')){
+    if(typeof simSchliessen==='function'){ simSchliessen(); }
+    else{
+      simActive=false; simPlaying=false;
+      if(simRAF) cancelAnimationFrame(simRAF);
+      document.getElementById('simBar').classList.remove('show');
+      document.getElementById('simZoomBar').classList.remove('show');
+      resizeCanvas();
+      document.getElementById('zoomCtrl').classList.remove('hidden');
+    }
   }
   renderSoftkeys();
   refreshArbeitsplan();
@@ -12596,7 +12840,9 @@ function renderPlanVorschau(){
   // Beschriftung: groesster ⌀ und Laenge
   c.fillStyle='#6b7a87'; c.font=(11*dpr)+'px Segoe UI, Arial, sans-serif';
   c.textAlign='left'; c.textBaseline='middle';
-  c.fillText('⌀'+(2*rMax).toFixed(0), 4*dpr, mx(rMax));
+  // 9 statt 4 px vom Rand [Nachtschicht 07./08.09.2026]: das Mass klebte
+  // an der blauen Trennlinie der Vorschau (gemessen x=836 bei Linie 832..834).
+  c.fillText('⌀'+(2*rMax).toFixed(0), 9*dpr, mx(rMax));
   c.textAlign='center'; c.textBaseline='alphabetic';
   c.fillText('Z'+Math.min(zA,zI).toFixed(0), zL, cvp.height-6*dpr);
   c.fillText('Z'+Math.max(zA,zI).toFixed(0), zR, cvp.height-6*dpr);
@@ -32257,7 +32503,13 @@ document.getElementById('maskKalk').addEventListener('input',()=>{
   kalkSpeichern(); kalkBlattMalen();
 });
 document.getElementById('hskSim').onclick=openSimulation;
-document.getElementById('simClose').onclick=()=>{
+// SIM SCHLIESSEN ALS FUNKTION [Nachtschicht 07./08.09.2026]: der
+// Rueckweg '<- Arbeitsplan' (backToArbeitsplan, am Laptop waehrend der
+// Simulation sichtbar) raeumte nur Leisten und Zeiger weg, nicht die
+// Klassen simvoll/sim3dan — body trug danach 'simvoll mode-arbeitsplan'
+// (gemessen), und das naechste Oeffnen des Editors zeigte noch die
+// Sim-Statuszeile ueber den Achsen. Ein Ausgang fuer beide Wege.
+function simSchliessen(){
   simActive=false; simPlaying=false;
   massMarke=null;                     // Fundstellen-Markierung mit der Sim beenden
   window.__sim3d=false;
@@ -32275,7 +32527,8 @@ document.getElementById('simClose').onclick=()=>{
   resizeCanvas();
   document.getElementById('zoomCtrl').classList.remove('hidden');
   draw();
-};
+}
+document.getElementById('simClose').onclick=simSchliessen;
 document.getElementById('simSlider').addEventListener('input',(e)=>{
   simProgress=+e.target.value; simPlaying=false; simUhrStellen();
   document.getElementById('simPlay').textContent='▶';
