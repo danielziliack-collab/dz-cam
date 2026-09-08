@@ -4338,15 +4338,17 @@ Eilgang-R&uuml;ckfall. Die NC beider Profile wird im Pr&uuml;fstand getrennt geg
 eingefrorene St&auml;nde gepr&uuml;ft.</p>
 <dt id="ba-ma-kaestchen">DNC &uuml;ber das Funk-K&auml;stchen aus der App</dt>
 <dd>In der NC-Ausgabe unter <b>DNC &#9656;</b> steht oben der Block <b>K&auml;stchen
-(Funk-DNC)</b>: Adresse (1500er <code>http://dnc-1500.local</code>, 1000er
-<code>http://dnc-1000.local</code>, je Maschine gemerkt), <b>Pr&uuml;fen</b>,
+(Funk-DNC)</b>: Adresse (fest: 1500er <code>http://192.168.4.1</code>, 1000er
+<code>http://192.168.4.10</code> &mdash; die Namen dnc-1500.local/dnc-1000.local gehen
+nur auf Ger&auml;ten, die .local aufl&ouml;sen; je Maschine gemerkt), <b>Pr&uuml;fen</b>,
 <b>Auf das K&auml;stchen legen</b> (das erzeugte Programm, gefiltert wie beim
 Sichern), <b>Archiv anzeigen</b> mit <i>An Maschine senden</i> / <i>Laden</i>
 (holt die Datei auf dieses Ger&auml;t) / &#x2715;, dazu <b>Empfangen (Sicherung)</b>
 und <b>Abbrechen</b>. Handy oder Laptop m&uuml;ssen im WLAN <b>DNC</b> sein.<br>
 <b>Wichtig:</b> L&auml;uft die App als PWA &uuml;ber https, blockiert der Browser die
 Verbindung zum K&auml;stchen (http) &mdash; das ist eine Browserregel, kein Fehler.
-Dann die App vom K&auml;stchen selbst &ouml;ffnen: <b>http://dnc-1500.local/app</b>.
+Dann die App vom K&auml;stchen selbst &ouml;ffnen: <b>http://192.168.4.1/app</b>
+(1000er: http://192.168.4.10/app).
 Daf&uuml;r einmal die Datei euroturn-kontur-cam.html auf der DNC-Seite des
 K&auml;stchens unter &bdquo;App auf der Karte&ldquo; hochladen; nach jeder neuen
 App-Version wiederholen. Die Doppelklick-Datei am Laptop spricht das K&auml;stchen
@@ -27581,7 +27583,11 @@ function dncLog(t, warn){
 // Die Adresse wird je Maschine gemerkt (et_kaestchen), Vorgabe die
 // mDNS-Namen aus der Konfig der Kaestchen.
 // =================================================================
-const KAESTCHEN_VORGABE={MONFORTS_1500_EUROTURN:'http://dnc-1500.local', MONFORTS_1000_MTC_K_6624B:'http://dnc-1000.local'};
+// FESTE ADRESSEN statt .local-Namen [Daniels Befund 08.09.2026: "das
+// findet er nicht"] — Windows-Laptops und manche Handys loesen dnc-1500.local
+// nicht auf. Die Kaestchen tragen die Nummern fest in ihrer Konfig (ip=):
+// 1500er als Netz-Chef .1, 1000er .10 (eingebucht UND im Notnetz).
+const KAESTCHEN_VORGABE={MONFORTS_1500_EUROTURN:'http://192.168.4.1', MONFORTS_1000_MTC_K_6624B:'http://192.168.4.10'};
 let kbPoll=null, kbOk=false;
 function kaestchenEigeneHerkunft(){
   try{ const h=String(location.hostname||'').toLowerCase();
@@ -27602,9 +27608,20 @@ function kaestchenAdresseMerken(adr){
 }
 function kaestchenGemischt(adr){ try{ return location.protocol==='https:' && /^http:/i.test(adr||''); }catch(e){ return false; } }
 async function kbApi(pfad, opt){
-  const r=await fetch(kaestchenAdresse()+pfad, Object.assign({cache:'no-store'}, opt||{}));
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  return r;
+  // Zeitdeckel: ohne ihn haengt "pruefe..." bei falscher Adresse, bis der
+  // Browser von sich aus aufgibt (gemessen: nach 2,5 s noch keine Antwort,
+  // TCP-Zeitueberschreitung liegt bei 20 s und mehr). 12 s reichen auch
+  // fuer den Programm-Upload ueber Funk (20 kB).
+  const ac=(typeof AbortController!=='undefined')? new AbortController() : null;
+  const t=ac? setTimeout(()=>ac.abort(), 12000) : null;
+  try{
+    const r=await fetch(kaestchenAdresse()+pfad, Object.assign({cache:'no-store'}, ac?{signal:ac.signal}:{}, opt||{}));
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r;
+  }catch(e){
+    if(e && e.name==='AbortError') throw new Error('keine Antwort in 12 s');
+    throw e;
+  }finally{ if(t) clearTimeout(t); }
 }
 function kaestchenBlockHtml(){
   return '<b>Kästchen (Funk-DNC)</b> <span id="kbBeleg" style="font-size:11px;color:#6b7883;"></span>'
@@ -27665,7 +27682,7 @@ async function kaestchenPruefen(){
     kbOk=false; kaestchenPollStop();
     kbStatus('nicht erreichbar', true);
     if(!kaestchenGemischt(kaestchenAdresse()))
-      kaestchenHinweis('Kästchen nicht erreichbar. Bist du im WLAN „DNC"? Ist das Kästchen an? Adresse der 1500er: http://dnc-1500.local oder http://192.168.4.1, der 1000er: http://dnc-1000.local.');
+      kaestchenHinweis('Kästchen nicht erreichbar. Bist du im WLAN „DNC"? Ist das Kästchen an? Adresse der 1500er: http://192.168.4.1, der 1000er: http://192.168.4.10 (beide fest in der Konfig der Kästchen).');
     return null;
   }
 }
