@@ -4345,14 +4345,18 @@ nur auf Ger&auml;ten, die .local aufl&ouml;sen; je Maschine gemerkt), <b>Pr&uuml
 Sichern), <b>Archiv anzeigen</b> mit <i>An Maschine senden</i> / <i>Laden</i>
 (holt die Datei auf dieses Ger&auml;t) / &#x2715;, dazu <b>Empfangen (Sicherung)</b>
 und <b>Abbrechen</b>. Handy oder Laptop m&uuml;ssen im WLAN <b>DNC</b> sein.<br>
-<b>Wichtig:</b> L&auml;uft die App als PWA &uuml;ber https, blockiert der Browser die
-Verbindung zum K&auml;stchen (http) &mdash; das ist eine Browserregel, kein Fehler.
-Dann die App vom K&auml;stchen selbst &ouml;ffnen: <b>http://192.168.4.1/app</b>
-(1000er: http://192.168.4.10/app).
-Daf&uuml;r einmal die Datei euroturn-kontur-cam.html auf der DNC-Seite des
-K&auml;stchens unter &bdquo;App auf der Karte&ldquo; hochladen; nach jeder neuen
-App-Version wiederholen. Die Doppelklick-Datei am Laptop spricht das K&auml;stchen
-direkt an. Stand 08.09.2026.</dd>
+<b>Zwei Wege, nie ein Durchgriff:</b> Maschine &harr; K&auml;stchen (seriell) und
+K&auml;stchen &harr; Handy/Laptop (Funk). Ein Programm liegt immer erst auf dem
+K&auml;stchen, dann in der Maschine &mdash; und umgekehrt. Jede App-Kopie (Kachel,
+Laptop-Datei) hat ihren EIGENEN Programmspeicher; die Verbindung zwischen ihnen ist
+die Datei (NC sichern / Sicherungsdatei).<br>
+<b>Vom Laptop (Doppelklick-Datei):</b> der Block oben spricht das K&auml;stchen direkt an.<br>
+<b>Vom Handy (Kachel):</b> der Browser blockiert die Verbindung zum K&auml;stchen (https
+gegen http, eine Browserregel). Der Weg: <b>NC sichern</b>, dann in Safari die eigene
+Seite des K&auml;stchens (http://192.168.4.1 bzw. .10) &ouml;ffnen &mdash; ein schlichtes
+&Uuml;bertragungswerkzeug: &bdquo;Aufs K&auml;stchen legen&ldquo;, &bdquo;In die Maschine
+laden&ldquo;, &bdquo;Aus der Maschine holen&ldquo;, &bdquo;Aufs Ger&auml;t holen&ldquo;.
+Stand 08.09.2026.</dd>
 <dt id="ba-ma-dnc-seriell">DNC direkt aus der App (Web-Serial)</dt>
 <dd>Der Knopf <b>&bdquo;DNC&ldquo;</b> in der G-Code-Ansicht &ouml;ffnet die serielle
 &Uuml;bertragung: Verbinden (USB-RS232-Adapter w&auml;hlen), dann
@@ -27571,15 +27575,20 @@ function dncLog(t, warn){
 // aufs Kaestchen legen, das Archiv der Karte sehen, von dort senden
 // oder laden, Sicherung von der Maschine anstossen.
 //
-// WOHER die Adresse kommt, entscheidet, ob es geht:
-// - Laeuft die App VOM KAESTCHEN (http://dnc-1500.local/app — die
-//   Datei liegt auf dessen Karte), ist die Adresse die eigene Herkunft.
-//   Das ist der Weg fuers Handy: gleiche Herkunft, kein Internet.
-// - Laeuft sie als Doppelklick-Datei am Laptop, geht der direkte
-//   Zugriff, weil das Kaestchen CORS-Kopfzeilen sendet.
-// - Laeuft sie als PWA ueber https, BLOCKIERT der Browser jede
-//   Verbindung zu http://dnc-... (Mixed Content) — kein Bug, den man
-//   umgehen koennte; der Block sagt es und nennt den Weg ueber /app.
+// WOHER die App laeuft, entscheidet, ob es geht:
+// - Doppelklick-Datei am Laptop: direkter Zugriff, weil das Kaestchen
+//   CORS-Kopfzeilen sendet. Das ist der Weg, fuer den der Block da ist.
+// - Handy-Kachel (PWA ueber https): der Browser BLOCKIERT jede
+//   Verbindung zu http://192.168.4.x (Mixed Content) — kein Bug, den man
+//   umgehen koennte. Der Block sagt es und nennt den Weg: "NC sichern"
+//   und auf der eigenen Seite des Kaestchens hochladen. Eine Kopie der
+//   App AUF dem Kaestchen (/app) war am 08.09. kurz gebaut und ist auf
+//   Daniels Entscheid wieder raus: das Werkzeug auf dem Kaestchen soll
+//   nicht aussehen wie das CAM, sondern ein schlichtes Uebertragungs-
+//   werkzeug bleiben — und jede App-Kopie haette ohnehin ihren eigenen
+//   Programmspeicher gehabt.
+// - kaestchenEigeneHerkunft bleibt als Wache: laeuft die App je von
+//   einer 192.168.4.x-Adresse, ist das Kaestchen die eigene Herkunft.
 // Die Adresse wird je Maschine gemerkt (et_kaestchen), Vorgabe die
 // mDNS-Namen aus der Konfig der Kaestchen.
 // =================================================================
@@ -27649,8 +27658,8 @@ function kaestchenHinweis(txt){
   const adr=kaestchenAdresse();
   let t=txt||'';
   if(!t && kaestchenGemischt(adr))
-    t='Diese App läuft über https (PWA) — der Browser lässt dann keine Verbindung zu '+adr+' zu. '
-     +'Öffne die App direkt vom Kästchen: '+adr+'/app (dazu die App einmal auf die Karte legen: DNC-Seite des Kästchens, „App auf der Karte").';
+    t='Von der Handy-Kachel aus lässt der Browser keine Verbindung zum Kästchen zu (https gegen http). '
+     +'Der Weg am Handy: „NC sichern", dann in Safari die Seite des Kästchens ('+adr+') öffnen, dort „Aufs Kästchen legen" und „In die Maschine laden".';
   h.textContent=t; h.style.display=t? 'block':'none';
 }
 function kbStatus(t, warn){ const e=document.getElementById('kbStat'); if(e){ e.textContent=t; e.style.color=warn? '#b03030':''; } }
@@ -27745,14 +27754,28 @@ function kaestchenVerdrahten(){
   const adr=document.getElementById('kbAdr');
   if(adr) adr.addEventListener('change', ()=>{ if(!adr.disabled) kaestchenAdresseMerken(adr.value); kaestchenHinweis(); });
 }
+// Auf der Handy-Kachel (https) KEIN Kaestchen-Block [Daniels Ansage
+// 08.09.2026 abends]: von dort kann er nie funktionieren (Browserregel),
+// ein toter Block verwirrt nur. Dort steht der Dateiweg in zwei Saetzen;
+// den vollen Block bekommen die Laptop-Datei und jede http-Herkunft.
+function kaestchenNurHinweis(){
+  try{ return location.protocol==='https:' && !kaestchenEigeneHerkunft(); }catch(e){ return false; }
+}
 function dncPanelMalen(){
   const box=document.getElementById('dncPanel');
   if(!box) return;
   if(box.dataset.gebaut!=='1'){
     box.dataset.gebaut='1';
-    box.innerHTML=kaestchenBlockHtml()
-      +'<div id="dncSeriell" style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px;"></div>';
-    kaestchenVerdrahten();
+    if(kaestchenNurHinweis()){
+      box.innerHTML='<b>Kästchen (Funk-DNC)</b><div style="margin-top:6px;">Von dieser App-Kopie aus kann der Browser das Kästchen nicht ansprechen (Kachel über https). '
+        +'Der Weg: <b>NC sichern</b>, dann in Safari die Seite des Kästchens öffnen — 1500er <b>http://192.168.4.1</b>, 1000er <b>http://192.168.4.10</b> — '
+        +'dort „Aufs Kästchen legen" und „In die Maschine laden". Sicherungen holst du dort mit „Aus der Maschine holen" und „Aufs Gerät holen".</div>'
+        +'<div id="dncSeriell" style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px;"></div>';
+    } else {
+      box.innerHTML=kaestchenBlockHtml()
+        +'<div id="dncSeriell" style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px;"></div>';
+      kaestchenVerdrahten();
+    }
   }
   kaestchenAnzeigen();
   dncSeriellMalen();
