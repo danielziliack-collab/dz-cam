@@ -476,6 +476,9 @@ body.artefakt .hsoftkeys{padding-right:48px;}
     max-height:100%;max-width:100%;
   }
   .mask.show{opacity:1;pointer-events:auto;transform:scale(1);}
+  /* Groessen-Griff der Masken (62-fensterlage.js): nur ab 900 px sichtbar,
+     s. Desktop-Query Punkt (19). Hier nur die Ausblendung. */
+  .mask-griff{display:none;}
   /* EINGABE-SCHALTER IM MASKENKOPF [Siemens, Drehen bedienen 11.2.3].
      Klein und rechts: er gehoert zur Maske, nicht zu einem Parameter,
      und darf die Zeilenzahl des Bodys nicht erhoehen — die zu kuerzen
@@ -2081,6 +2084,23 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
        Text untereinander. Nebeneinander sind sie Karten. */
     .leerakt{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
     .leerakt > button{margin:0;min-height:74px;}
+
+    /* (19) FENSTERLAGE [Daniels Auftrag 08.09.2026]: Masken am Kopf
+       verschieben, am Griff rechts unten in der Groesse ziehen,
+       Doppelklick auf den Kopf = zurueck in die Mitte (62-fensterlage.js).
+       Der Griff liegt in der Ecke ueber dem Koerper (z-index), sein
+       Muster sind zwei schraege Striche wie an jedem Fenstergriff. */
+    .mask > .mask-head{cursor:move;user-select:none;}
+    .mask > .mask-head button, .mask > .mask-head .radiobtns, .mask > .mask-head .selwert, .mask > .mask-head select{cursor:pointer;}
+    .mask-griff{
+      display:block;position:absolute;right:0;bottom:0;width:20px;height:20px;z-index:5;
+      cursor:nwse-resize;border-radius:0 0 12px 0;
+      background:linear-gradient(135deg, transparent 0 55%, hsl(var(--ton), 16.9%, 69.8%) 55% 62%, transparent 62% 72%, hsl(var(--ton), 16.9%, 69.8%) 72% 79%, transparent 79%);
+    }
+    .mask-griff:hover{background:linear-gradient(135deg, transparent 0 55%, var(--blue) 55% 62%, transparent 62% 72%, var(--blue) 72% 79%, transparent 79%);}
+    /* Eine frei gesetzte Maske hat keine Einblend-Skalierung mehr (transform
+       ist ihre Lage) — die Deckkraft blendet weiterhin. */
+    .mask.frei{transition:opacity .14s ease;}
 
   }
 </style>
@@ -4524,7 +4544,13 @@ Kopfknopf ☰/⊞ schaltet zwischen Kachel- und Zeilenansicht. Im Kontur-Editor
 stehen die Softkeys als Spalte rechts, die Elementliste daneben; in der
 Simulation liegen Sim-, Status- und Zoomleiste unter der Zeichnung.
 &bdquo;&larr; Arbeitsplan&ldquo; w&auml;hrend der Simulation beendet sie genauso wie das
-X der Sim-Leiste. Stand 08.09.2026.</dd>
+X der Sim-Leiste.<br>
+<b>Masken verschieben und ziehen:</b> Kopfzeile anfassen und ziehen verschiebt die
+Maske, der Griff rechts unten zieht die Gr&ouml;&szlig;e; Lage und Gr&ouml;&szlig;e werden je
+Maske auf diesem Ger&auml;t gemerkt. Doppelklick auf die Kopfzeile stellt eine Maske
+zur&uuml;ck in die Mitte &mdash; alle auf einmal:
+<button class="gcbtn" id="baFensterReset" type="button" style="padding:4px 10px;font-size:11.5px;">Fensterlagen zur&uuml;cksetzen</button>
+Stand 08.09.2026.</dd>
 <dt id="ba-be-hilfe">Diese Anleitung</dt>
 <dd>Das <b>?</b> in der Kopfzeile &ouml;ffnet sie von &uuml;berall;
 &bdquo;Inhalt&ldquo; springt zum Verzeichnis. Ein Tipp auf die <b>Beschriftung</b> eines
@@ -4852,15 +4878,42 @@ window.__fehlerMelden = function(quelle, e){
 };
 (function(){
   var alt = EventTarget.prototype.addEventListener;
+  // REGISTER fuer removeEventListener [Nachtschicht 08.09.2026, beim
+  // Fensterlage-Modul gefunden]: der Faenger registriert statt fn eine
+  // Huelle — removeEventListener(type, fn) mit dem Original fand sie nie,
+  // JEDER Abmeldeversuch in der App lief ins Leere (gemessen: der
+  // Bewegungs-Listener eines Griff-Zugs blieb nach dem Loslassen aktiv
+  // und zog die Maske bei jeder Mausbewegung weiter). Im Bestand nutzte
+  // bis dahin nichts removeEventListener, deshalb fiel es nie auf. Das
+  // Register ordnet fn -> Huelle je Ziel/Typ/Capture zu; doppeltes
+  // Anmelden derselben Funktion zaehlt wie im DOM einmal.
+  var register = new WeakMap();
+  function capVon(opt){ return opt===true || !!(opt && opt.capture); }
   EventTarget.prototype.addEventListener = function(type, fn, opt){
     if(typeof fn !== 'function') return alt.call(this, type, fn, opt);
-    var self=this;
+    var self=this, cap=capVon(opt);
+    var liste = register.get(fn);
+    if(!liste){ liste=[]; register.set(fn, liste); }
+    for(var i=0;i<liste.length;i++){ if(liste[i].t===self && liste[i].type===type && liste[i].cap===cap) return; }
     var wrapped = function(ev){
       try{ return fn.call(self, ev); }
       catch(e){ window.__fehlerMelden('listener:'+type, e); }
     };
     wrapped.__orig = fn;
+    liste.push({t:self, type:type, cap:cap, w:wrapped});
     return alt.call(this, type, wrapped, opt);
+  };
+  var altRm = EventTarget.prototype.removeEventListener;
+  EventTarget.prototype.removeEventListener = function(type, fn, opt){
+    if(typeof fn !== 'function') return altRm.call(this, type, fn, opt);
+    var cap=capVon(opt), liste=register.get(fn);
+    if(liste){
+      for(var i=0;i<liste.length;i++){
+        var e=liste[i];
+        if(e.t===this && e.type===type && e.cap===cap){ liste.splice(i,1); return altRm.call(this, type, e.w, opt); }
+      }
+    }
+    return altRm.call(this, type, fn, opt);
   };
   var altTo = window.setTimeout;
   window.setTimeout = function(fn, ms){
@@ -12258,6 +12311,164 @@ function hilfebildSeitlich(){
 }
 hilfebildSeitlich();
 window.addEventListener('resize', hilfebildSeitlich);
+// =====================================================================
+// FENSTERLAGE AM LAPTOP [Daniels Auftrag 08.09.2026: "die einzelnen
+// Fenster verschiebbar ... von der Groesse her manuell anpassen"]
+// ---------------------------------------------------------------------
+// Ab 900 px sind alle Masken schwebende Dialoge (fest positioniert,
+// zentriert — 02-stil.html, Desktop-Query). Hier kommt die Bedienung
+// dazu: am Maskenkopf ziehen verschiebt, der Griff rechts unten zieht
+// die Groesse, ein Doppelklick auf den Kopf stellt die Maske zurueck in
+// die Mitte. Lage und Groesse werden JE MASKE im Browserspeicher
+// gemerkt (Slot et_fensterlage, dasselbe Muster wie et_kachelpilot) —
+// die Gewindemaske steht morgen wieder da, wo sie heute hingeschoben
+// wurde.
+//
+// WARUM Inline-Stile mit !important: die Desktop-Regel zentriert mit
+// left/top/transform/width !important. Ein normaler Inline-Stil
+// verloere gegen die Stylesheet-!important-Regel; nur ein Inline-Stil
+// mit derselben Wichtigkeit gewinnt. Beim Verschieben wird NUR die Lage
+// gesetzt, nicht die Hoehe — sonst friere eine Maske, die beim Wechsel
+// einfach -> komplett waechst, auf ihrer alten Hoehe ein. Die Hoehe
+// setzt allein der Griff.
+//
+// Unter 900 px passiert nichts: keine Griffe, keine Inline-Stile
+// (Regel 3 der CLAUDE.md). Wird ein Laptop-Fenster unter 900 px
+// verkleinert, raeumt fensterlageAnwenden die Inline-Stile weg.
+// =====================================================================
+const FL_SLOT='et_fensterlage';
+let flLagen={};          // {maskId: {x,y[,w,h]}} — gemerkte Lagen
+
+function flBreit(){ return typeof window!=='undefined' && window.innerWidth>=900; }
+function flLaden(){
+  flLagen={};
+  try{ const s=localStorage.getItem(FL_SLOT); const o=s? JSON.parse(s):null;
+    if(o && typeof o==='object' && !Array.isArray(o)) flLagen=o; }catch(e){ flLagen={}; }
+}
+function flSpeichern(){ try{ localStorage.setItem(FL_SLOT, JSON.stringify(flLagen)); }catch(e){} }
+
+// Mindestmasse: Masken mit seitlichem Hilfebild (Bildspalte 520 px)
+// brauchen Platz fuer Formular UND Bild; die uebrigen kommen mit 420 aus.
+function flMindest(m){
+  let bild=false;
+  try{ bild=!!(m && m.querySelector && m.querySelector(':scope > canvas.mask-help')); }catch(e){}
+  return { w: bild? 960 : 420, h: 200 };
+}
+
+// REINE RECHNUNG (Pruefstand): Lage in den Bildschirm klemmen. Breite und
+// Hoehe sind optional — fehlen sie, gilt die gemessene Groesse nur fuer
+// die Klemmung der Lage und wird NICHT zurueckgegeben.
+function fensterlageKlemmen(l, vw, vh, min, ist){
+  min=min||{w:420,h:200}; ist=ist||{};
+  const hatW=isFinite(l.w), hatH=isFinite(l.h);
+  const w=hatW? Math.max(min.w, Math.min(l.w, vw-16)) : (isFinite(ist.w)? ist.w : min.w);
+  const h=hatH? Math.max(min.h, Math.min(l.h, vh-16)) : (isFinite(ist.h)? ist.h : min.h);
+  const x=Math.max(8, Math.min(isFinite(l.x)? l.x : 8, Math.max(8, vw-w-8)));
+  const y=Math.max(8, Math.min(isFinite(l.y)? l.y : 8, Math.max(8, vh-h-8)));
+  const k={x:Math.round(x), y:Math.round(y)};
+  if(hatW) k.w=Math.round(w);
+  if(hatH) k.h=Math.round(h);
+  return k;
+}
+
+function fensterlageSetzen(id, l){
+  const m=document.getElementById(id); if(!m) return null;
+  let ist={};
+  try{ const r=m.getBoundingClientRect(); ist={w:r.width, h:r.height}; }catch(e){}
+  const k=fensterlageKlemmen(l, window.innerWidth, window.innerHeight, flMindest(m), ist);
+  const st=m.style;
+  st.setProperty('left', k.x+'px', 'important');
+  st.setProperty('top', k.y+'px', 'important');
+  st.setProperty('transform', 'none', 'important');
+  if(isFinite(k.w)) st.setProperty('width', k.w+'px', 'important');
+  if(isFinite(k.h)){ st.setProperty('height', k.h+'px', 'important'); st.setProperty('max-height', 'none', 'important'); }
+  m.classList.add('frei');
+  try{ m.dataset.fensterlage=JSON.stringify(k); }catch(e){}
+  flLagen[id]=k;
+  return k;
+}
+function flStilWeg(m){
+  ['left','top','transform','width','height','max-height'].forEach(p=>{ try{ m.style.removeProperty(p); }catch(e){} });
+  m.classList.remove('frei');
+  try{ delete m.dataset.fensterlage; }catch(e){}
+}
+function fensterlageLoeschen(id){
+  const m=document.getElementById(id); if(m) flStilWeg(m);
+  delete flLagen[id];
+}
+function fensterlageZuruecksetzen(){
+  Object.keys(flLagen).forEach(id=>{ const m=document.getElementById(id); if(m) flStilWeg(m); });
+  flLagen={};
+  try{ localStorage.removeItem(FL_SLOT); }catch(e){}
+}
+// Alle gemerkten Lagen anwenden (Start, Fenstergroesse geaendert). Unter
+// 900 px: Inline-Stile weg, die Lagen bleiben gemerkt fuer den Rueckweg.
+function fensterlageAnwenden(){
+  if(!flBreit()){
+    Object.keys(flLagen).forEach(id=>{ const m=document.getElementById(id); if(m) flStilWeg(m); });
+    return;
+  }
+  Object.keys(flLagen).forEach(id=>{ if(document.getElementById(id)) fensterlageSetzen(id, flLagen[id]); });
+}
+
+// Ziehen: Kopf = verschieben, Griff = Groesse. Bewegung und Loslassen
+// haengen am document, nicht am Element — so laeuft es auch, wenn der
+// Zeiger schneller ist als das Element (und ohne Pointer-Capture, das
+// synthetische Ereignisse nicht kennen).
+function flZiehen(m, ev, art){
+  if(!flBreit() || ev.button!==0) return;
+  const r=m.getBoundingClientRect();
+  const start={x:ev.clientX, y:ev.clientY, l:{x:r.left, y:r.top, w:r.width, h:r.height}};
+  ev.preventDefault();
+  let bewegt=false;
+  const move=e=>{
+    const dx=e.clientX-start.x, dy=e.clientY-start.y;
+    if(!bewegt && Math.abs(dx)<2 && Math.abs(dy)<2) return;
+    bewegt=true;
+    if(art==='lage') fensterlageSetzen(m.id, {x:start.l.x+dx, y:start.l.y+dy});
+    else fensterlageSetzen(m.id, {x:start.l.x, y:start.l.y, w:start.l.w+dx, h:start.l.h+dy});
+  };
+  const up=()=>{
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+    document.removeEventListener('pointercancel', up);
+    if(bewegt) flSpeichern();
+  };
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+  document.addEventListener('pointercancel', up);
+}
+function flBedienelement(t){
+  try{ return !!(t && t.closest && t.closest('button,input,select,textarea,.radiobtns,.selwert,label,a')); }catch(e){ return false; }
+}
+function flVerdrahten(m){
+  if(!m || m.dataset.flVerdrahtet) return;
+  m.dataset.flVerdrahtet='1';
+  let kopf=null;
+  try{ kopf=m.querySelector(':scope > .mask-head'); }catch(e){}
+  if(kopf){
+    kopf.addEventListener('pointerdown', ev=>{ if(flBedienelement(ev.target)) return; flZiehen(m, ev, 'lage'); });
+    kopf.addEventListener('dblclick', ev=>{
+      if(!flBreit() || flBedienelement(ev.target)) return;
+      fensterlageLoeschen(m.id); flSpeichern();
+    });
+  }
+  // Griff rechts unten — im Stylesheet unter 900 px ausgeblendet.
+  const g=document.createElement('div');
+  g.className='mask-griff'; g.title='Groesse ziehen — Doppelklick auf den Kopf stellt die Maske zurueck';
+  g.addEventListener('pointerdown', ev=>flZiehen(m, ev, 'groesse'));
+  m.appendChild(g);
+}
+(function(){
+  try{
+    flLaden();
+    document.querySelectorAll('.mask').forEach(flVerdrahten);
+    fensterlageAnwenden();
+    window.addEventListener('resize', fensterlageAnwenden);
+    const b=document.getElementById('baFensterReset');
+    if(b) b.addEventListener('click', ()=>{ fensterlageZuruecksetzen(); try{ melde('Alle Fensterlagen zurückgesetzt — die Masken stehen wieder in der Mitte.'); }catch(e){} });
+  }catch(e){}
+})();
 // =================================================================
 // Arbeitsplan (program tree) list
 // =================================================================
