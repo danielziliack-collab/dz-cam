@@ -479,6 +479,9 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   /* Groessen-Griff der Masken (62-fensterlage.js): nur ab 900 px sichtbar,
      s. Desktop-Query Punkt (19). Hier nur die Ausblendung. */
   .mask-griff{display:none;}
+  /* Trennlinien der Hauptansichten (63-trennlinien.js): unter 900 px aus,
+     s. Desktop-Query Punkt (20). */
+  .spalter{display:none;}
   /* EINGABE-SCHALTER IM MASKENKOPF [Siemens, Drehen bedienen 11.2.3].
      Klein und rechts: er gehoert zur Maske, nicht zu einem Parameter,
      und darf die Zeilenzahl des Bodys nicht erhoehen — die zu kuerzen
@@ -2101,6 +2104,23 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
     /* Eine frei gesetzte Maske hat keine Einblend-Skalierung mehr (transform
        ist ihre Lage) — die Deckkraft blendet weiterhin. */
     .mask.frei{transition:opacity .14s ease;}
+
+    /* (20) TRENNLINIEN [Daniels Auftrag 08.09.2026, Stufe 2]: zwischen
+       Arbeitsplan und Werkstueck-Vorschau bzw. Zeichnung und Elementliste
+       liegt eine 6-px-Linie zum Ziehen (63-trennlinien.js). Sie ersetzt
+       die feste blaue Trennkante der rechten Spalte und traegt selbst den
+       Farbton; beim Ueberfahren wird sie kraeftiger. In der Simulation
+       ist die Elementliste weg, die Linie auch. order:1 stellt die
+       Editor-Linie zwischen Zeichnung (0) und Liste (2). */
+    body.mode-arbeitsplan #stageMain > .spalter-plan,
+    body.mode-grafisch:not(.simvoll) #stageMain > .spalter-editor{
+      display:block;flex:0 0 6px;width:6px;cursor:col-resize;
+      background:var(--blue);opacity:.55;transition:opacity .1s;
+    }
+    #stageMain > .spalter:hover{opacity:1;}
+    body.mode-grafisch #stageMain > .spalter-editor{order:1;}
+    body.mode-arbeitsplan #planVorschau{border-left:none;}
+    body.mode-grafisch #pointListPanel{border-left:none;}
 
   }
 </style>
@@ -4549,7 +4569,11 @@ X der Sim-Leiste.<br>
 Maske, der Griff rechts unten zieht die Gr&ouml;&szlig;e; Lage und Gr&ouml;&szlig;e werden je
 Maske auf diesem Ger&auml;t gemerkt. Doppelklick auf die Kopfzeile stellt eine Maske
 zur&uuml;ck in die Mitte &mdash; alle auf einmal:
-<button class="gcbtn" id="baFensterReset" type="button" style="padding:4px 10px;font-size:11.5px;">Fensterlagen zur&uuml;cksetzen</button>
+<button class="gcbtn" id="baFensterReset" type="button" style="padding:4px 10px;font-size:11.5px;">Fensterlagen zur&uuml;cksetzen</button><br>
+<b>Spaltenbreite:</b> die blaue Trennlinie zwischen Arbeitsplan und Werkst&uuml;ck bzw. zwischen
+Zeichnung und Elementliste l&auml;sst sich ziehen; Doppelklick auf die Linie stellt die Vorgabe
+wieder her, die Breite wird gemerkt.
+<button class="gcbtn" id="baTrennReset" type="button" style="padding:4px 10px;font-size:11.5px;">Spaltenbreiten zur&uuml;cksetzen</button>
 Stand 08.09.2026.</dd>
 <dt id="ba-be-hilfe">Diese Anleitung</dt>
 <dd>Das <b>?</b> in der Kopfzeile &ouml;ffnet sie von &uuml;berall;
@@ -12467,6 +12491,135 @@ function flVerdrahten(m){
     window.addEventListener('resize', fensterlageAnwenden);
     const b=document.getElementById('baFensterReset');
     if(b) b.addEventListener('click', ()=>{ fensterlageZuruecksetzen(); try{ melde('Alle Fensterlagen zurückgesetzt — die Masken stehen wieder in der Mitte.'); }catch(e){} });
+  }catch(e){}
+})();
+// =====================================================================
+// TRENNLINIEN DER HAUPTANSICHTEN [Daniels Auftrag 08.09.2026, Stufe 2]
+// ---------------------------------------------------------------------
+// Am Laptop teilen sich zwei Spalten den Platz: im Arbeitsplan der Plan
+// und die Werkstueck-Vorschau (440 px), im Kontur-Editor die Zeichnung
+// und die Elementliste (360 px). Zwischen beiden liegt jetzt eine
+// ziehbare Trennlinie wie im Explorer: ziehen aendert die Breite der
+// rechten Spalte, Doppelklick stellt die Vorgabe wieder her, die Breite
+// wird je Ansicht im Browserspeicher gemerkt (Slot et_trennlinien).
+//
+// Die Trennlinien sind DOM-Elemente, die dieses Modul beim Start
+// zwischen die Spalten setzt; im Stylesheet sind sie unter 900 px
+// ausgeblendet (Regel 3 der CLAUDE.md), am Laptop je nach Ansicht
+// sichtbar (mode-arbeitsplan bzw. mode-grafisch, nie in der Simulation).
+// Die Breite steht als normaler Inline-Stil am rechten Panel — die
+// Desktop-Regeln (flex:0 0 440px, width, min-width) tragen kein
+// !important, ein Inline-Stil gewinnt. Nach dem Ziehen wird die
+// Zeichenflaeche neu vermessen (resizeCanvas) bzw. die Vorschau neu
+// gemalt (renderPlanVorschau), sonst bliebe das Canvas auf der alten
+// Pixelbreite.
+// =====================================================================
+const TL_SLOT='et_trennlinien';
+// Je Trennlinie: rechtes Panel, Vorgabe, Grenzen, was danach neu zu
+// zeichnen ist. minLinks = was der linken Spalte mindestens bleibt.
+const TL_LINIEN={
+  plan:   { panel:'planVorschau',   vor:'planVorschau',   vorgabe:440, min:300, max:820, minLinks:420, klasse:'spalter-plan' },
+  editor: { panel:'pointListPanel', vor:'pointListPanel', vorgabe:360, min:240, max:720, minLinks:480, klasse:'spalter-editor' }
+};
+let tlBreiten={};
+
+function tlBreit(){ return typeof window!=='undefined' && window.innerWidth>=900; }
+function tlLaden(){
+  tlBreiten={};
+  try{ const s=localStorage.getItem(TL_SLOT); const o=s? JSON.parse(s):null;
+    if(o && typeof o==='object' && !Array.isArray(o)) tlBreiten=o; }catch(e){ tlBreiten={}; }
+}
+function tlSpeichern(){ try{ localStorage.setItem(TL_SLOT, JSON.stringify(tlBreiten)); }catch(e){} }
+
+// REINE RECHNUNG (Pruefstand): Breite der rechten Spalte in ihre Grenzen
+// klemmen — und so, dass der linken Spalte minLinks bleibt (Softkey-
+// Spalte 96 px und Trennlinie 6 px sind schon abgezogen).
+function trennlinieKlemmen(name, w, vw){
+  const L=TL_LINIEN[name]; if(!L) return null;
+  const frei=(isFinite(vw)? vw : 1366) - 96 - 6 - L.minLinks;
+  const obenGrenze=Math.max(L.min, Math.min(L.max, frei));
+  return Math.round(Math.max(L.min, Math.min(isFinite(w)? w : L.vorgabe, obenGrenze)));
+}
+function trennlinieSetzen(name, w){
+  const L=TL_LINIEN[name]; if(!L) return null;
+  const p=document.getElementById(L.panel); if(!p) return null;
+  const k=trennlinieKlemmen(name, w, window.innerWidth);
+  p.style.width=k+'px'; p.style.minWidth=k+'px'; p.style.flex='0 0 '+k+'px';
+  try{ p.dataset.trennlinie=String(k); }catch(e){}
+  tlBreiten[name]=k;
+  tlNachziehen(name);
+  return k;
+}
+function trennlinieLoeschen(name){
+  const L=TL_LINIEN[name]; if(!L) return;
+  const p=document.getElementById(L.panel);
+  if(p){ p.style.width=''; p.style.minWidth=''; p.style.flex=''; try{ delete p.dataset.trennlinie; }catch(e){} }
+  delete tlBreiten[name];
+  tlNachziehen(name);
+}
+function trennlinienZuruecksetzen(){
+  Object.keys(TL_LINIEN).forEach(trennlinieLoeschen);
+  tlBreiten={};
+  try{ localStorage.removeItem(TL_SLOT); }catch(e){}
+}
+// Zeichenflaechen an die neue Spaltenbreite anpassen.
+function tlNachziehen(name){
+  try{
+    if(name==='editor'){ if(typeof resizeCanvas==='function') resizeCanvas(); if(typeof draw==='function') draw(); }
+    else { if(typeof renderPlanVorschau==='function') renderPlanVorschau(); }
+  }catch(e){}
+}
+function trennlinienAnwenden(){
+  if(!tlBreit()){
+    Object.keys(TL_LINIEN).forEach(n=>{ const p=document.getElementById(TL_LINIEN[n].panel);
+      if(p){ p.style.width=''; p.style.minWidth=''; p.style.flex=''; } });
+    return;
+  }
+  Object.keys(tlBreiten).forEach(n=>{ if(TL_LINIEN[n]) trennlinieSetzen(n, tlBreiten[n]); });
+}
+function tlZiehen(name, ev){
+  if(!tlBreit() || ev.button!==0) return;
+  const L=TL_LINIEN[name]; const p=document.getElementById(L.panel); if(!p) return;
+  const startX=ev.clientX, startW=p.getBoundingClientRect().width;
+  ev.preventDefault();
+  let bewegt=false;
+  const move=e=>{
+    const dx=e.clientX-startX;
+    if(!bewegt && Math.abs(dx)<2) return;
+    bewegt=true;
+    // Die Linie sitzt LINKS vom Panel: Ziehen nach rechts macht es schmaler.
+    trennlinieSetzen(name, startW-dx);
+  };
+  const up=()=>{
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+    document.removeEventListener('pointercancel', up);
+    if(bewegt) tlSpeichern();
+  };
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+  document.addEventListener('pointercancel', up);
+}
+function tlEinbauen(name){
+  const L=TL_LINIEN[name];
+  const vor=document.getElementById(L.vor); if(!vor || !vor.parentNode) return null;
+  if(document.getElementById('spalter_'+name)) return document.getElementById('spalter_'+name);
+  const s=document.createElement('div');
+  s.className='spalter '+L.klasse; s.id='spalter_'+name;
+  s.title='Ziehen aendert die Spaltenbreite — Doppelklick stellt die Vorgabe wieder her';
+  s.addEventListener('pointerdown', ev=>tlZiehen(name, ev));
+  s.addEventListener('dblclick', ()=>{ if(!tlBreit()) return; trennlinieLoeschen(name); tlSpeichern(); });
+  vor.parentNode.insertBefore(s, vor);
+  return s;
+}
+(function(){
+  try{
+    tlLaden();
+    Object.keys(TL_LINIEN).forEach(tlEinbauen);
+    trennlinienAnwenden();
+    window.addEventListener('resize', trennlinienAnwenden);
+    const b=document.getElementById('baTrennReset');
+    if(b) b.addEventListener('click', ()=>{ trennlinienZuruecksetzen(); try{ melde('Spaltenbreiten zurückgesetzt.'); }catch(e){} });
   }catch(e){}
 })();
 // =================================================================
