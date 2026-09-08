@@ -4336,6 +4336,21 @@ Gewinde werden nur am Zielpunkt korrigiert (Ansage, wenn sich die Abweichung
 <p>Das Maschinenprofil steuert T-Format, Zyklusfreigaben, I/K-Skalierung und den
 Eilgang-R&uuml;ckfall. Die NC beider Profile wird im Pr&uuml;fstand getrennt gegen
 eingefrorene St&auml;nde gepr&uuml;ft.</p>
+<dt id="ba-ma-kaestchen">DNC &uuml;ber das Funk-K&auml;stchen aus der App</dt>
+<dd>In der NC-Ausgabe unter <b>DNC &#9656;</b> steht oben der Block <b>K&auml;stchen
+(Funk-DNC)</b>: Adresse (1500er <code>http://dnc-1500.local</code>, 1000er
+<code>http://dnc-1000.local</code>, je Maschine gemerkt), <b>Pr&uuml;fen</b>,
+<b>Auf das K&auml;stchen legen</b> (das erzeugte Programm, gefiltert wie beim
+Sichern), <b>Archiv anzeigen</b> mit <i>An Maschine senden</i> / <i>Laden</i>
+(holt die Datei auf dieses Ger&auml;t) / &#x2715;, dazu <b>Empfangen (Sicherung)</b>
+und <b>Abbrechen</b>. Handy oder Laptop m&uuml;ssen im WLAN <b>DNC</b> sein.<br>
+<b>Wichtig:</b> L&auml;uft die App als PWA &uuml;ber https, blockiert der Browser die
+Verbindung zum K&auml;stchen (http) &mdash; das ist eine Browserregel, kein Fehler.
+Dann die App vom K&auml;stchen selbst &ouml;ffnen: <b>http://dnc-1500.local/app</b>.
+Daf&uuml;r einmal die Datei euroturn-kontur-cam.html auf der DNC-Seite des
+K&auml;stchens unter &bdquo;App auf der Karte&ldquo; hochladen; nach jeder neuen
+App-Version wiederholen. Die Doppelklick-Datei am Laptop spricht das K&auml;stchen
+direkt an. Stand 08.09.2026.</dd>
 <dt id="ba-ma-dnc-seriell">DNC direkt aus der App (Web-Serial)</dt>
 <dd>Der Knopf <b>&bdquo;DNC&ldquo;</b> in der G-Code-Ansicht &ouml;ffnet die serielle
 &Uuml;bertragung: Verbinden (USB-RS232-Adapter w&auml;hlen), dann
@@ -27544,15 +27559,195 @@ function dncLog(t, warn){
   while(el.children.length>80) el.removeChild(el.firstChild);
   el.scrollTop=el.scrollHeight;
 }
+// =================================================================
+// KAESTCHEN (Funk-DNC) AUS DER APP [Daniels Auftrag 08.09.2026:
+// "in der App aufs Kaestchen hochladen oder von der Speicherkarte
+// runterziehen"]. Das Kaestchen (dnc-kaestchen/) hat eine kleine
+// HTTP-Schnittstelle (/api/status, /api/liste, /api/upload, /api/holen,
+// /api/senden, /api/empfangen, /api/abbruch, /api/loeschen); dieser
+// Block ist ihr Gegenstueck in der NC-Ausgabe: das erzeugte Programm
+// aufs Kaestchen legen, das Archiv der Karte sehen, von dort senden
+// oder laden, Sicherung von der Maschine anstossen.
+//
+// WOHER die Adresse kommt, entscheidet, ob es geht:
+// - Laeuft die App VOM KAESTCHEN (http://dnc-1500.local/app — die
+//   Datei liegt auf dessen Karte), ist die Adresse die eigene Herkunft.
+//   Das ist der Weg fuers Handy: gleiche Herkunft, kein Internet.
+// - Laeuft sie als Doppelklick-Datei am Laptop, geht der direkte
+//   Zugriff, weil das Kaestchen CORS-Kopfzeilen sendet.
+// - Laeuft sie als PWA ueber https, BLOCKIERT der Browser jede
+//   Verbindung zu http://dnc-... (Mixed Content) — kein Bug, den man
+//   umgehen koennte; der Block sagt es und nennt den Weg ueber /app.
+// Die Adresse wird je Maschine gemerkt (et_kaestchen), Vorgabe die
+// mDNS-Namen aus der Konfig der Kaestchen.
+// =================================================================
+const KAESTCHEN_VORGABE={MONFORTS_1500_EUROTURN:'http://dnc-1500.local', MONFORTS_1000_MTC_K_6624B:'http://dnc-1000.local'};
+let kbPoll=null, kbOk=false;
+function kaestchenEigeneHerkunft(){
+  try{ const h=String(location.hostname||'').toLowerCase();
+    return /^dnc-[a-z0-9-]+\.local$/.test(h) || /^192\.168\.4\.\d+$/.test(h); }catch(e){ return false; }
+}
+function kaestchenGemerkt(){
+  try{ const g=JSON.parse(localStorage.getItem('et_kaestchen')||'null'); return (g && typeof g==='object' && !Array.isArray(g))? g : {}; }catch(e){ return {}; }
+}
+function kaestchenAdresse(){
+  if(kaestchenEigeneHerkunft()) return '';
+  const id=(typeof MASCHINENPROFIL!=='undefined' && MASCHINENPROFIL)? MASCHINENPROFIL.id : '';
+  const g=kaestchenGemerkt();
+  return String(g[id]||KAESTCHEN_VORGABE[id]||'http://dnc-1500.local').trim().replace(/\/+$/,'');
+}
+function kaestchenAdresseMerken(adr){
+  const g=kaestchenGemerkt(); g[MASCHINENPROFIL.id]=String(adr||'').trim().replace(/\/+$/,'');
+  try{ localStorage.setItem('et_kaestchen', JSON.stringify(g)); }catch(e){}
+}
+function kaestchenGemischt(adr){ try{ return location.protocol==='https:' && /^http:/i.test(adr||''); }catch(e){ return false; } }
+async function kbApi(pfad, opt){
+  const r=await fetch(kaestchenAdresse()+pfad, Object.assign({cache:'no-store'}, opt||{}));
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r;
+}
+function kaestchenBlockHtml(){
+  return '<b>Kästchen (Funk-DNC)</b> <span id="kbBeleg" style="font-size:11px;color:#6b7883;"></span>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0;">'
+    +'<label style="font-size:12px;">Adresse <input type="text" id="kbAdr" style="width:200px;font-size:13px;" autocomplete="off" spellcheck="false"></label>'
+    +'<button id="kbPruef" class="gcbtn">Prüfen</button><span id="kbStat" style="font-size:12.5px;"></span></div>'
+    +'<div id="kbHinweis" class="warn" style="display:none;margin:4px 0;border-radius:6px;"></div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;">'
+    +'<button id="kbHoch" class="gcbtn primary">Auf das Kästchen legen</button>'
+    +'<button id="kbListe" class="gcbtn">Archiv anzeigen</button>'
+    +'<button id="kbEmpf" class="gcbtn">Empfangen (Sicherung)</button>'
+    +'<button id="kbAbbr" class="gcbtn">Abbrechen</button></div>'
+    +'<div id="kbLauf" style="font-size:12.5px;margin:4px 0;"></div>'
+    +'<div id="kbArchiv"></div>';
+}
+function kaestchenAnzeigen(){
+  const adr=document.getElementById('kbAdr'); if(!adr) return;
+  if(kaestchenEigeneHerkunft()){ adr.value=location.origin; adr.disabled=true; }
+  else { adr.disabled=false; if(document.activeElement!==adr) adr.value=kaestchenAdresse(); }
+  const b=document.getElementById('kbBeleg'); if(b) b.textContent='· '+MASCHINENPROFIL.name;
+  kaestchenHinweis();
+}
+function kaestchenHinweis(txt){
+  const h=document.getElementById('kbHinweis'); if(!h) return;
+  const adr=kaestchenAdresse();
+  let t=txt||'';
+  if(!t && kaestchenGemischt(adr))
+    t='Diese App läuft über https (PWA) — der Browser lässt dann keine Verbindung zu '+adr+' zu. '
+     +'Öffne die App direkt vom Kästchen: '+adr+'/app (dazu die App einmal auf die Karte legen: DNC-Seite des Kästchens, „App auf der Karte").';
+  h.textContent=t; h.style.display=t? 'block':'none';
+}
+function kbStatus(t, warn){ const e=document.getElementById('kbStat'); if(e){ e.textContent=t; e.style.color=warn? '#b03030':''; } }
+function kaestchenLauf(s){
+  const e=document.getElementById('kbLauf'); if(!e) return;
+  e.textContent=(s.text||'')+(s.zustand==='SENDEN'? ' ['+(s.prozent||0)+' %]':'');
+}
+function kaestchenPollStop(){ if(kbPoll){ clearInterval(kbPoll); kbPoll=null; } }
+function kaestchenPollStart(){
+  kaestchenPollStop();
+  kbPoll=setInterval(async()=>{
+    try{ const s=await (await kbApi('/api/status')).json(); kaestchenLauf(s); }
+    catch(e){ kbStatus('Verbindung weg', true); kaestchenPollStop(); }
+  }, 1500);
+}
+async function kaestchenPruefen(){
+  const adr=document.getElementById('kbAdr');
+  if(adr && !adr.disabled) kaestchenAdresseMerken(adr.value);
+  kaestchenHinweis();
+  kbStatus('prüfe…');
+  try{
+    const s=await (await kbApi('/api/status')).json();
+    kbOk=true;
+    kbStatus('verbunden: '+s.name+' · '+s.seriell+(s.sd? '':' · KEINE SD-KARTE'));
+    kaestchenLauf(s); kaestchenPollStart(); kaestchenListe();
+    dncLog('Kästchen '+s.name+' erreicht ('+(kaestchenAdresse()||'eigene Herkunft')+').');
+    return s;
+  }catch(e){
+    kbOk=false; kaestchenPollStop();
+    kbStatus('nicht erreichbar', true);
+    if(!kaestchenGemischt(kaestchenAdresse()))
+      kaestchenHinweis('Kästchen nicht erreichbar. Bist du im WLAN „DNC"? Ist das Kästchen an? Adresse der 1500er: http://dnc-1500.local oder http://192.168.4.1, der 1000er: http://dnc-1000.local.');
+    return null;
+  }
+}
+async function kaestchenHochladen(){
+  const code=document.getElementById('gcodeOut').value;
+  if(!code){ alert('Noch kein G-Code erzeugt — erst „Erzeugen“ drücken.'); return; }
+  const O=document.getElementById('progNo').value.trim();
+  const name='O'+O+'.txt';
+  // Aufs Kaestchen geht, was die MASCHINE bekommt: derselbe Filter wie
+  // beim Sichern (Opferzeile, Zeilenlaenge, ASCII, CR LF).
+  const f=ncFuerMaschine(code);
+  if(f.warnungen.length && typeof exportToast==='function') exportToast('Satzlaenge: '+f.warnungen[0].slice(0,110));
+  kbStatus('lade hoch…');
+  try{
+    const fd=new FormData(); fd.append('datei', new Blob([f.text],{type:'text/plain'}), name);
+    await kbApi('/api/upload',{method:'POST', body:fd});
+    kbStatus('auf dem Kästchen: '+name+' ('+f.zeilen+' Zeilen)');
+    dncLog('Auf das Kästchen gelegt: '+name);
+    kaestchenListe();
+  }catch(e){ kbStatus('Hochladen fehlgeschlagen: '+e.message, true); kaestchenHinweis(); }
+}
+async function kaestchenListe(){
+  const el=document.getElementById('kbArchiv'); if(!el) return;
+  try{
+    const l=await (await kbApi('/api/liste')).json();
+    el.innerHTML='';
+    if(!l.dateien.length){ el.textContent='Keine Programme auf der Karte.'; return; }
+    l.dateien.forEach(d=>{
+      const z=document.createElement('div');
+      z.style.cssText='display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:3px 0;border-top:1px solid var(--line);';
+      const n=document.createElement('span'); n.style.cssText='flex:1 1 140px;font-size:12.5px;';
+      n.textContent=d.n+' '; const k=document.createElement('small'); k.style.color='#6b7883'; k.textContent=d.g+' Zeichen'; n.appendChild(k);
+      const bS=document.createElement('button'); bS.className='gcbtn primary'; bS.textContent='An Maschine senden';
+      bS.onclick=()=>zweiklickBestaetigen(bS, d.n+' an die Maschine senden?', async()=>{
+        try{ await kbApi('/api/senden?f='+encodeURIComponent(d.n),{method:'POST'}); kbStatus('sende '+d.n+' — an der Steuerung EINLESEN starten'); kaestchenPollStart(); }
+        catch(e){ kbStatus('Senden fehlgeschlagen: '+e.message, true); } });
+      const bH=document.createElement('button'); bH.className='gcbtn'; bH.textContent='Laden'; bH.title='Datei vom Kästchen auf dieses Gerät holen';
+      bH.onclick=async()=>{ try{ const t=await (await kbApi('/api/holen?f='+encodeURIComponent(d.n))).text(); await exportiereDatei(d.n, t, 'Programm'); }
+        catch(e){ kbStatus('Laden fehlgeschlagen: '+e.message, true); } };
+      const bL=document.createElement('button'); bL.className='gcbtn'; bL.textContent='✕'; bL.title='von der Karte löschen';
+      bL.onclick=()=>zweiklickBestaetigen(bL, d.n+' von der Karte löschen?', async()=>{
+        try{ await kbApi('/api/loeschen?f='+encodeURIComponent(d.n),{method:'POST'}); kaestchenListe(); }
+        catch(e){ kbStatus('Löschen fehlgeschlagen: '+e.message, true); } });
+      z.appendChild(n); z.appendChild(bS); z.appendChild(bH); z.appendChild(bL); el.appendChild(z);
+    });
+  }catch(e){ el.textContent=''; kbStatus('Archiv nicht lesbar: '+e.message, true); kaestchenHinweis(); }
+}
+async function kaestchenEmpfangen(){
+  try{ await kbApi('/api/empfangen',{method:'POST'}); kbStatus('empfange — an der Steuerung AUSGEBEN starten'); kaestchenPollStart(); }
+  catch(e){ kbStatus('Empfangen fehlgeschlagen: '+e.message, true); }
+}
+async function kaestchenAbbruch(){
+  try{ await kbApi('/api/abbruch',{method:'POST'}); kbStatus('abgebrochen'); }
+  catch(e){ kbStatus('Abbruch fehlgeschlagen: '+e.message, true); }
+}
+function kaestchenVerdrahten(){
+  const on=(id,fn)=>{ const e=document.getElementById(id); if(e) e.onclick=fn; };
+  on('kbPruef', kaestchenPruefen); on('kbHoch', kaestchenHochladen); on('kbListe', kaestchenListe);
+  on('kbEmpf', kaestchenEmpfangen); on('kbAbbr', kaestchenAbbruch);
+  const adr=document.getElementById('kbAdr');
+  if(adr) adr.addEventListener('change', ()=>{ if(!adr.disabled) kaestchenAdresseMerken(adr.value); kaestchenHinweis(); });
+}
 function dncPanelMalen(){
   const box=document.getElementById('dncPanel');
+  if(!box) return;
+  if(box.dataset.gebaut!=='1'){
+    box.dataset.gebaut='1';
+    box.innerHTML=kaestchenBlockHtml()
+      +'<div id="dncSeriell" style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px;"></div>';
+    kaestchenVerdrahten();
+  }
+  kaestchenAnzeigen();
+  dncSeriellMalen();
+}
+function dncSeriellMalen(){
+  const box=document.getElementById('dncSeriell');
   if(!box) return;
   const p=DNC_PROFILE[MASCHINENPROFIL.id]||DNC_PROFILE.MONFORTS_1500_EUROTURN;
   if(!('serial' in navigator)){
     box.innerHTML='<b>DNC seriell</b><div style="margin-top:6px;">Die direkte serielle '
       +'Übertragung (Web-Serial) gibt es nur in <b>Chrome oder Edge am Rechner</b> — '
-      +'dieser Browser kann sie nicht. Fürs iPhone ist das Funk-Kästchen geplant '
-      +'(Werkstatt-DNC-Entwurf); bis dahin: „NC sichern" und wie bisher übertragen.</div>';
+      +'dieser Browser kann sie nicht. Am iPhone geht es über das Kästchen (Block oben).</div>';
     return;
   }
   if(box.dataset.gebaut==='1'){ dncFelderVorbelegen(); return; }
@@ -27752,7 +27947,7 @@ document.getElementById('btnDnc').onclick=()=>{
   const box=document.getElementById('dncPanel'), b=document.getElementById('btnDnc');
   const auf=box.style.display==='none';
   if(auf){ dncPanelMalen(); box.style.display='block'; b.textContent='DNC ▾'; }
-  else { box.style.display='none'; b.textContent='DNC ▸'; }
+  else { box.style.display='none'; b.textContent='DNC ▸'; kaestchenPollStop(); }
 };
 
 document.getElementById('btnCopy').onclick=()=>{
