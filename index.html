@@ -1346,6 +1346,8 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   color:var(--text-dim);margin:7px 0 2px 0;}
 /* Gruppenzeilen der Zyklus-Softkeys: nur am Laptop (Punkt 23). */
 .sk-gruppe{display:none;}
+/* Kachel-Umschalter des Programmkopfs: nur am Laptop (Punkt 24). */
+#pkAnsichtBtn{display:none;}
 /* VORZEICHENKNOPF [Daniel, 26.08.2026] -------------------------- */
 /* Liegt ueber dem rechten Rand des Feldes, das gerade den Fokus hat.
    Absolut positioniert, damit sich an keiner der 136 Feldzeilen die
@@ -1637,20 +1639,15 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
     .mrow label{width:150px;}
     .mrow input,.mrow select{width:120px;}
     .logo{font-size:15px;padding:0 10px;}
-    .gfunk{display:block;}
+    /* (25) G-FUNKTIONEN-LISTE WEG [Daniel, 09.09.2026 spaetabends: "das
+       liest keiner, das bringt keinen Mehrwert"]: die Nachschlageliste
+       ueber dem Arbeitsplan bleibt auch am Laptop aus - am Handy war sie
+       es schon (Regel oben). Der Block steht weiter im DOM; der
+       Klapp-Listener in 93-programm.js haengt wirkungslos daran. */
+    .gfunk{display:none;}
     .mkspanel{padding:4px 10px;}
     .mksaxis .axval{font-size:22px;}
     .mksaxis{gap:8px;}
-    /* G-FUNKTIONEN EINKLAPPBAR [Daniel, Punkt 6]: der Block belegte eine
-       volle Breitzeile fuer eine Nachschlageliste, die man selten
-       braucht. Zugeklappt bleibt die Kopfzeile stehen — man weiss, dass
-       es die Liste gibt, und holt sie mit einem Klick. Der Zustand
-       haengt an einer Klasse am Block selbst, nicht an einer Einstellung:
-       er soll je Sitzung neu entschieden werden, nicht dauerhaft weg. */
-    .gfunk-head{cursor:pointer;display:flex;align-items:baseline;gap:8px;}
-    .gfunk-head .gfpfeil{font-weight:600;font-size:9.5px;color:hsl(var(--ton), 15.5%, 63.3%);}
-    .gfunk.zu .gfunk-cols{display:none;}
-    .gfunk.zu{padding-bottom:3px;}
     /* PROGRAMMKOPFWERTE GROESSER [Daniel, Punkt 6]: "die liest man im
        Vorbeigehen". Betrifft nur die erste Arbeitsplanzeile — die
        uebrigen Zeilen bleiben, wie sie sind, sonst wird die Liste
@@ -2139,6 +2136,10 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
       font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);
       border-top:1px solid hsl(var(--ton), 18.7%, 82.2%);margin-top:4px;text-align:center;}
     .softkeys .sk-gruppe:first-of-type{border-top:none;margin-top:0;}
+    /* (24) KACHEL-UMSCHALTER IM PROGRAMMKOPF [Daniel, 09.09.2026]: wie in
+       den Zyklusmasken, gemeinsamer Speicher et_kachelpilot; unter 900 px
+       bleibt der Kopf Formular (kachelPilotAnwenden nimmt ihn aus). */
+    #pkAnsichtBtn{display:inline-block;margin-left:10px;}
 
     /* (22) MASKEN ALS VOLLBILD [Daniel, 09.09.2026 abends: "in dem Moment,
        wo ich die Maske eintrage, interessiert mich nicht, was im
@@ -2168,6 +2169,30 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
     body.maskvoll #maskAbspanenEinfach > .mask-body > .k-aktion, body.maskvoll #maskAbspanenKontur > .mask-body > .k-aktion, body.maskvoll #maskEinstechen > .mask-body > .k-aktion, body.maskvoll #maskStechdrehen > .mask-body > .k-aktion, body.maskvoll #maskAbstechen > .mask-body > .k-aktion, body.maskvoll #maskBohren > .mask-body > .k-aktion, body.maskvoll #maskGewinde > .mask-body > .k-aktion, body.maskvoll #maskFreistich > .mask-body > .k-aktion, body.maskvoll #maskParams > .mask-body > .k-aktion, body.maskvoll #maskAbspanenEinfach > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskAbspanenKontur > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskEinstechen > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskStechdrehen > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskAbstechen > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskBohren > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskGewinde > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskFreistich > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskParams > .mask-body > .mrow:has(.ok-gruen){
       position:sticky;bottom:0;background:var(--panel);padding-top:6px;padding-bottom:10px;z-index:2;
     }
+    /* (22b) VOLLBILD AUCH FUER DIE UNTERE KNOPFLEISTE [Daniel, 09.09.2026
+       spaetabends: "wenn ich auf einen von diesen Buttons klicke, erwarte
+       ich eigentlich auch ein Vollbild - die Hauptmaske interessiert mich
+       in dem Moment nicht mehr"]: Werkzeuge, Programme, Planer,
+       Kalkulation und die NC-Ausgabe fuellen den Bildschirm wie die
+       Zyklusmasken, am selben Schalter. Die Formulare (Programme, Planer,
+       Kalkulation) bleiben eine mittige Spalte - ein Label links und sein
+       Feld 1200 px weiter rechts waere kein Gewinn. Die Simulation
+       schaltet openSimulation in ihr Pseudo-Vollbild (body.simfull). */
+    body.maskvoll #maskWerkzeuge, body.maskvoll #maskProgramme, body.maskvoll #maskPlaner, body.maskvoll #maskKalk, body.maskvoll #maskGcode{
+      position:fixed !important;left:0 !important;top:0 !important;transform:none !important;
+      width:100vw !important;max-width:none !important;height:100vh !important;max-height:none !important;
+      border-radius:0;box-shadow:none;border:none;
+    }
+    body.maskvoll #maskWerkzeuge > .mask-head, body.maskvoll #maskProgramme > .mask-head, body.maskvoll #maskPlaner > .mask-head, body.maskvoll #maskKalk > .mask-head, body.maskvoll #maskGcode > .mask-head{cursor:default;}
+    body.maskvoll #maskWerkzeuge > .mask-griff, body.maskvoll #maskProgramme > .mask-griff, body.maskvoll #maskPlaner > .mask-griff, body.maskvoll #maskKalk > .mask-griff, body.maskvoll #maskGcode > .mask-griff{display:none;}
+    body.maskvoll #maskProgramme > .mask-body, body.maskvoll #maskPlaner > .mask-body, body.maskvoll #maskKalk > .mask-body{width:100%;max-width:980px;margin:0 auto;box-sizing:border-box;}
+    body.maskvoll #maskWerkzeuge > .mask-body{width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box;}
+    /* Kalkulation: der Koerper heisst #kalkBody (kein .mask-body). */
+    body.maskvoll #maskKalk > #kalkBody{width:100%;max-width:980px;margin:0 auto;box-sizing:border-box;}
+    /* Werkzeugliste: inline max-height 48vh (Handy-Mass) - im Vollbild
+       darf sie bis 230 px unter den Rand (Knopfzeile, Neues Werkzeug,
+       Fertig); sonst blieb die halbe Hoehe leer (Aufnahme p3-11). */
+    body.maskvoll #maskWerkzeuge .pointlist{max-height:calc(100vh - 230px) !important;}
 
   }
 </style>
@@ -4657,12 +4682,21 @@ stehen die Softkeys als Spalte rechts, die Elementliste daneben; in der
 Simulation liegen Sim-, Status- und Zoomleiste unter der Zeichnung.
 &bdquo;&larr; Arbeitsplan&ldquo; w&auml;hrend der Simulation beendet sie genauso wie das
 X der Sim-Leiste.<br>
+<b>Zyklusmasken am Laptop komplett und aufgeklappt (09.09.2026):</b> beim
+&Ouml;ffnen steht die Eingabe auf &bdquo;komplett&ldquo; und jede Gruppe ist offen
+&mdash; am Laptop ist Platz, und die meisten Werte werden ohnehin eingegeben.
+Zuklappen geht weiterhin, beim n&auml;chsten &Ouml;ffnen ist wieder alles offen; am
+Handy bleibt das gewohnte Aufklappen. Der Programmkopf hat am Laptop denselben
+Kachel-/Zeilen-Umschalter wie die Zyklusmasken. Die G-Funktionen-Liste &uuml;ber
+dem Arbeitsplan ist weg (&bdquo;das liest keiner&ldquo;).<br>
 <b>Zyklus-Softkeys in zwei Gruppen (09.09.2026):</b> zuerst &bdquo;auf Kontur&ldquo;
 &mdash; Abspanen Kontur und Stechdrehen brauchen eine gezeichnete Kontur &mdash;, darunter
 &bdquo;frei bema&szlig;t&ldquo; mit Ecke, Einstechen, Freistich, Abstechen, Bohren, Gewinde.
 Die Reihenfolge gilt auch am Handy, die Gruppenzeilen zeigt nur der Laptop.<br>
-<b>Masken als Vollbild (09.09.2026):</b> die acht Zyklusmasken und der Programmkopf
-f&uuml;llen am Laptop den ganzen Bildschirm &mdash; w&auml;hrend der Eingabe z&auml;hlt die
+<b>Masken als Vollbild (09.09.2026):</b> die acht Zyklusmasken, der Programmkopf und die Dialoge der
+unteren Knopfleiste (Werkzeuge, Programme, Planer, Kalkulation, NC-Ausgabe)
+f&uuml;llen am Laptop den ganzen Bildschirm; die Simulation startet gleich im
+Vollbild (der Knopf Vollbild in der Sim-Leiste schaltet zur&uuml;ck) &mdash; w&auml;hrend der Eingabe z&auml;hlt die
 Maske, der Hintergrund lenkt nur ab. Die Konturelement-Dialoge im Editor bleiben
 klein, dort geh&ouml;rt die Zeichnung mit der Live-Vorschau ins Bild. Wer die Masken
 lieber als Fenster hat, schaltet hier um:
@@ -4754,7 +4788,7 @@ erzeugt und ist damit immer vollst&auml;ndig.</p>
 
   <!-- Werkzeug/Technologie mask -->
   <div class="mask" id="maskParams" style="position:fixed;">
-    <div class="mask-head"><span class="mtitel">Programmkopf</span></div>
+    <div class="mask-head"><span class="mtitel">Programmkopf</span><button id="pkAnsichtBtn" class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button></div>
     <!-- Hilfebild: der Rueckzugsbereich ist ohne Bild kaum zu fassen
          [Daniel, 28.08.2026; ShopTurn arbeitet dort ebenfalls mit
          Bild, Handbuch S. 409]. -->
@@ -10009,9 +10043,47 @@ function selListeZeigen(groupId){
 // Kopfknopf jeder Maske schaltet global auf die Zeilenansicht
 // zurueck (et_kachelpilot — der Schluessel bleibt, gespeicherte
 // Waehlen aus der Pilotphase gelten weiter).
+// AM LAPTOP KOMPLETT UND AUFGEKLAPPT [Daniel, 09.09.2026 spaetabends: "auf
+// dem Laptop ... komplett aufgeklappt anzeigen ... die Uebersichtlichkeit
+// ist einfach so gross; ich muss sowieso bei vielen Zyklen alles
+// eingeben. Am Handy ist das Aufklappen gut so"]: sobald eine der acht
+// Zyklusmasken die Klasse show bekommt und das Fenster 900 px breit ist,
+// steht der Kopfschalter auf komplett und jede Gruppe ist offen. Der
+// Beobachter haengt am class-Attribut (wie body.emodus im Editor) statt an
+// den 16 Oeffnungsstellen; die 60 ms lassen die setTimeout(0)-Syncs der
+// Oeffnungsroutinen vorbeiziehen (sie klappen nur AUF, nie zu). Zuklappen
+// von Hand bleibt moeglich - beim naechsten Oeffnen ist wieder alles
+// offen. Unter 900 px passiert nichts (Regel 3).
+const LAPTOP_AUF_MASKEN={maskAbspanenEinfach:'ae', maskAbspanenKontur:'ak', maskEinstechen:'es', maskStechdrehen:'st', maskFreistich:'fs', maskAbstechen:'ab', maskBohren:'bo', maskGewinde:'gw'};
+function laptopMaskeAufklappen(maskId){
+  const mask=document.getElementById(maskId); if(!mask) return false;
+  if(typeof window==='undefined' || window.innerWidth<900) return false;
+  const pref=LAPTOP_AUF_MASKEN[maskId]; if(!pref) return false;
+  try{ if(typeof setRadio==='function') setRadio(pref+'EingabeBtns','komplett'); }catch(e){}
+  eingabeModusSetzen(maskId,'komplett');
+  mask.querySelectorAll('.mgroup').forEach(g=>g.classList.add('auf'));
+  return true;
+}
+(function(){
+  if(typeof MutationObserver==='undefined' || !document.getElementById) return;
+  Object.keys(LAPTOP_AUF_MASKEN).forEach(id=>{
+    const m=document.getElementById(id); if(!m || !m.classList) return;
+    try{
+      new MutationObserver(()=>{
+        const offen=m.classList.contains('show');
+        if(offen && !m.dataset.laptopAuf){ m.dataset.laptopAuf='1'; setTimeout(()=>{ try{ laptopMaskeAufklappen(id); }catch(e){} }, 60); }
+        else if(!offen) delete m.dataset.laptopAuf;
+      }).observe(m,{attributes:true, attributeFilter:['class']});
+    }catch(e){}
+  });
+})();
 const KACHEL_MASKEN=['maskAbspanenEinfach','maskAbspanenKontur',
   'maskEinstechen','maskStechdrehen','maskFreistich','maskAbstechen',
   'maskBohren','maskGewinde',
+  // PROGRAMMKOPF (Daniel, 09.09.2026: "das waer hier auch schoen, wenn man
+  // umschalten kann") - NUR am Laptop: kachelPilotAnwenden nimmt ihn unter
+  // 900 px aus, das abgenommene Handy-Formular bleibt.
+  'maskParams',
   // EDITOR-PANELS [Daniels Freigabe 04.09.2026, Vorschlag A]: der
   // Kontureditor traegt denselben Kachelstil wie die Zyklusmasken —
   // der Editor sieht aus wie der Rest der App.
@@ -10023,6 +10095,7 @@ function kachelPilotAnwenden(){
     const m=document.getElementById(id);
     if(!m) return;
     const editorPanel=(id==='maskStart'||id==='maskGerade'||id==='maskKreis');
+    if(id==='maskParams' && !(typeof window!=='undefined' && window.innerWidth>=900)){ m.classList.remove('kachelpilot'); return; }
     m.classList.toggle('kachelpilot', an);
     if(an){
       // Breite Kacheln je Inhalt: Werkzeug-/Konturwahl und Zeilen
@@ -12496,7 +12569,11 @@ function flBreit(){ return typeof window!=='undefined' && window.innerWidth>=900
 // Editor-Dialoge (Gerade/Kreis) bleiben Fenster: dort braucht man die
 // Zeichnung mit der Live-Vorschau.
 const MV_SLOT='et_maskvoll';
-const MV_MASKEN=['maskAbspanenEinfach','maskAbspanenKontur','maskEinstechen','maskStechdrehen','maskAbstechen','maskBohren','maskGewinde','maskFreistich','maskParams'];
+// Dazu seit dem 09.09.2026 spaetabends die Dialoge der unteren Knopfleiste
+// (Daniel: "wenn ich auf einen von diesen Buttons klicke, erwarte ich auch
+// ein Vollbild"); die Simulation nimmt openSimulation selbst ins Vollbild.
+const MV_MASKEN=['maskAbspanenEinfach','maskAbspanenKontur','maskEinstechen','maskStechdrehen','maskAbstechen','maskBohren','maskGewinde','maskFreistich','maskParams',
+  'maskWerkzeuge','maskProgramme','maskPlaner','maskKalk','maskGcode'];
 function maskVollGewuenscht(){ try{ const v=localStorage.getItem(MV_SLOT); return v===null ? true : v==='1'; }catch(e){ return true; } }
 function maskVollAktiv(id){ try{ return document.body.classList.contains('maskvoll') && MV_MASKEN.indexOf(id)>=0; }catch(e){ return false; } }
 function maskVollAnwenden(){
@@ -16512,7 +16589,9 @@ function helpDim(c, x1,y1, x2,y2, off, label, on, labelSide){
   const mx=(a1x+a2x)/2, my=(a1y+a2y)/2;
   const lx=mx+nx*(labelSide==='in'?-9:9)*HELP_SKAL*Math.sign(off||1);
   const ly=my+ny*(labelSide==='in'?-9:9)*HELP_SKAL*Math.sign(off||1);
-  helpLabel(c,label,lx,ly+3.5,on);
+  // Leeres Label = nur die Linie; die Pille setzt der Aufrufer selbst
+  // (Programmkopf-Bild: senkrechte Masse mit Pille NEBEN der Linie).
+  if(label) helpLabel(c,label,lx,ly+3.5,on);
 }
 function helpLine(c,x1,y1,x2,y2,style,w,dash){
   // GESTRICHELT = HILFSLINIE, nicht Werkstueck. Rohteilkontur,
@@ -16819,62 +16898,89 @@ const MASK_HELP = {
       return " "+String(+parseFloat(e.value)); };
     const rohr = (typeof selBtnVal==="function" && selBtnVal("pkFormBtns")==="rohr") ||
                  ((document.getElementById("pkForm")||{}).value==="rohr");
-    const k=Math.max(0.7, Math.min(1, h/420));           // Abstaende wachsen mit der Hoehe
+    // ENTZERRT, V3 [Daniel, 09.09.2026: "teilweise noch dicht auf dicht ...
+    // Bemassungspfeile mehr auf Abstand, Pillen weniger ueberlappend"]:
+    // das Teil endet bei 60 % der Breite, rechts davon liegen Z0 (an der
+    // Stirn), ZRA (80 px dahinter) und XA (104 px) in EIGENEN Spalten;
+    // ueber und unter dem Teil stehen die Masslinien in festen Baendern
+    // (LA 22 / XRA 56 px darueber, ZI 22 / XRA 50 / ZA 64 px darunter).
+    // Jede Pille hat ihren Platz: die der senkrechten Masse (XA, XI)
+    // stehen NEBEN ihrer Linie (helpDim setzte sie mittig darauf), die
+    // SC-Pille zwischen Z0- und ZRA-Linie, die Z0-Linie laeuft nur
+    // ausserhalb des Teils. k skaliert mit der Bildhoehe (Laptop: 1).
+    const k=Math.max(0.7, Math.min(1, h/420));
     const axY=Math.round(h*0.50), R=Math.round(h*0.24);
-    const fL=Math.round(w*0.07), zL=Math.round(w*0.30), zR=Math.round(w*0.78);
+    const T=axY-R, B=axY+R;
+    const fL=Math.round(w*0.07), zL=Math.round(w*0.30), zR=Math.round(w*0.60);
     const bx=zL-14, bw=Math.round(w*0.075), bh=Math.round(h*0.036);
+    const xZRA=zR+80*k, xXA=zR+104*k;
+    const lab=(t,x,y,on,al)=>helpLabel(c,t,x,y,on,al);
+    // Pille eines Masses, das seine Linie ueber helpDim ohne Label zieht:
+    // dieselbe Fokusregel wie helpDim (nur das angefasste Mass).
+    const dimLab=(t,x,y,on,al)=>{ if(HELP_FOKUS && !on) return; helpLabel(c,t,x,y,on,al); };
     // Futterkoerper und zwei Backen, die auf dem Teil greifen
     c.save();
     c.fillStyle="rgba(120,134,148,0.30)"; c.strokeStyle=HELP_OFF; c.lineWidth=1.2;
     const fuH=Math.round(R*1.55);
     c.fillRect(fL, axY-fuH, bx-fL, 2*fuH); c.strokeRect(fL, axY-fuH, bx-fL, 2*fuH);
     c.fillStyle="rgba(90,104,118,0.45)";
-    c.fillRect(bx, axY-R-bh, bw, bh); c.strokeRect(bx, axY-R-bh, bw, bh);
-    c.fillRect(bx, axY+R, bw, bh);    c.strokeRect(bx, axY+R, bw, bh);
+    c.fillRect(bx, T-bh, bw, bh); c.strokeRect(bx, T-bh, bw, bh);
+    c.fillRect(bx, B, bw, bh);    c.strokeRect(bx, B, bw, bh);
     c.restore();
-    helpLabel(c,"Futter", Math.round((fL+bx)/2), axY-fuH-10*k, false);
-    helpLabel(c,"Backen", bx+bw/2, axY-R-bh-7*k, false);   // ueber der oberen Backe, frei von der ZI-Masslinie
+    lab("Futter + Backen", Math.round((fL+bx)/2), axY+fuH+13*k, false);
     // Teil: voller Schnitt, Metallverlauf wie in den Zyklusbildern
-    helpFillPart(c,(pp)=>{ pp.moveTo(bx-4,axY-R); pp.lineTo(zR,axY-R); pp.lineTo(zR,axY+R); pp.lineTo(bx-4,axY+R); pp.closePath(); });
+    helpFillPart(c,(pp)=>{ pp.moveTo(bx-4,T); pp.lineTo(zR,T); pp.lineTo(zR,B); pp.lineTo(bx-4,B); pp.closePath(); });
+    // Drehachse (Strich-Punkt) mit Z-Beschriftung, X-Achse oben links
+    c.save(); c.setLineDash([12,4,3,4]); c.strokeStyle="#8a97a3"; c.lineWidth=1;
+    c.beginPath(); c.moveTo(fL-8,axY); c.lineTo(w-8,axY); c.stroke(); c.restore();
+    lab("Z", w-10, axY-8, false, "right");
+    lab("X\u2300", fL-2, Math.round(h*0.10), false, "left");
+    // Z0 gestrichelt NUR ausserhalb des Teils - die Stirnkante ist die
+    // Linie selbst, und vor der Stirn bleibt Platz fuer die ZRI-Pille.
+    c.save(); c.setLineDash([3,3]); c.strokeStyle=HELP_OFF; c.lineWidth=1;
+    c.beginPath(); c.moveTo(zR, T-62*k); c.lineTo(zR, T); c.moveTo(zR, B); c.lineTo(zR, B+56*k); c.stroke(); c.restore();
+    lab("Z0", zR-6, T-62*k, false, "right");
+    // Rueckzugsebenen aussen: XRA beidseitig der Achse, ZRA vor der Stirn
+    const yXRAo=T-56*k, yXRAu=B+50*k;
+    strich(bx-30, yXRAo, w-10, yXRAo, A("pkXRA"));
+    strich(bx-30, yXRAu, w-10, yXRAu, A("pkXRA"));
+    lab("XRA"+V("pkXRA"), bx-28, yXRAo-12*k, A("pkXRA"), "left");
+    strich(xZRA, T-62*k, xZRA, B+56*k, A("pkZRA"));
+    lab("ZRA"+V("pkZRA"), xZRA+6, T-62*k, A("pkZRA"), "left");
     if(rohr){
       const ri=Math.round(R*0.45);
       c.save(); c.fillStyle="#f4f7fa"; c.fillRect(bx-4, axY-ri, zR-bx+4, 2*ri);
       c.strokeStyle=HELP_OFF; c.lineWidth=1; c.strokeRect(bx-4, axY-ri, zR-bx+4, 2*ri); c.restore();
-      helpDim(c, zR+96*k, axY-ri, zR+96*k, axY+ri, 0, "\u2300XI"+V("pkXI"), A("pkXI"), "in");
+      // XI in der Bohrung selbst (dort ist Platz), Pille links der Linie
+      const xXI=zR-44*k;
+      helpDim(c, xXI, axY-ri, xXI, axY+ri, 0, "", A("pkXI"));
+      dimLab("\u2300XI"+V("pkXI"), xXI-8, axY+4, A("pkXI"), "right");
       // Rueckzugsebenen innen: XRI in der Bohrung, ZRI vor der Stirn
-      const yXRI=axY-ri+12*k, xZRI=zR+16*k;
+      const yXRI=axY-ri+12*k, xZRI=zR+12*k;
       strich(bx-4, yXRI, w-10, yXRI, A("pkXRI")); strich(bx-4, axY+ri-12*k, w-10, axY+ri-12*k, A("pkXRI"));
-      helpLabel(c,"XRI"+V("pkXRI"), w-12, yXRI-8*k, A("pkXRI"), "right");
+      lab("XRI"+V("pkXRI"), w-12, yXRI-10*k, A("pkXRI"), "right");
       strich(xZRI, axY-ri, xZRI, axY+ri, A("pkZRI"));
-      helpLabel(c,"ZRI"+V("pkZRI"), xZRI+4, axY+ri+14*k, A("pkZRI"), "left");
+      lab("ZRI"+V("pkZRI"), xZRI+4, axY+ri+16*k, A("pkZRI"), "left");
     }
-    // Drehachse (Strich-Punkt) und Z0-Linie an der Stirn
-    c.save(); c.setLineDash([12,4,3,4]); c.strokeStyle="#8a97a3"; c.lineWidth=1;
-    c.beginPath(); c.moveTo(fL-8,axY); c.lineTo(w-8,axY); c.stroke(); c.restore();
-    c.save(); c.setLineDash([3,3]); c.strokeStyle=HELP_OFF; c.lineWidth=1;
-    c.beginPath(); c.moveTo(zR, axY-R-52*k); c.lineTo(zR, axY+R+56*k); c.stroke(); c.restore();
-    helpLabel(c,"Z0", zR-4, axY-R-44*k, false, "right");
-    helpLabel(c,"Z", w-14, axY-6, false, "right");
-    helpLabel(c,"X\u2300", fL-2, Math.round(h*0.10), false, "left");
-    // Rueckzugsebenen aussen: gestrichelt, beidseitig der Achse
-    const yXRA=axY-R-34*k, xZRA=zR+30*k;
-    strich(bx-30, yXRA, w-10, yXRA, A("pkXRA"));
-    strich(bx-30, axY+R+34*k, w-10, axY+R+34*k, A("pkXRA"));
-    helpLabel(c,"XRA"+V("pkXRA"), bx-28, yXRA-9*k, A("pkXRA"), "left");
-    strich(xZRA, axY-R-52*k, xZRA, axY+R+56*k, A("pkZRA"));
-    helpLabel(c,"ZRA"+V("pkZRA"), xZRA+5, axY-R-44*k, A("pkZRA"), "left");
-    // Werkzeugwechselpunkt: Fadenkreuz oben rechts, ausserhalb der Ebenen
-    const xT=w-30, yT=Math.round(h*0.08), onT=A("wwpX")||A("wwpZ");
+    // Werkzeugwechselpunkt: Fadenkreuz oben rechts in eigener Zeile
+    const xT=w-30, yT=Math.round(h*0.06), onT=A("wwpX")||A("wwpZ");
     c.save(); c.strokeStyle=onT?HELP_ON:HELP_OFF; c.lineWidth=1.6;
     c.beginPath(); c.moveTo(xT-9,yT); c.lineTo(xT+9,yT); c.moveTo(xT,yT-9); c.lineTo(xT,yT+9); c.stroke();
     c.beginPath(); c.arc(xT,yT,5.5,0,Math.PI*2); c.stroke(); c.restore();
-    helpLabel(c,"XT"+V("wwpX")+" / ZT"+V("wwpZ"), xT-14, yT+4, onT, "right");
-    // Masse als Pillen: Durchmesser rechts aussen, Laengen unten und oben
-    helpDim(c, zR+62*k, axY-R, zR+62*k, axY+R, 0, "\u2300XA"+V("stockDia"), A("stockDia"), "in");
-    helpDim(c, bx-4, axY+R+18*k, zR, axY+R+18*k, 0, "ZI"+V("pkZI"), A("pkZI"));
-    helpDim(c, bx+bw, axY-R-18*k, zR, axY-R-18*k, 0, "LA"+V("pkLA"), A("pkLA"));
-    helpDim(c, zR, axY-R-6, zR+18*k, axY-R-6, 0, "SC"+V("safeZ"), A("safeZ"));
-    helpDim(c, zR, axY+R+44*k, zR+12*k, axY+R+44*k, 0, "ZA"+V("pkZA"), A("pkZA"));
+    lab("XT"+V("wwpX")+" / ZT"+V("wwpZ"), xT-14, yT+4, onT, "right");
+    // Masse: LA (Pille darueber) und ZI (Pille darunter) in eigenen
+    // Baendern, SC vor der Stirn auf halber Hoehe mit Pille zwischen Z0
+    // und ZRA, ZA unten rechts, XA ganz rechts mit Pille neben der Linie
+    helpDim(c, bx+bw, T-22*k, zR, T-22*k, 0, "LA"+V("pkLA"), A("pkLA"), "in");
+    helpDim(c, bx-4, B+22*k, zR, B+22*k, 0, "ZI"+V("pkZI"), A("pkZI"));
+    // 64 % des Radius: beim Rohr liegt die obere XRI-Linie bei 55 %, die
+    // SC-Pille (unter ihrer Linie) muss darueber bleiben (Aufnahme p3-07).
+    const ySC=Math.round(axY-R*0.64);
+    helpDim(c, zR, ySC, zR+22*k, ySC, 0, "", A("safeZ"));
+    dimLab("SC"+V("safeZ"), zR+40*k, ySC+12*HELP_SKAL+3.5, A("safeZ"));
+    helpDim(c, zR, B+64*k, zR+12*k, B+64*k, 0, "ZA"+V("pkZA"), A("pkZA"));
+    helpDim(c, xXA, T, xXA, B, 0, "", A("stockDia"));
+    dimLab("\u2300XA"+V("stockDia"), xXA+8, axY+18*k, A("stockDia"), "left");
     function strich(x1,y1,x2,y2,on){
       c.save(); c.setLineDash([5,4]); c.lineWidth=on?1.9:1.1;
       c.strokeStyle=on?HELP_ON:HELP_OFF; c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke(); c.restore();
@@ -33287,6 +33393,18 @@ function openSimulation(){
   userAdjustedView=false;
   requestAnimationFrame(()=>{ try{ resizeCanvas(); autoFit(); }catch(e){} });
   document.body.classList.add('simvoll');
+  // SIM GLEICH ALS VOLLBILD AM LAPTOP [Daniel, 09.09.2026 spaetabends: der
+  // Simulation-Knopf soll wie die Masken den Bildschirm fuellen]: dasselbe
+  // Pseudo-Vollbild, das der Knopf Vollbild in der Sim-Leiste schaltet
+  // (canvasWrap fest ueber allem, Kopfzeile weg) - OHNE die Browser-
+  // Vollbild-API, die bleibt dem Knopf. Haengt am Masken-Vollbild-Schalter
+  // der Anleitung (et_maskvoll); simSchliessen raeumt die Klasse weg.
+  try{
+    if(window.innerWidth>=900 && typeof maskVollGewuenscht==='function' && maskVollGewuenscht()){
+      document.body.classList.add('simfull');
+      const bf=document.getElementById('simFull'); if(bf) bf.classList.add('an');
+    }
+  }catch(e){}
   try{ legendeLeisteAktiv(); }catch(e){}   // Legendenleiste einmalig fuellen
   // LAYOUT NACH DEM KLASSENWECHSEL [Daniel, IMG_2630]: applyGrafischLayout()
   // lief weiter oben noch OHNE simvoll und rechnete Softkeys/Punktliste ab,
