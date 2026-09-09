@@ -2140,6 +2140,13 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
        den Zyklusmasken, gemeinsamer Speicher et_kachelpilot; unter 900 px
        bleibt der Kopf Formular (kachelPilotAnwenden nimmt ihn aus). */
     #pkAnsichtBtn{display:inline-block;margin-left:10px;}
+    /* (26) ANLEITUNG UEBER DEN MASKEN [Daniel, 09.09.2026 spaetabends: "dann
+       oeffnet's die Hilfe im Hintergrund und ich seh sie nicht"]: die
+       Masken liegen am Laptop auf z 900 (Vollbild), die Anleitung auf 700 -
+       der Label-Tipp holte sie hinter die Maske. Jetzt 940: ueber jeder
+       Maske, unter dem Meldebanner (950). Am Handy sind die Masken z 5,
+       dort war es nie ein Problem. */
+    #baPanel{z-index:940;}
 
     /* (22) MASKEN ALS VOLLBILD [Daniel, 09.09.2026 abends: "in dem Moment,
        wo ich die Maske eintrage, interessiert mich nicht, was im
@@ -4668,8 +4675,9 @@ bleiben bewusst fest.</dd>
 <dd><b>Hilfebilder am Laptop (09.09.2026):</b> in den Zyklusmasken und im
 Programmkopf ist das Bild rechts 420 px hoch statt 247, Ma&szlig;e und Pillen
 sind um ein Drittel gr&ouml;&szlig;er. Das Bild des Programmkopfs zeigt am Laptop
-einen vollen Schnitt beidseitig der Achse mit Futter und Backen und allen
-Kopfma&szlig;en als Pillen (XA, ZA, ZI, LA, SC, R&uuml;ckzugsebenen, Werkzeugwechselpunkt)
+einen vollen Schnitt beidseitig der Achse als Zeichnung nach Norm (Schraffur,
+Futterk&ouml;rper und dreistufige Backen wie in der Simulation im Schnitt,
+keine Fase am Teil) und allen Kopfma&szlig;en als Pillen (XA, ZA, ZI, LA, SC, R&uuml;ckzugsebenen, Werkzeugwechselpunkt)
 &mdash; ohne 3D-K&ouml;rper; am Handy bleibt das bisherige Schema. Der
 Vorzeichenknopf, der beim Tippen rechts im Zahlenfeld erscheint, deckt die
 Ziffern nicht mehr zu (das Feld bekommt solange rechts ein Polster). Die
@@ -16811,6 +16819,18 @@ function helpBahnLegende(c, w, mitEilgang){
 // HANDY-SCHEMA DES PROGRAMMKOPFS (bis 899 px), unveraendert seit dem
 // 28.08.2026 - Regel 3. Freie Funktion, KEIN Schluessel von MASK_HELP:
 // Pruefung 57 verlangt fuer jeden Schluessel einen eigenen Bildrahmen.
+// SCHRAFFUR MIT WINKEL [Programmkopf V4, 09.09.2026]: Norm-Schraffur in
+// Schirmkoordinaten, auf den Pfad geklemmt. Benachbarte Schnittteile
+// (Futter, Backen, Teil) bekommen entgegengesetzte Richtungen - so liest
+// man im Bild, was zu welchem Teil gehoert. Deckkraft und Abstand kommen
+// vom Aufrufer, damit das Futter leiser bleibt als das Teil.
+function helpSchraffurWinkel(c, build, winkel, farbe, abstand){
+  c.save(); c.beginPath(); build(c); c.closePath(); c.clip();
+  c.strokeStyle=farbe; c.lineWidth=0.9;
+  const d=abstand||7, Ln=1400, a=winkel*Math.PI/180, dx=Math.cos(a), dy=-Math.sin(a), nx=-dy, ny=dx;
+  for(let t=-1000;t<1400;t+=d){ c.beginPath(); c.moveTo(t*nx-Ln*dx, t*ny-Ln*dy); c.lineTo(t*nx+Ln*dx, t*ny+Ln*dy); c.stroke(); }
+  c.restore();
+}
 function maskParamsHandy(active){
     const H=helpCtx("help_maskParams"); if(!H) return;
     const {c,w,h}=H; const A=(id)=>active===id;
@@ -16898,87 +16918,108 @@ const MASK_HELP = {
       return " "+String(+parseFloat(e.value)); };
     const rohr = (typeof selBtnVal==="function" && selBtnVal("pkFormBtns")==="rohr") ||
                  ((document.getElementById("pkForm")||{}).value==="rohr");
-    // ENTZERRT, V3 [Daniel, 09.09.2026: "teilweise noch dicht auf dicht ...
-    // Bemassungspfeile mehr auf Abstand, Pillen weniger ueberlappend"]:
-    // das Teil endet bei 60 % der Breite, rechts davon liegen Z0 (an der
-    // Stirn), ZRA (80 px dahinter) und XA (104 px) in EIGENEN Spalten;
-    // ueber und unter dem Teil stehen die Masslinien in festen Baendern
-    // (LA 22 / XRA 56 px darueber, ZI 22 / XRA 50 / ZA 64 px darunter).
-    // Jede Pille hat ihren Platz: die der senkrechten Masse (XA, XI)
-    // stehen NEBEN ihrer Linie (helpDim setzte sie mittig darauf), die
-    // SC-Pille zwischen Z0- und ZRA-Linie, die Z0-Linie laeuft nur
-    // ausserhalb des Teils. k skaliert mit der Bildhoehe (Laptop: 1).
+    // V4 [Daniels Entscheid 09.09.2026 nach zwei Mustern - "alles im
+    // Schnitt, direkt von der Seite, dann liest man die Masslinien"]:
+    // technischer Vollschnitt nach Zeichnungsnorm. Die Futterstirn ist
+    // nur noch eine 34 px breite Scheibe, die oben und unten aus dem Bild
+    // laeuft (das Futter ist viermal so gross wie das Teil). Stufenbacken
+    // WIE IN DER SIMULATION (futterGeometrie, Daniels Messung am
+    // Originalfutter): der Backenkoerper steht an der Futterstirn voll und
+    // laeuft nach vorn in drei Absaetzen aus (Hoehen 1 / 0,68 / 0,36),
+    // die Spannflaeche ist durchgehend der Rohteilradius, das Teil steckt
+    // mit seiner Spannlaenge im Backenbereich (dort beginnt ZI); die
+    // Backenfront ist der LA-Bezug. Ein erster Bau hatte die Stufen INNEN
+    // und zum Futter steigend - "um 180 Grad falsch" (Daniel). KEINE
+    // Aussenfase am Teil ("das hat es
+    // nicht, das verfaelscht die Bezugskante"). Schraffur: Teil 45 Grad
+    // kraeftig, Backen und Futter 135 Grad (Gegenrichtung, Norm). Die
+    // Bemassung ist die von V3 (Baender ueber und unter dem Teil, Pillen
+    // neben den senkrechten Linien); unten sitzt sie um die Backenhoehe
+    // tiefer, damit ZI nicht durch die untere Backe laeuft.
     const k=Math.max(0.7, Math.min(1, h/420));
-    const axY=Math.round(h*0.50), R=Math.round(h*0.24);
+    const axY=Math.round(h*0.50), R=Math.round(h*0.19);
     const T=axY-R, B=axY+R;
-    const fL=Math.round(w*0.07), zL=Math.round(w*0.30), zR=Math.round(w*0.60);
-    const bx=zL-14, bw=Math.round(w*0.075), bh=Math.round(h*0.036);
+    const zR=Math.round(w*0.64);
+    // Futterstirn bei 14 %, Backenlaenge 19 % der Breite (rund 1,0 R -
+    // real backeL 45 zu R 41); das Teil endet mit Spannlaenge im Backenbereich.
+    const bx=Math.round(w*0.14), bw=Math.round(w*0.19);
     const xZRA=zR+80*k, xXA=zR+104*k;
+    const jh=Math.round(R*0.70), z3=bw/3, h2=Math.round(jh*0.68), h3=Math.round(jh*0.36);
+    const x0=bx+Math.round(bw*0.45);                  // Teilende im Backenbereich (Spannlaenge)
+    const unten=jh-10;                                // untere Baender unter der Backe
     const lab=(t,x,y,on,al)=>helpLabel(c,t,x,y,on,al);
-    // Pille eines Masses, das seine Linie ueber helpDim ohne Label zieht:
-    // dieselbe Fokusregel wie helpDim (nur das angefasste Mass).
     const dimLab=(t,x,y,on,al)=>{ if(HELP_FOKUS && !on) return; helpLabel(c,t,x,y,on,al); };
-    // Futterkoerper und zwei Backen, die auf dem Teil greifen
+    // Futterstirn als Schnittscheibe
+    const fL=Math.max(2, bx-70*k);                    // Futterkoerper 70 px breit
+    c.save(); c.fillStyle="#e9edf1"; c.fillRect(fL, 2, bx-fL, h-4); c.restore();
+    helpSchraffurWinkel(c, (p)=>{ p.rect(fL, 2, bx-fL, h-4); }, 135, "rgba(70,90,110,0.22)", 9);
+    c.save(); c.strokeStyle="#5c6b78"; c.lineWidth=1.4; c.strokeRect(fL, 2, bx-fL, h-4); c.restore();
+    // Stufenbacken: Spannflaeche durchgehend am Teil, aussen drei Absaetze
+    // nach vorn fallend (Simulation: G.stufen 1 / 0,68 / 0,36)
+    const backe=(p,oben)=>{
+      const s=oben?1:-1, y0=oben?T:B;
+      p.moveTo(bx, y0); p.lineTo(bx, y0-s*jh); p.lineTo(bx+z3, y0-s*jh); p.lineTo(bx+z3, y0-s*h2);
+      p.lineTo(bx+2*z3, y0-s*h2); p.lineTo(bx+2*z3, y0-s*h3); p.lineTo(bx+bw, y0-s*h3); p.lineTo(bx+bw, y0);
+    };
+    [true,false].forEach(o=>{
+      c.save(); c.fillStyle="#cfd7df"; c.beginPath(); backe(c,o); c.closePath(); c.fill(); c.restore();
+      helpSchraffurWinkel(c, (p)=>backe(p,o), 135, "rgba(60,78,96,0.32)", 6);
+      c.save(); c.strokeStyle="#33424f"; c.lineWidth=1.5; c.lineJoin="round"; c.beginPath(); backe(c,o); c.closePath(); c.stroke(); c.restore();
+    });
+    // Teil im Vollschnitt, ohne Fase
+    const teil=(p)=>{ p.rect(x0, T, zR-x0, B-T); };
+    const ri=rohr? Math.round(R*0.45) : 0;
+    c.save(); c.fillStyle="#e6ebf0"; c.beginPath(); teil(c); c.fill(); c.restore();
     c.save();
-    c.fillStyle="rgba(120,134,148,0.30)"; c.strokeStyle=HELP_OFF; c.lineWidth=1.2;
-    const fuH=Math.round(R*1.55);
-    c.fillRect(fL, axY-fuH, bx-fL, 2*fuH); c.strokeRect(fL, axY-fuH, bx-fL, 2*fuH);
-    c.fillStyle="rgba(90,104,118,0.45)";
-    c.fillRect(bx, T-bh, bw, bh); c.strokeRect(bx, T-bh, bw, bh);
-    c.fillRect(bx, B, bw, bh);    c.strokeRect(bx, B, bw, bh);
+    if(ri){ c.beginPath(); teil(c); c.rect(x0, axY-ri, zR-x0, 2*ri); c.clip("evenodd"); }
+    else { c.beginPath(); teil(c); c.clip(); }
+    helpSchraffurWinkel(c, (p)=>{ p.rect(0,0,w,h); }, 45, "rgba(50,72,92,0.38)", 7);
     c.restore();
-    lab("Futter + Backen", Math.round((fL+bx)/2), axY+fuH+13*k, false);
-    // Teil: voller Schnitt, Metallverlauf wie in den Zyklusbildern
-    helpFillPart(c,(pp)=>{ pp.moveTo(bx-4,T); pp.lineTo(zR,T); pp.lineTo(zR,B); pp.lineTo(bx-4,B); pp.closePath(); });
-    // Drehachse (Strich-Punkt) mit Z-Beschriftung, X-Achse oben links
-    c.save(); c.setLineDash([12,4,3,4]); c.strokeStyle="#8a97a3"; c.lineWidth=1;
-    c.beginPath(); c.moveTo(fL-8,axY); c.lineTo(w-8,axY); c.stroke(); c.restore();
+    if(ri){ c.save(); c.fillStyle="#f7f9fb"; c.fillRect(x0, axY-ri, zR-x0, 2*ri); c.strokeStyle=HELP_EDGE; c.lineWidth=1.4; c.strokeRect(x0, axY-ri, zR-x0, 2*ri); c.restore(); }
+    c.save(); c.strokeStyle=HELP_EDGE; c.lineWidth=2.2; c.lineJoin="round"; c.beginPath(); teil(c); c.stroke(); c.restore();
+    // Drehachse
+    c.save(); c.setLineDash([12,4,3,4]); c.strokeStyle="#7f8d99"; c.lineWidth=1;
+    c.beginPath(); c.moveTo(fL-6,axY); c.lineTo(w-8,axY); c.stroke(); c.restore();
+    lab("Backen", bx+bw*0.42, B+jh*0.45+4, false);
+    lab("Futter", (fL+bx)/2, h-8, false);
     lab("Z", w-10, axY-8, false, "right");
-    lab("X\u2300", fL-2, Math.round(h*0.10), false, "left");
-    // Z0 gestrichelt NUR ausserhalb des Teils - die Stirnkante ist die
-    // Linie selbst, und vor der Stirn bleibt Platz fuer die ZRI-Pille.
+    lab("X\u2300", bx+6, Math.round(h*0.10), false, "left");   // rechts neben dem Futter
+    // Z0 gestrichelt nur ausserhalb des Teils
+    const Bu=B+unten;
     c.save(); c.setLineDash([3,3]); c.strokeStyle=HELP_OFF; c.lineWidth=1;
-    c.beginPath(); c.moveTo(zR, T-62*k); c.lineTo(zR, T); c.moveTo(zR, B); c.lineTo(zR, B+56*k); c.stroke(); c.restore();
+    c.beginPath(); c.moveTo(zR, T-62*k); c.lineTo(zR, T); c.moveTo(zR, B); c.lineTo(zR, Bu+56*k); c.stroke(); c.restore();
     lab("Z0", zR-6, T-62*k, false, "right");
-    // Rueckzugsebenen aussen: XRA beidseitig der Achse, ZRA vor der Stirn
-    const yXRAo=T-56*k, yXRAu=B+50*k;
-    strich(bx-30, yXRAo, w-10, yXRAo, A("pkXRA"));
-    strich(bx-30, yXRAu, w-10, yXRAu, A("pkXRA"));
-    lab("XRA"+V("pkXRA"), bx-28, yXRAo-12*k, A("pkXRA"), "left");
-    strich(xZRA, T-62*k, xZRA, B+56*k, A("pkZRA"));
+    // Rueckzugsebenen aussen
+    const yXRAo=T-56*k, yXRAu=Bu+50*k;
+    // ab der Backenfront, nicht durch die Backen hindurch
+    strich(bx+bw+4, yXRAo, w-10, yXRAo, A("pkXRA"));
+    strich(bx+bw+4, yXRAu, w-10, yXRAu, A("pkXRA"));
+    lab("XRA"+V("pkXRA"), bx+bw+6, yXRAo-12*k, A("pkXRA"), "left");
+    strich(xZRA, T-62*k, xZRA, Bu+56*k, A("pkZRA"));
     lab("ZRA"+V("pkZRA"), xZRA+6, T-62*k, A("pkZRA"), "left");
     if(rohr){
-      const ri=Math.round(R*0.45);
-      c.save(); c.fillStyle="#f4f7fa"; c.fillRect(bx-4, axY-ri, zR-bx+4, 2*ri);
-      c.strokeStyle=HELP_OFF; c.lineWidth=1; c.strokeRect(bx-4, axY-ri, zR-bx+4, 2*ri); c.restore();
-      // XI in der Bohrung selbst (dort ist Platz), Pille links der Linie
       const xXI=zR-44*k;
       helpDim(c, xXI, axY-ri, xXI, axY+ri, 0, "", A("pkXI"));
       dimLab("\u2300XI"+V("pkXI"), xXI-8, axY+4, A("pkXI"), "right");
-      // Rueckzugsebenen innen: XRI in der Bohrung, ZRI vor der Stirn
       const yXRI=axY-ri+12*k, xZRI=zR+12*k;
-      strich(bx-4, yXRI, w-10, yXRI, A("pkXRI")); strich(bx-4, axY+ri-12*k, w-10, axY+ri-12*k, A("pkXRI"));
+      strich(x0, yXRI, w-10, yXRI, A("pkXRI")); strich(x0, axY+ri-12*k, w-10, axY+ri-12*k, A("pkXRI"));
       lab("XRI"+V("pkXRI"), w-12, yXRI-10*k, A("pkXRI"), "right");
       strich(xZRI, axY-ri, xZRI, axY+ri, A("pkZRI"));
       lab("ZRI"+V("pkZRI"), xZRI+4, axY+ri+16*k, A("pkZRI"), "left");
     }
-    // Werkzeugwechselpunkt: Fadenkreuz oben rechts in eigener Zeile
+    // Werkzeugwechselpunkt oben rechts
     const xT=w-30, yT=Math.round(h*0.06), onT=A("wwpX")||A("wwpZ");
     c.save(); c.strokeStyle=onT?HELP_ON:HELP_OFF; c.lineWidth=1.6;
     c.beginPath(); c.moveTo(xT-9,yT); c.lineTo(xT+9,yT); c.moveTo(xT,yT-9); c.lineTo(xT,yT+9); c.stroke();
     c.beginPath(); c.arc(xT,yT,5.5,0,Math.PI*2); c.stroke(); c.restore();
     lab("XT"+V("wwpX")+" / ZT"+V("wwpZ"), xT-14, yT+4, onT, "right");
-    // Masse: LA (Pille darueber) und ZI (Pille darunter) in eigenen
-    // Baendern, SC vor der Stirn auf halber Hoehe mit Pille zwischen Z0
-    // und ZRA, ZA unten rechts, XA ganz rechts mit Pille neben der Linie
+    // Masse: LA ab Backenfront, ZI ab Stufe, SC, ZA, XA
     helpDim(c, bx+bw, T-22*k, zR, T-22*k, 0, "LA"+V("pkLA"), A("pkLA"), "in");
-    helpDim(c, bx-4, B+22*k, zR, B+22*k, 0, "ZI"+V("pkZI"), A("pkZI"));
-    // 64 % des Radius: beim Rohr liegt die obere XRI-Linie bei 55 %, die
-    // SC-Pille (unter ihrer Linie) muss darueber bleiben (Aufnahme p3-07).
+    helpDim(c, x0, Bu+22*k, zR, Bu+22*k, 0, "ZI"+V("pkZI"), A("pkZI"));
     const ySC=Math.round(axY-R*0.64);
     helpDim(c, zR, ySC, zR+22*k, ySC, 0, "", A("safeZ"));
     dimLab("SC"+V("safeZ"), zR+40*k, ySC+12*HELP_SKAL+3.5, A("safeZ"));
-    helpDim(c, zR, B+64*k, zR+12*k, B+64*k, 0, "ZA"+V("pkZA"), A("pkZA"));
+    helpDim(c, zR, Bu+64*k, zR+12*k, Bu+64*k, 0, "ZA"+V("pkZA"), A("pkZA"));
     helpDim(c, xXA, T, xXA, B, 0, "", A("stockDia"));
     dimLab("\u2300XA"+V("stockDia"), xXA+8, axY+18*k, A("stockDia"), "left");
     function strich(x1,y1,x2,y2,on){
