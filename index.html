@@ -4530,8 +4530,10 @@ das 1000er-Profil gew&auml;hlt ist:</b> (1) <b>Opferzeile hinter dem M30</b> &md
 Zeile jeder &Uuml;bertragung verloren (bewiesen 07.09.: ein Satz HINTER dem M30
 wird geschluckt, das M30 bleibt); aus der App per Web-Serial kommt sie an
 (09.09.2026). Es ist also das DNC-Programm, nicht die Steuerung. Die App
-h&auml;ngt in jedem Fall eine Opferzeile <code>(ENDE UEBERTRAGUNG)</code> an
-&mdash; kommt sie mit, ist sie ein harmloser Kommentar.
+h&auml;ngt sie an, solange das H&auml;kchen &bdquo;Opferzeile hinter M30&ldquo; im
+DNC-Block gesetzt ist (Vorgabe an; gilt f&uuml;r Sichern und Senden) &mdash; kommt
+sie mit, ist sie ein harmloser Kommentar; ohne H&auml;kchen endet die Datei mit
+dem M30.
 (2) <b>Keine Zeile &uuml;ber ~45 Zeichen</b> &mdash; l&auml;ngere rei&szlig;en im
 Empfangspuffer (bei 52 und 72 gemessen; DNC Precision kennt nur Zeilen-, kein
 Zeichen-Delay). Die App bricht lange Kommentarzeilen in mehrere um; ein
@@ -4543,7 +4545,11 @@ Wortgrenze (07.09.: &bdquo;zu viele Interpolationsadressen&ldquo;) noch mitten
 im Wort mit Ziffer-Anfang (09.09.2026: &bdquo;152 Fehlerhafte
 Zahlenangabe&ldquo;); ein Zyklussatz muss als EINE Zeile ankommen. Aus der App
 gehen S&auml;tze &uuml;ber 45 Zeichen deshalb zeichenweise gebremst (noch
-unverifiziert, s. Web-Serial). (3) Reines ASCII &mdash; ein
+unverifiziert, s. Web-Serial). Die Pausen je Zeichen und je Zeile stehen als
+Felder im DNC-Block und lassen sich an der Maschine anpassen; &bdquo;Datei senden
+(roh)&ldquo; schickt eine Textdatei (etwa einen von der Maschine gezogenen
+Zyklussatz) unver&auml;ndert &mdash; nur ASCII und CR LF, keine Opferzeile, kein
+Umbruch, die Bremse gilt. (3) Reines ASCII &mdash; ein
 Gedankenstrich im Kommentar wurde in einer Testdatei zum Steuerzeichen XOFF.
 (4) Zeilenenden CR LF, wie die Sicherungen der Maschine. Kommentarzeilen ohne
 N-Nummer und LF-Enden nimmt sie zwar an; die Regeln 1&ndash;3 sind trotzdem
@@ -20736,7 +20742,7 @@ const MASCHINEN_PROFILE = {
     // traf. Sie bremst per RTS/CTS und schickt KEIN XOFF; ohne
     // Hardware-Handshake am Laptop kommt "194 Empfangsspeicher
     // ueberlauf". Dazu vier Dateiregeln, alle gemessen (s. BA).
-    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. WEB-SERIAL AUS DER APP am Geraet bewiesen 09.09.2026 (Kantenwelle, 126 Zeilen hin und zurueck byteidentisch, Prog. Pruefen ohne Meldung). Dateiregeln: Opferzeile hinter M30 (bei DNC Precision geht die letzte Zeile verloren, aus der App kommt sie an), Zeilen ueber ~45 Zeichen reissen im Empfangspuffer, und Fortsetzungszeilen setzt die Steuerung NIE zusammen (07.09. an der Wortgrenze, 09.09.2026 mitten im Wort mit Ziffer: "152 Fehlerhafte Zahlenangabe") - lange Saetze sendet die App deshalb zeichenweise gebremst (unverifiziert, Test naechster Termin), Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an',
+    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. WEB-SERIAL AUS DER APP am Geraet bewiesen 09.09.2026 (Kantenwelle, 126 Zeilen hin und zurueck byteidentisch, Prog. Pruefen ohne Meldung). Dateiregeln: Opferzeile hinter M30 (bei DNC Precision geht die letzte Zeile verloren, aus der App kommt sie an), Zeilen ueber ~45 Zeichen reissen im Empfangspuffer, und Fortsetzungszeilen setzt die Steuerung NIE zusammen (07.09. an der Wortgrenze, 09.09.2026 mitten im Wort mit Ziffer: "152 Fehlerhafte Zahlenangabe") - lange Saetze sendet die App deshalb zeichenweise gebremst (unverifiziert, Test naechster Termin), Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an; Opferzeile im DNC-Block abschaltbar, Zeichen- und Zeilenpause dort einstellbar, Textdateien lassen sich roh senden (fuer den Termin 10.09.2026 vorbereitet)',
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
@@ -28272,7 +28278,16 @@ const DNC_PROFILE={
 // Byte an den Adapter, 3 ms Pause dazwischen (Browser-Timer laufen ohnehin
 // auf ~4 ms) - dieselbe Idee wie chardelay 1000 us im Kaestchen. Unter der
 // Grenze aendert sich am bewiesenen Weg nichts.
-const DNC_1000_GEBREMST_AB=45, DNC_1000_ZEICHENPAUSE_MS=3;
+const DNC_1000_GEBREMST_AB=45, DNC_1000_ZEICHENPAUSE_MS=3, DNC_1000_ZEILENPAUSE_MS=150;
+// TERMIN-KNOEPFE [Vorbereitung 10.09.2026, Daniels Plan: "Zyklen komplett lang
+// reinbekommen mit dieser Bremse" und "ob wir die Opferzeile ueberhaupt noch
+// brauchen"]: Zeichen- und Zeilenpause stehen als Felder im DNC-Block, damit
+// ein gerissener Satz vor Ort mit mehr Pause wiederholt werden kann, statt
+// einen Termin zu kosten; die Opferzeile ist abschaltbar (Slot et_opferzeile,
+// Vorgabe an - fuer DNC Precision noetig, aus der App kam die letzte Zeile am
+// 09.09.2026 an). Beides gilt nur am 1000er-Sendeweg.
+function opferzeileGewuenscht(){ try{ return localStorage.getItem('et_opferzeile')!=='aus'; }catch(e){ return true; } }
+function dncPauseMs(id, vorgabe){ const e=(typeof document!=='undefined')? document.getElementById(id) : null; const v=e? parseFloat(e.value) : NaN; return (isFinite(v) && v>=0) ? v : vorgabe; }
 let dncPort=null, dncXoff=false, dncLeser=null, dncRx=[], dncRxCb=null, dncSendeLauf=false;
 function dncLog(t, warn){
   const el=document.getElementById('dncLog');
@@ -28519,11 +28534,16 @@ function dncSeriellMalen(){
     +'<label style="font-size:12px;">Parität <select id="dncPar"><option value="none">keine</option><option value="even">gerade</option><option value="odd">ungerade</option></select></label>'
     +'<label style="font-size:12px;">Stop <select id="dncStop"><option>1</option><option>2</option></select></label>'
     +'<label style="font-size:12px;"><input type="checkbox" id="dncWartXon" checked> auf Anforderung der Maschine warten (Xon)</label>'
+    +'<label style="font-size:12px;" title="1000er: hinter dem M30 eine Kommentarzeile anhaengen - DNC Precision verliert die letzte Zeile, aus der App kam sie an (09.09.2026). Gilt fuer NC sichern und Programm senden."><input type="checkbox" id="dncOpfer" checked> Opferzeile hinter M30 (1000er)</label>'
+    +'<label style="font-size:12px;" title="1000er: Pause je Zeichen bei Saetzen ueber 45 Zeichen (Bremse)">Zeichenpause <input type="number" id="dncZeichenPause" value="3" min="0" step="1" style="width:52px;"> ms</label>'
+    +'<label style="font-size:12px;" title="1000er: Pause nach jeder Zeile">Zeilenpause <input type="number" id="dncZeilenPause" value="150" min="0" step="10" style="width:60px;"> ms</label>'
     +'</div>'
     +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;">'
     +'<button id="dncVerb" class="gcbtn">Verbinden</button>'
     +'<button id="dncSend" class="gcbtn primary" disabled>Programm senden</button>'
     +'<button id="dncEmpf" class="gcbtn" disabled>Empfangen (Sicherung)</button>'
+    +'<button id="dncDateiBtn" class="gcbtn" disabled title="Eine Textdatei unveraendert senden (Testsaetze, Sicherungen): kein Filter, keine Opferzeile, kein Umbruch - nur ASCII, CR LF, Leerzeilen weg; die Bremse fuer lange Zeilen gilt">Datei senden (roh)</button>'
+    +'<input type="file" id="dncDatei" accept=".txt,.tap,.nc,.TXT,.TAP,.NC" style="display:none">'
     +'<button id="dncStop2" class="gcbtn" disabled>Abbrechen</button>'
     +'</div>'
     +'<div id="dncStatus" style="font-size:12.5px;margin:4px 0;color:#39434c;">nicht verbunden</div>'
@@ -28534,6 +28554,11 @@ function dncSeriellMalen(){
   document.getElementById('dncVerb').onclick=dncVerbindenTrennen;
   document.getElementById('dncSend').onclick=dncSenden;
   document.getElementById('dncEmpf').onclick=dncEmpfangen;
+  { const op=document.getElementById('dncOpfer'); op.checked=opferzeileGewuenscht();
+    op.onchange=()=>{ try{ localStorage.setItem('et_opferzeile', op.checked?'an':'aus'); }catch(e){} dncLog('Opferzeile '+(op.checked?'an':'AUS')+' (gilt fuer Sichern und Senden an die 1000er).'); }; }
+  document.getElementById('dncDateiBtn').onclick=()=>{ const i=document.getElementById('dncDatei'); i.value=''; i.click(); };
+  document.getElementById('dncDatei').onchange=(ev)=>{ const fl=ev.target.files && ev.target.files[0]; if(!fl) return;
+    const rd=new FileReader(); rd.onload=()=>dncSenden(String(rd.result||''), fl.name); rd.readAsText(fl); };
   document.getElementById('dncStop2').onclick=()=>{ dncSendeLauf=false; dncRxCb=null; dncLog('Abbruch durch Bediener.'); dncKnoepfe(); };
 }
 function dncFelderVorbelegen(){
@@ -28551,6 +28576,7 @@ function dncKnoepfe(){
   const en=(id,an)=>{ const e=document.getElementById(id); if(e) e.disabled=!an; };
   en('dncSend', verb && !dncSendeLauf && !dncRxCb);
   en('dncEmpf', verb && !dncSendeLauf && !dncRxCb);
+  en('dncDateiBtn', verb && !dncSendeLauf && !dncRxCb);
   en('dncStop2', verb && (dncSendeLauf || !!dncRxCb));
   const v=document.getElementById('dncVerb');
   if(v) v.textContent=verb? 'Trennen' : 'Verbinden';
@@ -28614,13 +28640,19 @@ async function dncLeseSchleife(){
     if(!dncPort) break;
   }
 }
-async function dncSenden(){
+async function dncSenden(rohText, rohName){
   if(!dncPort || dncSendeLauf) return;
-  const text=document.getElementById('gcodeOut').value;
-  if(!text || !text.trim()){ dncStatus('kein Programm — erst „Erzeugen" druecken'); return; }
-  // Gefiltert wie beim Sichern (Opferzeile, Zeilenlaenge, ASCII, CR LF
-  // — s. ncFuerMaschine). Die Ansicht bleibt das volle Programm.
-  const f=ncFuerMaschine(text);
+  // DATEI ROH [Vorbereitung 10.09.2026]: eine Textdatei (123.TAP, MINI_G72,
+  // eine Maschinensicherung) geht unveraendert - kein Filter, keine
+  // Opferzeile, kein Kommentarumbruch; nur ASCII, CR LF, Leerzeilen weg.
+  // Der Knopf "Programm senden" ruft mit dem Klick-Ereignis, das ist kein
+  // String - dann gilt die NC-Ausgabe, gefiltert wie beim Sichern
+  // (Opferzeile, Zeilenlaenge, ASCII, CR LF - s. ncFuerMaschine).
+  const roh=(typeof rohText==='string');
+  const text=roh ? rohText : document.getElementById('gcodeOut').value;
+  if(!text || !text.trim()){ dncStatus(roh ? 'Datei ist leer' : 'kein Programm — erst „Erzeugen" druecken'); return; }
+  const f=roh ? dncRohDatei(text) : ncFuerMaschine(text);
+  if(roh) dncLog('Datei "'+(rohName||'?')+'" roh: '+f.zeilen+' Zeilen, laengste '+f.laengste+' Zeichen (kein Filter, keine Opferzeile).');
   f.warnungen.forEach(w=>dncLog('WARNUNG: '+w, true));
   const bytes=new TextEncoder().encode(f.text);
   const prof=DNC_PROFILE[MASCHINENPROFIL.id]||DNC_PROFILE.MONFORTS_1500_EUROTURN;
@@ -28644,6 +28676,7 @@ async function dncSenden(){
         // Weg MIT an - der Verlust der letzten Zeile am 07.09. war DNC
         // Precision (dort kam sie am 09.09. als einzelnes "(" an).
         const zeilen=f.text.split('\r\n').filter((z,ix,a)=>ix<a.length-1);
+        const zp=dncPauseMs('dncZeichenPause', DNC_1000_ZEICHENPAUSE_MS), zlp=dncPauseMs('dncZeilenPause', DNC_1000_ZEILENPAUSE_MS);
         let n=0;
         for(const z of zeilen){
           if(!dncSendeLauf) break;
@@ -28663,13 +28696,13 @@ async function dncSenden(){
           if(b.length>DNC_1000_GEBREMST_AB){
             for(let k=0;k<b.length && dncSendeLauf;k++){
               await w.write(b.slice(k,k+1));
-              await new Promise(r=>setTimeout(r,DNC_1000_ZEICHENPAUSE_MS));
+              await new Promise(r=>setTimeout(r,zp));
             }
             gebremst++;
           } else await w.write(b);
           i+=b.length; n++;
           dncStatus('sende... Zeile '+n+' / '+zeilen.length+' ('+i+' Zeichen)');
-          await new Promise(r=>setTimeout(r,150));
+          await new Promise(r=>setTimeout(r,zlp));
         }
       } else {
         while(i<bytes.length && dncSendeLauf){
@@ -28686,8 +28719,8 @@ async function dncSenden(){
           dncStatus('sende... '+Math.round(100*i/bytes.length)+' % ('+i+' / '+bytes.length+' Zeichen)');
         }
       }
-      if(gebremst) dncLog(gebremst+' Zeile/n ueber '+DNC_1000_GEBREMST_AB+' Zeichen zeichenweise gebremst gesendet - an der Maschine unverifiziert, im Editor nachsehen, ob sie ganz da sind.', true);
-      if(dncSendeLauf){ dncStatus('gesendet: '+bytes.length+' Zeichen, '+f.zeilen+' Zeilen'+(hardware?' (die letzte ist die Opferzeile)':'')); dncLog('Programm komplett gesendet.'); }
+      if(gebremst) dncLog(gebremst+' Zeile/n ueber '+DNC_1000_GEBREMST_AB+' Zeichen zeichenweise gebremst gesendet ('+dncPauseMs('dncZeichenPause', DNC_1000_ZEICHENPAUSE_MS)+' ms je Zeichen) - an der Maschine unverifiziert, im Editor nachsehen, ob sie ganz da sind.', true);
+      if(dncSendeLauf){ dncStatus('gesendet: '+bytes.length+' Zeichen, '+f.zeilen+' Zeilen'+((hardware && f.opferzeile)?' (die letzte ist die Opferzeile)':'')); dncLog('Programm komplett gesendet.'); }
       else { dncStatus('Senden abgebrochen bei '+i+' Zeichen'); }
     }catch(e){ dncLog('Sendefehler: '+(e&&e.message), true); dncStatus('Sendefehler'); }
     finally{ try{ w.releaseLock(); }catch(e){} dncSendeLauf=false; dncKnoepfe(); }
@@ -29164,9 +29197,12 @@ const NC_1000_OPFERZEILE='(ENDE UEBERTRAGUNG - OPFERZEILE)';
 // nichts ueber den Empfang. Bis der Roundtrip gefahren ist, bekommt
 // jeder Satz ueber dieser Laenge einen HINWEIS (kein Blocker).
 const NC_1500_UNBELEGT_AB=100;
-function ncFuerMaschine(code, profilId){
+function ncFuerMaschine(code, profilId, opt){
   const id=profilId || (typeof MASCHINENPROFIL!=='undefined' && MASCHINENPROFIL ? MASCHINENPROFIL.id : '');
   const warnungen=[];
+  // OPFERZEILE NACH SCHALTER [10.09.2026]: opt.opferzeile (Pruefstand) vor
+  // dem Haekchen im DNC-Block (Slot et_opferzeile), Vorgabe an.
+  const mitOpfer=(opt && opt.opferzeile!==undefined) ? !!opt.opferzeile : opferzeileGewuenscht();
   let zeilen=String(code||'').replace(/\r\n/g,'\n').split('\n').map(z=>ncAscii(z).replace(/\s+$/,''));
   if(id==='MONFORTS_1000_MTC_K_6624B'){
     // Alles HINTER dem letzten M30 weg: die Fusskommentare (Einrichter-
@@ -29191,7 +29227,7 @@ function ncFuerMaschine(code, profilId){
         warnungen.push('Satz mit '+t.length+' Zeichen (Grenze '+NC_1000_MAX_SATZ+', 1000er reisst ab ~52; aus der App zeichenweise gebremst gesendet, an der Maschine unverifiziert - im Editor nachsehen): '+t.slice(0,32)+'...');
       aus.push(t);
     }
-    aus.push(NC_1000_OPFERZEILE);
+    if(mitOpfer) aus.push(NC_1000_OPFERZEILE);
     zeilen=aus;
   } else {
     while(zeilen.length && !zeilen[zeilen.length-1]) zeilen.pop();
@@ -29200,7 +29236,15 @@ function ncFuerMaschine(code, profilId){
         warnungen.push('Satz mit '+t.length+' Zeichen: Empfang an der 1500er bei dieser Laenge nicht belegt (bis ~40 gefahren, T8 mit 137 nie geprueft) — nach dem Einspielen im Editor nachsehen: '+t.slice(0,32)+'...');
     });
   }
-  return {text: zeilen.join('\r\n')+'\r\n', warnungen, zeilen:zeilen.length};
+  return {text: zeilen.join('\r\n')+'\r\n', warnungen, zeilen:zeilen.length, opferzeile:(id==='MONFORTS_1000_MTC_K_6624B' && mitOpfer)};
+}
+// DATEI ROH [10.09.2026]: fuer "Datei senden (roh)" - Saetze und Kommentare
+// bleiben, wie sie sind (kein Umbruch, keine Opferzeile, nichts hinter M30
+// weg); nur ASCII, CR LF und Leerzeilen weg (Regel 4 der 1000er).
+function dncRohDatei(text){
+  const zeilen=String(text||'').replace(/\r\n?/g,'\n').split('\n').map(z=>ncAscii(z).replace(/\s+$/,'')).filter(z=>z);
+  let laengste=0; zeilen.forEach(z=>{ if(z.length>laengste) laengste=z.length; });
+  return {text: zeilen.join('\r\n')+'\r\n', warnungen:[], zeilen:zeilen.length, laengste, opferzeile:false};
 }
 
 async function exportGcode(ext){
