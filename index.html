@@ -1988,8 +1988,22 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
     .mask:not(.kachelpilot) .mrow > select.tool-select{width:430px;}
     .mask:not(.kachelpilot) .mrow > input + input,
     .mask:not(.kachelpilot) .mrow > input:has(+ input){flex:0 0 110px;}
+    /* (5b) KANTENFELDER MIT UMSCHALTER [Daniels Laptop-Foto 09.09.2026 22:41:
+       Einstich, Ecke 1-4 - "die Zahlen sind halb abgeschnitten"]: die
+       Wertfelder neben Fase/Radius tragen die INLINE-Breite 51 px des
+       Handy-Layouts; am Laptop reserviert Edge darin noch den Drehknopf
+       des Zahlenfelds - gemessen 51 px Inhalt in 49 px Box, "0,5" lief
+       rechts aus dem Feld, waehrend die Nachbarzeilen 170 px haben.
+       flex-basis 120 gewinnt gegen die Inline-Breite (wie #boZ1). */
     .mask:not(.kachelpilot) .mrow > #boZ1, .mask:not(.kachelpilot) .mrow > #gwH1,
-    .mask:not(.kachelpilot) .mrow > #abKaWert, .mask:not(.kachelpilot) .mrow > #abKa{width:120px;flex:0 0 120px;}
+    .mask:not(.kachelpilot) .mrow > #abKaWert, .mask:not(.kachelpilot) .mrow > #abKa,
+    .mask:not(.kachelpilot) .mrow > #esE1, .mask:not(.kachelpilot) .mrow > #esE2, .mask:not(.kachelpilot) .mrow > #esE3, .mask:not(.kachelpilot) .mrow > #esE4,
+    .mask:not(.kachelpilot) .mrow > #aeK1, .mask:not(.kachelpilot) .mrow > #aeK2, .mask:not(.kachelpilot) .mrow > #aeK3{width:120px;flex:0 0 120px;}
+    /* Drehknoepfe der Zahlenfelder am Laptop aus: Edge blendet sie beim
+       Ueberfahren UEBER die rechtsbuendige letzte Ziffer; am Handy gibt
+       es sie nicht (iOS), dort aendert die Regel nichts. */
+    .mask input[type=number]::-webkit-inner-spin-button, .mask input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+    .mask input[type=number]{-moz-appearance:textfield;}
     .mask:not(.kachelpilot) .mrow > #sw_aeK1Btns, .mask:not(.kachelpilot) .mrow > #sw_aeK2Btns, .mask:not(.kachelpilot) .mrow > #sw_aeK3Btns,
     .mask:not(.kachelpilot) .mrow > #sw_esE1Btns, .mask:not(.kachelpilot) .mrow > #sw_esE2Btns, .mask:not(.kachelpilot) .mrow > #sw_esE3Btns, .mask:not(.kachelpilot) .mrow > #sw_esE4Btns,
     .mask:not(.kachelpilot) .mrow > #sw_abKaBtns{width:110px;min-width:110px;}
@@ -6520,7 +6534,10 @@ function futterGeometrie(){
     rAussen: FUTTER.rAussen,
     zKoerper: zStirn-FUTTER.hoehe,
     rNabe: Math.max(FUTTER.rBohrung, Math.min(rSpann, FUTTER.rAussen)),
-    // Backenbreite in mm statt als fester Winkel, s. Kommentar in draw3D
+    // Backenbreite in mm: die 3D-Backe hat seit dem 09.09.2026 parallele
+    // Flanken (klotz in draw3D) und nimmt backeB direkt; halbWinkel bleibt
+    // als Winkel am mittleren Backenradius stehen (frueher das Segment).
+    backeB: FUTTER.backeB,
     halbWinkel: Math.min(0.45, (FUTTER.backeB/2)/Math.max(rMitteB,1)),
   };
 }
@@ -31673,49 +31690,58 @@ function draw3D(opt){
     const lamB=(a)=>Math.max(0, Math.cos(a)*licht.y + Math.sin(a)*licht.z);
     const hellB=(a)=>{ const l=lamB(a); return 0.30+0.58*l+0.45*Math.pow(l,28); };
     const mitte4=(p)=>(p[0][2]+p[1][2]+p[2][2]+p[3][2])/4;
-    const seg=(a1,a2,r1,r2,z1,z2,rgb)=>{
-      const P=(a,r,z)=>proj(z, r*Math.cos(a), r*Math.sin(a));
-      const NB=Math.max(4, Math.round(NP*(a2-a1)/(2*Math.PI)));
-      // Jede der sechs Backenflaechen hat eine bekannte Normale — der
-      // Klotz ist geschlossen, also faellt die Haelfte weg, die vom
-      // Betrachter wegzeigt. Auch hier sind die Tiefenversaetze entfallen.
+    // PARALLELE FLANKEN [Daniel, 09.09.2026 22:50, Laptop-Foto der
+    // Stirnansicht: "die Backen gehen keilfoermig, verjuengen sich zum
+    // Drehteil hin - normale Spannbacken haben eine definierte,
+    // gleichbleibende Staerke"]. Vorher war die Backe ein KREISSEGMENT mit
+    // festem Winkel (aus der Breite am mittleren Backenradius gerechnet):
+    // am Spannradius 2*r*sin(hb) breit, an der Stufenoberkante das
+    // Doppelte und mehr - ein Keil, von vorn deutlich zu sehen. Jetzt ist
+    // sie ein KLOTZ: die Flanken sind parallele Ebenen im Abstand +-tB von
+    // der Backenachse, die Aussenflaeche ist eben, nur die Spannflaeche
+    // bleibt ein Bogen auf dem Spannradius (sie liegt am Teil an). tB =
+    // halbe Backenbreite (backeB 32/35 mm je Maschine, aus futterGeometrie),
+    // bei duennen Teilen auf 0,85*rSpann gedeckelt, damit sich die drei
+    // Backen bei 120 Grad Teilung nicht schneiden. Gilt am Handy wie am
+    // Laptop - dieselbe Zeichnung (Daniel: "ich weiss nicht, ob das auf der
+    // Mobilansicht genauso ist" - ja, war es).
+    const klotz=(am,tB,r1,r2,z1,z2,rgb)=>{
+      const ca=Math.cos(am), sa=Math.sin(am);
+      // Backenkoordinaten: u laengs der Backenachse (radial), t quer dazu
+      const P=(u,t,z)=>proj(z, u*ca - t*sa, u*sa + t*ca);
+      const uIn=(t)=>Math.sqrt(Math.max(0, r1*r1 - t*t));       // Spannflaeche = Bogen auf r1
+      const NB=Math.max(4, Math.round(NP*2*Math.asin(Math.min(1,tB/r1))/(2*Math.PI)));
+      // Jede Flaeche hat eine bekannte Normale - der Klotz ist geschlossen,
+      // also faellt die Haelfte weg, die vom Betrachter wegzeigt.
       const halt=(nz,ny,nd,d,p,hell)=>{
         if(!sichtbar(nz,ny,nd)){ cullWeg++; return; }
         quads.push({d, pts:p, hell, rgbF:rgb});
       };
       for(let k=0;k<NB;k++){
-        const b1=a1+(a2-a1)*k/NB, b2=a1+(a2-a1)*(k+1)/NB, bm=(b1+b2)/2;
-        // Aussenmantel (gerundet) — Normale radial nach aussen
-        let p=[P(b1,r2,z1),P(b2,r2,z1),P(b2,r2,z2),P(b1,r2,z2)];
-        halt(0, Math.cos(bm), Math.sin(bm), mitte4(p), p, hellB(bm));
-        // Spannflaeche innen — liegt am Werkstueck an, Normale zeigt zur
-        // Achse, also gegenlaeufig beleuchtet und deutlich dunkler.
-        p=[P(b1,r1,z1),P(b2,r1,z1),P(b2,r1,z2),P(b1,r1,z2)];
-        halt(0, -Math.cos(bm), -Math.sin(bm), mitte4(p), p, 0.26+0.22*lamB(bm+Math.PI));
+        const t1=-tB+2*tB*k/NB, t2=-tB+2*tB*(k+1)/NB, tm=(t1+t2)/2;
+        // Aussenflaeche eben - Normale ist die Backenachse, ein Helligkeitswert
+        let p=[P(r2,t1,z1),P(r2,t2,z1),P(r2,t2,z2),P(r2,t1,z2)];
+        halt(0, ca, sa, mitte4(p), p, hellB(am));
+        // Spannflaeche: Bogen am Werkstueck, Normale zur Achse hin, also
+        // gegenlaeufig beleuchtet und deutlich dunkler
+        const phm=am+Math.asin(Math.max(-1,Math.min(1,tm/r1)));
+        p=[P(uIn(t1),t1,z1),P(uIn(t2),t2,z1),P(uIn(t2),t2,z2),P(uIn(t1),t1,z2)];
+        halt(0, -Math.cos(phm), -Math.sin(phm), mitte4(p), p, 0.26+0.22*lamB(phm+Math.PI));
         // Stirn vorn (zum Werkstueck hin, +Z) und Rueckseite (-Z)
-        p=[P(b1,r1,z2),P(b2,r1,z2),P(b2,r2,z2),P(b1,r2,z2)];
+        p=[P(uIn(t1),t1,z2),P(uIn(t2),t2,z2),P(r2,t2,z2),P(r2,t1,z2)];
         halt(1,0,0, mitte4(p), p, 0.70);
-        p=[P(b1,r1,z1),P(b2,r1,z1),P(b2,r2,z1),P(b1,r2,z1)];
+        p=[P(uIn(t1),t1,z1),P(uIn(t2),t2,z1),P(r2,t2,z1),P(r2,t1,z1)];
         halt(-1,0,0, mitte4(p), p, 0.38);
       }
-      // Seitenflanken, nur an den beiden Enden des Segments. Ihre
-      // Normale steht quer zum Umfang und zeigt vom Segment weg —
-      // bei a1 nach -phi, bei a2 nach +phi.
-      [[a1,-1],[a2,1]].forEach(([a,vz])=>{
-        const p=[P(a,r1,z1),P(a,r2,z1),P(a,r2,z2),P(a,r1,z2)];
-        halt(0, -vz*Math.sin(a), vz*Math.cos(a), mitte4(p), p, 0.44);
+      // Flanken: parallele Ebenen bei t = -tB und +tB, Normale quer zur
+      // Backenachse und vom Klotz weg
+      [[-tB,-1],[tB,1]].forEach(([t,vz])=>{
+        const p=[P(uIn(t),t,z1),P(r2,t,z1),P(r2,t,z2),P(uIn(t),t,z2)];
+        halt(0, -vz*sa, vz*ca, mitte4(p), p, 0.44);
       });
     };
-    // BREITE IN MILLIMETERN, NICHT IN GRAD. Vorher stand ein fester
-    // Winkel von 24 Grad — an einem duennen Teil wurden daraus schmale
-    // Leisten von wenigen Millimetern, an einem dicken breite Schaufeln.
-    // Eine Backe hat aber eine feste Breite, egal worauf sie spannt.
-    // Der Winkel wird deshalb aus der Breite am mittleren Backenradius
-    // gerechnet und nach oben begrenzt, damit sich die drei bei kleinem
-    // Spann-⌀ nicht ueberlappen (120 Grad Teilung, also hoechstens gut
-    // 50 Grad je Backe).
-    // Backenbreite und Stufenlage kommen aus (O.ohneFutter? null : futterGeometrie()).
-    const hb=G.halbWinkel;
+    // Backenbreite und Stufenlage kommen aus futterGeometrie.
+    const tB=Math.min((G.backeB||32)/2, 0.85*rSpann);
     // Die Stufe sitzt anteilig, nicht bei festen 27 mm: steckt das
     // Werkstueck nur kurz im Futter, sind auch die Backen kurz, und die
     // Stufe muesste sonst hinter dem Spannbereich liegen.
@@ -31723,7 +31749,7 @@ function draw3D(opt){
     // Dreistufige Backe: ein Klotz je Stufe, Hoehen aus G.stufen.
     [Math.PI/2, Math.PI/2+2*Math.PI/3, Math.PI/2+4*Math.PI/3].forEach(am=>{
       G.stufen.forEach(st2=>{
-        seg(am-hb, am+hb, rSpann, st2.r, st2.zVon, st2.zBis, stahlB);
+        klotz(am, tB, rSpann, st2.r, st2.zVon, st2.zBis, stahlB);
       });
     });
   })();
