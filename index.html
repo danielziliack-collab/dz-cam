@@ -902,6 +902,9 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   /* Planvorschau: am Handy niemals sichtbar (kein Platz), am Desktop per
      Media-Query eingeschaltet. */
   .planvorschau{display:none;}
+  /* 2D/3D-Schalter der Werkstueckvorschau (nur Desktop sichtbar, s. Vorschau) */
+  .pv-btn{float:right;font-size:10px;font-weight:700;padding:1px 7px;border:1px solid var(--line);border-radius:3px;background:#fff;color:var(--text-dim);cursor:pointer;line-height:1.3;}
+  .pv-btn.an{background:var(--blue);border-color:var(--blue);color:#fff;}
   .planvorschau canvas{width:100%;flex:1 1 auto;min-height:0;background:#fff;}
   .pv-info{border-top:1px solid var(--line);padding:8px 12px;font-size:12px;color:hsl(var(--ton), 17.0%, 26.5%);
     line-height:1.55;background:hsl(var(--ton), 66.7%, 98.8%);}
@@ -3226,7 +3229,7 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
            Rohteil und Konturen zum Arbeitsplan, damit beim Durchgehen der
            Schritte immer klar ist, an welchem Teil man arbeitet. -->
       <div class="planvorschau view-arbeitsplan" id="planVorschau">
-        <div class="ap-head">WERKSTÜCK</div>
+        <div class="ap-head">WERKSTÜCK<button id="pv3dBtn" class="pv-btn" type="button" title="Werkstueck als 3D-Koerper oder als 2D-Schnitt">3D</button></div>
         <canvas id="pvCv"></canvas>
         <div class="pv-info" id="pvInfo"></div>
       </div>
@@ -4678,7 +4681,14 @@ sind um ein Drittel gr&ouml;&szlig;er. Das Bild des Programmkopfs zeigt am Lapto
 einen vollen Schnitt beidseitig der Achse als Zeichnung nach Norm (Schraffur,
 Futterk&ouml;rper und dreistufige Backen wie in der Simulation im Schnitt,
 keine Fase am Teil) und allen Kopfma&szlig;en als Pillen (XA, ZA, ZI, LA, SC, R&uuml;ckzugsebenen, Werkzeugwechselpunkt)
-&mdash; ohne 3D-K&ouml;rper; am Handy bleibt das bisherige Schema. Der
+&mdash; am Handy dasselbe Bild als obere H&auml;lfte (Achse am unteren Rand,
+Zylinder als K&ouml;rper, Rohr im Schnitt, alle Kopfma&szlig;e als Pillen). Die acht
+Zyklusbilder zeigen am Laptop seit dem 09.09.2026 bei Au&szlig;enbearbeitungen das
+Werkst&uuml;ck als K&ouml;rper mit dem Metallverlauf der Simulation (Kontur samt
+Spiegelbild, keine Schraffur), bei Innenbearbeitungen und beim Bohren den
+Vollschnitt mit Schraffur; der Programmkopf zeigt den Zylinder als K&ouml;rper,
+das Rohr im Vollschnitt. Bahnen, Stiche und Ma&szlig;e bleiben in der oberen
+H&auml;lfte. Der
 Vorzeichenknopf, der beim Tippen rechts im Zahlenfeld erscheint, deckt die
 Ziffern nicht mehr zu (das Feld bekommt solange rechts ein Polster). Die
 2D-Simulation zeichnet am Laptop das Materialbild bildpunktfein vereinfacht
@@ -4697,6 +4707,12 @@ Zuklappen geht weiterhin, beim n&auml;chsten &Ouml;ffnen ist wieder alles offen;
 Handy bleibt das gewohnte Aufklappen. Der Programmkopf hat am Laptop denselben
 Kachel-/Zeilen-Umschalter wie die Zyklusmasken. Die G-Funktionen-Liste &uuml;ber
 dem Arbeitsplan ist weg (&bdquo;das liest keiner&ldquo;).<br>
+<b>Werkst&uuml;ck als 3D-K&ouml;rper (09.09.2026):</b> die Werkst&uuml;ck-Vorschau im
+Arbeitsplan zeigt das Rohteil als durchscheinenden Drehk&ouml;rper von der Seite,
+darin das Fertigteil dunkler und seine Kontur gestrichelt &mdash; man sieht durch
+das Rohteil, was daraus wird; der gew&auml;hlte Schritt ist orange get&ouml;nt. Ohne
+Futter und Backen, nur das Werkst&uuml;ck. Der Knopf 3D/2D im Kopf der Vorschau schaltet auf das bisherige
+Schnittbild zur&uuml;ck.<br>
 <b>Zyklus-Softkeys in zwei Gruppen (09.09.2026):</b> zuerst &bdquo;auf Kontur&ldquo;
 &mdash; Abspanen Kontur und Stechdrehen brauchen eine gezeichnete Kontur &mdash;, darunter
 &bdquo;frei bema&szlig;t&ldquo; mit Ecke, Einstechen, Freistich, Abstechen, Bohren, Gewinde.
@@ -13383,8 +13399,160 @@ function schrittBereich(st){
   }
   return null;
 }
-function renderPlanVorschau(){
-  const box=document.getElementById('planVorschau');
+// =====================================================================
+// WERKSTUECK ALS 3D-KOERPER [Daniel, 09.09.2026 ~21:45: "das waer am
+// coolsten, wenn du das als 3D-Teil da rechts im Fenster darstellen
+// koenntest"]. Eigener kleiner Renderer (Drehkoerper aus Profil, flach
+// schattierte Vierecke, Malerreihenfolge nach Tiefe) - dieselbe Bauart
+// wie das Programmkopf-Muster B vom selben Abend. Kamera: erst Neigung um
+// die Drehachse (von oben), dann Drehung um die Bildsenkrechte - die
+// Achse bleibt waagerecht, die Stirn kommt zum Betrachter. Gezeichnet
+// werden: das Fertigteil (Aussenkontur revolviert; endet die Kontur vor
+// dem Rohteilende, steht dahinter Rohteil), die Bohrung (Innenkontur
+// oder Rohr-Innen-⌀, Normalen nach innen, durch die Stirn sichtbar),
+// Futter und drei Stufenbacken aus futterGeometrie (die Simulation
+// zeichnet dieselben), das Rohteil als durchscheinende Huelle - was
+// davon ueber dem Fertigteil steht, ist Spanvolumen - und der gewaehlte
+// Schritt als orange getoenter Bereich (schrittBereich, wie in 2D).
+// Nur ab 900 px und nur, wenn der Schalter im Kopf auf 3D steht
+// (Slot et_vorschau3d, Vorgabe 3D); sonst bleibt das 2D-Bild.
+// =====================================================================
+const PV3D_SLOT='et_vorschau3d';
+(function(){ try{ const b=document.getElementById('pv3dBtn'); if(!b) return;
+  const zeige=()=>{ const an=planVorschau3DGewuenscht(); b.textContent=an?'3D':'2D'; b.classList.toggle('an', an); };
+  b.addEventListener('click', ()=>{ planVorschau3DSetzen(!planVorschau3DGewuenscht()); zeige(); }); zeige(); }catch(e){} })();
+function planVorschau3DGewuenscht(){ try{ const v=localStorage.getItem(PV3D_SLOT); return v===null ? true : v==='1'; }catch(e){ return true; } }
+function planVorschau3DSetzen(an){ try{ localStorage.setItem(PV3D_SLOT, an?'1':'0'); }catch(e){} try{ renderPlanVorschau(); }catch(e){} }
+function planVorschau3D(c, cvp, D){
+  if(!(typeof window!=='undefined' && window.innerWidth>=900) || !planVorschau3DGewuenscht()) return false;
+  const {zA,zI,rRoh,rInnen,ketten,dpr}=D;
+  const w=cvp.width/dpr, h=cvp.height/dpr;
+  const zLo=Math.min(zA,zI), zHi=Math.max(zA,zI);
+  // Aussenkontur = Kette mit dem groessten Radius, Innenkonturen = die uebrigen
+  let aussen=null, rA=0;
+  ketten.forEach(k=>{ let m=0; k.forEach(p=>{ if(p.x>m) m=p.x; }); if(m>rA){ rA=m; aussen=k; } });
+  const innen=ketten.filter(k=>k!==aussen && k.length>1);
+  // Profil des Fertigteils, z aufsteigend (Futterseite -> Stirn)
+  let prof;
+  if(aussen && aussen.length>1){
+    prof=aussen.map(p=>[p.z, Math.max(0,p.x)]);
+    if(prof[0][0]>prof[prof.length-1][0]) prof.reverse();
+    const first=prof[0];
+    if(first[0]>zLo+1e-6){ prof.unshift([zLo, rRoh], [first[0], rRoh]); }   // dahinter steht Rohteil
+  } else {
+    prof=[[zLo,rRoh],[zHi,rRoh],[zHi,0]];
+  }
+  let ri=rInnen>0? rInnen : 0, innenProf=null;
+  if(innen.length){
+    const ik=innen[0].map(p=>[p.z, Math.max(0,p.x)]); if(ik[0][0]>ik[ik.length-1][0]) ik.reverse();
+    innenProf=ik.filter(p=>p[1]>0.05); if(innenProf.length>1){ ri=innenProf[innenProf.length-1][1]; }
+  }
+  if(ri>0){ const l=prof[prof.length-1]; if(l[1]<0.05) prof[prof.length-1]=[l[0], ri]; }
+  // ---- Kamera: Seitenansicht, leicht von oben und von der Stirn her ----
+  const al=22*Math.PI/180, be=14*Math.PI/180;
+  const ca=Math.cos(al), sa=Math.sin(al), cb=Math.cos(be), sb=Math.sin(be);
+  const Vv=[sb, sa*cb, ca*cb];
+  const Lv=(()=>{ const v=[0.35,0.80,0.50]; const n=Math.hypot(...v); return v.map(a=>a/n); })();
+  const roh=(z,x,y)=>{ const x1=x*ca-y*sa, y1=x*sa+y*ca; return [z*cb-y1*sb, x1, z*sb+y1*cb]; };
+  // Massstab: nur das Rohteil (ohne Futter wird das Bild deutlich groesser)
+  const pts=[];
+  [[zLo,rRoh],[zHi,rRoh]].forEach(([z,r])=>{ for(let a=0;a<6.3;a+=0.4) pts.push(roh(z, r*Math.cos(a), r*Math.sin(a))); });
+  let sxMin=Infinity,sxMax=-Infinity,syMin=Infinity,syMax=-Infinity;
+  pts.forEach(p=>{ sxMin=Math.min(sxMin,p[0]); sxMax=Math.max(sxMax,p[0]); syMin=Math.min(syMin,p[1]); syMax=Math.max(syMax,p[1]); });
+  const rand=16, s=Math.min((w-2*rand)/Math.max(1e-6,sxMax-sxMin), (h-2*rand-16)/Math.max(1e-6,syMax-syMin));
+  const cx=rand-sxMin*s+((w-2*rand)-(sxMax-sxMin)*s)/2, cy=rand+8+syMax*s+((h-2*rand-16)-(syMax-syMin)*s)/2;
+  const P=(z,x,y)=>{ const r=roh(z,x,y); return [cx+r[0]*s, cy-r[1]*s]; };
+  const tiefe=(z,x,y)=>roh(z,x,y)[2];
+  // ---- gewaehlter Schritt (orange) ----
+  const mSt=(typeof selStepIdx==='number' && selStepIdx>=0)?programSteps[selStepIdx]:null;
+  let ber=null; try{ ber=schrittBereich(mSt); }catch(e){}
+  const markiert=(z)=> ber && isFinite(ber.z1) && isFinite(ber.z2) && z>=Math.min(ber.z1,ber.z2)-1e-6 && z<=Math.max(ber.z1,ber.z2)+1e-6;
+  // Profile an den Bereichsgrenzen teilen, damit jedes Teilstueck ganz
+  // innen oder ganz aussen liegt (ein langes Mantelsegment ueber der
+  // Einstichzone hatte seine Mitte sonst ausserhalb).
+  const teilen=(pf)=>{ if(!ber || !isFinite(ber.z1) || !isFinite(ber.z2)) return pf;
+    const grenzen=[Math.min(ber.z1,ber.z2), Math.max(ber.z1,ber.z2)]; const out=[pf[0]];
+    for(let i=1;i<pf.length;i++){ const a=pf[i-1], b=pf[i];
+      const zs=grenzen.filter(g=> (g>Math.min(a[0],b[0])+1e-6 && g<Math.max(a[0],b[0])-1e-6)).sort((u,v)=> a[0]<b[0]? u-v : v-u);
+      zs.forEach(g=>{ const t=(g-a[0])/(b[0]-a[0]); out.push([g, a[1]+(b[1]-a[1])*t]); });
+      out.push(b); }
+    return out; };
+  const faces=[];
+  // Streulicht plus Glanzband (Blinn-Phong, Halbvektor aus Licht und Blick):
+  // ohne das Glanzband war der Koerper eine matte graue Flaeche.
+  const Hv=(()=>{ const v=[Lv[0]+Vv[0],Lv[1]+Vv[1],Lv[2]+Vv[2]]; const n=Math.hypot(...v); return v.map(a=>a/n); })();
+  const farbe=(n,base,z)=>{ const d=Math.max(0, n[0]*Lv[0]+n[1]*Lv[1]+n[2]*Lv[2]); const f=0.42+0.5*d;
+    const sp=70*Math.pow(Math.max(0, n[0]*Hv[0]+n[1]*Hv[1]+n[2]*Hv[2]), 24);
+    let r=base[0]*f+sp, g=base[1]*f+sp, b=base[2]*f+sp;
+    if(z!==undefined && markiert(z)){ r=r*0.4+224*0.6; g=g*0.4+112*0.6; b=b*0.4+32*0.6; }
+    return 'rgb('+Math.round(Math.min(255,r))+','+Math.round(Math.min(255,g))+','+Math.round(Math.min(255,b))+')'; };
+  const revolve=(pf, phi0, phi1, nPhi, base, opt)=>{
+    const o=opt||{}; const inv=o.innen? -1 : 1;
+    for(let i=0;i<pf.length-1;i++){
+      const [za,ra]=pf[i], [zb,rb]=pf[i+1];
+      const dz=zb-za, dr=rb-ra, len=Math.hypot(dz,dr); if(len<1e-9) continue;
+      const nz=-dr/len*inv, nr=dz/len*inv;
+      for(let j=0;j<nPhi;j++){
+        const f0=phi0+(phi1-phi0)*j/nPhi, f1=phi0+(phi1-phi0)*(j+1)/nPhi, fm=(f0+f1)/2;
+        const n=[nz, nr*Math.cos(fm), nr*Math.sin(fm)];
+        if(n[0]*Vv[0]+n[1]*Vv[1]+n[2]*Vv[2] <= 0.01) continue;
+        const q=[[za,ra*Math.cos(f0),ra*Math.sin(f0)],[zb,rb*Math.cos(f0),rb*Math.sin(f0)],[zb,rb*Math.cos(f1),rb*Math.sin(f1)],[za,ra*Math.cos(f1),ra*Math.sin(f1)]];
+        const d=q.reduce((a,p)=>a+tiefe(...p),0)/4;
+        faces.push({d, col:farbe(n,base,o.mark?(za+zb)/2:undefined), pts:q.map(p=>P(...p)), alpha:o.alpha});
+      }
+    }
+  };
+  const flush=(ziel)=>{ const g=ziel||c; faces.sort((a,b)=>a.d-b.d); faces.forEach(f=>{
+    g.beginPath(); f.pts.forEach((p,i)=> i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); g.closePath();
+    if(f.alpha!==undefined) g.globalAlpha=f.alpha;
+    g.fillStyle=f.col; g.fill(); g.strokeStyle=f.col; g.lineWidth=0.5; g.stroke();
+    g.globalAlpha=1;
+  }); faces.length=0; };
+  c.save(); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  const TAU=2*Math.PI;
+  // 1) Fertigteil als dunklerer Koerper (mit Schrittmarkierung), Bohrung innen
+  revolve(teilen(prof), 0, TAU, 72, [158,170,182], {mark:true});
+  if(innenProf && innenProf.length>1){ revolve(teilen(innenProf), 0, TAU, 48, [104,116,128], {innen:true, mark:true}); }
+  else if(ri>0){ revolve([[zHi,ri],[zLo,ri]], 0, TAU, 48, [104,116,128], {innen:true}); }
+  flush();
+  // 2) Rohteil als durchscheinende helle Huelle - das Fertigteil scheint durch.
+  //    Erst DECKEND auf eine Zwischenflaeche, dann als Ganzes mit 38 % darueber:
+  //    Viereck fuer Viereck mit Alpha gemalt, addierten sich Fuellung und
+  //    Randstrich an jeder Kante zu dunklen Streifen (erstes Bild, Rotorwelle).
+  //    Ohne Zwischenflaeche (Ersatz-Browser) faellt es auf den Alpha-Weg zurueck.
+  let hOff=null, hCtx=null;
+  try{ hOff=document.createElement('canvas'); hOff.width=cvp.width; hOff.height=cvp.height; hCtx=hOff.getContext('2d'); if(hCtx && hCtx.setTransform) hCtx.setTransform(dpr,0,0,dpr,0,0); else hCtx=null; }catch(e){ hCtx=null; }
+  revolve([[zLo,0.05],[zLo,rRoh],[zHi,rRoh],[zHi,0.05]], 0, TAU, 72, [222,229,236]);
+  if(hCtx){ flush(hCtx); c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=0.38; c.drawImage(hOff,0,0); c.restore(); }
+  else { faces.forEach(f=>{ f.alpha=0.38; }); flush(); }
+  // 3) Fertigkontur gestrichelt durch die Huelle: Silhouetten oben und unten
+  //    (dort steht die Flaechennormale senkrecht zum Blick: phi = -alpha und
+  //    pi - alpha) sowie der Stirnkreis; Rohteilkanten duenn durchgezogen
+  const sil=(pf, phi)=>{ c.beginPath(); pf.forEach((p,i)=>{ const q=P(p[0], p[1]*Math.cos(phi), p[1]*Math.sin(phi)); if(i) c.lineTo(q[0],q[1]); else c.moveTo(q[0],q[1]); }); c.stroke(); };
+  const kreis=(z,r)=>{ if(!(r>0)) return; c.beginPath(); for(let k=0;k<=48;k++){ const a=k/48*TAU; const q=P(z, r*Math.cos(a), r*Math.sin(a)); if(k) c.lineTo(q[0],q[1]); else c.moveTo(q[0],q[1]); } c.stroke(); };
+  c.save();
+  c.setLineDash([6,4]); c.strokeStyle='rgba(30,46,62,0.85)'; c.lineWidth=1.4;
+  sil(prof, -al); sil(prof, Math.PI-al);
+  let rStirn=0; prof.forEach(p=>{ if(Math.abs(p[0]-zHi)<1e-6 && p[1]>rStirn) rStirn=p[1]; });
+  kreis(zHi, rStirn); if(ri>0) kreis(zHi, ri);
+  // gewaehlter Schritt: seine Kontur laeuft orange UEBER der Huelle - unter
+  // der Huelle allein war die Toenung blass (erstes Bild, Einstich am Bolzen)
+  if(ber){ c.strokeStyle='#e07020'; c.lineWidth=2.2;
+    const silMark=(pf, phi)=>{ for(let i=1;i<pf.length;i++){ const a=pf[i-1], b=pf[i]; if(!markiert((a[0]+b[0])/2)) continue;
+      const q0=P(a[0], a[1]*Math.cos(phi), a[1]*Math.sin(phi)), q1=P(b[0], b[1]*Math.cos(phi), b[1]*Math.sin(phi));
+      c.beginPath(); c.moveTo(q0[0],q0[1]); c.lineTo(q1[0],q1[1]); c.stroke(); } };
+    silMark(teilen(prof), -al); silMark(teilen(prof), Math.PI-al);
+    if(innenProf && innenProf.length>1){ silMark(teilen(innenProf), -al); silMark(teilen(innenProf), Math.PI-al); }
+  }
+  c.setLineDash([]); c.strokeStyle='rgba(60,76,92,0.6)'; c.lineWidth=1;
+  sil([[zLo,rRoh],[zHi,rRoh]], -al); sil([[zLo,rRoh],[zHi,rRoh]], Math.PI-al); kreis(zHi, rRoh);
+  c.restore();
+  c.fillStyle='#6b7a87'; c.font='11px Segoe UI, Arial, sans-serif'; c.textAlign='left'; c.textBaseline='top';
+  c.fillText('\u2300'+(2*Math.max(rRoh,rA)).toFixed(0)+'  \u00b7  Z'+zLo.toFixed(0)+' \u2026 Z'+zHi.toFixed(0)+'  \u00b7  Rohteil durchscheinend, Fertigteil darin', 9, 6);
+  c.restore();
+  return true;
+}
+function renderPlanVorschau(){  const box=document.getElementById('planVorschau');
   const cvp=document.getElementById('pvCv');
   if(!box || !cvp || !cvp.getContext) return;
   if(box.offsetParent===null && !cvp.__test) return;   // ausgeblendet: nichts tun
@@ -13449,6 +13617,11 @@ function renderPlanVorschau(){
   };
   const ketten=zuege.map(kette);
 
+  // 3D-KOERPER ab 900 px (Schalter im Kopf) - sonst das 2D-Bild darunter
+  let drei=false;
+  try{ drei=planVorschau3D(c, cvp, {zA,zI,rRoh,rInnen,ketten,zMin,zMax,rMax,dpr}); }
+  catch(e){ drei=false; try{ console.error('Vorschau 3D:', e&&e.message); }catch(_){} }
+  if(!drei){
   // Rohteil — in der Farbe dessen, was noch WEG muss
   const zL=mz(Math.min(zA,zI)), zR=mz(Math.max(zA,zI));
   c.fillStyle='#e8d9a6'; c.strokeStyle='#b9a877'; c.lineWidth=1*dpr;
@@ -13514,6 +13687,7 @@ function renderPlanVorschau(){
   c.fillText('Z'+Math.min(zA,zI).toFixed(0), zL, cvp.height-6*dpr);
   c.fillText('Z'+Math.max(zA,zI).toFixed(0), zR, cvp.height-6*dpr);
 
+  }
   // Kopfdaten unter dem Bild
   const info=document.getElementById('pvInfo');
   if(info){
@@ -15729,8 +15903,46 @@ function helpAxY(h, rand){
 // Abbildung Millimeter -> Bildpunkte zurueck:
 //   {zx(z), rx(r), skal, axY, zMin, zMax, rMax}
 // Alles Weitere im Bild — Koerper, Masse, Bahnen — rechnet damit.
-function helpSchnitt(H, teilName, opt){
-  // teilName darf ein Name aus HILFE_KONTUREN sein ODER ein fertiges
+// 3D-KOERPER OHNE SCHNITT [Daniel, 09.09.2026 ~21:40: "bei Aussen-
+// bearbeitungen ist ein tolles 3D-Bild in jedem Fall besser, die
+// Schraffur macht da keinen Sinn"]: die obere Kontur (Schirmpunkte, von
+// links nach rechts) und ihr Spiegelbild an der Drehachse werden zu
+// EINEM Koerper und mit dem Metallverlauf der Simulation gefuellt
+// (HF_METALL: dunkle Mantellinien, Glanzbaender, dunkelste Achse) -
+// dasselbe Bild wie das Werkstueck in der Simulation. Kein Schnitt, keine
+// Schraffur, kein Spiegel-Kopieren: der Koerper ist ein Polygon.
+function helpKoerper3D(c, pts, axY){
+  if(!pts || pts.length<2) return;
+  const unten=pts.slice().reverse().map(q=>[q[0], 2*axY-q[1]]);
+  const alle=pts.concat(unten);
+  let yo=Infinity; pts.forEach(q=>{ if(q[1]<yo) yo=q[1]; });
+  const yu=2*axY-yo;
+  c.save();
+  c.beginPath(); alle.forEach((q,i)=> i? c.lineTo(q[0],q[1]) : c.moveTo(q[0],q[1])); c.closePath();
+  const g=c.createLinearGradient(0, yo, 0, Math.max(yo+1, yu));
+  const st=(typeof HF_METALL!=='undefined') ? HF_METALL : [[0,'#8a95a0'],[0.1,'#d2dae0'],[0.5,'#6a757f'],[0.9,'#d2dae0'],[1,'#8a95a0']];
+  st.forEach(s=>g.addColorStop(s[0], s[1]));
+  c.fillStyle=g; c.fill();
+  c.strokeStyle=HELP_SCHNITT_KANTE; c.lineWidth=2.2; c.lineJoin='round'; c.stroke();
+  c.restore();
+}
+// VOLLSCHNITT AM LAPTOP [Daniel, 09.09.2026 spaetabends: "zieh das so
+// durch, das sieht gut aus mit dem Vollschnitt"]: ab 900 px wird die
+// obere Haelfte (der Schnitt des Teils) an der Drehachse nach unten
+// gespiegelt - statt des 3D-Koerpers, den help3DSpiegeln am Laptop
+// nicht mehr zeichnet. Laeuft direkt nach dem Teil und VOR Bahnen,
+// Stichen und Massen: die bleiben oben, unten steht nur ruhiger
+// Schnitt. Am Handy (HELP_AXY 0, unter 900 px) passiert nichts.
+function helpSchnittSpiegel(c, w, axY){
+  if(!(typeof window!=='undefined' && window.innerWidth>=900)) return;
+  if(!HELP_CV || !(HELP_AXY>0) || !(axY>0)) return;
+  const dpr=window.devicePixelRatio||1, Wd=HELP_CV.width, ay=Math.round(axY*dpr);
+  if(Math.round(HELP_H*dpr)-ay<10) return;
+  c.save();
+  try{ c.setTransform(dpr,0,0,-dpr,0,2*axY*dpr); c.drawImage(HELP_CV, 0,0,Wd,ay, 0,0,w,axY); }catch(e){}
+  c.restore();
+}
+function helpSchnitt(H, teilName, opt){  // teilName darf ein Name aus HILFE_KONTUREN sein ODER ein fertiges
   // Konturobjekt (aus den Feldwerten gerechnet).
   const teil = (teilName && teilName.k) ? teilName : HILFE_KONTUREN[teilName];
   if(!teil || !teil.k || teil.k.length<2) return null;
@@ -15749,6 +15961,14 @@ function helpSchnitt(H, teilName, opt){
   const skal=Math.min(bZ,bR);
   const zx=(z)=>links + (z-zMin)*skal;
   const rx=(r)=>axY - r*skal;
+  // 3D-KOERPER STATT SCHNITT bei Aussenbearbeitung am Laptop [Daniel,
+  // 09.09.2026]: ohne Bohrung ist es eine Aussenbearbeitung - dann der
+  // Koerper wie in der Simulation (helpKoerper3D). Mit Bohrung (Innen-
+  // bearbeitung) bleibt der Vollschnitt mit Schraffur und Spiegel.
+  const koerper3d=(typeof window!=='undefined' && window.innerWidth>=900) && !(teil.i && teil.i.length>1) && HELP_AXY>0;
+  if(koerper3d){
+    helpKoerper3D(c, K.map(pt=>[zx(pt[0]), rx(pt[1])]), axY);
+  } else {
   // --- Flaeche ---
   c.save();
   c.beginPath();
@@ -15760,7 +15980,13 @@ function helpSchnitt(H, teilName, opt){
   // Verlauf spannt sich ueber die echte Teilhoehe (Oberkante bis
   // Drehachse) — Glanzband bei 40..55 %, derselbe Look wie
   // helpFillPart/helpHatch45. Eine Materialsprache fuer alle Bilder.
-  {
+  // ZEICHNUNGSNORM AM LAPTOP [Daniel, 09.09.2026, Entscheid nach zwei
+  // Mustern]: flache Schnittflaeche mit kraeftiger 45-Grad-Schraffur
+  // wie im Programmkopf-Bild V4. Am Handy bleibt der Metallverlauf
+  // (Regel 3).
+  const norm=(typeof window!=='undefined' && window.innerWidth>=900);
+  if(norm){ c.fillStyle='#e6ebf0'; }
+  else {
     const gy0=rx(teil.rMax), gy1=axY;
     const g=c.createLinearGradient(0, gy0, 0, Math.max(gy0+40, gy1));
     g.addColorStop(0,'#e2e8ed'); g.addColorStop(0.4,'#b6c5d2');
@@ -15768,12 +15994,12 @@ function helpSchnitt(H, teilName, opt){
     c.fillStyle=g;
   }
   c.fill();
-  // --- Schraffur, in der Flaeche geklemmt: nur noch die feine
-  // Norm-Aussage "Schnittflaeche", das Material traegt der Verlauf ---
+  // --- Schraffur, in der Flaeche geklemmt: am Handy nur die feine
+  // Norm-Aussage "Schnittflaeche" (das Material traegt der Verlauf),
+  // am Laptop die kraeftige Normschraffur ---
   c.save(); c.clip();
-  c.strokeStyle='rgba(86,106,122,0.12)'; c.lineWidth=0.8;
-  for(let x=-axY; x<w+axY; x+=8){
-    c.beginPath(); c.moveTo(x, axY); c.lineTo(x+axY, 0); c.stroke();
+  c.strokeStyle=norm?'rgba(50,72,92,0.38)':'rgba(86,106,122,0.12)'; c.lineWidth=norm?0.9:0.8;
+  for(let x=-axY; x<w+axY; x+=(norm?7:8)){    c.beginPath(); c.moveTo(x, axY); c.lineTo(x+axY, 0); c.stroke();
   }
   c.restore();
   // --- Bohrung aussparen ---
@@ -15797,6 +16023,8 @@ function helpSchnitt(H, teilName, opt){
     c.strokeStyle=HELP_SCHNITT_KANTE; c.lineWidth=2.2; c.stroke();
   }
   c.restore();
+  helpSchnittSpiegel(c, w, axY);
+  }
   helpCenterline(c,w,axY);
   HELP_ZL = zx(zMin); HELP_ZR = zx(zMax);
   HELP_KONTUR = K; HELP_ABB = {zx, rx}; HELP_TEIL_AKT = teil;
@@ -16290,6 +16518,10 @@ function help3DStreifen(){
 }
 function help3DSpiegeln(){
   if(!HELP_CV || !HELP_AXY) return;
+  // AM LAPTOP KEIN 3D-KOERPER MEHR [Daniel, 09.09.2026]: dort steht der
+  // gespiegelte Vollschnitt (helpSchnittSpiegel). Am Handy laeuft dieser
+  // Zweig ohnehin nie (Bildhoehe 184 < HELP_3D_AB).
+  if(typeof window!=='undefined' && window.innerWidth>=900) return;
   const dpr=window.devicePixelRatio||1;
   const c=HELP_CV.getContext('2d');
   const W=HELP_CV.width, ay=Math.round(HELP_AXY*dpr);
@@ -16528,9 +16760,10 @@ function helpLabel(c, txt, x, y, on, align){
     let _cx = _al==='left' ? x+_tb/2 : (_al==='right' ? x-_tb/2 : x);
     let px0=_cx-pw/2; const py0=y-3.5-ph/2;
     // AM RAND NICHT ANSCHNEIDEN [09.09.2026, Ecke-Bild bei 420 px: die
-    // X0-Pille hing am linken Canvasrand]. Nur auf den hohen Laptop-
+    // X0-Pille hing am linken Canvasrand; 5 px Abstand, mit 2 px klebten
+    // ⌀82/V/X1 in vier Bildern noch am Rahmen (Bilder v7z)]. Nur auf den hohen Laptop-
     // Bildern (HELP_SKAL > 1) - das Handy-Bild bleibt Pixel fuer Pixel.
-    if(HELP_SKAL>1 && HELP_W){ let d=0; if(px0<2) d=2-px0; else if(px0+pw>HELP_W-2) d=(HELP_W-2)-(px0+pw); if(d){ px0+=d; _cx+=d; } }
+    if(HELP_SKAL>1 && HELP_W){ let d=0; if(px0<5) d=5-px0; else if(px0+pw>HELP_W-5) d=(HELP_W-5)-(px0+pw); if(d){ px0+=d; _cx+=d; } }
     c.beginPath();
     c.moveTo(px0+r,py0); c.lineTo(px0+pw-r,py0);
     c.arc(px0+pw-r,py0+r,r,-Math.PI/2,Math.PI/2);
@@ -16658,12 +16891,18 @@ function helpFillPart(c, build){
   // deutlich kraeftiger (2.6 statt 1.8): das FERTIGTEIL ist die
   // wichtigste Linie im Bild und darf dominieren.
   const gh=Math.max(160, (typeof HELP_H!=='undefined'&&HELP_H)||160);
-  const g=c.createLinearGradient(0,0,0,gh);
-  g.addColorStop(0,'#e2e8ed'); g.addColorStop(0.4,'#b6c5d2');
-  g.addColorStop(0.55,'#cdd8e2'); g.addColorStop(1,'#98aabb');
-  c.fillStyle=g; c.strokeStyle=HELP_EDGE; c.lineWidth=2.6; c.lineJoin='round';
-  c.beginPath(); build(c); c.closePath(); c.fill(); c.stroke();
-  // SCHNITTFLAECHE SCHRAFFIEREN [Daniel, 28.08.2026: "die Qualitaet
+  // ZEICHNUNGSNORM AM LAPTOP [09.09.2026]: flach + kraeftige Schraffur
+  // (wie helpSchnitt); am Handy der Metallverlauf.
+  const norm=(typeof window!=='undefined' && window.innerWidth>=900);
+  if(norm){ c.fillStyle='#e6ebf0'; }
+  else {
+    const g=c.createLinearGradient(0,0,0,gh);
+    g.addColorStop(0,'#e2e8ed'); g.addColorStop(0.4,'#b6c5d2');
+    g.addColorStop(0.55,'#cdd8e2'); g.addColorStop(1,'#98aabb');
+    c.fillStyle=g;
+  }
+  c.strokeStyle=HELP_EDGE; c.lineWidth=2.6; c.lineJoin='round';
+  c.beginPath(); build(c); c.closePath(); c.fill(); c.stroke();  // SCHNITTFLAECHE SCHRAFFIEREN [Daniel, 28.08.2026: "die Qualitaet
   // der Bilder muessen wir aufwerten"]. Ein Halbschnitt gehoert nach
   // Zeichnungsnorm schraffiert — ohne das ist es ein grauer Klotz,
   // und man sieht nicht, dass man in das Teil hineinschaut.
@@ -16675,9 +16914,12 @@ function helpFillPart(c, build){
   // Feiner als vorher (0,10 statt 0,16, Abstand 8): auf dem
   // Metallverlauf traegt die Schraffur nur noch die Norm-Aussage
   // "Schnittflaeche", nicht mehr den Materialeindruck.
-  c.strokeStyle='rgba(86,106,122,0.10)'; c.lineWidth=0.8;
-  for(let t=-240; t<760; t+=8){
-    c.beginPath(); c.moveTo(t,210); c.lineTo(t+230,-24); c.stroke();
+  // Ueber die ganze Bildhoehe (die alte Schleife endete bei 210 px - am
+  // hohen Laptop-Bild blieb der Bohren-Block darunter ohne Schraffur).
+  c.strokeStyle=norm?'rgba(50,72,92,0.38)':'rgba(86,106,122,0.10)'; c.lineWidth=norm?0.9:0.8;
+  const Hh=Math.max(210, gh)+40;
+  for(let t=-Hh-40; t<900; t+=(norm?7:8)){
+    c.beginPath(); c.moveTo(t,Hh); c.lineTo(t+Hh+24,-24); c.stroke();
   }
   c.restore();
 }
@@ -16764,7 +17006,7 @@ function helpBahn(c, pkte, opt){
   c.save();
   c.strokeStyle=o.eil?HELP_EIL:HELP_VORSCHUB;
   c.globalAlpha=o.on?1:0.72;      // ruhig im Hintergrund, klar bei Fokus
-  c.lineWidth=o.on?2.2:1.4;
+  c.lineWidth=(o.on?2.2:1.4)*HELP_SKAL;   // am Laptop (1,35) kraeftiger [Daniel: Verfahrwege lesbar]
   if(o.dash) c.setLineDash(o.dash);
   c.beginPath();
   pkte.forEach((p,i)=> i? c.lineTo(p[0],p[1]) : c.moveTo(p[0],p[1]));
@@ -16831,67 +17073,115 @@ function helpSchraffurWinkel(c, build, winkel, farbe, abstand){
   for(let t=-1000;t<1400;t+=d){ c.beginPath(); c.moveTo(t*nx-Ln*dx, t*ny-Ln*dy); c.lineTo(t*nx+Ln*dx, t*ny+Ln*dy); c.stroke(); }
   c.restore();
 }
+// HANDY-PROGRAMMKOPF, drei Runden am 09.09.2026 abends: 21:27 Daniels
+// iPhone-Foto (XA als Laenge, LA unsichtbar) -> Bild neu; ~21:50 "Zylinder
+// in 3D, Backen und Futter auch, Rohr im Schnitt" -> Koerper mit Achse in
+// der Bildmitte plus eigenes Rohr-Schema; 22:14/22:20 "wie am Laptop, nur
+// das halbe Bild" -> die Fassung darunter: obere Haelfte des Laptop-Bilds,
+// EIN Schema fuer Zylinder und Rohr.
 function maskParamsHandy(active){
+    // HANDY = OBERE HAELFTE DES LAPTOP-BILDES [Daniel, 09.09.2026 22:14 mit
+    // Foto und 22:20: "wie in der Laptopansicht, aber nur das halbe Bild
+    // wegen der Platzverhaeltnisse - in 3D, nur halb so gross"]. Derselbe
+    // Inhalt wie maskParams am Laptop: Futter, Stufenbacke, Zylinder als
+    // Koerper bzw. Rohr als Schnitt der Wand, ALLE Kopfmasse als Pillen -
+    // aber nur die Haelfte ueber der Drehachse; die Achse liegt am unteren
+    // Rand, die 184 px gehoeren dem halben Teil. Der Koerper wird an der
+    // Achse abgeschnitten (clip), sein Metallverlauf ist der obere Teil
+    // des Laptop-Verlaufs. XA steht als Halbschnitt-Durchmesser: Masslinie
+    // von der Achse bis zur Mantellinie mit EINEM Pfeil (Norm), Pille
+    // daneben. Sein Foto von 22:14 zeigte noch den ALTEN Stand (XA als
+    // Laenge): der 21:30-Bau kam nie auf den Server, GitHub war seit 20:00
+    // von hier nicht erreichbar.
+    const rohr = (typeof selBtnVal==="function" && selBtnVal("pkFormBtns")==="rohr") ||
+                 ((document.getElementById("pkForm")||{}).value==="rohr");
     const H=helpCtx("help_maskParams"); if(!H) return;
     const {c,w,h}=H; const A=(id)=>active===id;
     const V=(id)=>{ const e=document.getElementById(id);
       if(!e || e.value==="" || isNaN(parseFloat(e.value))) return "";
       return " "+String(+parseFloat(e.value)); };
-    const num=(id,vor)=>{ const e=document.getElementById(id);
-      const v=e? parseFloat(e.value) : NaN; return isFinite(v)? v : vor; };
-    const rohr = (typeof selBtnVal==="function" && selBtnVal("pkFormBtns")==="rohr") ||
-                 ((document.getElementById("pkForm")||{}).value==="rohr");
-    const axY=helpAxY(h,14);
-    helpCenterline(c,w,axY);
-
-    // Werkstueck: Mantel oben, Bohrung nur beim Rohr. Die Masse
-    // stehen nicht massstaeblich — das Bild erklaert die LAGE der
-    // Ebenen, nicht die Groesse des Teils.
-    const surf=52, bohr=96;
-    const zL=88, zR=w-64;
-    helpFillPart(c,(pp)=>{
-      pp.moveTo(zL,axY); pp.lineTo(zL,surf); pp.lineTo(zR,surf);
-      pp.lineTo(zR, rohr?bohr:axY);
-      if(rohr){ pp.lineTo(zL,bohr); }
-      pp.lineTo(zL,axY);
-    });
-
-    // Spannfutter links — der Rueckzugsbereich endet an ihm.
-    c.save();
-    c.fillStyle="rgba(120,134,148,0.30)"; c.strokeStyle=HELP_OFF; c.lineWidth=1.2;
-    c.fillRect(22, surf-14, 58, axY-surf+14); c.strokeRect(22, surf-14, 58, axY-surf+14);
-    c.restore();
-    helpLabel(c,"Futter", 51, surf-22, false);
-
-    // Die vier Ebenen. Gestrichelt: sie sind keine Kontur, sondern
-    // eine Grenze, hinter der frei verfahren werden darf.
+    HELP_AXY=0;
+    const axY=h-20;                                      // Achse am unteren Rand; 20 px darunter fuer die ZRI-Pille des Rohrs
+    const R=Math.round(h*0.28), T=axY-R;                   // Teilradius 52 px bei 184
+    const fL=18, bx=fL+40, bw=Math.round(w*0.10), x0=bx+Math.round(bw*0.45), zR=Math.round(w*0.60);
     const strich=(x1,y1,x2,y2,on)=>{
-      c.save();
-      c.setLineDash([5,4]); c.lineWidth=on?1.9:1.1;
-      c.strokeStyle=on?HELP_ON:HELP_OFF;
-      c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke();
-      c.restore();
+      c.save(); c.setLineDash([5,4]); c.lineWidth=on?1.9:1.1; c.strokeStyle=on?HELP_ON:HELP_OFF;
+      c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke(); c.restore();
     };
-    const yXRA=surf-24, xZRA=zR+26;
-    strich(zL-40, yXRA, w-14, yXRA, A("pkXRA"));
-    helpLabel(c,"XRA"+V("pkXRA"), zL-16, yXRA-9, A("pkXRA"), "left");
-    strich(xZRA, surf-30, xZRA, axY, A("pkZRA"));
-    helpLabel(c,"ZRA"+V("pkZRA"), xZRA+4, surf-4, A("pkZRA"), "left");
+    // Futterkoerper und obere Stufenbacke, schattiert wie am Laptop (Stufen
+    // nach vorn fallend, Koerper an der Futterstirn voll)
+    c.save();
+    { const g=c.createLinearGradient(0, 10, 0, axY);
+      [[0,"#7c8792"],[0.45,"#b4bec7"],[1,"#66717b"]].forEach(s=>g.addColorStop(s[0],s[1]));
+      c.fillStyle=g; c.fillRect(fL, 10, bx-fL, axY-10); }
+    c.strokeStyle="#3f4c58"; c.lineWidth=1.2; c.strokeRect(fL, 10, bx-fL, axY-10);
+    const jh=Math.round(bw*1.3), z3=bw/3, h2=Math.round(jh*0.68), h3=Math.round(jh*0.36);
+    const backe=(p)=>{ p.moveTo(bx,T); p.lineTo(bx,T-jh); p.lineTo(bx+z3,T-jh); p.lineTo(bx+z3,T-h2);
+      p.lineTo(bx+2*z3,T-h2); p.lineTo(bx+2*z3,T-h3); p.lineTo(bx+bw,T-h3); p.lineTo(bx+bw,T); };
+    { const g=c.createLinearGradient(bx,0,bx+bw,0); g.addColorStop(0,"#8d98a3"); g.addColorStop(1,"#b3bdc6");
+      c.fillStyle=g; c.beginPath(); backe(c); c.closePath(); c.fill();
+      c.strokeStyle="#33424f"; c.lineWidth=1.2; c.lineJoin="round"; c.beginPath(); backe(c); c.closePath(); c.stroke(); }
+    c.restore();
+    // Teil: Zylinder als Koerper, an der Achse abgeschnitten; Rohr als
+    // Halbschnitt der Wand (Schraffur 45 Grad, darunter die Bohrung frei)
+    const yI=rohr? axY-Math.round(R*0.45) : axY;
     if(rohr){
-      const yXRI=bohr+16;
-      strich(zL-40, yXRI, w-14, yXRI, A("pkXRI"));
-      helpLabel(c,"XRI"+V("pkXRI"), zL-16, yXRI+10, A("pkXRI"), "left");
-      const xZRI=zL-30;
-      strich(xZRI, bohr-6, xZRI, axY, A("pkZRI"));
-      helpLabel(c,"ZRI"+V("pkZRI"), xZRI-4, axY-8, A("pkZRI"), "right");
+      const wand=(p)=>{ p.rect(x0, T, zR-x0, yI-T); };
+      c.save(); c.fillStyle="#e6ebf0"; c.beginPath(); wand(c); c.fill(); c.restore();
+      helpSchraffurWinkel(c, wand, 45, "rgba(40,56,72,0.55)", 7);
+      c.save(); c.strokeStyle="#2b3a47"; c.lineWidth=1.6; c.beginPath(); wand(c); c.stroke(); c.restore();
+    } else {
+      c.save(); c.beginPath(); c.rect(0, 0, w, axY); c.clip();
+      helpKoerper3D(c, [[x0,T],[zR,T]], axY);
+      c.restore();
     }
-
-    // Rohteilmasse — nur wenn eines davon angefasst ist.
-    helpDim(c, zL,surf, zR,surf, -14, "⌀XA"+V("stockDia"), A("stockDia"));
-    helpDim(c, zR,surf+8, zR,axY, 18, "ZA"+V("pkZA"), A("pkZA"), "in");
-    helpDim(c, zL,axY+2, zR,axY+2, 10, "ZI"+V("pkZI"), A("pkZI"));
-    // Die Achsen zeichnet helpCenterline schon — hier waeren sie
-    // doppelt.
+    helpCenterline(c,w,axY);
+    // Gestrichelte Ebenen: XRA ueber dem Teil ab der Backenfront, Z0 ueber
+    // der Stirn, ZRA davor (von der Oberkante bis zur Achse)
+    const yXRA=T-12, xZRA=zR+34, yTop=30;
+    strich(bx+bw+4, yXRA, w-6, yXRA, A("pkXRA"));
+    helpLabel(c,"XRA"+V("pkXRA"), bx+bw+8, yXRA+4, A("pkXRA"), "left");
+    strich(zR, yTop, zR, T, false);
+    helpLabel(c,"Z0", zR, 36, false);
+    strich(xZRA, yTop, xZRA, axY, A("pkZRA"));
+    helpLabel(c,"ZRA"+V("pkZRA"), xZRA+2, 78, A("pkZRA"));
+    // Werkzeugwechselpunkt: nur die Pille oben rechts (wie am Laptop, ohne Fadenkreuz)
+    const onT=A("wwpX")||A("wwpZ");
+    helpLabel(c,"XT"+V("wwpX")+" / ZT"+V("wwpZ"), w-4, 16, onT, "right");
+    // Laengen ueber dem Teil: ZI vom Teilende in den Backen bis zur Stirn
+    // (Pille unter der Linie), ZA rechts vom Linienende an der Stirn, LA ab
+    // der Backenfront (Pille ueber der Linie)
+    helpDim(c, x0, 48, zR, 48, 0, "ZI"+V("pkZI"), A("pkZI"));
+    helpLabel(c,"ZA"+V("pkZA"), zR+8, 60, A("pkZA"), "left");
+    helpDim(c, bx+bw, 86, zR, 86, 0, "LA"+V("pkLA"), A("pkLA"), "in");
+    // XA als Halbschnitt-Durchmesser: Masshilfslinie an der Mantellinie,
+    // Masslinie von der Achse hoch mit einem Pfeil, Pille links daneben
+    const xXA=w-12, onXA=A("stockDia");
+    if(!(HELP_FOKUS && !onXA)){
+      c.save(); c.strokeStyle=onXA?HELP_ON:HELP_OFF; c.fillStyle=onXA?HELP_ON:HELP_OFF; c.lineWidth=onXA?1.8:1;
+      c.beginPath(); c.moveTo(zR+2, T); c.lineTo(xXA+3, T); c.stroke();
+      c.beginPath(); c.moveTo(xXA, axY+4); c.lineTo(xXA, T); c.stroke();
+      helpArrowHead(c, xXA, T, Math.PI/2, onXA);
+      c.restore();
+    }
+    helpLabel(c,"\u2300XA"+V("stockDia"), xXA-8, 150, onXA, "right");
+    // SC: kleines Mass vor der Stirn, Pille rechts der ZRA-Linie
+    helpDim(c, zR, T+10, zR+12, T+10, 0, "", A("safeZ"));
+    helpLabel(c,"SC"+V("safeZ"), xZRA+5, T+14, A("safeZ"), "left");
+    if(rohr){
+      // XI in der Bohrung (Mass von der Achse zur Wand, Pille links davon),
+      // XRI als gestrichelte Ebene in der Bohrung mit Pille am linken Ende,
+      // ZRI vor der Stirn ueber die Bohrungshoehe, Pille unter der Achse
+      const xXI=zR-16, onXI=A("pkXI");
+      helpDim(c, xXI, yI, xXI, axY, 0, "", onXI);
+      helpLabel(c,"\u2300XI"+V("pkXI"), xXI-6, axY-7, onXI, "right");
+      const yXRI=yI+8;
+      strich(x0, yXRI, w-6, yXRI, A("pkXRI"));
+      helpLabel(c,"XRI"+V("pkXRI"), x0+4, axY-8, A("pkXRI"), "left");
+      const xZRI=zR+10;
+      strich(xZRI, yI, xZRI, axY, A("pkZRI"));
+      helpLabel(c,"ZRI"+V("pkZRI"), zR+12, h-5, A("pkZRI"), "left");
+    }
 }
 const MASK_HELP = {
   // PROGRAMMKOPF [Daniel, 28.08.2026]. Vier Zahlen spannen einen
@@ -16905,8 +17195,9 @@ const MASK_HELP = {
   // Pillen (XA, ZA, ZI, LA, SC, XRA/ZRA, XT/ZT) - ohne 3D-Koerper, denn das
   // Bild ist ein Rahmenschema, kein Teil; der Koerper halbierte nur die
   // Hoehe. Alles relativ zur Bildgroesse, das Schema waechst mit dem
-  // Canvas. Unter 900 px bleibt das abgenommene Handy-Schema
-  // (maskParamsHandy) unveraendert - Regel 3.
+  // Canvas. Unter 900 px zeichnet maskParamsHandy DENSELBEN Inhalt als
+  // obere Haelfte (Daniels Wunsch 09.09.2026 22:14/22:20) - Regel 3 gilt,
+  // weil er es ausdruecklich verlangt hat.
   maskParams(active){
     if(window.innerWidth<900) return maskParamsHandy(active);
     const H=helpCtx("help_maskParams"); if(!H) return;
@@ -16937,23 +17228,34 @@ const MASK_HELP = {
     // neben den senkrechten Linien); unten sitzt sie um die Backenhoehe
     // tiefer, damit ZI nicht durch die untere Backe laeuft.
     const k=Math.max(0.7, Math.min(1, h/420));
-    const axY=Math.round(h*0.50), R=Math.round(h*0.19);
-    const T=axY-R, B=axY+R;
+    const axY=Math.round(h*0.50);
     const zR=Math.round(w*0.64);
-    // Futterstirn bei 14 %, Backenlaenge 19 % der Breite (rund 1,0 R -
-    // real backeL 45 zu R 41); das Teil endet mit Spannlaenge im Backenbereich.
-    const bx=Math.round(w*0.14), bw=Math.round(w*0.19);
+    // Futterstirn bei 14 %, Backenlaenge 11,5 % der Breite, Backenhoehe
+    // 1,3 x Laenge [Daniel: "die Backen sind hoeher als lang" - real
+    // backeH 90 zu backeL 45]; das Teil endet mit Spannlaenge im Backenbereich.
+    const bx=Math.round(w*0.14), bw=Math.round(w*0.115);
+    const jhV=Math.round(bw*1.3);
+    // Radius weicht bei niedrigen Bildern [Daniels Foto 21:48: die ZA-Pille
+    // war bei ~410 px Hoehe abgeschnitten]: unter dem Teil brauchen Backe,
+    // ZI/ZA-Zeile und untere XRA-Linie zusammen jh + 50 px.
+    const R=Math.max(40, Math.min(Math.round(h*0.18), Math.round(h*0.5-jhV-52)));
+    const T=axY-R, B=axY+R;
     const xZRA=zR+80*k, xXA=zR+104*k;
-    const jh=Math.round(R*0.70), z3=bw/3, h2=Math.round(jh*0.68), h3=Math.round(jh*0.36);
+    const jh=jhV, z3=bw/3, h2=Math.round(jh*0.68), h3=Math.round(jh*0.36);
     const x0=bx+Math.round(bw*0.45);                  // Teilende im Backenbereich (Spannlaenge)
     const unten=jh-10;                                // untere Baender unter der Backe
     const lab=(t,x,y,on,al)=>helpLabel(c,t,x,y,on,al);
     const dimLab=(t,x,y,on,al)=>{ if(HELP_FOKUS && !on) return; helpLabel(c,t,x,y,on,al); };
     // Futterstirn als Schnittscheibe
     const fL=Math.max(2, bx-70*k);                    // Futterkoerper 70 px breit
-    c.save(); c.fillStyle="#e9edf1"; c.fillRect(fL, 2, bx-fL, h-4); c.restore();
-    helpSchraffurWinkel(c, (p)=>{ p.rect(fL, 2, bx-fL, h-4); }, 135, "rgba(70,90,110,0.22)", 9);
-    c.save(); c.strokeStyle="#5c6b78"; c.lineWidth=1.4; c.strokeRect(fL, 2, bx-fL, h-4); c.restore();
+    // Futterkoerper als Zylinder von der Seite: dunklerer Metallverlauf
+    // ueber die Bildhoehe (er laeuft oben und unten aus dem Bild), keine
+    // Schraffur [Daniel, 09.09.2026: Futter und Backen als 3D-Teil].
+    c.save();
+    { const g=c.createLinearGradient(0, 2, 0, h-4);
+      [[0,'#6e7982'],[0.12,'#aab4bd'],[0.5,'#606b75'],[0.88,'#aab4bd'],[1,'#6e7982']].forEach(s=>g.addColorStop(s[0],s[1]));
+      c.fillStyle=g; c.fillRect(fL, 2, bx-fL, h-4); }
+    c.strokeStyle="#3f4c58"; c.lineWidth=1.4; c.strokeRect(fL, 2, bx-fL, h-4); c.restore();
     // Stufenbacken: Spannflaeche durchgehend am Teil, aussen drei Absaetze
     // nach vorn fallend (Simulation: G.stufen 1 / 0,68 / 0,36)
     const backe=(p,oben)=>{
@@ -16962,13 +17264,18 @@ const MASK_HELP = {
       p.lineTo(bx+2*z3, y0-s*h2); p.lineTo(bx+2*z3, y0-s*h3); p.lineTo(bx+bw, y0-s*h3); p.lineTo(bx+bw, y0);
     };
     [true,false].forEach(o=>{
-      c.save(); c.fillStyle="#cfd7df"; c.beginPath(); backe(c,o); c.closePath(); c.fill(); c.restore();
-      helpSchraffurWinkel(c, (p)=>backe(p,o), 135, "rgba(60,78,96,0.32)", 6);
+      // Backen als Koerper: heller Kopf, dunkler zum Futter hin, keine Schraffur
+      c.save(); { const g=c.createLinearGradient(bx, 0, bx+bw, 0); g.addColorStop(0,'#8d98a3'); g.addColorStop(1,'#b3bdc6'); c.fillStyle=g; }
+      c.beginPath(); backe(c,o); c.closePath(); c.fill(); c.restore();
       c.save(); c.strokeStyle="#33424f"; c.lineWidth=1.5; c.lineJoin="round"; c.beginPath(); backe(c,o); c.closePath(); c.stroke(); c.restore();
     });
-    // Teil im Vollschnitt, ohne Fase
+    // Teil ohne Fase: ZYLINDER als Koerper mit dem Metallverlauf der
+    // Simulation [Daniel, 09.09.2026: "ohne Schraffur, da stoert nichts"],
+    // ROHR im Vollschnitt (die Bohrung muss man sehen).
     const teil=(p)=>{ p.rect(x0, T, zR-x0, B-T); };
     const ri=rohr? Math.round(R*0.45) : 0;
+    if(!rohr){ helpKoerper3D(c, [[x0,T],[zR,T]], axY); }
+    else {
     c.save(); c.fillStyle="#e6ebf0"; c.beginPath(); teil(c); c.fill(); c.restore();
     c.save();
     if(ri){ c.beginPath(); teil(c); c.rect(x0, axY-ri, zR-x0, 2*ri); c.clip("evenodd"); }
@@ -16977,25 +17284,25 @@ const MASK_HELP = {
     c.restore();
     if(ri){ c.save(); c.fillStyle="#f7f9fb"; c.fillRect(x0, axY-ri, zR-x0, 2*ri); c.strokeStyle=HELP_EDGE; c.lineWidth=1.4; c.strokeRect(x0, axY-ri, zR-x0, 2*ri); c.restore(); }
     c.save(); c.strokeStyle=HELP_EDGE; c.lineWidth=2.2; c.lineJoin="round"; c.beginPath(); teil(c); c.stroke(); c.restore();
+    }
     // Drehachse
     c.save(); c.setLineDash([12,4,3,4]); c.strokeStyle="#7f8d99"; c.lineWidth=1;
     c.beginPath(); c.moveTo(fL-6,axY); c.lineTo(w-8,axY); c.stroke(); c.restore();
-    lab("Backen", bx+bw*0.42, B+jh*0.45+4, false);
-    lab("Futter", (fL+bx)/2, h-8, false);
+    // "Futter" und "Backen" ohne Beschriftung [Daniel, 21:48: "kannst du weglassen"]
     lab("Z", w-10, axY-8, false, "right");
     lab("X\u2300", bx+6, Math.round(h*0.10), false, "left");   // rechts neben dem Futter
     // Z0 gestrichelt nur ausserhalb des Teils
     const Bu=B+unten;
     c.save(); c.setLineDash([3,3]); c.strokeStyle=HELP_OFF; c.lineWidth=1;
-    c.beginPath(); c.moveTo(zR, T-62*k); c.lineTo(zR, T); c.moveTo(zR, B); c.lineTo(zR, Bu+56*k); c.stroke(); c.restore();
+    c.beginPath(); c.moveTo(zR, T-62*k); c.lineTo(zR, T); c.moveTo(zR, B); c.lineTo(zR, Bu+46*k); c.stroke(); c.restore();
     lab("Z0", zR-6, T-62*k, false, "right");
     // Rueckzugsebenen aussen
-    const yXRAo=T-56*k, yXRAu=Bu+50*k;
+    const yXRAo=T-56*k, yXRAu=Bu+42*k;
     // ab der Backenfront, nicht durch die Backen hindurch
     strich(bx+bw+4, yXRAo, w-10, yXRAo, A("pkXRA"));
     strich(bx+bw+4, yXRAu, w-10, yXRAu, A("pkXRA"));
     lab("XRA"+V("pkXRA"), bx+bw+6, yXRAo-12*k, A("pkXRA"), "left");
-    strich(xZRA, T-62*k, xZRA, Bu+56*k, A("pkZRA"));
+    strich(xZRA, T-62*k, xZRA, Bu+46*k, A("pkZRA"));
     lab("ZRA"+V("pkZRA"), xZRA+6, T-62*k, A("pkZRA"), "left");
     if(rohr){
       const xXI=zR-44*k;
@@ -17007,19 +17314,19 @@ const MASK_HELP = {
       strich(xZRI, axY-ri, xZRI, axY+ri, A("pkZRI"));
       lab("ZRI"+V("pkZRI"), xZRI+4, axY+ri+16*k, A("pkZRI"), "left");
     }
-    // Werkzeugwechselpunkt oben rechts
-    const xT=w-30, yT=Math.round(h*0.06), onT=A("wwpX")||A("wwpZ");
-    c.save(); c.strokeStyle=onT?HELP_ON:HELP_OFF; c.lineWidth=1.6;
-    c.beginPath(); c.moveTo(xT-9,yT); c.lineTo(xT+9,yT); c.moveTo(xT,yT-9); c.lineTo(xT,yT+9); c.stroke();
-    c.beginPath(); c.arc(xT,yT,5.5,0,Math.PI*2); c.stroke(); c.restore();
-    lab("XT"+V("wwpX")+" / ZT"+V("wwpZ"), xT-14, yT+4, onT, "right");
+    // Werkzeugwechselpunkt oben rechts - nur die Pille, das Fadenkreuz
+    // daneben ist weg [Daniel, 21:48: "kannst du auch weglassen"]
+    const yT=Math.round(h*0.06), onT=A("wwpX")||A("wwpZ");
+    lab("XT"+V("wwpX")+" / ZT"+V("wwpZ"), w-12, yT+4, onT, "right");
     // Masse: LA ab Backenfront, ZI ab Stufe, SC, ZA, XA
     helpDim(c, bx+bw, T-22*k, zR, T-22*k, 0, "LA"+V("pkLA"), A("pkLA"), "in");
     helpDim(c, x0, Bu+22*k, zR, Bu+22*k, 0, "ZI"+V("pkZI"), A("pkZI"));
     const ySC=Math.round(axY-R*0.64);
     helpDim(c, zR, ySC, zR+22*k, ySC, 0, "", A("safeZ"));
     dimLab("SC"+V("safeZ"), zR+40*k, ySC+12*HELP_SKAL+3.5, A("safeZ"));
-    helpDim(c, zR, Bu+64*k, zR+12*k, Bu+64*k, 0, "ZA"+V("pkZA"), A("pkZA"));
+    // ZA auf der ZI-Zeile: die ZI-Pille steht in der Teilmitte, die ZA-Pille
+    // an der Stirn - sie liegen nebeneinander, und unten wird nichts abgeschnitten
+    helpDim(c, zR, Bu+22*k, zR+12*k, Bu+22*k, 0, "ZA"+V("pkZA"), A("pkZA"));
     helpDim(c, xXA, T, xXA, B, 0, "", A("stockDia"));
     dimLab("\u2300XA"+V("stockDia"), xXA+8, axY+18*k, A("stockDia"), "left");
     function strich(x1,y1,x2,y2,on){
@@ -17919,11 +18226,8 @@ const MASK_HELP = {
     // PLANGEWINDE [01.09.2026]: das Bild zeigt das Laengsgewinde —
     // eine stumme Falschanzeige waere schlimmer als der Hinweis
     // (dieselbe Regel wie beim Einstich mit Lage innen).
-    if(typeof selBtnVal==='function' && selBtnVal('gwFormBtns')==='plan'){
-      c.fillStyle='#333'; c.font='10.5px system-ui';
-      c.fillText('Bild zeigt das LAENGSGEWINDE — Form plan schneidet', 8, 14);
-      c.fillText('die Spirale auf der Stirn (X0 aussen nach X1 innen).', 8, 27);
-    }
+    // (Der Plan-Hinweis steht weiter unten: NACH dem Schnittspiegel,
+    // sonst stuende er am Laptop kopfueber in der unteren Haelfte.)
     const V=(id)=>{ const e=document.getElementById(id);
       if(!e || e.value==='' || isNaN(parseFloat(e.value))) return '';
       return ' '+String(+parseFloat(e.value)); };
@@ -17956,9 +18260,8 @@ const MASK_HELP = {
     const gwLen=Math.min(zStirn-zEnde-52, w*0.46);  // Gewindelaenge im Bild
     const zGw=zStirn-gwLen;                         // Gewindeauslauf (links)
     const P=Math.max(16, 24 - (60-profW)*0.12);
-    helpCenterline(c,w,axY);
     const halb=Math.tan(profW/2*Math.PI/180)*(root-crest);
-    helpFillPart(c,(p)=>{
+    const gwBau=(p)=>{
       p.moveTo(zStirn,yBase); p.lineTo(zStirn,crest);
       let z=zStirn-8;
       if(art==='trapez'){
@@ -17980,7 +18283,26 @@ const MASK_HELP = {
       }
       // Auslauf: glatter Mantel bis zum linken Rand
       p.lineTo(zGw,crest); p.lineTo(zEnde,crest); p.lineTo(zEnde,yBase);
-    });
+    };
+    // AUSSENGEWINDE AM LAPTOP ALS 3D-KOERPER [Daniel, 09.09.2026]: das
+    // Profil wird aufgezeichnet (die Achspunkte an den Enden weg) und als
+    // gespiegelter Koerper mit dem Metallverlauf gefuellt; das Innengewinde
+    // bleibt im Vollschnitt (Wand oben und unten, Bohrung dazwischen).
+    if(!innen && typeof window!=='undefined' && window.innerWidth>=900 && HELP_AXY>0){
+      const pts=[]; gwBau({moveTo:(x,y)=>pts.push([x,y]), lineTo:(x,y)=>pts.push([x,y])});
+      helpKoerper3D(c, pts.filter(q=>Math.abs(q[1]-yBase)>0.5), axY);
+    } else {
+      helpFillPart(c,gwBau);
+      // VOLLSCHNITT AM LAPTOP: Material samt Zaehnen nach unten spiegeln,
+      // DANACH Achse und Plan-Hinweis (die gehoeren nicht gespiegelt).
+      helpSchnittSpiegel(c, w, axY);
+    }
+    helpCenterline(c,w,axY);
+    if(typeof selBtnVal==='function' && selBtnVal('gwFormBtns')==='plan'){
+      c.fillStyle='#333'; c.font='10.5px system-ui';
+      c.fillText('Bild zeigt das LAENGSGEWINDE — Form plan schneidet', 8, 14);
+      c.fillText('die Spirale auf der Stirn (X0 aussen nach X1 innen).', 8, 27);
+    }
     // --- SCHNITTAUFTEILUNG SICHTBAR MACHEN [Daniel, 26.08.2026] ---
     // Ein Gewinde entsteht aus vielen Zuegen in denselben Gang. WIE tief
     // jeder davon geht, ist die eigentliche Entscheidung der Maske —
