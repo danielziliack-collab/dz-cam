@@ -1344,6 +1344,8 @@ body.artefakt .hsoftkeys{padding-right:48px;}
 .ampel-liste .z-grau{color:var(--text-dim);}
 .ampel-kopf{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
   color:var(--text-dim);margin:7px 0 2px 0;}
+/* Gruppenzeilen der Zyklus-Softkeys: nur am Laptop (Punkt 23). */
+.sk-gruppe{display:none;}
 /* VORZEICHENKNOPF [Daniel, 26.08.2026] -------------------------- */
 /* Liegt ueber dem rechten Rand des Feldes, das gerade den Fokus hat.
    Absolut positioniert, damit sich an keiner der 136 Feldzeilen die
@@ -2066,7 +2068,14 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
     #maskFreistich, #maskParams{grid-template-columns:minmax(0,1fr) 520px;}
     #maskAbspanenEinfach > canvas.mask-help, #maskAbspanenKontur > canvas.mask-help, #maskEinstechen > canvas.mask-help,
     #maskStechdrehen > canvas.mask-help, #maskAbstechen > canvas.mask-help, #maskBohren > canvas.mask-help, #maskGewinde > canvas.mask-help,
-    #maskFreistich > canvas.mask-help, #maskParams > canvas.mask-help{width:492px;max-width:492px;}
+    #maskFreistich > canvas.mask-help, #maskParams > canvas.mask-help{width:492px;max-width:492px;height:min(420px,58vh);}
+    /* (21) HOHES HILFEBILD [Daniel, 09.09.2026: "rechts das Hilfebild
+       etwas kleiner und unscharf"]: mit height:auto folgte die Hoehe dem
+       Bitmap-Seitenverhaeltnis und blieb bei 247 px, die Spalte hatte 622.
+       Der Halbschnitt bekam davon 47 %, also 115 px. Jetzt 420 px (58 vh
+       auf kleinen Schirmen); helpCtx liest die CSS-Hoehe und zeichnet das
+       Schema in dieser Groesse, ab 330 px mit Schriftfaktor 1,35
+       (HELP_SKAL). Am Handy bleibt es bei 184 px. */
 
     /* (16) MASKENKOPF: 13,5-px-Titel auf einem 1220-px-Dialog las sich
        wie eine Fussnote. 15 px, etwas mehr Polster. */
@@ -2121,6 +2130,44 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
     body.mode-grafisch #stageMain > .spalter-editor{order:1;}
     body.mode-arbeitsplan #planVorschau{border-left:none;}
     body.mode-grafisch #pointListPanel{border-left:none;}
+
+    /* (23) ZYKLUS-GRUPPEN [Daniel, 09.09.2026 abends]: "auf Kontur"
+       (Abspanen Kontur, Stechdrehen) und "frei bemasst" (die uebrigen
+       sechs) als schmale Gruppenzeilen in der Softkey-Spalte. Unter
+       900 px bleiben sie aus (Basisregel), dort gilt nur die Ordnung. */
+    .softkeys .sk-gruppe{display:block;flex:0 0 auto;width:100%;padding:6px 4px 2px;
+      font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);
+      border-top:1px solid hsl(var(--ton), 18.7%, 82.2%);margin-top:4px;text-align:center;}
+    .softkeys .sk-gruppe:first-of-type{border-top:none;margin-top:0;}
+
+    /* (22) MASKEN ALS VOLLBILD [Daniel, 09.09.2026 abends: "in dem Moment,
+       wo ich die Maske eintrage, interessiert mich nicht, was im
+       Hintergrund passiert - sieht improvisiert aus wie ein extra
+       Fenster"]: die neun Masken mit Hilfebild fuellen den ganzen
+       Bildschirm (body.maskvoll, Vorgabe an, Schalter in der Anleitung
+       Kap. 12). Die Editor-Dialoge Gerade/Kreis bleiben klein - dort
+       braucht man die Zeichnung mit der Live-Vorschau. Die Inline-Lagen
+       der Fensterlage tragen !important und schluegen diese Regeln;
+       62-fensterlage.js raeumt sie weg, solange Vollbild gilt. Die
+       Bildspalte waechst mit: 40 % der Breite, mindestens 520 px, das
+       Canvas fuellt sie (bei 1366 px: 518 x 520). */
+    body.maskvoll #maskAbspanenEinfach, body.maskvoll #maskAbspanenKontur, body.maskvoll #maskEinstechen, body.maskvoll #maskStechdrehen, body.maskvoll #maskAbstechen, body.maskvoll #maskBohren, body.maskvoll #maskGewinde, body.maskvoll #maskFreistich, body.maskvoll #maskParams{
+      position:fixed !important;left:0 !important;top:0 !important;transform:none !important;
+      width:100vw !important;max-width:none !important;height:100vh !important;max-height:none !important;
+      border-radius:0;box-shadow:none;border:none;
+      grid-template-columns:minmax(0,1fr) minmax(520px,40%);
+    }
+    body.maskvoll #maskAbspanenEinfach > canvas.mask-help, body.maskvoll #maskAbspanenKontur > canvas.mask-help, body.maskvoll #maskEinstechen > canvas.mask-help, body.maskvoll #maskStechdrehen > canvas.mask-help, body.maskvoll #maskAbstechen > canvas.mask-help, body.maskvoll #maskBohren > canvas.mask-help, body.maskvoll #maskGewinde > canvas.mask-help, body.maskvoll #maskFreistich > canvas.mask-help, body.maskvoll #maskParams > canvas.mask-help{
+      width:calc(100% - 28px);max-width:none;height:min(520px,62vh);
+    }
+    body.maskvoll #maskAbspanenEinfach > .mask-head, body.maskvoll #maskAbspanenKontur > .mask-head, body.maskvoll #maskEinstechen > .mask-head, body.maskvoll #maskStechdrehen > .mask-head, body.maskvoll #maskAbstechen > .mask-head, body.maskvoll #maskBohren > .mask-head, body.maskvoll #maskGewinde > .mask-head, body.maskvoll #maskFreistich > .mask-head, body.maskvoll #maskParams > .mask-head{cursor:default;}
+    body.maskvoll #maskAbspanenEinfach > .mask-griff, body.maskvoll #maskAbspanenKontur > .mask-griff, body.maskvoll #maskEinstechen > .mask-griff, body.maskvoll #maskStechdrehen > .mask-griff, body.maskvoll #maskAbstechen > .mask-griff, body.maskvoll #maskBohren > .mask-griff, body.maskvoll #maskGewinde > .mask-griff, body.maskvoll #maskFreistich > .mask-griff, body.maskvoll #maskParams > .mask-griff{display:none;}
+    /* Aktionszeile im Vollbild immer im Bild: der Koerper rollt, die
+       Knoepfe kleben unten - bei 768 px Hoehe war "Uebernehmen" sonst
+       um 8 px angeschnitten, bis man rollt (Aufnahme v2, 09.09.2026). */
+    body.maskvoll #maskAbspanenEinfach > .mask-body > .k-aktion, body.maskvoll #maskAbspanenKontur > .mask-body > .k-aktion, body.maskvoll #maskEinstechen > .mask-body > .k-aktion, body.maskvoll #maskStechdrehen > .mask-body > .k-aktion, body.maskvoll #maskAbstechen > .mask-body > .k-aktion, body.maskvoll #maskBohren > .mask-body > .k-aktion, body.maskvoll #maskGewinde > .mask-body > .k-aktion, body.maskvoll #maskFreistich > .mask-body > .k-aktion, body.maskvoll #maskParams > .mask-body > .k-aktion, body.maskvoll #maskAbspanenEinfach > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskAbspanenKontur > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskEinstechen > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskStechdrehen > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskAbstechen > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskBohren > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskGewinde > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskFreistich > .mask-body > .mrow:has(.ok-gruen), body.maskvoll #maskParams > .mask-body > .mrow:has(.ok-gruen){
+      position:sticky;bottom:0;background:var(--panel);padding-top:6px;padding-bottom:10px;z-index:2;
+    }
 
   }
 </style>
@@ -4371,12 +4418,21 @@ der Adapter bremst). An die 1000er sendet die App <b>zeilenweise mit 150 ms
 Pause</b> &mdash; das ist gewollt und entspricht dem &bdquo;Line delay 150&ldquo;,
 mit dem die &Uuml;bertragung am 07.09.2026 mit DNC Precision stabil lief; ohne
 Pause l&auml;uft der Empfangspuffer der Steuerung &uuml;ber (ein 242-Zeilen-Programm
-brach bei 197 ab). Ein 200-Zeilen-Programm braucht so etwa 40 Sekunden. Beide
-Wege sind mit DNC Precision belegt, mit Web-Serial aus der App noch nicht
-gefahren. Das geht NUR in Chrome oder Edge am Rechner &mdash; das iPhone
-kann grunds&auml;tzlich nicht direkt seriell; daf&uuml;r ist das
-DNC-Funk-K&auml;stchen geplant. Erster Lauf an der Maschine steht noch aus
-&mdash; mit einem kurzen Testprogramm beginnen.</dd>
+brach bei 197 ab). Ein 200-Zeilen-Programm braucht so etwa 40 Sekunden. <b>An der 1000er am
+Ger&auml;t bewiesen (09.09.2026):</b> die Kantenwelle (126 Zeilen) ging aus Edge
+in 24 Sekunden hinein, &bdquo;Prog. Pr&uuml;fen&ldquo; ohne Meldung, und kam &uuml;ber
+&bdquo;Empfangen&ldquo; byteidentisch zur&uuml;ck. Die Opferzeile kommt auf diesem Weg
+mit an und bleibt ein harmloser Kommentar (mit DNC Precision ging die letzte
+Zeile verloren). S&auml;tze &uuml;ber 45 Zeichen sendet die App an die 1000er
+<b>zeichenweise gebremst</b> (3 ms je Zeichen, wie das K&auml;stchen), weil ihr
+Empfangspuffer sonst mitten in der Zeile rei&szlig;t und die Steuerung
+Fortsetzungszeilen NIE zusammensetzt (07.09. an der Wortgrenze, 09.09. mitten im
+Wort mit Ziffer: &bdquo;152 Fehlerhafte Zahlenangabe&ldquo;). Ob so ein langer
+Zyklussatz ganz ankommt, ist noch nicht gefahren: nach dem Einspielen im Editor
+nachsehen. An der 1500er ist der Weg aus der App noch nicht gefahren, dort ist
+bisher nur DNC Precision belegt (03.09.2026). Das geht NUR in Chrome oder Edge am
+Rechner &mdash; das iPhone kann grunds&auml;tzlich nicht direkt seriell; daf&uuml;r
+gibt es das DNC-Funk-K&auml;stchen.</dd>
 <dt id="ba-ma-dnc">Daten&uuml;bertragung (DNC Precision, V24)</dt>
 <dd>Je Maschine ein EIGENES Profil in DNC Precision anlegen (beide senden und
 empfangen mit 9600, aber der Handshake ist verschieden):<br>
@@ -4421,19 +4477,24 @@ von 242 Zeilen ab). Parameter am Ger&auml;t: MENUE &rarr; Konfiguration &rarr;
 2000 ff.; Fehler quittieren mit Softkey &bdquo;Quittung&ldquo;.<br>
 <b>Vier Dateiregeln der 1000er, alle am 07.09.2026 gemessen &mdash; die App
 wendet sie beim &bdquo;NC sichern&ldquo; und beim DNC-Senden selbst an, sobald
-das 1000er-Profil gew&auml;hlt ist:</b> (1) <b>Die letzte Zeile jeder
-&Uuml;bertragung geht verloren</b> &mdash; die Steuerung schlie&szlig;t eine
-Zeile erst mit dem n&auml;chsten Zeilenanfang ab und verwirft den Rest beim
-Timeout (bewiesen: ein Satz HINTER dem M30 wird geschluckt, das M30 bleibt).
-Die App h&auml;ngt deshalb eine Opferzeile <code>(ENDE UEBERTRAGUNG)</code> an.
+das 1000er-Profil gew&auml;hlt ist:</b> (1) <b>Opferzeile hinter dem M30</b> &mdash; mit DNC Precision geht die letzte
+Zeile jeder &Uuml;bertragung verloren (bewiesen 07.09.: ein Satz HINTER dem M30
+wird geschluckt, das M30 bleibt); aus der App per Web-Serial kommt sie an
+(09.09.2026). Es ist also das DNC-Programm, nicht die Steuerung. Die App
+h&auml;ngt in jedem Fall eine Opferzeile <code>(ENDE UEBERTRAGUNG)</code> an
+&mdash; kommt sie mit, ist sie ein harmloser Kommentar.
 (2) <b>Keine Zeile &uuml;ber ~45 Zeichen</b> &mdash; l&auml;ngere rei&szlig;en im
 Empfangspuffer (bei 52 und 72 gemessen; DNC Precision kennt nur Zeilen-, kein
 Zeichen-Delay). Die App bricht lange Kommentarzeilen in mehrere um; ein
 Maschinensatz &uuml;ber 50 Zeichen bekommt eine Warnung. Der 115 Zeichen lange
-G71-Zyklussatz der Steuerung kommt per DNC NICHT durch &mdash; Zyklen an der
-1000er bleiben Handarbeit im Editor, die App schickt Einzels&auml;tze.
-Fortsetzungszeilen ohne N-Nummer setzt die Steuerung nicht zusammen
-(&bdquo;zu viele Interpolationsadressen&ldquo;). (3) Reines ASCII &mdash; ein
+G71-Zyklussatz der Steuerung kommt per DNC Precision NICHT durch &mdash; Zyklen an
+der 1000er bleiben Handarbeit im Editor, die App schickt Einzels&auml;tze.
+Fortsetzungszeilen setzt die Steuerung NIE zusammen &mdash; weder an der
+Wortgrenze (07.09.: &bdquo;zu viele Interpolationsadressen&ldquo;) noch mitten
+im Wort mit Ziffer-Anfang (09.09.2026: &bdquo;152 Fehlerhafte
+Zahlenangabe&ldquo;); ein Zyklussatz muss als EINE Zeile ankommen. Aus der App
+gehen S&auml;tze &uuml;ber 45 Zeichen deshalb zeichenweise gebremst (noch
+unverifiziert, s. Web-Serial). (3) Reines ASCII &mdash; ein
 Gedankenstrich im Kommentar wurde in einer Testdatei zum Steuerzeichen XOFF.
 (4) Zeilenenden CR LF, wie die Sicherungen der Maschine. Kommentarzeilen ohne
 N-Nummer und LF-Enden nimmt sie zwar an; die Regeln 1&ndash;3 sind trotzdem
@@ -4579,14 +4640,34 @@ Liste; Leertaste/Enter schalten am Laptop. Gesperrte Werte werden
 Farbtonregler &mdash; Warn- und Bahnfarben (rot, gr&uuml;n, amber, violett, blau)
 bleiben bewusst fest.</dd>
 <dt id="ba-be-laptop">Am Laptop (ab 900 px Breite)</dt>
-<dd>Masken sind zentrierte Dialoge, das <b>Hilfebild steht rechts neben den
+<dd><b>Hilfebilder am Laptop (09.09.2026):</b> in den Zyklusmasken und im
+Programmkopf ist das Bild rechts 420 px hoch statt 247, Ma&szlig;e und Pillen
+sind um ein Drittel gr&ouml;&szlig;er. Das Bild des Programmkopfs zeigt am Laptop
+einen vollen Schnitt beidseitig der Achse mit Futter und Backen und allen
+Kopfma&szlig;en als Pillen (XA, ZA, ZI, LA, SC, R&uuml;ckzugsebenen, Werkzeugwechselpunkt)
+&mdash; ohne 3D-K&ouml;rper; am Handy bleibt das bisherige Schema. Der
+Vorzeichenknopf, der beim Tippen rechts im Zahlenfeld erscheint, deckt die
+Ziffern nicht mehr zu (das Feld bekommt solange rechts ein Polster). Die
+2D-Simulation zeichnet am Laptop das Materialbild bildpunktfein vereinfacht
+und merkt sich Restmaterial- und Einschnittfl&auml;chen je Programm &mdash;
+gemessen bei 1366 px: ein Bild fiel von 350 auf 50 ms (Kantenwelle) und von 600 auf 60 ms (Rotorwelle), 3D liegt bei 30.<br>Masken f&uuml;llen den Bildschirm (Schalter unten; als Fenster sind sie zentrierte Dialoge), das <b>Hilfebild steht rechts neben den
 Feldern</b> (ShopTurn-Anordnung) &mdash; das Formular links rollt f&uuml;r sich. Der
 Kopfknopf ☰/⊞ schaltet zwischen Kachel- und Zeilenansicht. Im Kontur-Editor
 stehen die Softkeys als Spalte rechts, die Elementliste daneben; in der
 Simulation liegen Sim-, Status- und Zoomleiste unter der Zeichnung.
 &bdquo;&larr; Arbeitsplan&ldquo; w&auml;hrend der Simulation beendet sie genauso wie das
 X der Sim-Leiste.<br>
-<b>Masken verschieben und ziehen:</b> Kopfzeile anfassen und ziehen verschiebt die
+<b>Zyklus-Softkeys in zwei Gruppen (09.09.2026):</b> zuerst &bdquo;auf Kontur&ldquo;
+&mdash; Abspanen Kontur und Stechdrehen brauchen eine gezeichnete Kontur &mdash;, darunter
+&bdquo;frei bema&szlig;t&ldquo; mit Ecke, Einstechen, Freistich, Abstechen, Bohren, Gewinde.
+Die Reihenfolge gilt auch am Handy, die Gruppenzeilen zeigt nur der Laptop.<br>
+<b>Masken als Vollbild (09.09.2026):</b> die acht Zyklusmasken und der Programmkopf
+f&uuml;llen am Laptop den ganzen Bildschirm &mdash; w&auml;hrend der Eingabe z&auml;hlt die
+Maske, der Hintergrund lenkt nur ab. Die Konturelement-Dialoge im Editor bleiben
+klein, dort geh&ouml;rt die Zeichnung mit der Live-Vorschau ins Bild. Wer die Masken
+lieber als Fenster hat, schaltet hier um:
+<label style="display:inline-block;margin:4px 0;"><input type="checkbox" id="baMaskVoll" checked> Masken als Vollbild (aus = Fenster, verschiebbar)</label><br>
+<b>Masken verschieben und ziehen (nur als Fenster):</b> Kopfzeile anfassen und ziehen verschiebt die
 Maske, der Griff rechts unten zieht die Gr&ouml;&szlig;e; Lage und Gr&ouml;&szlig;e werden je
 Maske auf diesem Ger&auml;t gemerkt. Doppelklick auf die Kopfzeile stellt eine Maske
 zur&uuml;ck in die Mitte &mdash; alle auf einmal:
@@ -4663,7 +4744,7 @@ vorschruppen.</dd>
      TT.MM.JJJJ" ergaenzt, MUSS dieses Datum mitziehen — sonst schlaegt
      der Pruefstand an. [Daniels Befund 06.09.2026: die Anleitung war
      inhaltlich nachgezogen, das Standdatum stand noch auf 31.08.] -->
-<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 08.09.2026. Sie
+<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 09.09.2026. Sie
 w&auml;chst mit der App &mdash; das Inhaltsverzeichnis wird aus den Kapiteln
 erzeugt und ist damit immer vollst&auml;ndig.</p>
 
@@ -8103,10 +8184,19 @@ function renderSoftkeys(){
     // Der dxfFile-Input bleibt; der Editor-Softkey nutzt ihn.
     add(skMode==='zyklen'?'active sub':'sub','⚙','Zyklen',()=>{ skMode='zyklen'; renderSoftkeys(); });
     if(skMode==='zyklen'){
-      add('yellow',SK_ICONS.zyAbspEcke,'Abspanen<br>(Ecke)',()=>openAbspanenEinfachMask());
+      // ZWEI GRUPPEN [Daniel, 09.09.2026 abends: "Abspanen Kontur und
+      // Stechdrehen beziehen sich immer auf eine vorangehende Kontur -
+      // die wuerde ich zusammenfassen"]: die Konturzyklen stehen zuerst,
+      // direkt unter Kontur/Zyklen, die frei bemassten darunter. Die
+      // Gruppenzeilen (sk-gruppe) zeigt nur der Laptop; am Handy ist die
+      // Leiste eine umbrechende Reihe, dort gilt allein die Reihenfolge.
+      const gruppe=(txt)=>{ const g=document.createElement('div'); g.className='sk-gruppe'; g.textContent=txt; skCol.appendChild(g); };
+      gruppe('auf Kontur');
       add('yellow',SK_ICONS.zyAbspKontur,'Abspanen<br>Kontur',()=>openAbspanenKonturMask(), contour.length<2);
-      add('yellow',SK_ICONS.zyEinstechen,'Einstechen',()=>openEinstechenMask());
       add('yellow',SK_ICONS.zyStechdrehen,'Stech-<br>drehen',()=>openStechdrehenMask(), !contours.some(c=>c.els.length>1));
+      gruppe('frei bema\u00dft');
+      add('yellow',SK_ICONS.zyAbspEcke,'Abspanen<br>(Ecke)',()=>openAbspanenEinfachMask());
+      add('yellow',SK_ICONS.zyEinstechen,'Einstechen',()=>openEinstechenMask());
       add('yellow',SK_ICONS.zyFreistich,'Freistich<br>DIN 509',()=>openFreistichMask());
       add('yellow',SK_ICONS.zyAbstechen,'Abstechen',()=>openAbstechenMask());
       add('yellow',SK_ICONS.zyBohren,'Bohren',()=>openBohrenMask());
@@ -10355,6 +10445,14 @@ const VZ_NIE=/^(pkTw|rapidF|esX0|esT1|aeX0|akStock|akTsX0|akXmin|fsX0|fsV|gwX0|s
       if(vzKnopf.parentNode!==heim && heim.appendChild) heim.appendChild(vzKnopf);
     }
     stand(); setzen();
+    // POLSTER STATT UEBERDECKUNG [Daniel, 09.09.2026, Laptop-Screenshots]:
+    // der Knopf liegt 36 px vom rechten Feldrand nach innen, und seit die
+    // Zahlen rechtsbuendig stehen (30.08.), deckte er genau die letzten
+    // Ziffern zu (gemessen 34 px Ueberlappung: aus "-92" wurde "-9").
+    // Solange der Knopf haengt, bekommt das Feld rechts ein Polster in
+    // Knopfbreite - die Zahl rutscht nach links, die Feldbreite bleibt
+    // (box-sizing border-box). abraeumen() nimmt es zurueck.
+    if(el.style && el.dataset){ el.dataset.vzPad = el.style.paddingRight||''; el.style.paddingRight='44px'; }
   };
 
   const abraeumen=()=>{
@@ -10364,6 +10462,9 @@ const VZ_NIE=/^(pkTw|rapidF|esX0|esT1|aeX0|akStock|akTsX0|akXmin|fsX0|fsV|gwX0|s
     if(vzFeld && vzFeld.dataset && vzFeld.dataset.vzText){
       delete vzFeld.dataset.vzText;
       if(!vzFeld.dataset.warNumber) vzFeld.type="number";
+    }
+    if(vzFeld && vzFeld.style && vzFeld.dataset && ('vzPad' in vzFeld.dataset)){
+      vzFeld.style.paddingRight=vzFeld.dataset.vzPad; delete vzFeld.dataset.vzPad;
     }
     if(vzKnopf && vzKnopf.parentNode && vzKnopf.parentNode.removeChild)
       vzKnopf.parentNode.removeChild(vzKnopf);
@@ -12385,6 +12486,31 @@ const FL_SLOT='et_fensterlage';
 let flLagen={};          // {maskId: {x,y[,w,h]}} — gemerkte Lagen
 
 function flBreit(){ return typeof window!=='undefined' && window.innerWidth>=900; }
+// MASKEN ALS VOLLBILD [Daniel, 09.09.2026 abends]: "in dem Moment, wo ich
+// die Maske eintrage, interessiert mich nicht, was im Hintergrund
+// passiert - sieht improvisiert aus wie ein extra Fenster". Die neun
+// Masken mit Hilfebild fuellen am Laptop den Bildschirm (body.maskvoll,
+// Regeln in 02-stil.html Punkt 22). Vorgabe AN; der Schalter in der
+// Anleitung (Kap. 12, baMaskVoll) schaltet auf Fenster zurueck - dann
+// gelten Verschieben und Groesse (Fensterlage vom 08.09.) wieder. Die
+// Editor-Dialoge (Gerade/Kreis) bleiben Fenster: dort braucht man die
+// Zeichnung mit der Live-Vorschau.
+const MV_SLOT='et_maskvoll';
+const MV_MASKEN=['maskAbspanenEinfach','maskAbspanenKontur','maskEinstechen','maskStechdrehen','maskAbstechen','maskBohren','maskGewinde','maskFreistich','maskParams'];
+function maskVollGewuenscht(){ try{ const v=localStorage.getItem(MV_SLOT); return v===null ? true : v==='1'; }catch(e){ return true; } }
+function maskVollAktiv(id){ try{ return document.body.classList.contains('maskvoll') && MV_MASKEN.indexOf(id)>=0; }catch(e){ return false; } }
+function maskVollAnwenden(){
+  const an = maskVollGewuenscht() && flBreit();
+  try{ if(an) document.body.classList.add('maskvoll'); else document.body.classList.remove('maskvoll'); }catch(e){}
+  // Die Inline-Lagen der Fensterlage tragen !important und schluegen die
+  // Vollbild-Regeln - weg damit, solange Vollbild gilt; gemerkt bleiben
+  // sie fuer den Rueckweg.
+  if(an) MV_MASKEN.forEach(id=>{ const m=document.getElementById(id); if(m) flStilWeg(m); });
+  else fensterlageAnwenden();
+  const cb=document.getElementById('baMaskVoll'); if(cb) cb.checked=maskVollGewuenscht();
+  return an;
+}
+function maskVollSetzen(an){ try{ localStorage.setItem(MV_SLOT, an?'1':'0'); }catch(e){} return maskVollAnwenden(); }
 function flLaden(){
   flLagen={};
   try{ const s=localStorage.getItem(FL_SLOT); const o=s? JSON.parse(s):null;
@@ -12453,7 +12579,7 @@ function fensterlageAnwenden(){
     Object.keys(flLagen).forEach(id=>{ const m=document.getElementById(id); if(m) flStilWeg(m); });
     return;
   }
-  Object.keys(flLagen).forEach(id=>{ if(document.getElementById(id)) fensterlageSetzen(id, flLagen[id]); });
+  Object.keys(flLagen).forEach(id=>{ if(maskVollAktiv(id)) return; if(document.getElementById(id)) fensterlageSetzen(id, flLagen[id]); });
 }
 
 // Ziehen: Kopf = verschieben, Griff = Groesse. Bewegung und Loslassen
@@ -12461,7 +12587,7 @@ function fensterlageAnwenden(){
 // Zeiger schneller ist als das Element (und ohne Pointer-Capture, das
 // synthetische Ereignisse nicht kennen).
 function flZiehen(m, ev, art){
-  if(!flBreit() || ev.button!==0) return;
+  if(!flBreit() || ev.button!==0 || maskVollAktiv(m.id)) return;
   const r=m.getBoundingClientRect();
   const start={x:ev.clientX, y:ev.clientY, l:{x:r.left, y:r.top, w:r.width, h:r.height}};
   ev.preventDefault();
@@ -12509,7 +12635,11 @@ function flVerdrahten(m){
     flLaden();
     document.querySelectorAll('.mask').forEach(flVerdrahten);
     fensterlageAnwenden();
+    maskVollAnwenden();
     window.addEventListener('resize', fensterlageAnwenden);
+    window.addEventListener('resize', maskVollAnwenden);
+    const cbV=document.getElementById('baMaskVoll');
+    if(cbV) cbV.addEventListener('change', ()=>maskVollSetzen(cbV.checked));
     const b=document.getElementById('baFensterReset');
     if(b) b.addEventListener('click', ()=>{ fensterlageZuruecksetzen(); try{ melde('Alle Fensterlagen zurückgesetzt — die Masken stehen wieder in der Mitte.'); }catch(e){} });
   }catch(e){}
@@ -15407,6 +15537,13 @@ const HELP_FUSS = 0;
 // braucht sie, um in den Fussstreifen zu finden, bekommt sie aber
 // nicht als Parameter. Es gibt immer nur ein Bild gleichzeitig.
 let HELP_H = 0;
+// SCHRIFTFAKTOR DER HILFEBILDER [Daniel, 09.09.2026]: auf dem 420 px hohen
+// Laptop-Bild blieben Pillen und Masszahlen bei 10,5 px und wirkten
+// "klein und unscharf". helpCtx setzt den Faktor aus der Bildhoehe;
+// unter 330 px (Handy 184) bleibt er 1, dort aendert sich kein Pixel.
+let HELP_SKAL = 1;
+// Breite des laufenden Hilfebildes (CSS-Punkte), fuer die Randklemme in helpLabel.
+let HELP_W = 0;
 // Breite, die die Farblegende im Fussstreifen rechts belegt.
 // "▬ Vorschub" plus "▬ Eilgang" braucht rund 150 px, eine allein 76.
 let HELP_LEG_B = 0;
@@ -16264,6 +16401,8 @@ function helpCtx(canvasId, fallbackH){
   // Fussstreifen.
   HELP_CV = cv; HELP_ZL = 0; HELP_ZR = 0; HELP_KONTUR = null; HELP_ABB = null;
   HELP_H = Math.max(40, h-HELP_FUSS);
+  HELP_SKAL = (h>=330) ? 1.35 : 1;
+  HELP_W = w;
   // Vorgabe, falls die Legende erst NACH dem Erklaersatz gezeichnet
   // wird: Platz fuer einen Eintrag ("▬ Vorschub").
   HELP_LEG_B = 84;
@@ -16285,7 +16424,7 @@ function helpLabel(c, txt, x, y, on, align){
   // weissen Halo und der Text steht angeschnitten im Bild.
   if(HELP_SPAET){ HELP_SPAET.push(()=>helpLabel(c,txt,x,y,on,align)); return; }
   c.save();
-  c.font=(on?'bold 11px ':'10.5px ')+'Arial';
+  c.font=(on?'bold '+(11*HELP_SKAL).toFixed(1)+'px ':(10.5*HELP_SKAL).toFixed(1)+'px ')+'Arial';
   c.textAlign=align||'center';
   const _tb = c.measureText(String(txt)).width;
   const _al = align||'center';
@@ -16300,9 +16439,13 @@ function helpLabel(c, txt, x, y, on, align){
   // Knopf aus, und ein Knopf, der keiner ist, ist eine Falle.
   const istMass=/[0-9]/.test(String(txt||""));
   if(istMass){
-    const ph=on?17:15, pw=_tb+13, r=ph/2;
-    const _cx = _al==='left' ? x+_tb/2 : (_al==='right' ? x-_tb/2 : x);
-    const px0=_cx-pw/2, py0=y-3.5-ph/2;
+    const ph=(on?17:15)*HELP_SKAL, pw=_tb+13*HELP_SKAL, r=ph/2;
+    let _cx = _al==='left' ? x+_tb/2 : (_al==='right' ? x-_tb/2 : x);
+    let px0=_cx-pw/2; const py0=y-3.5-ph/2;
+    // AM RAND NICHT ANSCHNEIDEN [09.09.2026, Ecke-Bild bei 420 px: die
+    // X0-Pille hing am linken Canvasrand]. Nur auf den hohen Laptop-
+    // Bildern (HELP_SKAL > 1) - das Handy-Bild bleibt Pixel fuer Pixel.
+    if(HELP_SKAL>1 && HELP_W){ let d=0; if(px0<2) d=2-px0; else if(px0+pw>HELP_W-2) d=(HELP_W-2)-(px0+pw); if(d){ px0+=d; _cx+=d; } }
     c.beginPath();
     c.moveTo(px0+r,py0); c.lineTo(px0+pw-r,py0);
     c.arc(px0+pw-r,py0+r,r,-Math.PI/2,Math.PI/2);
@@ -16326,7 +16469,7 @@ function helpLabel(c, txt, x, y, on, align){
   c.restore();
 }
 function helpArrowHead(c,x,y,ang,on){
-  const ah=on?6.2:5;
+  const ah=(on?6.2:5)*HELP_SKAL;
   c.beginPath(); c.moveTo(x,y);
   c.lineTo(x+Math.cos(ang+0.42)*ah,y+Math.sin(ang+0.42)*ah);
   c.lineTo(x+Math.cos(ang-0.42)*ah,y+Math.sin(ang-0.42)*ah);
@@ -16367,8 +16510,8 @@ function helpDim(c, x1,y1, x2,y2, off, label, on, labelSide){
   helpArrowHead(c,a2x,a2y,ang+Math.PI,on);
   c.restore();
   const mx=(a1x+a2x)/2, my=(a1y+a2y)/2;
-  const lx=mx+nx*(labelSide==='in'?-9:9)*Math.sign(off||1);
-  const ly=my+ny*(labelSide==='in'?-9:9)*Math.sign(off||1);
+  const lx=mx+nx*(labelSide==='in'?-9:9)*HELP_SKAL*Math.sign(off||1);
+  const ly=my+ny*(labelSide==='in'?-9:9)*HELP_SKAL*Math.sign(off||1);
   helpLabel(c,label,lx,ly+3.5,on);
 }
 function helpLine(c,x1,y1,x2,y2,style,w,dash){
@@ -16586,12 +16729,10 @@ function helpBahnLegende(c, w, mitEilgang){
 // ---------------------------------------------------------------
 // Die acht Masken-Schemata
 // ---------------------------------------------------------------
-const MASK_HELP = {
-  // PROGRAMMKOPF [Daniel, 28.08.2026]. Vier Zahlen spannen einen
-  // Rahmen um das Werkstueck auf, ausserhalb dessen die Achsen frei
-  // verfahren duerfen (Handbuch S. 409). Ohne Bild muss man sich das
-  // denken; mit Bild sieht man es.
-  maskParams(active){
+// HANDY-SCHEMA DES PROGRAMMKOPFS (bis 899 px), unveraendert seit dem
+// 28.08.2026 - Regel 3. Freie Funktion, KEIN Schluessel von MASK_HELP:
+// Pruefung 57 verlangt fuer jeden Schluessel einen eigenen Bildrahmen.
+function maskParamsHandy(active){
     const H=helpCtx("help_maskParams"); if(!H) return;
     const {c,w,h}=H; const A=(id)=>active===id;
     const V=(id)=>{ const e=document.getElementById(id);
@@ -16652,6 +16793,92 @@ const MASK_HELP = {
     helpDim(c, zL,axY+2, zR,axY+2, 10, "ZI"+V("pkZI"), A("pkZI"));
     // Die Achsen zeichnet helpCenterline schon — hier waeren sie
     // doppelt.
+}
+const MASK_HELP = {
+  // PROGRAMMKOPF [Daniel, 28.08.2026]. Vier Zahlen spannen einen
+  // Rahmen um das Werkstueck auf, ausserhalb dessen die Achsen frei
+  // verfahren duerfen (Handbuch S. 409). Ohne Bild muss man sich das
+  // denken; mit Bild sieht man es.
+  //
+  // ZWEI BILDER [Daniel, 09.09.2026: "Halbschnitt oben, 3D unten - gefaellt
+  // mir nicht so gut"]: am LAPTOP zeichnet maskParams einen vollen Schnitt
+  // beidseitig der Achse mit Futter und Backen und ALLEN Kopfmassen als
+  // Pillen (XA, ZA, ZI, LA, SC, XRA/ZRA, XT/ZT) - ohne 3D-Koerper, denn das
+  // Bild ist ein Rahmenschema, kein Teil; der Koerper halbierte nur die
+  // Hoehe. Alles relativ zur Bildgroesse, das Schema waechst mit dem
+  // Canvas. Unter 900 px bleibt das abgenommene Handy-Schema
+  // (maskParamsHandy) unveraendert - Regel 3.
+  maskParams(active){
+    if(window.innerWidth<900) return maskParamsHandy(active);
+    const H=helpCtx("help_maskParams"); if(!H) return;
+    const c=H.c, w=H.w, h=H.hVoll;
+    HELP_AXY=0;
+    const A=(id)=>active===id;
+    const V=(id)=>{ const e=document.getElementById(id);
+      if(!e || e.value==="" || isNaN(parseFloat(e.value))) return "";
+      return " "+String(+parseFloat(e.value)); };
+    const rohr = (typeof selBtnVal==="function" && selBtnVal("pkFormBtns")==="rohr") ||
+                 ((document.getElementById("pkForm")||{}).value==="rohr");
+    const k=Math.max(0.7, Math.min(1, h/420));           // Abstaende wachsen mit der Hoehe
+    const axY=Math.round(h*0.50), R=Math.round(h*0.24);
+    const fL=Math.round(w*0.07), zL=Math.round(w*0.30), zR=Math.round(w*0.78);
+    const bx=zL-14, bw=Math.round(w*0.075), bh=Math.round(h*0.036);
+    // Futterkoerper und zwei Backen, die auf dem Teil greifen
+    c.save();
+    c.fillStyle="rgba(120,134,148,0.30)"; c.strokeStyle=HELP_OFF; c.lineWidth=1.2;
+    const fuH=Math.round(R*1.55);
+    c.fillRect(fL, axY-fuH, bx-fL, 2*fuH); c.strokeRect(fL, axY-fuH, bx-fL, 2*fuH);
+    c.fillStyle="rgba(90,104,118,0.45)";
+    c.fillRect(bx, axY-R-bh, bw, bh); c.strokeRect(bx, axY-R-bh, bw, bh);
+    c.fillRect(bx, axY+R, bw, bh);    c.strokeRect(bx, axY+R, bw, bh);
+    c.restore();
+    helpLabel(c,"Futter", Math.round((fL+bx)/2), axY-fuH-10*k, false);
+    helpLabel(c,"Backen", bx+bw/2, axY-R-bh-7*k, false);   // ueber der oberen Backe, frei von der ZI-Masslinie
+    // Teil: voller Schnitt, Metallverlauf wie in den Zyklusbildern
+    helpFillPart(c,(pp)=>{ pp.moveTo(bx-4,axY-R); pp.lineTo(zR,axY-R); pp.lineTo(zR,axY+R); pp.lineTo(bx-4,axY+R); pp.closePath(); });
+    if(rohr){
+      const ri=Math.round(R*0.45);
+      c.save(); c.fillStyle="#f4f7fa"; c.fillRect(bx-4, axY-ri, zR-bx+4, 2*ri);
+      c.strokeStyle=HELP_OFF; c.lineWidth=1; c.strokeRect(bx-4, axY-ri, zR-bx+4, 2*ri); c.restore();
+      helpDim(c, zR+96*k, axY-ri, zR+96*k, axY+ri, 0, "\u2300XI"+V("pkXI"), A("pkXI"), "in");
+      // Rueckzugsebenen innen: XRI in der Bohrung, ZRI vor der Stirn
+      const yXRI=axY-ri+12*k, xZRI=zR+16*k;
+      strich(bx-4, yXRI, w-10, yXRI, A("pkXRI")); strich(bx-4, axY+ri-12*k, w-10, axY+ri-12*k, A("pkXRI"));
+      helpLabel(c,"XRI"+V("pkXRI"), w-12, yXRI-8*k, A("pkXRI"), "right");
+      strich(xZRI, axY-ri, xZRI, axY+ri, A("pkZRI"));
+      helpLabel(c,"ZRI"+V("pkZRI"), xZRI+4, axY+ri+14*k, A("pkZRI"), "left");
+    }
+    // Drehachse (Strich-Punkt) und Z0-Linie an der Stirn
+    c.save(); c.setLineDash([12,4,3,4]); c.strokeStyle="#8a97a3"; c.lineWidth=1;
+    c.beginPath(); c.moveTo(fL-8,axY); c.lineTo(w-8,axY); c.stroke(); c.restore();
+    c.save(); c.setLineDash([3,3]); c.strokeStyle=HELP_OFF; c.lineWidth=1;
+    c.beginPath(); c.moveTo(zR, axY-R-52*k); c.lineTo(zR, axY+R+56*k); c.stroke(); c.restore();
+    helpLabel(c,"Z0", zR-4, axY-R-44*k, false, "right");
+    helpLabel(c,"Z", w-14, axY-6, false, "right");
+    helpLabel(c,"X\u2300", fL-2, Math.round(h*0.10), false, "left");
+    // Rueckzugsebenen aussen: gestrichelt, beidseitig der Achse
+    const yXRA=axY-R-34*k, xZRA=zR+30*k;
+    strich(bx-30, yXRA, w-10, yXRA, A("pkXRA"));
+    strich(bx-30, axY+R+34*k, w-10, axY+R+34*k, A("pkXRA"));
+    helpLabel(c,"XRA"+V("pkXRA"), bx-28, yXRA-9*k, A("pkXRA"), "left");
+    strich(xZRA, axY-R-52*k, xZRA, axY+R+56*k, A("pkZRA"));
+    helpLabel(c,"ZRA"+V("pkZRA"), xZRA+5, axY-R-44*k, A("pkZRA"), "left");
+    // Werkzeugwechselpunkt: Fadenkreuz oben rechts, ausserhalb der Ebenen
+    const xT=w-30, yT=Math.round(h*0.08), onT=A("wwpX")||A("wwpZ");
+    c.save(); c.strokeStyle=onT?HELP_ON:HELP_OFF; c.lineWidth=1.6;
+    c.beginPath(); c.moveTo(xT-9,yT); c.lineTo(xT+9,yT); c.moveTo(xT,yT-9); c.lineTo(xT,yT+9); c.stroke();
+    c.beginPath(); c.arc(xT,yT,5.5,0,Math.PI*2); c.stroke(); c.restore();
+    helpLabel(c,"XT"+V("wwpX")+" / ZT"+V("wwpZ"), xT-14, yT+4, onT, "right");
+    // Masse als Pillen: Durchmesser rechts aussen, Laengen unten und oben
+    helpDim(c, zR+62*k, axY-R, zR+62*k, axY+R, 0, "\u2300XA"+V("stockDia"), A("stockDia"), "in");
+    helpDim(c, bx-4, axY+R+18*k, zR, axY+R+18*k, 0, "ZI"+V("pkZI"), A("pkZI"));
+    helpDim(c, bx+bw, axY-R-18*k, zR, axY-R-18*k, 0, "LA"+V("pkLA"), A("pkLA"));
+    helpDim(c, zR, axY-R-6, zR+18*k, axY-R-6, 0, "SC"+V("safeZ"), A("safeZ"));
+    helpDim(c, zR, axY+R+44*k, zR+12*k, axY+R+44*k, 0, "ZA"+V("pkZA"), A("pkZA"));
+    function strich(x1,y1,x2,y2,on){
+      c.save(); c.setLineDash([5,4]); c.lineWidth=on?1.9:1.1;
+      c.strokeStyle=on?HELP_ON:HELP_OFF; c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke(); c.restore();
+    }
   },
   maskFreistich(active){
     const H=helpCtx('help_maskFreistich'); if(!H) return;
@@ -20023,7 +20250,7 @@ const MASCHINEN_PROFILE = {
     // traf. Sie bremst per RTS/CTS und schickt KEIN XOFF; ohne
     // Hardware-Handshake am Laptop kommt "194 Empfangsspeicher
     // ueberlauf". Dazu vier Dateiregeln, alle gemessen (s. BA).
-    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. Dateiregeln: letzte Zeile geht verloren (Opferzeile), keine Zeile ueber ~45 Zeichen, Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an',
+    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. WEB-SERIAL AUS DER APP am Geraet bewiesen 09.09.2026 (Kantenwelle, 126 Zeilen hin und zurueck byteidentisch, Prog. Pruefen ohne Meldung). Dateiregeln: Opferzeile hinter M30 (bei DNC Precision geht die letzte Zeile verloren, aus der App kommt sie an), Zeilen ueber ~45 Zeichen reissen im Empfangspuffer, und Fortsetzungszeilen setzt die Steuerung NIE zusammen (07.09. an der Wortgrenze, 09.09.2026 mitten im Wort mit Ziffer: "152 Fehlerhafte Zahlenangabe") - lange Saetze sendet die App deshalb zeichenweise gebremst (unverifiziert, Test naechster Termin), Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an',
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
@@ -20167,7 +20394,7 @@ function ppMerkmale(){
     // Maschine (Bestandsprogramme), offen ist nur, ob sie ihn OHNE
     // PA/PB annimmt. Deshalb getrennte Zeilen mit ehrlichem Stand.
     M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
-      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — offen PF0.4, I/K und PX1 (Maskenwerte standen auf 0) und ob bei Flankenwinkeln PA/PB erscheinen (der Beleg hatte alpha 0; Test mit alpha 10/20 am naechsten Termin). Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC nicht durch (Empfangspuffer reisst ab ~45 Zeichen), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
+      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — am 09.09.2026 mit alpha1 10 / alpha2 20 / D 1 / t1 3 nachgezogen (O12345, Fotos): PK/PL = alpha1/alpha2, P227 = t1, P228 = D; I0 K0 und PF0.4 bleiben konstant (keine Winkel, kein D - PF vermutlich Maschinenwert), PX1 vermutlich Lage aussen (Innenstich offen); KEINE PA/PB, auch nicht mit Winkeln. Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC Precision nicht durch (Empfangspuffer reisst ab ~45 Zeichen, und Fortsetzungszeilen setzt die Steuerung NIE zusammen - 09.09.2026), aus der App geht er ab jetzt zeichenweise gebremst (unverifiziert), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
     M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
       w:'die Maschine faehrt ihn (Bestandsprogramme, alle mit steuerungsberechneten PA/PB) — ob sie den Satz OHNE PA/PB annimmt, prueft MINI_G72 am naechsten Termin; bis dahin Ausgabe als Einzelsaetze'});
     M.push({t:'Freistich G73 / Plangewinde G77', s:pr.zyklen.g73,
@@ -27552,8 +27779,14 @@ const DNC_PROFILE={
   MONFORTS_1500_EUROTURN:{baud:9600,baudEmpf:9600,bits:7,parity:'none',stop:1,flow:'xonxoff',
     beleg:'am Geraet bewiesen (Termin 03.09.2026, beide Richtungen)'},
   MONFORTS_1000_MTC_K_6624B:{baud:9600,baudEmpf:9600,bits:7,parity:'even',stop:2,flow:'hardware',
-    beleg:'am Geraet bewiesen (Termin 07.09.2026, beide Richtungen; Parameter 2000-2006 per Foto: RTS/CTS, kein Xon/Xoff, 2 Stoppbits)'}
+    beleg:'am Geraet bewiesen (07.09.2026 mit DNC Precision, 09.09.2026 aus der App per Web-Serial, beide Richtungen; Parameter 2000-2006 per Foto: RTS/CTS, kein Xon/Xoff, 2 Stoppbits)'}
 };
+// ZEICHENPAUSE FUER LANGE ZEILEN an der 1000er [Termin 09.09.2026]: ab 46
+// Bytes (45 ist die gemessene sichere Laenge) geht eine Zeile Byte fuer
+// Byte an den Adapter, 3 ms Pause dazwischen (Browser-Timer laufen ohnehin
+// auf ~4 ms) - dieselbe Idee wie chardelay 1000 us im Kaestchen. Unter der
+// Grenze aendert sich am bewiesenen Weg nichts.
+const DNC_1000_GEBREMST_AB=45, DNC_1000_ZEICHENPAUSE_MS=3;
 let dncPort=null, dncXoff=false, dncLeser=null, dncRx=[], dncRxCb=null, dncSendeLauf=false;
 function dncLog(t, warn){
   const el=document.getElementById('dncLog');
@@ -27911,21 +28144,44 @@ async function dncSenden(){
     dncSendeLauf=true; dncKnoepfe();
     const w=dncPort.writable.getWriter();
     try{
-      let i=0, xoffSeit=0;
+      let i=0, xoffSeit=0, gebremst=0;
       if(hardware){
         // 1000er: ZEILENWEISE MIT PAUSE, wie DNC Precision mit "Line
         // delay 150". Der Hardware-Handshake laeuft im Treiber
         // (flowControl 'hardware'), aber der Adapter reagiert auf CTS
         // innerhalb einer Zeile zu spaet — die Pause nach jeder Zeile
         // gibt der Steuerung Zeit, den Puffer wegzuschreiben. Ohne sie
-        // brach T9 am Termin bei 197 von 242 Zeilen ab. AN DER MASCHINE
-        // MIT WEB-SERIAL UNVERIFIZIERT — mit DNC Precision belegt.
+        // brach T9 am Termin bei 197 von 242 Zeilen ab. AM GERAET
+        // BEWIESEN 09.09.2026 (Kantenwelle O9006, 126 Zeilen, laengster Satz
+        // 39: aus Edge in 24 s hinein, Prog. Pruefen ohne Meldung, per
+        // Empfangen byteidentisch zurueck). Die Opferzeile kommt auf diesem
+        // Weg MIT an - der Verlust der letzten Zeile am 07.09. war DNC
+        // Precision (dort kam sie am 09.09. als einzelnes "(" an).
         const zeilen=f.text.split('\r\n').filter((z,ix,a)=>ix<a.length-1);
         let n=0;
         for(const z of zeilen){
           if(!dncSendeLauf) break;
           const b=new TextEncoder().encode(z+'\r\n');
-          await w.write(b); i+=b.length; n++;
+          // LANGE ZEILEN ZEICHENWEISE GEBREMST [Termin 09.09.2026]: der
+          // Empfangspuffer der 1000er reisst INNERHALB einer Zeile (07.09.:
+          // 115er-G71 bei 52 bzw. 72 abgeschnitten), und Fortsetzungszeilen
+          // setzt sie NIE zusammen (07.09. Wortgrenze, 09.09. mitten im Wort
+          // mit Ziffer: "152 Fehlerhafte Zahlenangabe"). Umbrechen ist also
+          // kein Ausweg; bleibt das Bremsen wie im Kaestchen (chardelay):
+          // jedes Byte einzeln an den Adapter, dazwischen Pause, damit die
+          // Leitung zwischen den Zeichen leer laeuft und die Steuerung
+          // nachkommt. Kurze Zeilen gehen weiter am Stueck (Kantenwelle,
+          // 126 Zeilen in 24 s, 09.09.2026 bewiesen). AN DER MASCHINE
+          // UNVERIFIZIERT: ob ein 130er-Satz so ganz ankommt, zeigt der
+          // naechste Termin - nach dem Einspielen im Editor nachsehen.
+          if(b.length>DNC_1000_GEBREMST_AB){
+            for(let k=0;k<b.length && dncSendeLauf;k++){
+              await w.write(b.slice(k,k+1));
+              await new Promise(r=>setTimeout(r,DNC_1000_ZEICHENPAUSE_MS));
+            }
+            gebremst++;
+          } else await w.write(b);
+          i+=b.length; n++;
           dncStatus('sende... Zeile '+n+' / '+zeilen.length+' ('+i+' Zeichen)');
           await new Promise(r=>setTimeout(r,150));
         }
@@ -27944,6 +28200,7 @@ async function dncSenden(){
           dncStatus('sende... '+Math.round(100*i/bytes.length)+' % ('+i+' / '+bytes.length+' Zeichen)');
         }
       }
+      if(gebremst) dncLog(gebremst+' Zeile/n ueber '+DNC_1000_GEBREMST_AB+' Zeichen zeichenweise gebremst gesendet - an der Maschine unverifiziert, im Editor nachsehen, ob sie ganz da sind.', true);
       if(dncSendeLauf){ dncStatus('gesendet: '+bytes.length+' Zeichen, '+f.zeilen+' Zeilen'+(hardware?' (die letzte ist die Opferzeile)':'')); dncLog('Programm komplett gesendet.'); }
       else { dncStatus('Senden abgebrochen bei '+i+' Zeichen'); }
     }catch(e){ dncLog('Sendefehler: '+(e&&e.message), true); dncStatus('Sendefehler'); }
@@ -28406,6 +28663,12 @@ function ncAscii(s){
   for(const [a,b] of NC_ASCII_ERSATZ) s=s.split(a).join(b);
   return s.replace(/[^\x09\x20-\x7E]/g,'');
 }
+// SAETZE WERDEN NICHT UMGEBROCHEN [Termin 09.09.2026]: die 1000er setzt
+// Fortsetzungszeilen NIE zusammen - weder an der Wortgrenze (07.09.,
+// "zu viele Interpolationsadressen") noch mitten im Wort mit Ziffer-
+// Anfang (09.09., "152 Fehlerhafte Zahlenangabe" am nackten G von
+// N0030). Ein Satz ueber der Grenze bleibt EINE Zeile; der Sendeweg
+// bremst ihn zeichenweise (dncSenden), nicht der Filter.
 const NC_1000_MAX_KOMMENTAR=45, NC_1000_MAX_SATZ=50;
 const NC_1000_OPFERZEILE='(ENDE UEBERTRAGUNG - OPFERZEILE)';
 // 1500er: bis ~40 Zeichen je Satz nachweislich angekommen (03.09.2026);
@@ -28439,7 +28702,7 @@ function ncFuerMaschine(code, profilId){
         continue;
       }
       if(/^[NO]/.test(t) && t.length>NC_1000_MAX_SATZ)
-        warnungen.push('Satz mit '+t.length+' Zeichen (Grenze '+NC_1000_MAX_SATZ+', 1000er reisst ab ~52): '+t.slice(0,32)+'...');
+        warnungen.push('Satz mit '+t.length+' Zeichen (Grenze '+NC_1000_MAX_SATZ+', 1000er reisst ab ~52; aus der App zeichenweise gebremst gesendet, an der Maschine unverifiziert - im Editor nachsehen): '+t.slice(0,32)+'...');
       aus.push(t);
     }
     aus.push(NC_1000_OPFERZEILE);
@@ -28629,12 +28892,23 @@ function matViewKey(){
 }
 
 // Weltpunkte {z, x=⌀} -> Bildschirmpfad. mirror spiegelt an der Drehachse.
+// ABBILDUNG EINMAL JE STRECKENZUG [Daniel, 09.09.2026: 2D ruckelt am
+// Laptop]: toScreen rechnet je Aufruf computeScale() samt Randmassen
+// neu. Bei 2400 bis 4000 Punkten je Polygon war DAS der Preis des
+// 2D-Bildes (Materialpolygon 120 ms, Restmaterial-Ebene 124 ms an der
+// Rotorwelle), nicht das Fuellen. Die Abbildung ist affin - z und
+// Durchmesser gehen linear ein, mit und ohne Spiegelung - also genuegen
+// drei Stuetzwerte; der Rundungsunterschied liegt bei 1e-13 Bildpunkt.
 function worldPath(c, pts, mirror){
   c.beginPath();
-  pts.forEach((q,i)=>{
-    const [sx,sy]=toScreen(q.z, mirror ? -q.x : q.x);
+  const o=toScreen(0,0), ez=toScreen(1,0), ex=toScreen(0,1);
+  const azx=ez[0]-o[0], azy=ez[1]-o[1], axx=ex[0]-o[0], axy=ex[1]-o[1];
+  const sg=mirror?-1:1;
+  for(let i=0;i<pts.length;i++){
+    const q=pts[i], x=sg*q.x;
+    const sx=o[0]+q.z*azx+x*axx, sy=o[1]+q.z*azy+x*axy;
     i===0 ? c.moveTo(sx,sy) : c.lineTo(sx,sy);
-  });
+  }
   c.closePath();
 }
 
@@ -29396,6 +29670,41 @@ function hfKonturLinie(c){
   c.restore();
 }
 
+// SCHIRMFEINE VEREINFACHUNG [Daniel, 09.09.2026: "2D ruckelt, 3D laeuft
+// superfluessig" - am Laptop]. Profil bei 1366 px (scratchpad laptop2):
+// ein 2D-Bild kostete 350 ms (Kantenwelle) bis 600 ms (Rotorwelle), davon
+// das Materialpolygon 120 ms und der Umriss 117 ms - nicht die Rechnung,
+// sondern das Fuellen und Nachziehen eines Streckenzugs mit bis zu
+// 4000 Punkten (grenze = 3 Punkte je Bildpunkt), von denen die meisten
+// auf Zylinderflaechen kollinear sind. Douglas-Peucker im SCHIRMRAUM mit
+// 0,35 Bildpunkt Toleranz behaelt jede Kante (der Abstandstest laesst
+// senkrechte Flanken stehen) und wirft nur, was kein Auge sieht. Das
+// FELD bleibt unangetastet - Kollisionspruefung und Massbericht rechnen
+// nicht auf dem Bild. Nur ab 900 px (Regel 3: am Handy kein Pixel).
+const HF_VEREINF_PX=0.35;
+function hfZugVereinfachen(pts, tolPx){
+  if(!pts || pts.length<3) return pts;
+  // Abbildung einmal (affin), nicht je Punkt - s. worldPath.
+  const o=toScreen(0,0), ez=toScreen(1,0), ex=toScreen(0,1);
+  const azx=ez[0]-o[0], azy=ez[1]-o[1], axx=ex[0]-o[0], axy=ex[1]-o[1];
+  const S=pts.map(p=>[o[0]+p.z*azx+p.x*axx, o[1]+p.z*azy+p.x*axy]);
+  const keep=new Uint8Array(pts.length); keep[0]=1; keep[pts.length-1]=1;
+  const stack=[[0,pts.length-1]];
+  while(stack.length){
+    const seg=stack.pop(), a=seg[0], b=seg[1];
+    if(b-a<2) continue;
+    const ax=S[a][0], ay=S[a][1], dx=S[b][0]-ax, dy=S[b][1]-ay, L=Math.hypot(dx,dy);
+    let best=-1, bi=-1;
+    for(let i=a+1;i<b;i++){
+      const px=S[i][0]-ax, py=S[i][1]-ay;
+      const d = L>1e-9 ? Math.abs(px*dy-py*dx)/L : Math.hypot(px,py);
+      if(d>best){ best=d; bi=i; }
+    }
+    if(best>tolPx){ keep[bi]=1; stack.push([a,bi]); stack.push([bi,b]); }
+  }
+  const out=[]; for(let i=0;i<pts.length;i++) if(keep[i]) out.push(pts[i]);
+  return out;
+}
 function hfMaterialMalen(){
   matCtx.setTransform(1,0,0,1,0,0);
   matCtx.clearRect(0,0,matCv.width,matCv.height);
@@ -29407,8 +29716,10 @@ function hfMaterialMalen(){
   // Dichter als ein Punktepaar je Bildpunkt: kostet wenig und laesst
   // Absaetze auch dann stehen, wenn sie zwischen zwei Bildpunkte fallen.
   const grenze=Math.max(400, (cv.width||800)*3);
-  const aussen=hfSilhouette(hf, view.zMin-rand, view.zMax+rand, grenze);
+  let aussen=hfSilhouette(hf, view.zMin-rand, view.zMax+rand, grenze);
   if(aussen.length<2) return;
+  const vereinf=(typeof window!=='undefined' && window.innerWidth>=900);
+  if(vereinf) aussen=hfZugVereinfachen(aussen, HF_VEREINF_PX*(window.devicePixelRatio||1));
   const g=matCtx.createLinearGradient(0,0,0,matCv.height);
   g.addColorStop(0,'#c9d2da'); g.addColorStop(0.5,'#aab6c0'); g.addColorStop(1,'#8d9aa5');
   matCtx.fillStyle=g;
@@ -29432,7 +29743,8 @@ function hfMaterialMalen(){
   if(showMirror) flaeche(aussen, -1);
   // Bohrung/Ausdrehung wieder herausnehmen. Nur wenn es sie gibt —
   // sonst kostet die Vollbild-Komposition ohne Wirkung.
-  const innen=hfInnenzug(hf, view.zMin-rand, view.zMax+rand, grenze);
+  let innen=hfInnenzug(hf, view.zMin-rand, view.zMax+rand, grenze);
+  if(vereinf) innen=hfZugVereinfachen(innen, HF_VEREINF_PX*(window.devicePixelRatio||1));
   // Hohlräume zwischen getrennten Ringen ebenfalls herausnehmen — s.
   // hfHohlraeume(). Beides in EINEM destination-out-Durchgang, weil die
   // Vollbild-Komposition der teure Teil ist, nicht das Polygon.
@@ -29972,12 +30284,21 @@ function buildLeftover(){
   // Bohrung mit weg.
   // Ohne Innenbearbeitung liefert innenAt ueberall 0, dann ist der Ring
   // die Vollflaeche und alles verhaelt sich wie vorher.
-  const part=[];
-  for(let z=ziel.zHi; z>=ziel.zLo-1e-9; z-=0.25){
-    const a=ziel.at(z);
-    part.push({z, x:(a===null)?0:a});
+  // POLYGON JE SOLLHUELLE NUR EINMAL [Daniel, 09.09.2026: 2D ruckelt am
+  // Laptop]: die Huelle aendert sich waehrend eines Laufs nicht, ihre
+  // Abtastung in 0,25-mm-Schritten (Rotorwelle: 144 ms) lief aber bei
+  // jedem Neuaufbau der Ebene, also alle 120 ms. Der Streckenzug haengt
+  // jetzt am Huellenobjekt; ein neues Programm bringt ein neues Objekt.
+  let part=ziel._leftPart;
+  if(!part){
+    part=[];
+    for(let z=ziel.zHi; z>=ziel.zLo-1e-9; z-=0.25){
+      const a=ziel.at(z);
+      part.push({z, x:(a===null)?0:a});
+    }
+    for(let z=ziel.zLo; z<=ziel.zHi+1e-9; z+=0.25) part.push({z, x:ziel.innenAt(z)});
+    ziel._leftPart=part;
   }
-  for(let z=ziel.zLo; z<=ziel.zHi+1e-9; z+=0.25) part.push({z, x:ziel.innenAt(z)});
   const st=stockModel();
   leftCtx.save();
   leftCtx.globalCompositeOperation='destination-out';
@@ -30006,13 +30327,18 @@ function buildGouge(){
   if(!ziel) return;
   const tol=0.15, tiefe=1.8;   // Durchmessermass: Band [ziel-1.8 .. ziel-0.15]
   gougeCtx.fillStyle='rgba(222,28,22,0.88)';
+  // POLYGONE JE SOLLHUELLE NUR EINMAL [Daniel, 09.09.2026: 2D ruckelt am
+  // Laptop]: die rote Bandflaeche haengt nur an der Huelle; ihre Abtastung
+  // kostete an der Rotorwelle 169 ms je Neuaufbau. Gemerkt am Huellen-
+  // objekt, gemalt wird jedes Mal, gerechnet nur beim ersten Mal.
+  let polys=ziel._gougePolys;
+  if(!polys){ polys=[]; ziel._gougePolys=polys;
   let run=null;
   const flush=()=>{
     if(!run || run.length<2){ run=null; return; }
     const poly=[...run.map(p2=>({z:p2.z, x:p2.oben})),
                 ...run.slice().reverse().map(p2=>({z:p2.z, x:p2.unten}))];
-    worldPath(gougeCtx, poly, false); gougeCtx.fill();
-    if(showMirror){ worldPath(gougeCtx, poly.map(p2=>({z:p2.z,x:-p2.x})), false); gougeCtx.fill(); }
+    polys.push(poly);
     run=null;
   };
   // SENKRECHTE FLANKEN AUSNEHMEN [Daniel, Screenshot: feine rote Striche
@@ -30066,6 +30392,11 @@ function buildGouge(){
     }
     flush();
   }
+  }
+  polys.forEach(poly=>{
+    worldPath(gougeCtx, poly, false); gougeCtx.fill();
+    if(showMirror){ worldPath(gougeCtx, poly.map(p2=>({z:p2.z,x:-p2.x})), false); gougeCtx.fill(); }
+  });
   gougeCtx.save();
   gougeCtx.globalCompositeOperation='destination-out';
   gougeCtx.drawImage(matCv,0,0);
