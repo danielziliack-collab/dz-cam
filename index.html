@@ -1602,6 +1602,18 @@ body.dunkel .rz-leiste{background:var(--panel);border-color:var(--line);}
 body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(--line);}
 /* Zeichenflaechen-Rahmen: der Canvas fuellt sich selbst weiss —
    der Rand um ihn darf dunkel sein, das liest sich als Viewport. */
+/* ZWISCHENSCHRITT-MASKE [Daniel, 10.09.2026]: Haekchenliste der M-Befehle
+   (eine Zeile je Befehl, Belegmarke rechts) und die Vorlagen-Knoepfe.
+   Neue Maske - aendert an den bestehenden kein Pixel. */
+.zw-mbox{display:flex;flex-direction:column;gap:2px;padding:2px 0 6px;}
+.zw-mbox .zw-m{display:flex;align-items:center;gap:8px;font-size:14px;padding:5px 2px;border-bottom:1px solid hsl(var(--ton),18%,90%);}
+.zw-mbox .zw-m b{min-width:38px;font-variant-numeric:tabular-nums;}
+.zw-mbox .zw-m span:first-of-type{flex:1 1 auto;min-width:0;}
+.zw-mbox .zw-m .beleg{font-size:10.5px;color:var(--text-dim);white-space:nowrap;}
+.zw-vorlagen{flex-wrap:wrap;gap:6px;}
+.zw-vorlagen .gcbtn{flex:1 1 auto;padding:7px 8px;font-size:13px;}
+body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
+
 @media(min-width:900px){
     /* Arbeitsplanzeile bleibt am Desktop EINZEILIG. Dort ist Platz
        genug fuer Symbol, Name, Detailtext und alle sieben Knoepfe; der
@@ -2164,6 +2176,16 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
        Maske, unter dem Meldebanner (950). Am Handy sind die Masken z 5,
        dort war es nie ein Problem. */
     #baPanel{z-index:940;}
+
+    /* (27) ZYKLEN-SPALTE MIT ZWISCHENSCHRITT [10.09.2026 abends]: mit dem
+       neunten Zyklusknopf (Bemerkung / M-Befehl) hat die Spalte im
+       Arbeitsplan 12 Knoepfe und 2 Gruppenzeilen - bei 52 px je Knopf
+       ragten der neunte und "Schritt loeschen" bei 1366x768 unter den
+       Rand (Aufnahme laptop2/v16). Dieselbe Verdichtung wie im Editor
+       (Punkt 8: 46 px, knappes Polster), und die Spalte scrollt notfalls,
+       statt Knoepfe zu verschlucken. Nur ab 900 px. */
+    body.mode-arbeitsplan .softkeys{overflow-y:auto;gap:2px;}
+    body.mode-arbeitsplan .sk{min-height:46px;padding:1px 3px;gap:2px;}
 
     /* (22) MASKEN ALS VOLLBILD [Daniel, 09.09.2026 abends: "in dem Moment,
        wo ich die Maske eintrage, interessiert mich nicht, was im
@@ -3040,6 +3062,25 @@ body.dunkel .rz-taste{background:var(--key);color:var(--text);border-color:var(-
                  Reihenfolge und mit "Abbruch" statt "Abbrechen".
                  Jetzt das Muster der sieben Geschwister. -->
             <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnAbOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnAbCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
+          </div>
+        </div>
+        <!-- ZWISCHENSCHRITT Bemerkung / M-Befehl [Daniel, 10.09.2026 abends]:
+             kein Zyklus - ein Baustein zwischen zwei Schritten, der eine
+             Bemerkung ins NC schreibt und/oder M-Befehle setzt (Messhalt,
+             Kuehlmittel, Spindel). Die M-Liste baut zwischenMBoxBauen aus
+             M_BEFEHLE (DV 610 Kap. 4.1); die Liste ist die Ausgabefolge. -->
+        <div class="mask" id="maskZwischen">
+          <div class="mask-head"><span class="mtitel" title="Bemerkung / M-Befehl zwischen zwei Schritten">Bemerkung / M-Befehl</span></div>
+          <div class="mask-body">
+            <div class="msec">Bemerkung (steht als Kommentar im NC)</div>
+            <div class="mrow"><label>Text</label><input type="text" id="zwText" maxlength="120" placeholder="z. B. Mass pruefen, Backen loesen" autocomplete="off" autocorrect="off" style="flex:1 1 auto;min-width:0;width:auto;"></div>
+            <div class="msec">M-Befehle (Ausgabe in dieser Reihenfolge)</div>
+            <div id="zwMBox" class="zw-mbox"></div>
+            <div class="mrow"><label>weiterer M-Befehl (Nummer)</label><input type="number" id="zwFrei" min="0" max="999" step="1" placeholder="frei" style="width:68px;"><span class="unit"></span></div>
+            <div class="mrow"><label>vorher zum Wechselpunkt XT/ZT fahren</label><input type="checkbox" id="zwWwp"></div>
+            <div class="msec">Vorlagen</div>
+            <div class="mrow zw-vorlagen"><button class="gcbtn" data-zwv="mess">Messhalt (M09 M05 M00, Wechselpunkt)</button><button class="gcbtn" data-zwv="kuehl">Kuehlmittel aus (M09)</button><button class="gcbtn" data-zwv="spindel">Spindel halt (M05)</button><button class="gcbtn" data-zwv="leer">alles aus</button></div>
+            <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnZwOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnZwCancel" style="flex:1 1 auto;min-width:0;padding:9px;">Abbrechen</button></div>
           </div>
         </div>
         <div class="mask" id="maskBohren">
@@ -4060,6 +4101,37 @@ erzeugt aber kein NC.</dd>
 <dd>Auf Programmebene: ein &uuml;bernommener Zyklus, ein Import, ein Vorschlag
 l&auml;sst sich zur&uuml;cknehmen. Ein einzelner Feldwechsel in der offenen Maske ist
 nicht einzeln r&uuml;cknehmbar &mdash; Abbrechen verwirft die Maske.</dd>
+<dt id="ba-ap-zwischen">Bemerkung / M-Befehl zwischen zwei Schritten</dt>
+<dd>Softkey <b>Zyklen &rarr; Bemerkung / M-Befehl</b> (seit 10.09.2026). Der Baustein
+landet wie ein Zyklus hinter dem angew&auml;hlten Schritt und l&auml;sst sich genauso
+ordnen, stilllegen und l&ouml;schen &mdash; nur bewegt er nichts. <b>Bemerkung:</b> der
+Text steht an seiner Stelle als Kommentarzeile <code>(BEMERKUNG: ...)</code> im NC,
+etwa &bdquo;Mass pr&uuml;fen&ldquo; oder &bdquo;Backen l&ouml;sen&ldquo;; Klammern im Text werden zu
+Bindestrichen (die Steuerung schlie&szlig;t den Kommentar an der ersten Klammer),
+Umlaute werden ersetzt. <b>M-Befehle:</b> H&auml;kchen in der Liste, jeder wird ein eigener
+Satz <code>(M-BEFEHL) Mxx</code>, immer in der Reihenfolge der Liste &mdash;
+K&uuml;hlmittel, Spindel, Halt (DV 610-0C Kap. 4.1, Seiten 4-1 bis 4-3; gilt f&uuml;r beide
+Maschinen). Ein <b>Messhalt</b> ist die Vorlage: M09 K&uuml;hlmittel aus, M05 Spindel halt,
+M00 Programm halt, dazu vorher die Fahrt zum Wechselpunkt XT/ZT &mdash; das Werkzeug
+steht dann aus dem Weg, du misst, NC-Start setzt fort. Der n&auml;chste Werkzeugaufruf
+schreibt M03 und M07 ohnehin wieder ins Programm: <b>K&uuml;hlmittel an nach jedem
+Werkzeugaufruf bleibt die Vorgabe</b>, ein M09 hier gilt bis dahin. Die Liste:
+<table style="border-collapse:collapse;margin:6px 0;"><tr><th style="text-align:left;padding:2px 8px 2px 0;">M</th><th style="text-align:left;padding:2px 8px;">Wirkung</th><th style="text-align:left;padding:2px 8px;">Beleg</th></tr>
+<tr><td>M09</td><td style="padding:2px 8px;">K&uuml;hlmittel aus (wirkt bei Satzende)</td><td style="padding:2px 8px;">aus der App gefahren, beide Maschinen</td></tr>
+<tr><td>M07 / M08</td><td style="padding:2px 8px;">K&uuml;hlmittel 1 / 2 ein (bei Satzanfang)</td><td style="padding:2px 8px;">M07 gefahren; M08 Handbuch</td></tr>
+<tr><td>M05</td><td style="padding:2px 8px;">Spindel halt (bei Satzende)</td><td style="padding:2px 8px;">gefahren, beide Maschinen</td></tr>
+<tr><td>M03 / M04</td><td style="padding:2px 8px;">Spindel rechts / links (bei Satzanfang)</td><td style="padding:2px 8px;">M03 gefahren; M04 Handbuch</td></tr>
+<tr><td>M19</td><td style="padding:2px 8px;">Spindel halt in definierter Winkellage (SPOS am Pult, Men&uuml; Spindel)</td><td style="padding:2px 8px;">Handbuch 4.1.10</td></tr>
+<tr><td>M00</td><td style="padding:2px 8px;">Programm halt bei Satzende, weiter mit NC-Start</td><td style="padding:2px 8px;">Handbuch 4.1.2 (1500er IBN.PAR nennt ihn)</td></tr>
+<tr><td>M01</td><td style="padding:2px 8px;">wahlweiser Halt &mdash; nur, wenn &bdquo;Wahlweise Halt&ldquo; am Pult aktiv ist</td><td style="padding:2px 8px;">Handbuch 4.1.3</td></tr>
+</table>
+Ein <b>weiterer M-Befehl</b> (Nummer) geht als <code>Mnn</code> hinten dran und bekommt in der
+Ampel den Hinweis, dass er nicht in der Liste steht (Getriebestufen M40&ndash;M49 und
+die freien Gruppen h&auml;ngen am PLC-Programm der Maschine). M30 schreibt das
+Programmende selbst, M02 und die Spindel-2-Befehle (M33&ndash;M36, keine angetriebenen
+Werkzeuge) werden nicht angeboten. Die Simulation &uuml;berliest die S&auml;tze; ein
+M00 kostet keine Hauptzeit, die Messzeit tr&auml;gst du in der Kalkulation als
+Nebenzeit ein.</dd>
 </dl>
 <h3 id="ba-k06-ablage">Programme und Ablage</h3>
 <dl>
@@ -8307,6 +8379,9 @@ function renderSoftkeys(){
       add('yellow',SK_ICONS.zyAbstechen,'Abstechen',()=>openAbstechenMask());
       add('yellow',SK_ICONS.zyBohren,'Bohren',()=>openBohrenMask());
       add('yellow',SK_ICONS.zyGewinde,'Gewinde',()=>openGewindeMask());
+      // ZWISCHENSCHRITT [Daniel, 10.09.2026 abends]: Bemerkung oder
+      // M-Befehle (Messhalt, Kuehlmittel, Spindel) zwischen zwei Zyklen.
+      add('yellow','<b style="font-size:15px;line-height:1;">M</b>','Bemerkung /<br>M-Befehl',()=>openZwischenMask());
       const spacer=document.createElement('div'); spacer.className='sk-spacer'; skCol.appendChild(spacer);
       add('','🗑','Schritt<br>löschen',()=>deleteSelectedStep(), selStepIdx<0);
     }
@@ -11027,6 +11102,10 @@ function editStep(i){
     document.getElementById('maskGewinde').classList.add('show');
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskGewinde'); }catch(e){}
+  } else if(st.type==='zwischen'){
+    zwischenFuellen(p);
+    document.getElementById('maskZwischen').classList.add('show');
+    try{ maskeSichtbarPruefen('maskZwischen'); }catch(e){}
   }
 }
 // Nimmt einen Schritt entweder neu auf oder ersetzt den gerade bearbeiteten.
@@ -12337,6 +12416,57 @@ document.getElementById('abZ0').addEventListener('input',()=>{
   }catch(e){}
 });
 document.getElementById('btnAbCancel').onclick=()=>{ editStepIdx=-1; document.getElementById('maskAbstechen').classList.remove('show'); };
+
+// ---- Bemerkung / M-Befehl zwischen zwei Schritten [Daniel, 10.09.2026] ----
+// Eigener Schritttyp 'zwischen' (kein Zyklus, kein Werkzeug): Textfeld
+// fuer die Bemerkung, Haekchenliste der M-Befehle aus M_BEFEHLE (Liste =
+// Ausgabefolge), ein freies M-Wort, Wechselpunkt-Anfahrt und Vorlagen
+// (Messhalt = M09 M05 M00 + Wechselpunkt). Die Liste wird beim Oeffnen
+// gebaut, damit Belegmarken und Profil stimmen.
+function zwischenMBoxBauen(sel){
+  const box=document.getElementById('zwMBox'); if(!box) return;
+  const gew=sel||[];
+  box.innerHTML=(typeof M_BEFEHLE!=='undefined'?M_BEFEHLE:[]).map(e=>
+    '<label class="zw-m"><input type="checkbox" class="zwM" value="'+e.m+'"'+(gew.includes(e.m)?' checked':'')+'> <b>'+e.m+'</b> <span>'+e.txt+'</span><span class="beleg">'+(e.gefahren?'aus der App gefahren':'Handbuch DV 610 Kap. 4.1')+'</span></label>').join('');
+}
+function zwischenLesen(){
+  const box=document.getElementById('zwMBox');
+  const m=box && box.querySelectorAll ? [...box.querySelectorAll('.zwM')].filter(c=>c.checked).map(c=>c.value) : [];
+  return { text: String((document.getElementById('zwText')||{}).value||'').trim(),
+           m, mFrei: String((document.getElementById('zwFrei')||{}).value||'').trim(),
+           wwp: (document.getElementById('zwWwp')||{}).checked ? 'ja' : 'nein' };
+}
+function zwischenFuellen(p){
+  p=p||{};
+  setVal('zwText', p.text||'');
+  zwischenMBoxBauen(p.m||[]);
+  setVal('zwFrei', p.mFrei||'');
+  const w=document.getElementById('zwWwp'); if(w) w.checked=(p.wwp==='ja');
+}
+function openZwischenMask(){
+  editStepIdx=-1;
+  zwischenFuellen({text:'', m:[], mFrei:'', wwp:'nein'});
+  document.getElementById('maskZwischen').classList.add('show');
+  try{ maskeSichtbarPruefen('maskZwischen'); }catch(e){}
+}
+document.getElementById('btnZwOk').onclick=()=>{
+  const params=zwischenLesen();
+  commitStep('zwischen', params);
+  document.getElementById('maskZwischen').classList.remove('show');
+  refreshAll();
+};
+document.getElementById('btnZwCancel').onclick=()=>{ editStepIdx=-1; document.getElementById('maskZwischen').classList.remove('show'); };
+(function(){
+  const box=document.getElementById('maskZwischen');
+  const kn=(box && box.querySelectorAll) ? box.querySelectorAll('[data-zwv]') : [];
+  [...kn].forEach(b=>b.addEventListener('click',()=>{
+    const v=b.dataset.zwv;
+    const sel={mess:['M09','M05','M00'], kuehl:['M09'], spindel:['M05'], leer:[]}[v]||[];
+    zwischenMBoxBauen(sel);
+    const w=document.getElementById('zwWwp'); if(w) w.checked=(v==='mess');
+    if(v==='leer') setVal('zwFrei','');
+  }));
+})();
 document.getElementById('btnAbOk').onclick=()=>{
   if(pflichtMeldung([['abZ0','Z0 Abstichlage'],['abX0','X0 Rohteil-⌀']])) return;
   const params={
@@ -13123,6 +13253,13 @@ function refreshArbeitsplan(){
     } else if(st.type==='gewinde'){
       icon='G'; name='Gewinde Längs'; detail=`${p.lage} · ⌀${p.x0}${p.form==='kegel'?'→⌀'+p.x1+' kegelig':''} × P${p.p} · Z${p.z0}→Z${p.z1} · ${bearbWort}ND${p.nd}${p.n>1?' · '+p.n+'-gängig':''} · T${p.t}`;
     }
+    if(st.type==='zwischen'){
+      // ZWISCHENSCHRITT [Daniel, 10.09.2026]: Bemerkung in Anfuehrungszeichen,
+      // die M-Woerter in Ausgabefolge, Pfeil wenn vorher zum Wechselpunkt.
+      const ms=(typeof zwischenMListe==='function')? zwischenMListe(p) : (p.m||[]);
+      icon='M'; name=(p.text? 'Bemerkung' : 'M-Befehl');
+      detail=[p.text? '\u201e'+String(p.text).slice(0,60)+'\u201c' : '', ms.join(' '), p.wwp==='ja'? '\u2192 XT/ZT' : ''].filter(Boolean).join(' \u00b7 ');
+    }
     // Piktogramm je Zyklustyp — dieselbe Bildsprache wie auf den Auswahl-Kacheln.
     const apIcon = {abspanen_einfach:'schruppen', abspanen_kontur:'konturparallel',
                     einstechen:'einstich', bohren:'bohren', gewinde:'gewindezug',
@@ -13157,7 +13294,7 @@ function refreshArbeitsplan(){
       <div class="ap-ordzeile">
       <button class="ap-ord" data-up="${i}" title="nach oben"${i===0?' disabled':''}>▲</button>
       <button class="ap-ord" data-dn="${i}" title="nach unten"${i===programSteps.length-1?' disabled':''}>▼</button>
-      <button class="ap-ord" data-sim="${i}" title="ab hier simulieren"${st.aus?" disabled":""}>▶</button>
+      <button class="ap-ord" data-sim="${i}" title="ab hier simulieren"${(st.aus||st.type==='zwischen')?" disabled":""}>▶</button>
       <button class="ap-ord" data-dup="${i}" title="verdoppeln">⧉</button>
       <button class="ap-ord${st.aus?' an':''}" data-aus="${i}" title="${st.aus?'wieder aktivieren':'stilllegen'}">${st.aus?'○':'●'}</button>
       </div>
@@ -15008,7 +15145,8 @@ const BA_MASKE={
   maskAbstechen:'ba-k05-abstechen', maskBohren:'ba-k05-bohren',
   maskGewinde:'ba-k05-gewinde', maskWerkzeuge:'ba-k11',
   maskProgramme:'ba-k06-ablage', maskStart:'ba-k03-elemente',
-  maskGerade:'ba-k03-elemente', maskKreis:'ba-k03-elemente'
+  maskGerade:'ba-k03-elemente', maskKreis:'ba-k03-elemente',
+  maskZwischen:'ba-ap-zwischen'
 };
 // Ein Klick aufs LABEL springt in die Anleitung — der Klick ins Feld
 // bleibt Eingabe. Delegiert, damit auch spaeter ergaenzte Zeilen
@@ -20808,6 +20946,31 @@ const MASCHINEN_PROFILE = {
     ],
   }),
 };
+// M-BEFEHLE FUER ZWISCHENSCHRITTE [Daniel, 10.09.2026 abends: "keine
+// Moeglichkeit, zwischen zwei Arbeitsschritten eine Bemerkung einzugeben ...
+// keine M-Befehle ... Spindelhalt, wenn ich messen muss ... gleich eine
+// Auflistung, welche M-Befehle moeglich sind"]. Quelle: DV 610-0C Kap. 4.1
+// (Seiten 4-1..4-3; gilt fuer den MTC-Dialekt beider Maschinen): Gruppe 30
+// satzweise (M00/M01/M02/M30), 31 Spindel 1 (M03/M04/M05/M19), 32
+// Kuehlmittel (M07/M08/M09), 33 Getriebestufen (M40..M49), 34 Spindel 2
+// (M33..M36 - keine angetriebenen Werkzeuge, nicht angeboten). GEFAHREN =
+// aus App-Programmen an der Maschine gelaufen (1500er 03.09.2026, 1000er
+// 09./10.09.2026: M03/M05/M07/M09 stehen in jedem Kopf und jeder Abfahrt);
+// Daniels eigene 1000er-Programme nutzen dieselben vier plus M30, die
+// 1500er-Datendiskette nennt in IBN.PAR M00/M03/M04/M05/M40-42. Die
+// Reihenfolge der Liste IST die Ausgabereihenfolge: Kuehlmittel, Spindel,
+// Halt - so wird aus M09+M05+M00 der Messhalt in der richtigen Folge.
+const M_BEFEHLE=[
+  {m:'M09', txt:'Kuehlmittel aus',                          gefahren:true},
+  {m:'M07', txt:'Kuehlmittel 1 ein',                        gefahren:true},
+  {m:'M08', txt:'Kuehlmittel 2 ein',                        gefahren:false},
+  {m:'M05', txt:'Spindel halt',                             gefahren:true},
+  {m:'M03', txt:'Spindel rechts (Uhrzeigersinn)',           gefahren:true},
+  {m:'M04', txt:'Spindel links (Gegenuhrzeigersinn)',       gefahren:false},
+  {m:'M19', txt:'Spindel halt in Winkellage (SPOS am Pult)', gefahren:false},
+  {m:'M00', txt:'Programm halt - weiter mit NC-Start',      gefahren:false},
+  {m:'M01', txt:'Wahlweiser Halt (nur wenn am Pult aktiv)', gefahren:false},
+];
 let MASCHINENPROFIL = MASCHINEN_PROFILE.MONFORTS_1500_EUROTURN;
 document.addEventListener('DOMContentLoaded', ()=>{
   const sel=document.getElementById('maschProfilSel');
@@ -20959,6 +21122,7 @@ const PP_FEST=[
   'D Zustelltiefe und UX Aufmass gelten RADIAL (ap, je Seite); axiale Werte (Planzustellung, UZ) 1:1.',
   'Schneidenradiuskorrektur automatisch: Schruppen ohne, Schlichten G41/G42 nach Lage.',
   'NMAX-Drehzahlgrenze (Programmkopf): jede G96-Anwahl steht als G97 S<NMAX>, G96 erst vor dem ersten Satz, dessen Start und Ziel ueber dem Grenz-Durchmesser liegen; unter der Klemme keine S-Woerter (10.09.2026: Alarm 007 an der 1000er, G96 am kleinen X angewaehlt). Leer = keine Wache, die Ampel sagt es an.',
+  'Zwischenschritt Bemerkung / M-Befehl (Arbeitsplan, Softkey Zyklen): die Bemerkung steht als Kommentarzeile (BEMERKUNG: ...) an ihrer Stelle im NC, M-Befehle einzeln als (M-BEFEHL)-Saetze in fester Folge Kuehlmittel, Spindel, Halt (DV 610 Kap. 4.1); wahlweise vorher zum Wechselpunkt. Der naechste Werkzeugaufruf schreibt M03/M07 wieder - Kuehlmittel an bleibt die Vorgabe.',
   'WIEDEREINSTIEG: nach jedem T-Aufruf stehen G94-Eilgangvorschub, Drehzahl, M03/M07 und G95-F neu im Programm — ein Satzvorlauf mitten hinein findet alles Modale vor (Daniels Ansage; G94-F belegt am Originalprogramm 01.10.2025).',
 ];
 // =================================================================
@@ -27290,6 +27454,23 @@ function nmaxWache(lines, warnings){
     out.forEach(z=>lines.push(z));
   }
 }
+// ZWISCHENSCHRITT [Daniel, 10.09.2026 abends]: Bemerkungstext fuer das NC
+// (keine Klammern - die Steuerung schliesst den Kommentar an der ersten
+// ')', s. Fehler 153 am selben Tag; Umlaute ersetzt die Endstufe von
+// buildProgram) und die geordnete M-Liste: nur bekannte Woerter aus
+// M_BEFEHLE in Listenfolge, ein freies M-Wort (Nummer) hinten dran.
+function zwischenText(s){
+  return String(s||'').replace(/[()]/g,'-').replace(/[\r\n\t]+/g,' ').replace(/\s{2,}/g,' ').trim().slice(0,120);
+}
+function zwischenMListe(q){
+  q=q||{};
+  const tab=(typeof M_BEFEHLE!=='undefined') ? M_BEFEHLE : [];
+  const gew=(q.m||[]).map(m=>String(m).toUpperCase().replace(/^M0?(\d)$/,'M0$1'));
+  const aus=tab.map(e=>e.m).filter(m=>gew.includes(m));
+  const frei=String(q.mFrei||'').trim().toUpperCase().replace(/^M/,'');
+  if(/^\d{1,3}$/.test(frei)){ const mw='M'+frei.padStart(2,'0'); if(!aus.includes(mw)) aus.push(mw); }
+  return aus;
+}
 function buildProgram(){
   const warnBox=document.getElementById('warnBox');
   warnBox.style.display='none';
@@ -27472,6 +27653,11 @@ function buildProgram(){
       name = 'GEWINDE';
       info = '\u2300'+fmt(q.x0)+' x P'+fmt(q.p)+' · Z'+fmt(q.z0)+' -> Z'+fmt(q.z1);
     }
+    if(st.type==='zwischen'){
+      const ms=zwischenMListe(q);
+      name = ms.length ? 'ZWISCHENSCHRITT' : 'BEMERKUNG';
+      info = ms.join(' ');
+    }
     // Der Kopfkommentar nennt die T-Nummer des MASCHINENRUFS (Platz),
     // dieselbe Aufloesung wie der T-Satz — sonst stuende im Kopf T21
     // und im Satz T14 [05.09.2026]. Fuer Lagerwerkzeuge (alle Demos)
@@ -27480,6 +27666,9 @@ function buildProgram(){
     return '(=== SCHRITT '+nr+': '+name+wz+(info?' | '+info:'')+' ===)';
   };
   let vorherigerSchritt = null;
+  // Ein Zwischenschritt mit Wechselpunkt-Anfahrt steht schon dort - der
+  // Werkzeugwechsel des naechsten Zyklus faehrt nicht noch einmal hin.
+  let schonAmWWP=false;
   // =================================================================
   // STILLGELEGTE SCHRITTE [Daniel, Punkt 13]
   // -----------------------------------------------------------------
@@ -27499,11 +27688,34 @@ function buildProgram(){
   SCHRITT_INDEX = aktiveSchritte.map(s2=>programSteps.indexOf(s2));
   aktiveSchritte.forEach((st,idx)=>{
     const neuT = st.params && st.params.t !== undefined ? String(st.params.t) : aktT;
-    if(neuT !== aktT){ if(aktT!==null) wechselAbfahrt(zuerstZ(vorherigerSchritt)); aktT = neuT; }
+    if(neuT !== aktT){ if(aktT!==null && !schonAmWWP) wechselAbfahrt(zuerstZ(vorherigerSchritt)); aktT = neuT; }
     if(st.params && st.params.t2 !== undefined) aktT = String(st.params.t2);
     // Sprechende Schrittueberschrift [Daniel, Lesbarkeit]: Typ, Werkzeug
     // und Kerndaten auf einen Blick.
     lines.push(schrittKopf(idx+1, st, idx));
+    // ZWISCHENSCHRITT [Daniel, 10.09.2026 abends]: Bemerkung als Kommentar,
+    // M-Befehle einzeln als (M-BEFEHL)-Saetze in Listenfolge (Kuehlmittel,
+    // Spindel, Halt). Mit 'vorher zum Wechselpunkt' faehrt die Abfahrt des
+    // Werkzeugwechsels (M09, M05, XT/ZT) vorweg - dann entfallen M09/M05
+    // aus der Liste, und der naechste Werkzeugaufruf faehrt nicht noch
+    // einmal hin (schonAmWWP). Kein Werkzeug, kein Reststand, keine
+    // Spannbereichs-Pruefung: der Schritt bewegt nichts; vorherigerSchritt
+    // bleibt der letzte Zyklus (Abfahrtreihenfolge aussen/innen).
+    if(st.type==='zwischen'){
+      const q=st.params||{};
+      const txt=zwischenText(q.text);
+      let ms=zwischenMListe(q);
+      if(txt) lines.push('(BEMERKUNG: '+txt+')');
+      if(q.wwp==='ja'){
+        if(aktT!==null){ wechselAbfahrt(zuerstZ(vorherigerSchritt)); schonAmWWP=true; }
+        ms=ms.filter(m=>m!=='M09' && m!=='M05');
+      }
+      ms.forEach(m=>{ lines.push(N()+' (M-BEFEHL) '+m); bump(); });
+      const bekannt=(typeof M_BEFEHLE!=='undefined')? M_BEFEHLE.map(e=>e.m) : [];
+      ms.filter(m=>!bekannt.includes(m)).forEach(m=>warnings.push('Schritt '+(idx+1)+': '+m+' steht nicht in der M-Liste (DV 610 Kap. 4.1) - an der Maschine unbelegt, Wirkung haengt am PLC-Programm.'));
+      if(!txt && !ms.length && q.wwp!=='ja') warnings.push('Schritt '+(idx+1)+' (Bemerkung / M-Befehl) ist leer und erzeugt nichts.');
+      return;
+    }
     // SPANNBEREICH [Daniel, Futter-Paket]: Bearbeitung nahe/hinter der
     // Backenfront (Rohstirn - Ausspannlaenge) wird gewarnt.
     //
@@ -27684,7 +27896,7 @@ function buildProgram(){
     else if(st.type==='freistich') genFreistich(st.params, N, bump, lines, warnings);
     else if(st.type==='bohren') genBohren(st.params, N, bump, lines, warnings);
     else if(st.type==='gewinde') genGewinde(st.params, N, bump, lines, warnings);
-      vorherigerSchritt = st;
+      vorherigerSchritt = st; schonAmWWP=false;
   });
 
 
@@ -29209,7 +29421,7 @@ function einrichteBlattText(){
     const p=s.params||{};
     const t=[p.t, p.t2].filter(v=>v!==undefined && v!=='').map(v=>'T'+v).join(' / ');
     const zeit=(D.hz && D.hz.proSchritt[i]!==undefined)?fmtZeit(D.hz.proSchritt[i]):'—';
-    L.push('  '+String(nr).padStart(2)+'  '+String(s.type).replace(/_/g,' ').padEnd(18)+
+    L.push('  '+String(nr).padStart(2)+'  '+(s.type==='zwischen'? 'Bemerkung/M' : String(s.type).replace(/_/g,' ')).padEnd(18)+
            ' '+t.padEnd(12)+' ⏱ '+zeit);
   });
   const still=programSteps.filter(s=>s.aus).length;
