@@ -27692,6 +27692,13 @@ function buildProgram(){
   // Spindel halt — der Revolver schwenkt NIE im Arbeitsraum. Gilt auch
   // vor dem ersten Werkzeug (Startlage unbekannt).
   // =========================================================
+  // aktT ist seit dem 10.09.2026 der zuletzt GERUFENE Werkzeugsatz (tSatz-
+  // String, aus den erzeugten Saetzen gelesen), nicht mehr die Parameter-
+  // annahme: vorher galt nach jedem Schritt mit T2 das T2 als aktiv, auch
+  // wenn nur geschruppt und T2 nie gerufen wurde - beim Schmiedeteil folgte
+  // auf T10 der Schritt mit T12 OHNE Abfahrt, der Wechsel stand im
+  // Arbeitsraum. Daniels Ansage: vor jedem echten Werkzeugwechsel zum
+  // Wechselpunkt. Bei Multifix wechselt er von Hand - dort muss Platz sein.
   let aktT = null;
   // Wechselpunkt aus dem PROGRAMMKOPF (aufspannungsabhaengig, [Daniel]);
   // Profilwert nur als Rueckfall.
@@ -27776,9 +27783,9 @@ function buildProgram(){
   const aktiveSchritte = programSteps.filter(s2=>!(s2 && s2.aus));
   SCHRITT_INDEX = aktiveSchritte.map(s2=>programSteps.indexOf(s2));
   aktiveSchritte.forEach((st,idx)=>{
-    const neuT = st.params && st.params.t !== undefined ? String(st.params.t) : aktT;
-    if(neuT !== aktT){ if(aktT!==null && !schonAmWWP) wechselAbfahrt(zuerstZ(vorherigerSchritt)); aktT = neuT; }
-    if(st.params && st.params.t2 !== undefined) aktT = String(st.params.t2);
+    const neuT = st.params && st.params.t !== undefined ? MASCHINENPROFIL.tSatz(st.params.t) : aktT;
+    if(neuT !== aktT){ if(aktT!==null && !schonAmWWP) wechselAbfahrt(zuerstZ(vorherigerSchritt)); }
+    const satzStart = lines.length;   // ab hier stehen die Saetze dieses Schritts
     // Sprechende Schrittueberschrift [Daniel, Lesbarkeit]: Typ, Werkzeug
     // und Kerndaten auf einen Blick.
     lines.push(schrittKopf(idx+1, st, idx));
@@ -27985,6 +27992,10 @@ function buildProgram(){
     else if(st.type==='freistich') genFreistich(st.params, N, bump, lines, warnings);
     else if(st.type==='bohren') genBohren(st.params, N, bump, lines, warnings);
     else if(st.type==='gewinde') genGewinde(st.params, N, bump, lines, warnings);
+      // Welches Werkzeug ist jetzt wirklich aktiv? Der letzte (WERKZEUG)-Satz
+      // dieses Schritts (Kopf, interner T2-Wechsel, Abstechen) - nicht die
+      // Parameter. Ohne T-Satz (Sonderfall) bleibt das bisherige.
+      for(let li=lines.length-1; li>=satzStart; li--){ const mT=/^N\d+ \(WERKZEUG\) (\S+)/.exec(lines[li]); if(mT){ aktT=mT[1]; break; } }
       vorherigerSchritt = st; schonAmWWP=false;
   });
 
