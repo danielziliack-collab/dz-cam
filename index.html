@@ -28276,7 +28276,13 @@ function ncLesbarMachen(text){
           .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
           .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue')
           .replace(/ß/g,'ss').replace(/°/g,'Grad').replace(/⌀/g,'D') : '';
-        wz.push(w? ('T'+w.t+nm) : m[1]);
+        // Liegt das Werkzeug auf einem PLATZ, ruft der Satz den Platz
+        // (wzPlatzNr). Der Kopf nannte bis zum 10.09.2026 nur die
+        // Lagernummer - beim Bau der Termin-Datei O9018 stand oben
+        // 'T40 Gewindedrehmeissel' und im Satz T15. Jetzt steht der
+        // Platz voran, die Lagernummer dahinter; ohne Platz wie bisher.
+        const tk=w? ((w.platz && String(w.platz)!==String(w.t))? 'T'+w.platz+' Lager-Nr.'+w.t : 'T'+w.t) : null;
+        wz.push(w? (tk+nm) : m[1]);
       });
       const kopf=[ibn[0]];              // (=== ZIELMASCHINE ... ===) bleibt vorn
       // Werkzeugzeilen auf ~70 Zeichen brechen — eine 200er-Zeile
