@@ -3474,9 +3474,18 @@ H&ouml;chstdrehzahl weiter, F in mm/U bleibt g&uuml;ltig. Sobald X wieder
 reicht, schaltet <b>(NMAX) G96 S&lt;Vc&gt;</b> zur&uuml;ck. Das ersetzt das
 fehlende G92/LIMS der Monforts im NC-Text; der
 <b>Hardware-Drehzahlw&auml;chter bleibt trotzdem von Hand zu stellen</b>
-(zweite Sicherung). Grenze der Wache: SSV-Zonen mit eigenen S-W&ouml;rtern
-klemmt sie nicht, sondern sagt es an; Bogen-Scheitel zwischen Start und
-Ziel pr&uuml;ft sie nicht.</dd>
+(zweite Sicherung). <b>Seit dem 10.09.2026 schreibt die Wache JEDE G96-Anwahl als
+<b>G97 S&lt;NMAX&gt;</b></b> &mdash; an der 1000er lief die Spindel hoch, als das
+Programm G96 anw&auml;hlte, w&auml;hrend das Werkzeug noch am kleinen &empty; stand
+(Alarm 007 &bdquo;Drehzahl&uuml;berwachungsger&auml;t defekt&ldquo;): am Programmstart und
+beim Wiedereinstieg kennt das Programm das X nicht. G96 kommt erst vor dem
+ersten Satz, dessen Start UND Ziel &uuml;ber dem Grenz-&empty; liegen, und der Start
+muss seit der Anwahl vom Programm selbst angefahren worden sein. Unter der
+Klemme entfernt die Wache die S-W&ouml;rter (Vorschubsatz, SSV-Stufen) &mdash; dort
+l&auml;uft n konstant auf NMAX, die Drehzahlvariation setzt &uuml;ber der Grenze
+wieder ein. Bogen-Scheitel zwischen Start und Ziel pr&uuml;ft sie nicht. <b>Leer =
+keine Wache</b>: die Ampel sagt es bei jedem G96-Programm an; Daniels Wert an der
+1000er war 600 U/min.</dd>
 </dl>
 
 <h2 id="ba-k03">3 &nbsp;Kontur zeichnen</h2>
@@ -4476,9 +4485,14 @@ Zeile verloren). S&auml;tze &uuml;ber 45 Zeichen sendet die App an die 1000er
 <b>zeichenweise gebremst</b> (3 ms je Zeichen, wie das K&auml;stchen), weil ihr
 Empfangspuffer sonst mitten in der Zeile rei&szlig;t und die Steuerung
 Fortsetzungszeilen NIE zusammensetzt (07.09. an der Wortgrenze, 09.09. mitten im
-Wort mit Ziffer: &bdquo;152 Fehlerhafte Zahlenangabe&ldquo;). Ob so ein langer
-Zyklussatz ganz ankommt, ist noch nicht gefahren: nach dem Einspielen im Editor
-nachsehen. An der 1500er ist der Weg aus der App noch nicht gefahren, dort ist
+Wort mit Ziffer: &bdquo;152 Fehlerhafte Zahlenangabe&ldquo;). <b>Am 10.09.2026 bewiesen:</b> der 115-Zeichen-G71 (O126) und die 130/135-Zeichen-S&auml;tze
+G74/G75 des Stufenbolzens (O9001, 458 Zeilen) kamen mit 3 ms je Zeichen ganz an und
+bestehen &bdquo;Prog. Pr&uuml;fen&ldquo;; die Meldung &bdquo;Zeit&uuml;berschreitung bei der
+&Uuml;bertragung&ldquo; nach dem Ende ist normal. Auf diesem Weg braucht es keine
+Opferzeile (das M30 kommt als letzte Zeile an, O9911) &mdash; die Datei wird nur noch
+f&uuml;r DNC Precision so aufbereitet (Schalter &bdquo;Datei f&uuml;r DNC Precision&ldquo; im
+DNC-Block). Kommentare bricht die App f&uuml;r den App-Weg erst bei 62 Zeichen um, der
+Breite des Editors der 1000er. An der 1500er ist der Weg aus der App noch nicht gefahren, dort ist
 bisher nur DNC Precision belegt (03.09.2026). Das geht NUR in Chrome oder Edge am
 Rechner &mdash; das iPhone kann grunds&auml;tzlich nicht direkt seriell; daf&uuml;r
 gibt es das DNC-Funk-K&auml;stchen.</dd>
@@ -4529,23 +4543,27 @@ wendet sie beim &bdquo;NC sichern&ldquo; und beim DNC-Senden selbst an, sobald
 das 1000er-Profil gew&auml;hlt ist:</b> (1) <b>Opferzeile hinter dem M30</b> &mdash; mit DNC Precision geht die letzte
 Zeile jeder &Uuml;bertragung verloren (bewiesen 07.09.: ein Satz HINTER dem M30
 wird geschluckt, das M30 bleibt); aus der App per Web-Serial kommt sie an
-(09.09.2026). Es ist also das DNC-Programm, nicht die Steuerung. Die App
-h&auml;ngt sie an, solange das H&auml;kchen &bdquo;Opferzeile hinter M30&ldquo; im
-DNC-Block gesetzt ist (Vorgabe an; gilt f&uuml;r Sichern und Senden) &mdash; kommt
-sie mit, ist sie ein harmloser Kommentar; ohne H&auml;kchen endet die Datei mit
-dem M30.
+(09.09.2026). Es ist also das DNC-Programm, nicht die Steuerung. Die App h&auml;ngt sie NUR noch an, wenn der Schalter &bdquo;Datei f&uuml;r DNC
+Precision&ldquo; im DNC-Block gesetzt ist (Vorgabe aus; gilt f&uuml;r Sichern und
+Senden). Auf dem App-Weg endet die Datei mit dem M30 &mdash; am 10.09.2026 bewiesen
+(O9911: das M30 kommt als letzte Zeile an).
 (2) <b>Keine Zeile &uuml;ber ~45 Zeichen</b> &mdash; l&auml;ngere rei&szlig;en im
 Empfangspuffer (bei 52 und 72 gemessen; DNC Precision kennt nur Zeilen-, kein
-Zeichen-Delay). Die App bricht lange Kommentarzeilen in mehrere um; ein
-Maschinensatz &uuml;ber 50 Zeichen bekommt eine Warnung. Der 115 Zeichen lange
-G71-Zyklussatz der Steuerung kommt per DNC Precision NICHT durch &mdash; Zyklen an
-der 1000er bleiben Handarbeit im Editor, die App schickt Einzels&auml;tze.
+Zeichen-Delay). Das gilt f&uuml;r DNC Precision: mit dem Schalter bricht die App Kommentare bei 45
+Zeichen um und meldet Maschinens&auml;tze &uuml;ber 50. Auf dem App-Weg (Web-Serial mit
+Zeichenbremse, 10.09.2026 bewiesen: 115/130/135 Zeichen ganz da) bricht sie Kommentare
+erst bei 62 Zeichen um &mdash; der Editor der 1000er zeigt etwa 62 Zeichen je Zeile, so
+bleibt jeder Kommentar ohne Scrollen lesbar &mdash; und entfernt innere Klammern in
+Kommentaren (10.09.2026: &bdquo;153 Adressbuchstabe nicht vorhanden&ldquo; an
+<code>( (Bahn um Stechbreite 3 versetzt) --)</code> &mdash; die Steuerung schlie&szlig;t den
+Kommentar an der ersten Klammer und liest den Rest als Satz; der Generator schreibt
+solche Kommentare seitdem nicht mehr). Zyklen an der 1000er: der Generator schreibt das
+1000er-Format noch nicht, die App schickt Einzels&auml;tze.
 Fortsetzungszeilen setzt die Steuerung NIE zusammen &mdash; weder an der
 Wortgrenze (07.09.: &bdquo;zu viele Interpolationsadressen&ldquo;) noch mitten
 im Wort mit Ziffer-Anfang (09.09.2026: &bdquo;152 Fehlerhafte
-Zahlenangabe&ldquo;); ein Zyklussatz muss als EINE Zeile ankommen. Aus der App
-gehen S&auml;tze &uuml;ber 45 Zeichen deshalb zeichenweise gebremst (noch
-unverifiziert, s. Web-Serial). Die Pausen je Zeichen und je Zeile stehen als
+Zahlenangabe&ldquo;); ein Zyklussatz muss als EINE Zeile ankommen. Aus der App gehen S&auml;tze &uuml;ber 45 Zeichen deshalb zeichenweise gebremst
+(am 10.09.2026 bewiesen, s. Web-Serial). Die Pausen je Zeichen und je Zeile stehen als
 Felder im DNC-Block und lassen sich an der Maschine anpassen; &bdquo;Datei senden
 (roh)&ldquo; schickt eine Textdatei (etwa einen von der Maschine gezogenen
 Zyklussatz) unver&auml;ndert &mdash; nur ASCII und CR LF, keine Opferzeile, kein
@@ -4585,22 +4603,29 @@ ihn an der Maschine &uuml;ber die ZYKLUS-Maske eingegeben (R1&ndash;R4 bewusst
 gezogen. Der Satz: <code>G71 G90 X50 Z-50 G91 I0 K0 PF0.4 PG0.2 PM10 PN10 PO0.5
 PP0.6 PQ0.7 PR0.8 PW3.15 PX1 PY1 P230:3.15 P240:1 P241:1</code> &mdash; PM/PN =
 Breite/Tiefe, PO&ndash;PR = R1&ndash;R4 in unserer Z&auml;hlung, PG = U, BS steht
-DOPPELT (PW und P230), PY = N, P240/P241 = Schruppen/Schlichten. <b>Bei
-&alpha;1 = &alpha;2 = 0 keine PA/PB</b> &mdash; ob sie bei Flankenwinkeln
-erscheinen, ist offen: <code>I0 K0</code> hinter G91 sehen aus wie die
-inkrementalen Flankenma&szlig;e, und die G72-S&auml;tze der 1000er tragen alle
-PA/PB (Daniels Einwand vom 07.09.). Offen sind au&szlig;erdem PF0.4 und PX1,
-weil die Maskenwerte dazu auf 0 standen; ein zweiter Einstich mit D&nbsp;1 und
-&alpha;1&nbsp;10 / &alpha;2&nbsp;20 kl&auml;rt beides. <b>Die App gibt
-den Einstich an der 1000er trotzdem weiter als Einzels&auml;tze aus</b>: Der
-115&nbsp;Zeichen lange Satz kommt per DNC nicht durch (der Empfangspuffer der
-Steuerung rei&szlig;t ab etwa 45 Zeichen, Roundtrip am selben Tag gemessen), und
-der Generator schreibt das 1000er-Format noch nicht. In den Merkmalen steht er
+DOPPELT (PW und P230), PY = N, P240/P241 = Schruppen/Schlichten. <b>Keine PA/PB im G71</b> &mdash; auch nicht mit Flankenwinkeln (09.09.2026,
+Maske D&nbsp;1 / &alpha;1&nbsp;10 / &alpha;2&nbsp;20, O12345): <code>PK/PL =
+&alpha;1/&alpha;2, P227 = t1, P228 = D</code>; <code>I0 K0</code> und <code>PF0.4</code>
+bleiben konstant, <code>PX1</code> ist vermutlich die Lage au&szlig;en (Innenstich
+offen). PA/PB geh&ouml;ren zum G72. <b>Die App gibt den Einstich an der 1000er weiter als Einzels&auml;tze aus</b>: der
+Generator schreibt das 1000er-Format noch nicht. Die L&auml;nge ist seit dem 10.09.2026
+kein Hindernis mehr &mdash; der 115er-Satz kommt aus der App mit der Zeichenbremse ganz
+an (O126), ebenso die 130/135-Zeichen-S&auml;tze G74/G75 des Stufenbolzens, die
+&bdquo;Prog. Pr&uuml;fen&ldquo; annimmt (Lauf am Teil offen). In den Merkmalen steht er
 darum als &bdquo;Maschinensatz belegt &mdash; Ausgabe noch Einzels&auml;tze&ldquo;.
 <br><b>G72 der 1000er:</b> Die Maschine f&auml;hrt ihn (Bestandsprogramme, alle
 mit steuerungsberechneten PA/PB-Werten). Ob sie den Satz auch OHNE PA/PB
 annimmt, pr&uuml;ft die Datei MINI_G72 am n&auml;chsten Termin; bis dahin
-Einzels&auml;tze. G73 und G77 sind an der 1000er unbelegt.</dd>
+Einzels&auml;tze. G73 und G77 sind an der 1000er unbelegt.
+<br><b>Werkzeugnummern (10.09.2026):</b> die 1000er nimmt nur T1&ndash;T32 (T32
+angenommen, T33 &bdquo;Fehler 152&ldquo; bei Prog. Pr&uuml;fen), real hat sie 16 Pl&auml;tze.
+Ein Lagerwerkzeug mit h&ouml;herer Nummer (Testvorlagen: T33, T40, T41) bekommt in der
+Ampel und beim Senden eine Warnung &mdash; im Werkzeuglager auf einen Platz legen, dann
+ruft die NC den Platz. <b>Editor:</b> rund 62 Zeichen je Zeile, l&auml;ngere S&auml;tze
+scrollen; freier Programmspeicher am 10.09.2026: 33280 Bytes. <b>Erster Lauf eines
+App-Programms:</b> Kantenwelle O9016 mit NMAX 600 komplett gefahren, Spanbruch G04 F2
+unterbricht den Span wie vorgesehen; die Drehzahlvariation SSV ist an der 1000er noch
+nicht beobachtet (der Lauf brach vorher mit Alarm 007 ab, s. NMAX im Programmkopf).</dd>
 <dt id="ba-ma-offen">Ehrlich offen</dt>
 <dd>Die Programmieranleitung DV 610-0C ist seit dem 31.08.2026 LESBAR (die
 Scan-Seiten werden im Browser gerendert). Damit belegt: P229 = SV Vorhalt vor dem
@@ -4822,7 +4847,7 @@ vorschruppen.</dd>
      TT.MM.JJJJ" ergaenzt, MUSS dieses Datum mitziehen — sonst schlaegt
      der Pruefstand an. [Daniels Befund 06.09.2026: die Anleitung war
      inhaltlich nachgezogen, das Standdatum stand noch auf 31.08.] -->
-<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 09.09.2026. Sie
+<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 10.09.2026. Sie
 w&auml;chst mit der App &mdash; das Inhaltsverzeichnis wird aus den Kapiteln
 erzeugt und ist damit immer vollst&auml;ndig.</p>
 
@@ -20732,6 +20757,15 @@ const MASCHINEN_PROFILE = {
     wwp:{ x:300, z:20 },
     // P9105=2 (IBN belegt): kurze T-Aufrufe Tzz / Abwahl T00
     tLang:false, tStatus:'confirmed_on_machine',
+    // T-NUMMERN [Termin 10.09.2026]: T32 angenommen, T33 'Fehler 152' bei
+    // Prog. Pruefen; real hat die Maschine 16 Plaetze (Daniel). Die Wache
+    // in buildProgram und im Exportfilter haengt daran.
+    tMax:32, plaetze:16, tMaxBeleg:'10.09.2026 am Geraet: T32 angenommen, T33 Fehler 152; real 16 Plaetze',
+    // ZYKLUSSAETZE AN DER MASCHINE [Termin 10.09.2026]: Stufenbolzen O9001
+    // aus der App eingespielt, G74 (130 Zeichen) und G75 (135) bestehen
+    // 'Prog. Pruefen' - Lauf am Teil offen.
+    g74Beleg:'Satz mit 130 Zeichen am 10.09.2026 aus der App eingespielt, Prog. Pruefen ohne Fehler; Lauf am Teil offen',
+    g75Beleg:'Satz mit 135 Zeichen am 10.09.2026 aus der App eingespielt, Prog. Pruefen ohne Fehler; Lauf am Teil offen',
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
     // unter G90 ebenfalls im DURCHMESSERMASS ausgegeben (IBN-belegt).
     ikDurchmesser:true, ikStatus:'confirmed_on_machine', ikBeleg:'P5105=1, IBN',
@@ -20742,7 +20776,7 @@ const MASCHINEN_PROFILE = {
     // traf. Sie bremst per RTS/CTS und schickt KEIN XOFF; ohne
     // Hardware-Handshake am Laptop kommt "194 Empfangsspeicher
     // ueberlauf". Dazu vier Dateiregeln, alle gemessen (s. BA).
-    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. WEB-SERIAL AUS DER APP am Geraet bewiesen 09.09.2026 (Kantenwelle, 126 Zeilen hin und zurueck byteidentisch, Prog. Pruefen ohne Meldung). Dateiregeln: Opferzeile hinter M30 (bei DNC Precision geht die letzte Zeile verloren, aus der App kommt sie an), Zeilen ueber ~45 Zeichen reissen im Empfangspuffer, und Fortsetzungszeilen setzt die Steuerung NIE zusammen (07.09. an der Wortgrenze, 09.09.2026 mitten im Wort mit Ziffer: "152 Fehlerhafte Zahlenangabe") - lange Saetze sendet die App deshalb zeichenweise gebremst (unverifiziert, Test naechster Termin), Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an; Opferzeile im DNC-Block abschaltbar, Zeichen- und Zeilenpause dort einstellbar, Textdateien lassen sich roh senden (fuer den Termin 10.09.2026 vorbereitet)',
+    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. WEB-SERIAL AUS DER APP am Geraet bewiesen 09.09.2026 (Kantenwelle, 126 Zeilen hin und zurueck byteidentisch, Prog. Pruefen ohne Meldung). Dateiregeln: Opferzeile hinter M30 (bei DNC Precision geht die letzte Zeile verloren, aus der App kommt sie an), Zeilen ueber ~45 Zeichen reissen im Empfangspuffer, und Fortsetzungszeilen setzt die Steuerung NIE zusammen (07.09. an der Wortgrenze, 09.09.2026 mitten im Wort mit Ziffer: "152 Fehlerhafte Zahlenangabe") - lange Saetze sendet die App deshalb zeichenweise gebremst (unverifiziert, Test naechster Termin), Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an; Opferzeile im DNC-Block abschaltbar, Zeichen- und Zeilenpause dort einstellbar, Textdateien lassen sich roh senden (fuer den Termin 10.09.2026 vorbereitet) | 10.09.2026: Web-Serial mit Zeichenbremse 3 ms bringt Saetze von 115/130/135 Zeichen ganz an (G71 O126, G74/G75 im Stufenbolzen O9001 bestehen Prog. Pruefen), M30 kommt als letzte Zeile an - Opferzeile nur noch fuer DNC Precision (Schalter im DNC-Block), Kommentare bis 62 Zeichen (Editorbreite), innere Klammern in Kommentaren entschaerft (Fehler 153), T-Nummern nur bis 32 (T33 = Fehler 152); erstes App-Programm (Kantenwelle O9016 mit NMAX 600) komplett gefahren, Spanbruch G04 F2 wirkt',
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
@@ -20755,9 +20789,10 @@ const MASCHINEN_PROFILE = {
                 Flankenmasse, und die G72-Bestandssaetze tragen PA/PB;
                 Test mit alpha 10/20 am naechsten Termin). Der Status
                 ist ANZEIGE:
-                die Ausgabe bleibt Einzelsatz, weil der 115-Zeichen-Satz
-                per DNC nicht durchkommt (Empfangspuffer reisst ab ~45)
-                und der Generator das 1000er-Format noch nicht schreibt.
+                die Ausgabe bleibt Einzelsatz, weil der Generator das
+                1000er-Format noch nicht schreibt (die Laenge ist seit dem
+                10.09.2026 kein Hindernis mehr: der 115er kommt mit der
+                Zeichenbremse aus der App ganz an).
                 G72 [01.09.]: die MTC-K schreibt ihn mit steuerungs-
                 berechneten PA/PB (Daniels TAP); ob sie ihn OHNE annimmt,
                 prueft MINI_G72 am naechsten Termin. G73/G77 unbelegt.
@@ -20860,8 +20895,10 @@ function ppMerkmale(){
   M.push({t:'Bogenmitte I/K', s:pr.ikStatus,
     w:pr.ikDurchmesser? 'I/K absolut; X-Mittelpunkt I im DURCHMESSERMASS ('+(pr.ikBeleg||'IBN')+')'
       : 'R-Wort bevorzugt; im I/K-Rueckfall gilt das RADIUSMASS'});
-  const g74=zyk('g74'); M.push({t:'Bohrzyklus G74', w:g74.w+' — Vorlauf W statt SC', s:g74.s});
-  const g75=zyk('g75'); M.push({t:'Gewindezyklus G75', w:g75.w+' — G97 zwingend', s:g75.s});
+  // g74Beleg/g75Beleg [Termin 10.09.2026]: Satzsyntax an der Maschine
+  // geprueft (Prog. Pruefen), Lauf am Teil offen - als Text an der Zeile.
+  const g74=zyk('g74'); M.push({t:'Bohrzyklus G74', w:g74.w+' — Vorlauf W statt SC'+(pr.g74Beleg? ' — '+pr.g74Beleg : ''), s:g74.s});
+  const g75=zyk('g75'); M.push({t:'Gewindezyklus G75', w:g75.w+' — G97 zwingend'+(pr.g75Beleg? ' — '+pr.g75Beleg : ''), s:g75.s});
   // G81ff: an BEIDEN Maschinen gesperrt, aber aus VERSCHIEDENEN
   // Gruenden — Daniels Befund 01.09.2026 ("zweimal derselbe Eintrag"):
   // vorher stand zweimal derselbe Text, der Unterschied gehoert benannt.
@@ -20886,7 +20923,7 @@ function ppMerkmale(){
     // Maschine (Bestandsprogramme), offen ist nur, ob sie ihn OHNE
     // PA/PB annimmt. Deshalb getrennte Zeilen mit ehrlichem Stand.
     M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
-      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — am 09.09.2026 mit alpha1 10 / alpha2 20 / D 1 / t1 3 nachgezogen (O12345, Fotos): PK/PL = alpha1/alpha2, P227 = t1, P228 = D; I0 K0 und PF0.4 bleiben konstant (keine Winkel, kein D - PF vermutlich Maschinenwert), PX1 vermutlich Lage aussen (Innenstich offen); KEINE PA/PB, auch nicht mit Winkeln. Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC Precision nicht durch (Empfangspuffer reisst ab ~45 Zeichen, und Fortsetzungszeilen setzt die Steuerung NIE zusammen - 09.09.2026), aus der App geht er ab jetzt zeichenweise gebremst (unverifiziert), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
+      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — am 09.09.2026 mit alpha1 10 / alpha2 20 / D 1 / t1 3 nachgezogen (O12345, Fotos): PK/PL = alpha1/alpha2, P227 = t1, P228 = D; I0 K0 und PF0.4 bleiben konstant (keine Winkel, kein D - PF vermutlich Maschinenwert), PX1 vermutlich Lage aussen (Innenstich offen); KEINE PA/PB, auch nicht mit Winkeln. Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC Precision nicht durch (Empfangspuffer reisst ab ~45 Zeichen, und Fortsetzungszeilen setzt die Steuerung NIE zusammen - 09.09.2026), aus der App geht er zeichenweise gebremst (10.09.2026 bewiesen: O126 ganz da, Prog. Pruefen ohne Fehler), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
     M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
       w:'die Maschine faehrt ihn (Bestandsprogramme, alle mit steuerungsberechneten PA/PB) — ob sie den Satz OHNE PA/PB annimmt, prueft MINI_G72 am naechsten Termin; bis dahin Ausgabe als Einzelsaetze'});
     M.push({t:'Freistich G73 / Plangewinde G77', s:pr.zyklen.g73,
@@ -20921,6 +20958,7 @@ const PP_FEST=[
   'NC-Kommentare in ASCII, ohne Klammern im Text — die Steuerung schliesst den Kommentar an der ERSTEN \u0029.',
   'D Zustelltiefe und UX Aufmass gelten RADIAL (ap, je Seite); axiale Werte (Planzustellung, UZ) 1:1.',
   'Schneidenradiuskorrektur automatisch: Schruppen ohne, Schlichten G41/G42 nach Lage.',
+  'NMAX-Drehzahlgrenze (Programmkopf): jede G96-Anwahl steht als G97 S<NMAX>, G96 erst vor dem ersten Satz, dessen Start und Ziel ueber dem Grenz-Durchmesser liegen; unter der Klemme keine S-Woerter (10.09.2026: Alarm 007 an der 1000er, G96 am kleinen X angewaehlt). Leer = keine Wache, die Ampel sagt es an.',
   'WIEDEREINSTIEG: nach jedem T-Aufruf stehen G94-Eilgangvorschub, Drehzahl, M03/M07 und G95-F neu im Programm — ein Satzvorlauf mitten hinein findet alles Modale vor (Daniels Ansage; G94-F belegt am Originalprogramm 01.10.2025).',
 ];
 // =================================================================
@@ -23224,7 +23262,9 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
             if(bahnP.length>200) break;
           }
           bahnP.push({z:lZ,x:lX});
-          lines.push(`(--- HINTERSCHNITT ${nr} KONTURPARALLEL AUF AUFMASS (Ersatzschraege ${fmt(effW)} Grad, Bahn = Wirkkontur des Werkzeugs) ---)`);
+          // KEINE KLAMMER IM KOMMENTAR [Termin 10.09.2026, Fehler 153 an der
+          // 1000er]: die Steuerung schliesst den Kommentar an der ersten ')'.
+          lines.push(`(--- HINTERSCHNITT ${nr} KONTURPARALLEL AUF AUFMASS - Ersatzschraege ${fmt(effW)} Grad, Bahn = Wirkkontur des Werkzeugs ---)`);
           lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(pk.mouthX+1)} Z${fmt(pk.zIn)}`); bump();
           lines.push(`${N()} (GERADE  ) G95 F${fmt(p.fr)} G01 X${fmt(wirkAt(pk.zIn))}`); bump();
           bahnP.forEach(q=>{
@@ -24053,7 +24093,8 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
           const spanT=(p.d>0.2)?2*p.d:2;   // D ist ap
           const nZ=Math.max(1, Math.ceil(hMax/spanT));
           if(hMax>0.15){
-            lines.push('(--- STIRNKEIL KONTURPARALLEL AUF AUFMASS ('+(nZ===1?'1 Zug':nZ+' Zuege')+') ---)');
+            // KEINE KLAMMER IM KOMMENTAR [Termin 10.09.2026, Fehler 153] - s. o.
+            lines.push('(--- STIRNKEIL KONTURPARALLEL AUF AUFMASS - '+(nZ===1?'1 Zug':nZ+' Zuege')+' ---)');
             for(let zi=nZ-1; zi>=0; zi--){
               const off=zi*hMax/nZ;
               let bahnK=[];
@@ -25372,7 +25413,10 @@ function genEinstechen(p, N, bump, lines, warnings){
         lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(p.z0+1)}`); bump();
         // Innenzug: Innenschneide auf der Kontur -> Bahn um 2·BS versetzt
         const I=segAx(-1);
-        lines.push(`(--- SCHLICHTEN INNENFLANKE + HALBER GRUND (Bahn um Stechbreite ${fmt(bw)} im ⌀ versetzt) ---)`);
+        // KEINE KLAMMER IM KOMMENTAR [Termin 10.09.2026, Fehler 153]: die
+        // 1000er schliesst den Kommentar an der ersten ')' und liest den
+        // Rest als Satz. Bindestrich statt Klammerpaar.
+        lines.push(`(--- SCHLICHTEN INNENFLANKE + HALBER GRUND - Bahn um Stechbreite ${fmt(bw)} im ⌀ versetzt ---)`);
         lines.push(`${N()} (GERADE  ) G00 X${fmt(I[0].x + 2*bw)} Z${fmt(p.z0+1)}`); bump();
         svKette(lines, N, bump, svEs, p.sf, I, p.ff, 2*bw, 0);
         lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(p.z0+1)}`); bump();
@@ -25629,7 +25673,8 @@ function genEinstechen(p, N, bump, lines, warnings){
         // Rechter Zug: rechte Schneide auf der Kontur -> Bahn um die
         // Stechbreite Richtung +z versetzt programmieren
         const R=segPts(-1);
-        lines.push(`(--- SCHLICHTEN RECHTE FLANKE + HALBER GRUND (Bahn um Stechbreite ${fmt(bw)} versetzt) ---)`);
+        // KEINE KLAMMER IM KOMMENTAR [Termin 10.09.2026, Fehler 153] - s. o.
+        lines.push(`(--- SCHLICHTEN RECHTE FLANKE + HALBER GRUND - Bahn um Stechbreite ${fmt(bw)} versetzt ---)`);
         lines.push(`${N()} (GERADE  ) G00 X${fmt(nutHoch)} Z${fmt(R[0].z+bw)}`); bump();
         svKette(lines, N, bump, svEs, p.sf, R, p.ff, 0, bw);
         lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(weg(p.x0,2))}`); bump();
@@ -27163,55 +27208,84 @@ function bettKompWache(lines, warnings){
 // stimmen weiter. Der Nachlauf laeuft VOR der Zeitrechnung:
 // Hauptzeit und Simulation rechnen die Umschaltungen automatisch
 // mit (parseGcodeForSim liest G96/G97/S modal).
-// GRENZE, ehrlich: Saetze, die selbst ein S-Wort tragen (SSV-
-// Stufen), klemmt die Wache nicht — unter G97 waere ihr Vc-Wert
-// eine Drehzahl und damit falsch. Faellt so ein Satz unter den
-// Grenz-⌀, steht stattdessen eine Warnung. Bogen-Scheitel zwischen
-// Start und Ziel prueft die Wache nicht (Zielpunkt-Betrachtung).
+// GRENZE (alt, bis 10.09.2026): Saetze mit eigenem S-Wort (SSV-Stufen)
+// wurden nicht geklemmt, sondern angesagt, und die G96-ANWAHL selbst
+// blieb stehen. DIE ANWAHLFALLE [Maschinentermin 10.09.2026, O9017]:
+// "(DREHZAHL) G96 S180" steht VOR der ersten Fahrt des Werkzeugs - am
+// Programmstart und beim Wiedereinstieg steht das Werkzeug dort, wo es
+// der Bediener hingefahren hat. Daniel stand am kleinen Durchmesser,
+// die Spindel lief hoch, der Hardware-Waechter warf Alarm 007
+// ("Drehzahlueberwachungsgeraet defekt"). Seine Ansage: "so umbauen,
+// dass der gar nicht in diese Drehzahlueberschreitungsfalle laeuft".
+// DESHALB JETZT: (1) JEDE G96-Anwahl wird als G97 S<NMAX> geschrieben -
+// dort ist die Position per Definition unbekannt (das X der letzten
+// programmierten Fahrt ist beim Wiedereinstieg nichts wert); G96 kommt
+// erst vor dem ersten Fahrsatz, dessen Start UND Ziel ueber dem Grenz-
+// Durchmesser liegen, und der Start muss seit der Anwahl vom Programm
+// selbst angefahren worden sein. (2) Unter der Klemme wird jedes S-Wort
+// entfernt: der VORSCHUB-Satz nennt die Vc erneut, SSV-Stufen tragen
+// ihre eigene - unter G97 waere der Wert eine Drehzahl (unter NMAX,
+// aber die Klemme S<NMAX> waere ueberschrieben und der Schnitt liefe
+// mit 180 U/min). Dort laeuft n konstant auf NMAX, die Variation setzt
+// ueber der Grenze wieder ein. (3) Bogen-Scheitel zwischen Start und
+// Ziel prueft die Wache weiter nicht.
 function nmaxWache(lines, warnings){
   const nmax=+((document.getElementById('pkNmax')||{}).value)||0;
   if(!(nmax>0)) return;
-  let g96=false, sVc=0, cx=null, clamp=false, anz=0, ssvWarn=false;
+  // wunsch: das Programm will G96 mit Vc=sVc; clamp: wir halten G97
+  // S<NMAX>; cx: letztes programmiertes X (null = unbekannt).
+  let wunsch=false, sVc=0, cx=null, clamp=false, anz=0, anwahl=0, sWeg=0;
   const out=[];
+  const nrVor=(L)=>'N'+String(Math.max(1,(+L.slice(1,5))-5)).padStart(4,'0');
+  // Ersetzen NUR im Satzteil hinter dem Satzart-Tag, nie im Kommentar.
+  const imSatz=(L, fn)=>{ const p=L.indexOf(')'); return p<0 ? fn(L) : L.slice(0,p+1)+fn(L.slice(p+1)); };
   for(let i=0;i<lines.length;i++){
-    const L=lines[i];
+    let L=lines[i];
     if(!/^N\d\d\d\d /.test(L)){ out.push(L); continue; }
     const kern=L.replace(/\([^)]*\)/g,'');
-    if(/\bG96\b/.test(kern)){ g96=true; clamp=false; }
-    if(/\bG97\b/.test(kern)){ g96=false; clamp=false; }
     const mS=kern.match(/\bS(\d+\.?\d*)/);
     const mX=kern.match(/\bX(-?\d+\.?\d*)/);
-    const zielX = mX ? Math.abs(+mX[1]) : null;
     const fahrsatz=/\bG0[0123]\b/.test(kern);
-    if(g96 && fahrsatz && zielX!==null){
-      const basis = mS ? +mS[1] : sVc;
+    // Ziel-X eines Fahrsatzes ohne X-Wort ist das modale X - so kann
+    // die Rueckschaltung auch vor einem reinen Z-Satz stehen (der
+    // Schlichtzug faehrt sonst bis zum ersten X-Satz auf NMAX).
+    const zielX = mX ? Math.abs(+mX[1]) : cx;
+    if(/\bG97\b/.test(kern)){ wunsch=false; clamp=false; }
+    if(/\bG96\b/.test(kern)){
+      // (1) Anwahl: G96 -> G97 S<NMAX>, Tag (NMAX    ); sonst nichts am
+      // Satz (das M03 des Abstechens bleibt stehen). Position ab hier
+      // unbekannt, bis das Programm selbst ein X anfaehrt.
+      wunsch=true; if(mS) sVc=+mS[1];
+      L=L.replace(/\(DREHZAHL\)/,'(NMAX    )');
+      L=imSatz(L, s=>s.replace(/\bG96\b/,'G97').replace(/\bS\d+\.?\d*/,'S'+fmt(nmax)));
+      clamp=true; anz++; anwahl++; cx=null;
+      out.push(L); continue;
+    }
+    if(wunsch){
+      // SSV-Satz: sein eigenes S gilt fuer die Grenze; ein Satz ohne
+      // Bewegung mit S (VORSCHUB) nennt die Basis-Vc erneut.
+      const basis=(mS && fahrsatz) ? +mS[1] : sVc;
+      if(mS && !fahrsatz) sVc=+mS[1];
       if(basis>0){
-        const dGrenz = basis*1000/(Math.PI*nmax);
-        const unterZiel = zielX < dGrenz-1e-9;
-        const unterStart = cx!==null && cx < dGrenz-1e-9;
-        if(mS && (unterZiel||unterStart)){
-          if(!ssvWarn){
-            warnings.push('NMAX '+fmt(nmax)+': eine Drehzahlvariations-Zone unterschreitet den Grenz-⌀ '+fmt(dGrenz)+' — dort kann die Wache nicht auf G97 klemmen (die SSV-Saetze tragen eigene S-Woerter). SSV-Zone verlegen oder NMAX pruefen.');
-            ssvWarn=true;
-          }
-        } else if(!mS){
-          const nr=+L.slice(1,5);
+        const dGrenz=basis*1000/(Math.PI*nmax);
+        if(fahrsatz && zielX!==null){
+          const unterZiel=zielX < dGrenz-1e-9;
+          const unterStart=(cx===null) || cx < dGrenz-1e-9;   // unbekannt = unter
           if(!clamp && unterZiel){
-            out.push('N'+String(Math.max(1,nr-5)).padStart(4,'0')+' (NMAX    ) G97 S'+fmt(nmax));
-            clamp=true; anz++;
+            out.push(nrVor(L)+' (NMAX    ) G97 S'+fmt(nmax)); clamp=true; anz++;
           } else if(clamp && !unterZiel && !unterStart){
-            out.push('N'+String(Math.max(1,nr-5)).padStart(4,'0')+' (NMAX    ) G96 S'+fmt(sVc));
-            clamp=false; anz++;
+            out.push(nrVor(L)+' (NMAX    ) G96 S'+fmt(sVc)); clamp=false; anz++;
           }
         }
+        // (2) unter der Klemme kein S-Wort
+        if(clamp && mS){ L=imSatz(L, s=>s.replace(/\s*\bS\d+\.?\d*/,'')); sWeg++; }
       }
     }
-    if(mS) sVc=+mS[1];
-    if(zielX!==null) cx=zielX;
+    if(mX && fahrsatz) cx=Math.abs(+mX[1]);
     out.push(L);
   }
-  if(anz>0){
-    warnings.push('NMAX-Wache: '+anz+' Umschaltsaetze eingefuegt — im Programm steht G97 S'+fmt(nmax)+', wo die G96-Drehzahl die Grenze risse, und G96 sobald X wieder reicht. Drehzahlwaechter der Maschine trotzdem von Hand stellen (zweite Sicherung).');
+  if(anz>0 || sWeg>0){
+    warnings.push('NMAX-Wache: '+anwahl+' G96-Anwahl/en als G97 S'+fmt(nmax)+' geschrieben (Anwahlfalle: am Programmstart und beim Wiedereinstieg ist X unbekannt - 10.09.2026 lief die 1000er so in Alarm 007), '+(anz-anwahl)+' Umschaltsaetze eingefuegt (G97 unter dem Grenz-Durchmesser, G96 erst wenn Start UND Ziel drueber liegen)'+(sWeg? '; '+sWeg+' S-Woerter unter der Klemme entfernt (Vorschubsatz/SSV - dort laeuft n konstant auf NMAX)':'')+'. Drehzahlwaechter der Maschine bleibt die zweite Sicherung.');
     lines.length=0;
     out.forEach(z=>lines.push(z));
   }
@@ -27265,7 +27339,11 @@ function buildProgram(){
       lines.push('(G96 IM PROGRAMM: DREHZAHLWAECHTER DER MASCHINE VON HAND BEGRENZEN)');
       const nmaxKopf=+((document.getElementById('pkNmax')||{}).value)||0;
       if(nmaxKopf>0) lines.push('(NMAX '+nmaxKopf+' U/MIN: DAS PROGRAMM SCHALTET UNTER DEM GRENZ-DM SELBST AUF G97 UM)');
-      warnings.push('G96 im Programm: Drehzahlwaechter der Maschine von Hand einstellen — die Getriebespindel hat kein programmierbares Limit (kein G92 an den Monforts).');
+      warnings.push('G96 im Programm: Drehzahlwaechter der Maschine von Hand einstellen — die Getriebespindel hat kein programmierbares Limit (kein G92 an den Monforts).'
+        // NMAX LEER [Termin 10.09.2026]: ohne Grenze laeuft keine Wache -
+        // die G96-Anwahl am kleinen X (Programmstart, Wiedereinstieg) ist
+        // dann genau die Anwahlfalle, die Alarm 007 ausloeste.
+        +(nmaxKopf>0 ? '' : ' NMAX im Programmkopf ist LEER - die NMAX-Wache laeuft nicht: die G96-Anwahl am Programmstart oder beim Wiedereinstieg trifft das Werkzeug, wo es gerade steht (10.09.2026: Alarm 007 an der 1000er am kleinen Durchmesser). Daniels Wert an der 1000er: 600 U/min.'));
     }
   }
   lines.push(`(PROGRAMMKOPF: Rohteil ${pkForm==='rohr'?'Rohr':'Zylinder'} XA${fmt(stock)}${pkForm==='rohr'?' XI'+fmt(parseFloat(pkXI)):''} ZA${fmt(parseFloat(pkZA))} ZI${fmt(parseFloat(pkZI))}${(+pkZV)?' ZV'+fmt(parseFloat(pkZV)):''})`);
@@ -27764,6 +27842,18 @@ function buildProgram(){
   }
   nmaxWache(lines, warnings);
   bettKompWache(lines, warnings);
+  // T-NUMMERN-WACHE [Termin 10.09.2026]: die 1000er nimmt nur T1-T32 -
+  // T32 wurde angenommen, T33 gab 'Fehler 152' bei Prog. Pruefen, real hat
+  // sie 16 Plaetze. Der Stufenbolzen rief T40 (Daniel hat an der Maschine
+  // auf T15 umgeschrieben). Kein Blocker: das Programm ist fuer die 1500er
+  // richtig; die Ampel nennt den Weg (Lagerwerkzeug auf einen Platz legen,
+  // dann ruft tSatz den Platz). Der Exportfilter meldet es beim Senden noch
+  // einmal.
+  if(MASCHINENPROFIL.tMax>0){
+    const zuHoch=[];
+    lines.forEach(l=>{ const m=l.match(/\(WERKZEUG\) T(\d+)\b/); if(m && +m[1]>MASCHINENPROFIL.tMax && !zuHoch.includes(m[1])) zuHoch.push(m[1]); });
+    if(zuHoch.length) warnings.push('T-NUMMER ZU HOCH fuer die '+MASCHINENPROFIL.label+': T'+zuHoch.join(', T')+' - die Steuerung nimmt nur T1-T'+MASCHINENPROFIL.tMax+' ('+(MASCHINENPROFIL.tMaxBeleg||'')+'). Werkzeug im Lager auf einen Platz 1-'+(MASCHINENPROFIL.plaetze||MASCHINENPROFIL.tMax)+' legen (Werkzeuge, Pfeil-Knopf), dann ruft die NC den Platz.');
+  }
   letzteWarnungen = warnings.slice();
   const out=ncLesbarMachen(lines.join('\n'));
   if(warnings.length) renderWarnBox(warnBox, warnings);
@@ -27850,6 +27940,17 @@ function ncLesbarMachen(text){
     // --- Leerzeile vor jedem Blocktrenner (Paket 4) --------------
     const aus=[];
     z.forEach(l=>{
+      // SICHERHEITSNETZ: KEINE INNERE KLAMMER IN KOMMENTARZEILEN [Termin
+      // 10.09.2026, '153 Adressbuchstabe nicht vorhanden' an der 1000er]:
+      // die Steuerung schliesst den Kommentar an der ERSTEN ')' und liest
+      // den Rest als Satz. Die bekannten Stellen (Einstich-Schlichtzuege,
+      // Hinterschnitt, Stirnkeil) sind im Generator bereinigt; das Netz
+      // faengt jede kuenftige. Nur reine Kommentarzeilen - Saetze bleiben
+      // bitgenau (Beweisgrenze von Pruefung 134).
+      if(/^\(/.test(l) && /\([^)]*\(/.test(l)){
+        const inhalt=l.replace(/^\(/,'').replace(/\)\s*$/,'').replace(/\s*\(/g,' - ').replace(/\)/g,'').replace(/\s{2,}/g,' ').trim();
+        l='('+inhalt+')';
+      }
       if(l.startsWith('(---') && aus.length && aus[aus.length-1]!=='') aus.push('');
       aus.push(l);
     });
@@ -28271,7 +28372,7 @@ const DNC_PROFILE={
   MONFORTS_1500_EUROTURN:{baud:9600,baudEmpf:9600,bits:7,parity:'none',stop:1,flow:'xonxoff',
     beleg:'am Geraet bewiesen (Termin 03.09.2026, beide Richtungen)'},
   MONFORTS_1000_MTC_K_6624B:{baud:9600,baudEmpf:9600,bits:7,parity:'even',stop:2,flow:'hardware',
-    beleg:'am Geraet bewiesen (07.09.2026 mit DNC Precision, 09.09.2026 aus der App per Web-Serial, beide Richtungen; Parameter 2000-2006 per Foto: RTS/CTS, kein Xon/Xoff, 2 Stoppbits)'}
+    beleg:'am Geraet bewiesen (07.09.2026 mit DNC Precision, 09.09.2026 aus der App per Web-Serial, beide Richtungen; Parameter 2000-2006 per Foto: RTS/CTS, kein Xon/Xoff, 2 Stoppbits; 10.09.2026: Zeichenbremse 3 ms bringt Saetze bis 135 Zeichen ganz an, M30 kommt als letzte Zeile an)'}
 };
 // ZEICHENPAUSE FUER LANGE ZEILEN an der 1000er [Termin 09.09.2026]: ab 46
 // Bytes (45 ist die gemessene sichere Laenge) geht eine Zeile Byte fuer
@@ -28279,14 +28380,17 @@ const DNC_PROFILE={
 // auf ~4 ms) - dieselbe Idee wie chardelay 1000 us im Kaestchen. Unter der
 // Grenze aendert sich am bewiesenen Weg nichts.
 const DNC_1000_GEBREMST_AB=45, DNC_1000_ZEICHENPAUSE_MS=3, DNC_1000_ZEILENPAUSE_MS=150;
-// TERMIN-KNOEPFE [Vorbereitung 10.09.2026, Daniels Plan: "Zyklen komplett lang
-// reinbekommen mit dieser Bremse" und "ob wir die Opferzeile ueberhaupt noch
-// brauchen"]: Zeichen- und Zeilenpause stehen als Felder im DNC-Block, damit
-// ein gerissener Satz vor Ort mit mehr Pause wiederholt werden kann, statt
-// einen Termin zu kosten; die Opferzeile ist abschaltbar (Slot et_opferzeile,
-// Vorgabe an - fuer DNC Precision noetig, aus der App kam die letzte Zeile am
-// 09.09.2026 an). Beides gilt nur am 1000er-Sendeweg.
-function opferzeileGewuenscht(){ try{ return localStorage.getItem('et_opferzeile')!=='aus'; }catch(e){ return true; } }
+// TERMIN-KNOEPFE [Vorbereitung 10.09.2026]: Zeichen- und Zeilenpause stehen
+// als Felder im DNC-Block, damit ein gerissener Satz vor Ort mit mehr Pause
+// wiederholt werden kann. ERGEBNIS DES TERMINS 10.09.2026: 3 ms je Zeichen
+// bringen Saetze von 115 (G71, O126), 130 und 135 Zeichen (G74/G75 im
+// Stufenbolzen O9001) ganz an, und das M30 kommt als letzte Zeile an (O9911)
+// - die Opferzeile ist auf dem App-Weg ueberfluessig. Sie haengt nur noch am
+// Schalter "Datei fuer DNC Precision" (Slot et_dncprecision, Vorgabe aus),
+// zusammen mit dem 45er-Kommentarumbruch, den DNC Precision braucht.
+// opferzeileGewuenscht bleibt als Name fuer den Bestand. Gilt nur am 1000er-Weg.
+function dncPrecisionGewuenscht(){ try{ return localStorage.getItem('et_dncprecision')==='an'; }catch(e){ return false; } }
+function opferzeileGewuenscht(){ return dncPrecisionGewuenscht(); }
 function dncPauseMs(id, vorgabe){ const e=(typeof document!=='undefined')? document.getElementById(id) : null; const v=e? parseFloat(e.value) : NaN; return (isFinite(v) && v>=0) ? v : vorgabe; }
 let dncPort=null, dncXoff=false, dncLeser=null, dncRx=[], dncRxCb=null, dncSendeLauf=false;
 function dncLog(t, warn){
@@ -28534,7 +28638,7 @@ function dncSeriellMalen(){
     +'<label style="font-size:12px;">Parität <select id="dncPar"><option value="none">keine</option><option value="even">gerade</option><option value="odd">ungerade</option></select></label>'
     +'<label style="font-size:12px;">Stop <select id="dncStop"><option>1</option><option>2</option></select></label>'
     +'<label style="font-size:12px;"><input type="checkbox" id="dncWartXon" checked> auf Anforderung der Maschine warten (Xon)</label>'
-    +'<label style="font-size:12px;" title="1000er: hinter dem M30 eine Kommentarzeile anhaengen - DNC Precision verliert die letzte Zeile, aus der App kam sie an (09.09.2026). Gilt fuer NC sichern und Programm senden."><input type="checkbox" id="dncOpfer" checked> Opferzeile hinter M30 (1000er)</label>'
+    +'<label style="font-size:12px;" title="1000er: Datei fuer DNC Precision aufbereiten - Kommentare bei 45 Zeichen umgebrochen (dort reissen laengere Zeilen, 07.09.2026) und Opferzeile hinter dem M30 (das Programm verliert die letzte Zeile). AUS = App-Weg: Umbruch bei 62 (Editorbreite), keine Opferzeile, lange Saetze zeichenweise gebremst (10.09.2026 bewiesen). Gilt fuer NC sichern und Programm senden."><input type="checkbox" id="dncPrecision"> Datei fuer DNC Precision (Umbruch 45, Opferzeile)</label>'
     +'<label style="font-size:12px;" title="1000er: Pause je Zeichen bei Saetzen ueber 45 Zeichen (Bremse)">Zeichenpause <input type="number" id="dncZeichenPause" value="3" min="0" step="1" style="width:52px;"> ms</label>'
     +'<label style="font-size:12px;" title="1000er: Pause nach jeder Zeile">Zeilenpause <input type="number" id="dncZeilenPause" value="150" min="0" step="10" style="width:60px;"> ms</label>'
     +'</div>'
@@ -28554,8 +28658,8 @@ function dncSeriellMalen(){
   document.getElementById('dncVerb').onclick=dncVerbindenTrennen;
   document.getElementById('dncSend').onclick=dncSenden;
   document.getElementById('dncEmpf').onclick=dncEmpfangen;
-  { const op=document.getElementById('dncOpfer'); op.checked=opferzeileGewuenscht();
-    op.onchange=()=>{ try{ localStorage.setItem('et_opferzeile', op.checked?'an':'aus'); }catch(e){} dncLog('Opferzeile '+(op.checked?'an':'AUS')+' (gilt fuer Sichern und Senden an die 1000er).'); }; }
+  { const op=document.getElementById('dncPrecision'); op.checked=dncPrecisionGewuenscht();
+    op.onchange=()=>{ try{ localStorage.setItem('et_dncprecision', op.checked?'an':'aus'); }catch(e){} dncLog('Datei fuer DNC Precision '+(op.checked?'AN (Umbruch 45, Opferzeile hinter M30)':'aus (App-Weg: Umbruch 62, keine Opferzeile)')+' - gilt fuer Sichern und Senden an die 1000er.'); }; }
   document.getElementById('dncDateiBtn').onclick=()=>{ const i=document.getElementById('dncDatei'); i.value=''; i.click(); };
   document.getElementById('dncDatei').onchange=(ev)=>{ const fl=ev.target.files && ev.target.files[0]; if(!fl) return;
     const rd=new FileReader(); rd.onload=()=>dncSenden(String(rd.result||''), fl.name); rd.readAsText(fl); };
@@ -28690,9 +28794,11 @@ async function dncSenden(rohText, rohName){
           // jedes Byte einzeln an den Adapter, dazwischen Pause, damit die
           // Leitung zwischen den Zeichen leer laeuft und die Steuerung
           // nachkommt. Kurze Zeilen gehen weiter am Stueck (Kantenwelle,
-          // 126 Zeilen in 24 s, 09.09.2026 bewiesen). AN DER MASCHINE
-          // UNVERIFIZIERT: ob ein 130er-Satz so ganz ankommt, zeigt der
-          // naechste Termin - nach dem Einspielen im Editor nachsehen.
+          // 126 Zeilen in 24 s, 09.09.2026 bewiesen). AM GERAET BEWIESEN
+          // 10.09.2026: der 115er-G71 (O126) und die 130/135er-Saetze G74/G75
+          // des Stufenbolzens (O9001, 458 Zeilen) kamen mit 3 ms je Zeichen
+          // ganz an und bestehen Prog. Pruefen; die Meldung
+          // "Zeitueberschreitung bei der Uebertragung" nach dem Ende ist normal.
           if(b.length>DNC_1000_GEBREMST_AB){
             for(let k=0;k<b.length && dncSendeLauf;k++){
               await w.write(b.slice(k,k+1));
@@ -28719,7 +28825,7 @@ async function dncSenden(rohText, rohName){
           dncStatus('sende... '+Math.round(100*i/bytes.length)+' % ('+i+' / '+bytes.length+' Zeichen)');
         }
       }
-      if(gebremst) dncLog(gebremst+' Zeile/n ueber '+DNC_1000_GEBREMST_AB+' Zeichen zeichenweise gebremst gesendet ('+dncPauseMs('dncZeichenPause', DNC_1000_ZEICHENPAUSE_MS)+' ms je Zeichen) - an der Maschine unverifiziert, im Editor nachsehen, ob sie ganz da sind.', true);
+      if(gebremst) dncLog(gebremst+' Zeile/n ueber '+DNC_1000_GEBREMST_AB+' Zeichen zeichenweise gebremst gesendet ('+dncPauseMs('dncZeichenPause', DNC_1000_ZEICHENPAUSE_MS)+' ms je Zeichen) (10.09.2026 an der 1000er bewiesen: 115, 130 und 135 Zeichen ganz da).');
       if(dncSendeLauf){ dncStatus('gesendet: '+bytes.length+' Zeichen, '+f.zeilen+' Zeilen'+((hardware && f.opferzeile)?' (die letzte ist die Opferzeile)':'')); dncLog('Programm komplett gesendet.'); }
       else { dncStatus('Senden abgebrochen bei '+i+' Zeichen'); }
     }catch(e){ dncLog('Sendefehler: '+(e&&e.message), true); dncStatus('Sendefehler'); }
@@ -29188,7 +29294,18 @@ function ncAscii(s){
 // Anfang (09.09., "152 Fehlerhafte Zahlenangabe" am nackten G von
 // N0030). Ein Satz ueber der Grenze bleibt EINE Zeile; der Sendeweg
 // bremst ihn zeichenweise (dncSenden), nicht der Filter.
-const NC_1000_MAX_KOMMENTAR=45, NC_1000_MAX_SATZ=50;
+// KOMMENTARBREITE [Termin 10.09.2026]: der Editor der 1000er zeigt rund 62
+// Zeichen je Zeile (Foto O9006; Daniel: "die volle Monitorbreite nutzen").
+// Mit der Zeichenbremse kommen lange Zeilen an (115/130/135 gemessen), ein
+// Kommentar darf also bis 62 gehen - laenger scrollt der Editor, die
+// Steuerung nimmt ihn trotzdem. NUR fuer DNC Precision gilt weiter 45
+// (07.09.2026: dort reissen laengere Zeilen im Empfangspuffer) plus die
+// Opferzeile; beides haengt am Schalter "Datei fuer DNC Precision" im
+// DNC-Block (Slot et_dncprecision, Vorgabe aus).
+// T-NUMMERN [10.09.2026]: die 1000er nimmt T1-T32 (T32 angenommen, T33
+// "Fehler 152" bei Prog. Pruefen), real hat sie 16 Plaetze - der T40 der
+// Testvorlage kostete eine Korrektur an der Maschine.
+const NC_1000_KOMMENTAR_APP=62, NC_1000_MAX_KOMMENTAR=45, NC_1000_MAX_SATZ=50, NC_1000_T_MAX=32;
 const NC_1000_OPFERZEILE='(ENDE UEBERTRAGUNG - OPFERZEILE)';
 // 1500er: bis ~40 Zeichen je Satz nachweislich angekommen (03.09.2026);
 // der einzige lange Zyklussatz, der je per DNC hinging, ist der G71 in
@@ -29200,33 +29317,51 @@ const NC_1500_UNBELEGT_AB=100;
 function ncFuerMaschine(code, profilId, opt){
   const id=profilId || (typeof MASCHINENPROFIL!=='undefined' && MASCHINENPROFIL ? MASCHINENPROFIL.id : '');
   const warnungen=[];
-  // OPFERZEILE NACH SCHALTER [10.09.2026]: opt.opferzeile (Pruefstand) vor
-  // dem Haekchen im DNC-Block (Slot et_opferzeile), Vorgabe an.
-  const mitOpfer=(opt && opt.opferzeile!==undefined) ? !!opt.opferzeile : opferzeileGewuenscht();
+  // DNC-PRECISION-MODUS [10.09.2026]: opt.precision (Pruefstand) vor dem
+  // Schalter im DNC-Block; opt.opferzeile und opt.umbruch uebersteuern
+  // einzeln. Vorgabe ist der App-Weg: Umbruch 62, keine Opferzeile.
+  const praez=(opt && opt.precision!==undefined) ? !!opt.precision : dncPrecisionGewuenscht();
+  const mitOpfer=(opt && opt.opferzeile!==undefined) ? !!opt.opferzeile : praez;
+  const maxKom=(opt && +opt.umbruch>0) ? +opt.umbruch : (praez ? NC_1000_MAX_KOMMENTAR : NC_1000_KOMMENTAR_APP);
   let zeilen=String(code||'').replace(/\r\n/g,'\n').split('\n').map(z=>ncAscii(z).replace(/\s+$/,''));
+  let klammern=0; const tHoch=[];
   if(id==='MONFORTS_1000_MTC_K_6624B'){
     // Alles HINTER dem letzten M30 weg: die Fusskommentare (Einrichter-
     // Hinweise, Statuszeilen) sind fuer die Maschine wertlos und kosten
-    // Programmspeicher — die 1000er hat ~50 kB frei. Das Bestandsformat
-    // ihrer eigenen Sicherungen endet mit M30; danach kommt nur noch
-    // die Opferzeile. Ohne M30 (Fehlerfall) bleibt alles.
+    // Programmspeicher — die 1000er hat ~50 kB frei (33280 Bytes am
+    // 10.09.2026 nach O9001/O9016/O9017). Das Bestandsformat ihrer
+    // eigenen Sicherungen endet mit M30; danach kommt hoechstens die
+    // Opferzeile. Ohne M30 (Fehlerfall) bleibt alles.
     let bisM30=-1;
     zeilen.forEach((z,i)=>{ if(/^N\d+.*\bM30\b/.test(z)) bisM30=i; });
     const quelle=(bisM30>=0) ? zeilen.slice(0,bisM30+1) : zeilen;
     const aus=[];
     for(const t of quelle){
       if(!t) continue;                                   // Leerzeilen weg
-      if(/^\(/.test(t) && t.length>NC_1000_MAX_KOMMENTAR){
-        // Reine Kommentarzeile: verlustfrei in geklammerte Stuecke
-        const inhalt=t.replace(/^\(/,'').replace(/\)\s*$/,'');
-        const breite=NC_1000_MAX_KOMMENTAR-2;
-        for(let i=0;i<inhalt.length;i+=breite) aus.push('('+inhalt.slice(i,i+breite)+')');
+      if(/^\(/.test(t)){
+        // Reine Kommentarzeile. INNERE KLAMMERN RAUS [Termin 10.09.2026,
+        // "153 Adressbuchstabe nicht vorhanden" an "( (Bahn um Stechbreite
+        // 3 versetzt) --)"]: die Steuerung schliesst den Kommentar an der
+        // ERSTEN Klammer und liest den Rest als Satz. Ein Klammerpaar im
+        // Text wird zu " - Text", danach verlustfrei in Stuecke <= maxKom,
+        // jedes mit eigener Klammer.
+        let inhalt=t.replace(/^\(/,'').replace(/\)\s*$/,'');
+        if(/[()]/.test(inhalt)){ inhalt=inhalt.replace(/\s*\(/g,' - ').replace(/\)/g,'').replace(/\s{2,}/g,' ').trim(); klammern++; }
+        if(inhalt.length+2>maxKom){
+          const breite=maxKom-2;
+          for(let i=0;i<inhalt.length;i+=breite) aus.push('('+inhalt.slice(i,i+breite)+')');
+        } else aus.push('('+inhalt+')');
         continue;
       }
-      if(/^[NO]/.test(t) && t.length>NC_1000_MAX_SATZ)
-        warnungen.push('Satz mit '+t.length+' Zeichen (Grenze '+NC_1000_MAX_SATZ+', 1000er reisst ab ~52; aus der App zeichenweise gebremst gesendet, an der Maschine unverifiziert - im Editor nachsehen): '+t.slice(0,32)+'...');
+      if(/^[NO]/.test(t)){
+        const mT=t.replace(/\([^)]*\)/g,'').match(/\bT(\d+)\b/);
+        if(mT && +mT[1]>NC_1000_T_MAX && !tHoch.includes(mT[1])) tHoch.push(mT[1]);
+        if(praez && t.length>NC_1000_MAX_SATZ)
+          warnungen.push('Satz mit '+t.length+' Zeichen: mit DNC Precision reisst die 1000er ab ~52 (07.09.2026) - aus der App senden (Zeichenbremse, 10.09.2026 bis 135 Zeichen bewiesen) oder im Editor eintippen: '+t.slice(0,32)+'...');
+      }
       aus.push(t);
     }
+    if(tHoch.length) warnungen.push('T'+tHoch.join(', T')+': die 1000er nimmt nur T1-T'+NC_1000_T_MAX+' (10.09.2026: T32 angenommen, T33 Fehler 152 bei Prog. Pruefen) - das Werkzeug im Lager auf einen Platz 1-16 legen, dann ruft die NC den Platz.');
     if(mitOpfer) aus.push(NC_1000_OPFERZEILE);
     zeilen=aus;
   } else {
@@ -29236,7 +29371,7 @@ function ncFuerMaschine(code, profilId, opt){
         warnungen.push('Satz mit '+t.length+' Zeichen: Empfang an der 1500er bei dieser Laenge nicht belegt (bis ~40 gefahren, T8 mit 137 nie geprueft) — nach dem Einspielen im Editor nachsehen: '+t.slice(0,32)+'...');
     });
   }
-  return {text: zeilen.join('\r\n')+'\r\n', warnungen, zeilen:zeilen.length, opferzeile:(id==='MONFORTS_1000_MTC_K_6624B' && mitOpfer)};
+  return {text: zeilen.join('\r\n')+'\r\n', warnungen, zeilen:zeilen.length, opferzeile:(id==='MONFORTS_1000_MTC_K_6624B' && mitOpfer), umbruch:maxKom, precision:praez, klammern};
 }
 // DATEI ROH [10.09.2026]: fuer "Datei senden (roh)" - Saetze und Kommentare
 // bleiben, wie sie sind (kein Umbruch, keine Opferzeile, nichts hinter M30
