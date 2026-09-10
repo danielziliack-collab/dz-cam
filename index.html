@@ -1348,7 +1348,22 @@ body.artefakt .hsoftkeys{padding-right:48px;}
 .ampel-kopf{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
   color:var(--text-dim);margin:7px 0 2px 0;}
 /* Gruppenzeilen der Zyklus-Softkeys: nur am Laptop (Punkt 23). */
-.sk-gruppe{display:none;}
+/* GRUPPENMARKEN AM HANDY [Daniel, 10.09.2026 spaetabends: "die Abspanzyklen,
+   die eine Kontur benutzen, auch am iPhone besser ordnen - ohne viel Platz,
+   elegant"]: die Leiste ist am Handy EIN waagerecht scrollender Streifen.
+   Die Gruppenzeilen des Laptops (volle Breite) kosteten dort je eine Reihe;
+   stattdessen steht vor jeder Gruppe eine 16 px schmale, senkrecht
+   beschriftete Marke in Knopfhoehe (auf Kontur / frei bemasst). Ausnahme
+   von Regel 3, von Daniel verlangt; nachgemessen laptop2/v19 (390 und
+   375 px: eine Reihe, Hoehe unveraendert). Der Laptop setzt die Marke in
+   der Query wieder auf die volle Gruppenzeile. */
+.sk-gruppe{display:flex;flex:0 0 auto;width:16px;align-self:stretch;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;transform:rotate(180deg);font-size:0;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--text-dim);border-left:2px solid #a9862a;padding:0;margin:0 2px;overflow:hidden;}
+/* Der volle Text ('frei bemasst') stuende senkrecht 70 px hoch und zoege
+   die Reihe von 66 auf 73 px (gemessen) - am Handy zeigt die Marke den
+   Kurztext aus data-kurz (Kontur / frei), der lange Text ist auf 0 gesetzt. */
+.sk-gruppe::before{content:attr(data-kurz);font-size:9px;}
 /* Kachel-Umschalter des Programmkopfs: nur am Laptop (Punkt 24). */
 #pkAnsichtBtn{display:none;}
 /* VORZEICHENKNOPF [Daniel, 26.08.2026] -------------------------- */
@@ -2163,7 +2178,10 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
        900 px bleiben sie aus (Basisregel), dort gilt nur die Ordnung. */
     .softkeys .sk-gruppe{display:block;flex:0 0 auto;width:100%;padding:6px 4px 2px;
       font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);
-      border-top:1px solid hsl(var(--ton), 18.7%, 82.2%);margin-top:4px;text-align:center;}
+      border-top:1px solid hsl(var(--ton), 18.7%, 82.2%);margin-top:4px;text-align:center;
+      /* die senkrechte Handy-Marke (Basisregel) hier zurueckdrehen */
+      writing-mode:horizontal-tb;transform:none;align-self:auto;border-left:none;margin-left:0;margin-right:0;overflow:visible;}
+    .softkeys .sk-gruppe::before{content:none;}
     .softkeys .sk-gruppe:first-of-type{border-top:none;margin-top:0;}
     /* (24) KACHEL-UMSCHALTER IM PROGRAMMKOPF [Daniel, 09.09.2026]: wie in
        den Zyklusmasken, gemeinsamer Speicher et_kachelpilot; unter 900 px
@@ -2468,6 +2486,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="mrow"><label>T Werkzeug</label><select id="aeT" class="tool-select"></select></div>
             <div class="mrow"><label>Drehzahleingabe</label><div class="radiobtns" id="aeSModeBtns"><button data-v="n">n (U/min)</button><button data-v="vc" class="sel">Vc (m/min)</button></div></div>
             <div class="mrow"><label>F / Vc Schruppen</label><input type="number" id="aeFR" value="0.25" step="any" style="width:51px;"><input type="number" step="any" id="aeSR" value="180" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="aeKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <div class="mrow"><label>F / Vc Schlichten</label><input type="number" id="aeFF" value="0.12" step="any" style="width:51px;"><input type="number" step="any" id="aeSF" value="200" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
             <!-- ZUSTELLUNG UND AUFMASS IM TECHNOLOGIE-BLOCK [Daniel,
                  29.08.2026: "direkt oben bei Werkzeug und Schnittwerten
@@ -2615,6 +2634,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="mrow"><label>T Werkzeug</label><select id="akT" class="tool-select"></select></div>
             <div class="mrow"><label>Drehzahleingabe</label><div class="radiobtns" id="akSModeBtns"><button data-v="n">n (U/min)</button><button data-v="vc" class="sel">Vc (m/min)</button></div></div>
             <div class="mrow"><label>F / Vc Schruppen</label><input type="number" id="akFR" value="0.25" step="any" style="width:51px;"><input type="number" step="any" id="akSR" value="180" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="akKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <div class="mrow"><label>F / Vc Schlichten</label><input type="number" id="akFF" value="0.12" step="any" style="width:51px;"><input type="number" step="any" id="akSF" value="200" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
             <!-- IM TECHNOLOGIE-BLOCK, OHNE GRUPPE [Daniel, 29.08.2026] -
                  s. Abspanen Ecke. UX gilt im DURCHMESSER (roughEnvelope:
@@ -2751,6 +2771,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="mrow"><label>T Werkzeug</label><select id="esT" class="tool-select"></select></div>
             <div class="mrow"><label>Drehzahleingabe</label><div class="radiobtns" id="esSModeBtns"><button data-v="n">n (U/min)</button><button data-v="vc" class="sel">Vc (m/min)</button></div></div>
             <div class="mrow"><label>F / Vc Schruppen</label><input type="number" id="esFR" value="0.08" step="any" style="width:51px;"><input type="number" step="any" id="esSR" value="140" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="esKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <div class="mrow"><label>F / Vc Schlichten</label><input type="number" id="esFF" value="0.04" step="any" style="width:51px;"><input type="number" step="any" id="esSF" value="140" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
             <!-- IM TECHNOLOGIE-BLOCK [Daniel, 29.08.2026: "D muss bei
                  allen Zyklen oben stehen, samt Aufmass"]. UX radial —
@@ -2868,6 +2889,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="mrow"><label>T Werkzeug (Stechplatte)</label><select id="stT" class="tool-select"></select></div>
             <div class="mrow"><label>Drehzahleingabe</label><div class="radiobtns" id="stSModeBtns"><button data-v="n">n (U/min)</button><button data-v="vc" class="sel">Vc (m/min)</button></div></div>
             <div class="mrow"><label>F / Vc Stechen (radial)</label><input type="number" id="stFR" value="0.08" step="any" style="width:51px;"><input type="number" step="any" id="stSR" value="140" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="stKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <div class="mrow"><label>F L&#228;ngsziehen</label><input type="number" id="stFL" value="0.12" step="any" ><span class="unit">mm/U</span></div>
             <div class="mrow"><label>F / Vc Schlichten</label><input type="number" id="stFF" value="0.06" step="any" style="width:51px;"><input type="number" step="any" id="stSF" value="140" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
             <!-- IM TECHNOLOGIE-BLOCK, OHNE GRUPPE [Daniel, 29.08.2026] -
@@ -2954,6 +2976,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <button data-v="n">n (U/min)</button><button data-v="vc" class="sel">Vc (m/min)</button>
             </div></div>
             <div class="mrow"><label>F / Vc Freistich</label><input type="number" id="fsFR" value="0.08" step="any" style="width:51px;"><input type="number" step="any" id="fsSR" value="200" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="fsKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <canvas class="mask-help" id="help_maskFreistich"></canvas>
             <div class="mrow"><label>Form</label><div class="radiobtns" id="fsFormBtns">
               <button data-v="E" class="sel">Form E (G79)</button>
@@ -3032,6 +3055,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="mrow"><label>T Werkzeug (Abstechstahl)</label><select id="abT" class="tool-select"></select></div>
             <div class="mrow"><label>Drehzahleingabe</label><div class="radiobtns" id="abSModeBtns"><button data-v="n">n (U/min)</button><button data-v="vc" class="sel">Vc (m/min)</button></div></div>
             <div class="mrow"><label>F / Vc Abstechen</label><input type="number" id="abFR" value="0.06" step="any" style="width:51px;"><input type="number" step="any" id="abSR" value="140" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i class="u-s">m/min</i></span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="abKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <div class="mrow"><label>Z0 Abstichposition / X0 Nenn-⌀</label><input step="any" style="width:51px;" type="number" id="abZ0" value="-100"><input step="any" style="width:51px;" type="number" id="abX0" value="60"><span class="unit">mm</span></div>
             <!-- Kante: Umschalter und Maß in EINER Zeile, wie bei Einstechen
                  und Abspanen [Daniel, ShopTurn-Art]. -->
@@ -3090,6 +3114,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
             <div class="mrow"><label>T Werkzeug</label><select id="boT" class="tool-select"></select></div>
             <div class="mrow"><label>F / S</label><input type="number" id="boF" value="0.1" step="any" style="width:51px;"><input type="number" step="any" id="boS" value="1200" style="width:51px;"><span class="unit unit2"><i>mm/U</i><i>U/min</i></span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="boKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <div class="mrow"><label>Bearbeitungsart</label>
               <div class="radiobtns" id="boArtBtns">
                 <button data-v="zentrieren" class="sel">Zentrieren</button>
@@ -3149,6 +3174,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="msec">Werkzeug &amp; Schnittwerte</div>
             <div class="mrow"><label>T Werkzeug</label><select id="gwT" class="tool-select"></select></div>
             <div class="mrow"><label>S Drehzahl (konstant, G97)</label><input type="number" step="any" id="gwS" value="400"><span class="unit">U/min</span></div>
+            <div class="mrow"><label>K&#252;hlmittel</label><div class="radiobtns" id="gwKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
             <div class="mrow"><label>Bearbeitung</label>
               <div class="radiobtns" id="gwBearbBtns">
                 <button data-v="schruppen" class="sel">Schruppen ▽</button>
@@ -3661,6 +3687,20 @@ Arbeitshilfe, kein Bestand.</dd>
 Hilfebild, das beim Anfassen eines Feldes die zugeh&ouml;rige Gr&ouml;&szlig;e
 markiert, und den Schalter <b>Grafik</b>, der stattdessen die echte
 Werkst&uuml;ckvorschau zeigt.</p>
+<dl>
+<dt id="ba-k05-kuehl">K&uuml;hlmittel an / aus je Zyklus</dt>
+<dd>Schalter in jeder Zyklusmaske direkt unter Vorschub und Drehzahl (seit 10.09.2026,
+Daniels Wunsch). <b>Vorgabe ist immer an</b>: der Kopfsatz des Zyklus schreibt nach dem
+Werkzeugaufruf M03 und M07. Auf &bdquo;aus&ldquo; schreibt er M09 statt M07 &mdash; das
+K&uuml;hlmittel bleibt f&uuml;r diesen Zyklus aus, ab dem n&auml;chsten Zyklus gilt wieder dessen
+Schalter. Im NC steht der Zyklus mit &bdquo;KUEHLMITTEL AUS&ldquo; im Schrittkopf, im
+Arbeitsplan in der Zeile. Alle Vorlagen und gespeicherten Programme laufen mit
+K&uuml;hlmittel an weiter. Dabei geschlossen (10.09.2026): das Abstechen und der Wechsel auf
+das Schlichtwerkzeug T2 schrieben bisher gar kein Kuehlmittelwort &mdash; nach der Abfahrt
+zum Wechselpunkt (M09) liefen sie trocken; das Abstechen rief sein Werkzeug au&szlig;erdem
+ohne Platzaufl&ouml;sung und ohne Eilgang-F f&uuml;r den Wiedereinstieg. F&uuml;r einen Halt
+zwischen zwei Schritten (Messen) gibt es den Baustein Bemerkung / M-Befehl (Kapitel 6).</dd>
+</dl>
 <dl>
 <dt id="ba-zk-radial">D und UX gelten RADIAL (ap, je Seite)</dt>
 <dd>Die wichtigste Konvention der App: <b>D&nbsp;2</b> hei&szlig;t, der Durchmesser
@@ -8368,11 +8408,13 @@ function renderSoftkeys(){
       // direkt unter Kontur/Zyklen, die frei bemassten darunter. Die
       // Gruppenzeilen (sk-gruppe) zeigt nur der Laptop; am Handy ist die
       // Leiste eine umbrechende Reihe, dort gilt allein die Reihenfolge.
-      const gruppe=(txt)=>{ const g=document.createElement('div'); g.className='sk-gruppe'; g.textContent=txt; skCol.appendChild(g); };
-      gruppe('auf Kontur');
+      // Kurztext fuer die senkrechte Handy-Marke (data-kurz, CSS ::before);
+      // der Laptop zeigt den vollen Text als Gruppenzeile.
+      const gruppe=(txt,kurz)=>{ const g=document.createElement('div'); g.className='sk-gruppe'; g.textContent=txt; if(g.dataset) g.dataset.kurz=kurz||txt; skCol.appendChild(g); };
+      gruppe('auf Kontur','Kontur');
       add('yellow',SK_ICONS.zyAbspKontur,'Abspanen<br>Kontur',()=>openAbspanenKonturMask(), contour.length<2);
       add('yellow',SK_ICONS.zyStechdrehen,'Stech-<br>drehen',()=>openStechdrehenMask(), !contours.some(c=>c.els.length>1));
-      gruppe('frei bema\u00dft');
+      gruppe('frei bema\u00dft','frei');
       add('yellow',SK_ICONS.zyAbspEcke,'Abspanen<br>(Ecke)',()=>openAbspanenEinfachMask());
       add('yellow',SK_ICONS.zyEinstechen,'Einstechen',()=>openEinstechenMask());
       add('yellow',SK_ICONS.zyFreistich,'Freistich<br>DIN 509',()=>openFreistichMask());
@@ -10884,6 +10926,7 @@ function editStep(i){
   const p=st.params;
   editStepIdx=i;
   if(st.type==='abspanen_einfach'){
+    setRadio('aeKuehlBtns', p.kuehl||'an');
     setRadio('aeBearbBtns',p.bearbeitung); setRadio('aeRichtBtns',p.richtung); setRadio('aeLageBtns',p.lage);
     setVal('aeX0',p.x0); setVal('aeZ0',p.z0); setVal('aeX1',p.x1); setVal('aeZ1',p.z1);
     setVal('aeD',p.d); setVal('aeUX',p.ux); setVal('aeUZ',p.uz); setVal('aeT',p.t);
@@ -10915,6 +10958,7 @@ function editStep(i){
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskAbspanenEinfach'); }catch(e){}
   } else if(st.type==='abspanen_kontur'){
+    setRadio('akKuehlBtns', p.kuehl||'an');
     setRadio('akEingrenzBtns', p.eingrenz||'nein');
     setVal('akZA', isFinite(p.za)? p.za : '');
     setVal('akZB', isFinite(p.zb)? p.zb : '');
@@ -10948,6 +10992,7 @@ function editStep(i){
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskAbspanenKontur'); }catch(e){}
   } else if(st.type==='freistich'){
+    setRadio('fsKuehlBtns', p.kuehl||'an');
     setRadio('fsFormBtns', p.form||'E'); setVal('fsPM',p.pm||2); setVal('fsPJ',p.pj||0);
     setVal('fsP76',p.p76||1.5); setRadio('fsG76Btns',p.g76||'A');
     setVal('fsA76',p.al76||60); setVal('fsD76',p.d76||2); setVal('fsU76',p.u76||0.2);
@@ -10965,6 +11010,7 @@ function editStep(i){
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskFreistich'); }catch(e){}
   } else if(st.type==='abstechen'){
+    setRadio('abKuehlBtns', p.kuehl||'an');
     setVal('abT',p.t); setVal('abX0',p.x0); setVal('abZ0',p.z0);
     setRadio('abKaBtns', p.kaTyp||'keine'); setVal('abKa',p.ka);
     setVal('abX1',p.x1); setVal('abXD',p.xd); setVal('abSD',p.sd); setVal('abFD',p.fd);
@@ -10977,6 +11023,7 @@ function editStep(i){
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskAbstechen'); }catch(e){}
   } else if(st.type==='einstechen'){
+    setRadio('esKuehlBtns', p.kuehl||'an');
     setRadio('esBearbBtns',p.bearbeitung);
     setRadio('esAusrBtns', p.ausr||'radial');
     // EIN Lagefeld mit drei Stellungen [Daniel, 28.08.2026]:
@@ -11027,6 +11074,7 @@ function editStep(i){
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskEinstechen'); }catch(e){}
   } else if(st.type==='stechdrehen'){
+    setRadio('stKuehlBtns', p.kuehl||'an');
     fillStKonturSelect(p.contourId, p.blankContourId);
     setRadio('stBearbBtns',p.bearbeitung);
     setRadio('stRichtBtns', p.richtung||'z');
@@ -11050,6 +11098,7 @@ function editStep(i){
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskStechdrehen'); }catch(e){}
   } else if(st.type==='bohren'){
+    setRadio('boKuehlBtns', p.kuehl||'an');
     setRadio('boArtBtns',p.art);
     setRadio('boAusgBtns', p.ausg||'gcode');
     setVal('boR230', p.r230!==undefined?p.r230:3);
@@ -11080,6 +11129,7 @@ function editStep(i){
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
   try{ maskeSichtbarPruefen('maskBohren'); }catch(e){}
   } else if(st.type==='gewinde'){
+    setRadio('gwKuehlBtns', p.kuehl||'an');
     setRadio('gwBearbBtns',p.bearbeitung); setRadio('gwLageBtns',p.lage);
     setVal('gwX0',p.x0); setVal('gwZ0',p.z0); setVal('gwZ1',p.z1); setVal('gwP',p.p);
     setVal('gwH1',p.h1); setVal('gwU',p.u); setVal('gwND',p.nd); setVal('gwLW',p.lw);
@@ -11140,7 +11190,8 @@ function wireRadioGroup(id){
   });
 }
 ['akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stLageBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
-'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns','akPlanFertigBtns'].forEach(wireRadioGroup);
+'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns','akPlanFertigBtns',
+'aeKuehlBtns','akKuehlBtns','esKuehlBtns','stKuehlBtns','fsKuehlBtns','abKuehlBtns','boKuehlBtns','gwKuehlBtns'].forEach(wireRadioGroup);
 // Kleinumschalter IN einer Feldzeile (wie abs/ink): verdrahtet, aber
 // BEWUSST ohne Auswahlfeld — ein 51-px-Knopfpaar soll Knopfpaar
 // bleiben. Bis zum 29.08.2026 fehlte der Eintrag ganz, und die
@@ -11154,7 +11205,9 @@ wireRadioGroup('boWMode');   // man/auto des Bohr-Vorlaufs — war ebenso tot
 // Dieselben Gruppen bekommen ihr Auswahlfeld. Eine Liste, damit keine
 // Gruppe verdrahtet ist, aber ohne Feld bleibt (oder umgekehrt).
 const SELFELD_GRUPPEN=['akPlanFertigBtns','akEingabeBtns','stEingabeBtns','esEingabeBtns','gwEingabeBtns','boEingabeBtns','aeEingabeBtns','fsEingabeBtns','abEingabeBtns','aeBearbBtns','aeRichtBtns','aeLageBtns','akBearbBtns','akRichtBtns','akLageBtns','akSchlRichtBtns','aeSchlRichtBtns','esBearbBtns','esAusrBtns','esLageBtns','esFormBtns','esE1Btns','esE2Btns','esE3Btns','esE4Btns','boArtBtns','boEntBearbBtns','gwBearbBtns','gwLageBtns','gwVerfBtns','gwArtBtns','gwAusgBtns','boAusgBtns','aeAusgBtns','aeFormBtns','aeSbBtns','akSbBtns','aeSvBtns','akSvBtns','esSvBtns','esAusgBtns','akTauchBtns','stRichtBtns','stLageBtns','stBearbBtns','stSchlStratBtns','stRaeumBtns','fsAusgBtns','abKaBtns','aeK1Btns','aeK2Btns','aeK3Btns','gwFormBtns',
-'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns'];
+'aeSModeBtns','akSModeBtns','esSModeBtns','stSModeBtns','abSModeBtns','fsFormBtns','fsG76Btns','fsSModeBtns','akHintBtns','pkRueckzugBtns','gwFlankeBtns','akEingrenzBtns',
+// KUEHLMITTEL an/aus [10.09.2026]: Antippfeld wie die Drehzahleingabe daneben.
+'aeKuehlBtns','akKuehlBtns','esKuehlBtns','stKuehlBtns','fsKuehlBtns','abKuehlBtns','boKuehlBtns','gwKuehlBtns'];
 SELFELD_GRUPPEN.forEach(id=>{ try{ selFeldAufbauen(id); }catch(e){} });
 // Die Rueckzugsstufe schaltet ihre Felder frei — beim Klick und einmal
 // beim Laden, damit der Startzustand stimmt.
@@ -12221,6 +12274,7 @@ document.getElementById('btnAeCancel').onclick=()=>{ editStepIdx=-1; document.ge
 document.getElementById('btnAeOk').onclick=()=>{
   if(pflichtMeldung([['aeX0','X0 Bezugspunkt ⌀'],['aeZ0','Z0 Bezugspunkt'],['aeX1','X1 Endpunkt ⌀'],['aeZ1','Z1 Endpunkt']])) return;
   const params = {
+    kuehl: selBtnVal('aeKuehlBtns')||'an',
     bearbeitung: selBtnVal('aeBearbBtns'),
     richtung: selBtnVal('aeRichtBtns'),
     lage: selBtnVal('aeLageBtns'),
@@ -12279,6 +12333,7 @@ function openAbspanenKonturMask(){
 document.getElementById('btnAkCancel').onclick=()=>{ editStepIdx=-1; document.getElementById('maskAbspanenKontur').classList.remove('show'); };
 document.getElementById('btnAkOk').onclick=()=>{
   const params = {
+    kuehl: selBtnVal('akKuehlBtns')||'an',
     bearbeitung: selBtnVal('akBearbBtns'),
     richtung: selBtnVal('akRichtBtns'),
     lage: selBtnVal('akLageBtns'),
@@ -12375,6 +12430,7 @@ document.getElementById('btnFsCancel').onclick=()=>{
 };
 document.getElementById('btnFsOk').onclick=()=>{
   const params={
+    kuehl: selBtnVal('fsKuehlBtns')||'an',
     form: selBtnVal('fsFormBtns')||'E',
     pm: +document.getElementById('fsPM').value||2,
     pj: +document.getElementById('fsPJ').value||0,
@@ -12470,6 +12526,7 @@ document.getElementById('btnZwCancel').onclick=()=>{ editStepIdx=-1; document.ge
 document.getElementById('btnAbOk').onclick=()=>{
   if(pflichtMeldung([['abZ0','Z0 Abstichlage'],['abX0','X0 Rohteil-⌀']])) return;
   const params={
+    kuehl: selBtnVal('abKuehlBtns')||'an',
     t: document.getElementById('abT').value,
     x0: +document.getElementById('abX0').value,
     z0: +document.getElementById('abZ0').value,
@@ -12498,6 +12555,7 @@ document.getElementById('btnEsCancel').onclick=()=>{ editStepIdx=-1; document.ge
 document.getElementById('btnEsOk').onclick=()=>{
   if(pflichtMeldung([['esX0','X0 Bezugspunkt ⌀'],['esZ0','Z0 Bezugspunkt'],['esB1','B1 Einstichbreite'],['esT1','T1 Einstichtiefe ⌀']])) return;
   const params = {
+    kuehl: selBtnVal('esKuehlBtns')||'an',
     bearbeitung: selBtnVal('esBearbBtns'),
     x0: +document.getElementById('esX0').value,     z0: +document.getElementById('esZ0').value,
     z0bez: (document.querySelector('#esZ0BezBtns .sel')||{dataset:{}}).dataset.v || 'rechts',
@@ -12562,6 +12620,7 @@ document.getElementById('btnStCancel').onclick=()=>{ editStepIdx=-1; document.ge
 document.getElementById('btnStOk').onclick=()=>{
   if(pflichtMeldung([['stD','D Zustellung']])) return;
   const params = {
+    kuehl: selBtnVal('stKuehlBtns')||'an',
     bearbeitung: selBtnVal('stBearbBtns'),
     richtung: selBtnVal('stRichtBtns') || 'z',
     stock: +document.getElementById('stStock').value,
@@ -12601,6 +12660,7 @@ document.getElementById('btnBoCancel').onclick=()=>{ editStepIdx=-1; document.ge
 document.getElementById('btnBoOk').onclick=()=>{
   if(pflichtMeldung([['boZ0','Z0 Bezugspunkt'],['boZ1','Z1 Endtiefe']])) return;
   const params = {
+    kuehl: selBtnVal('boKuehlBtns')||'an',
     art: selBtnVal('boArtBtns'),
     entBearb: selBtnVal('boEntBearbBtns'),
     ausg: selBtnVal('boAusgBtns') || 'gcode',
@@ -12644,6 +12704,7 @@ document.getElementById('btnGwCancel').onclick=()=>{ editStepIdx=-1; document.ge
 document.getElementById('btnGwOk').onclick=()=>{
   if(pflichtMeldung([['gwX0','X0 Nenndurchmesser'],['gwZ0','Z0 Anfang'],['gwZ1','Z1 Ende'],['gwP','P Steigung']])) return;
   const params = {
+    kuehl: selBtnVal('gwKuehlBtns')||'an',
     bearbeitung: selBtnVal('gwBearbBtns'),
     lage: selBtnVal('gwLageBtns'),
     x0: +document.getElementById('gwX0').value, z0: +document.getElementById('gwZ0').value, z1: zykWert('gwZ1','gwZ0'),
@@ -13260,6 +13321,8 @@ function refreshArbeitsplan(){
       icon='M'; name=(p.text? 'Bemerkung' : 'M-Befehl');
       detail=[p.text? '\u201e'+String(p.text).slice(0,60)+'\u201c' : '', ms.join(' '), p.wwp==='ja'? '\u2192 XT/ZT' : ''].filter(Boolean).join(' \u00b7 ');
     }
+    // KUEHLMITTEL AUS in der Zeile [10.09.2026] - die Abweichung vom Normalfall.
+    if(p.kuehl==='aus' && st.type!=='zwischen') detail+=(detail? ' \u00b7 ' : '')+'K\u00fchlmittel aus';
     // Piktogramm je Zyklustyp — dieselbe Bildsprache wie auf den Auswahl-Kacheln.
     const apIcon = {abspanen_einfach:'schruppen', abspanen_kontur:'konturparallel',
                     einstechen:'einstich', bohren:'bohren', gewinde:'gewindezug',
@@ -15093,6 +15156,8 @@ function baSchliessen(){ document.getElementById('baPanel').classList.remove('sh
 // damit Pruefung 133 sie bei jedem Lauf gegen die vorhandenen Anker
 // halten kann.
 const BA_ANKER={
+  aeKuehlBtns:'ba-k05-kuehl', akKuehlBtns:'ba-k05-kuehl', esKuehlBtns:'ba-k05-kuehl', stKuehlBtns:'ba-k05-kuehl',
+  fsKuehlBtns:'ba-k05-kuehl', abKuehlBtns:'ba-k05-kuehl', boKuehlBtns:'ba-k05-kuehl', gwKuehlBtns:'ba-k05-kuehl',
   safeZ:'ba-pk-sc', stockDia:'ba-pk-rohteil', pkForm:'ba-pk-rohteil',
   pkZA:'ba-pk-rohteil', pkZI:'ba-pk-rohteil', pkLA:'ba-pk-rohteil',
   rapidF:'ba-pk-rapid', pkWerkstoff:'ba-pk-werkstoff',
@@ -21122,7 +21187,7 @@ const PP_FEST=[
   'D Zustelltiefe und UX Aufmass gelten RADIAL (ap, je Seite); axiale Werte (Planzustellung, UZ) 1:1.',
   'Schneidenradiuskorrektur automatisch: Schruppen ohne, Schlichten G41/G42 nach Lage.',
   'NMAX-Drehzahlgrenze (Programmkopf): jede G96-Anwahl steht als G97 S<NMAX>, G96 erst vor dem ersten Satz, dessen Start und Ziel ueber dem Grenz-Durchmesser liegen; unter der Klemme keine S-Woerter (10.09.2026: Alarm 007 an der 1000er, G96 am kleinen X angewaehlt). Leer = keine Wache, die Ampel sagt es an.',
-  'Zwischenschritt Bemerkung / M-Befehl (Arbeitsplan, Softkey Zyklen): die Bemerkung steht als Kommentarzeile (BEMERKUNG: ...) an ihrer Stelle im NC, M-Befehle einzeln als (M-BEFEHL)-Saetze in fester Folge Kuehlmittel, Spindel, Halt (DV 610 Kap. 4.1); wahlweise vorher zum Wechselpunkt. Der naechste Werkzeugaufruf schreibt M03/M07 wieder - Kuehlmittel an bleibt die Vorgabe.',
+  'Zwischenschritt Bemerkung / M-Befehl (Arbeitsplan, Softkey Zyklen): die Bemerkung steht als Kommentarzeile (BEMERKUNG: ...) an ihrer Stelle im NC, M-Befehle einzeln als (M-BEFEHL)-Saetze in fester Folge Kuehlmittel, Spindel, Halt (DV 610 Kap. 4.1); wahlweise vorher zum Wechselpunkt. Der naechste Werkzeugaufruf schreibt M03/M07 wieder - Kuehlmittel an bleibt die Vorgabe; je Zyklus schaltet der Schalter bei F/S auf aus (Kopfsatz M09 statt M07). Seit dem 10.09.2026 auch beim Abstechen und nach dem Wechsel auf T2 (vorher ohne Kuehlmittelwort).',
   'WIEDEREINSTIEG: nach jedem T-Aufruf stehen G94-Eilgangvorschub, Drehzahl, M03/M07 und G95-F neu im Programm — ein Satzvorlauf mitten hinein findet alles Modale vor (Daniels Ansage; G94-F belegt am Originalprogramm 01.10.2025).',
 ];
 // =================================================================
@@ -21715,7 +21780,7 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)} S${p.sr}`); bump();
 
   // SCHRUPPGRENZE AN DER K2-KANTE [Daniel, ShopTurn-Kanten]: eine Hohlkehle
@@ -23448,7 +23513,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)} S${p.sr}`); bump();
 
   // Nachschlagefunktion der HAUPTKONTUR: außerhalb der Taschen die Aufmaß-Hülle,
@@ -24330,6 +24395,10 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
     lines.push(`(--- SCHLICHTEN: Kontur ${p.schlRicht==='lr'?'links->rechts':'rechts->links'} - F${fmt(p.ff)} S${p.sf} ---)`);
     lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sf}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
+    // KUEHLMITTEL NACH DEM T2-WECHSEL [10.09.2026]: die Abfahrt davor hat M09
+    // geschrieben - ohne diese Zeile schlichtete T2 trocken (Bestandsluecke,
+    // Baseline neu). Nur bei echtem Werkzeugwechsel, sonst bleibt der Kopf.
+    if(p.t2 && String(p.t2)!==String(p.t)){ lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump(); }
     const cc=crcCode(p) ? (crcCode(p)+' ') : '';
     // Reitstockschutz: nie unter den eingestellten kleinsten Durchmesser fahren. Ohne das
     // würde der Schlichtgang bei einer Kontur, die in der Mitte beginnt, bis X0 zustellen —
@@ -24790,6 +24859,8 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
       lines.push(`(--- HINTERSCHNITTE SCHLICHTEN MIT T${p.t2} ---)`);
       lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t2)}`); bump();
       lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
+      // KUEHLMITTEL NACH DEM T2-WECHSEL [10.09.2026], s. Konturschlichten.
+      lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.ff)} S${p.sf}`); bump();
       pocketRuns.forEach(r=>{
         const pk=pocketsC[r.pocket];
@@ -24888,7 +24959,7 @@ function genFreistich(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)}`); bump();
   lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(p.x0+4)} Z${fmt(p.z0+4)}`); bump();
   if(!gcodeAus){
@@ -25014,7 +25085,7 @@ function genFreistich76(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)}`); bump();
   lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(p.x0+4)} Z${fmt(p.z0+4)}`); bump();
   if(ausg==='zyklus'){
@@ -25098,8 +25169,16 @@ function genAbstechen(p, N, bump, lines, warnings){
   const xS=p.x0+2;
   lines.push('');
   lines.push('(--- ABSTECHEN: Z'+fmt(p.z0)+', ⌀'+fmt(p.x0)+' -> '+fmt(p.x1)+', Platte '+fmt(bw)+' mm ---)');
-  lines.push(`${N()} T${p.t}`); bump();
+  // KOPF NACH DEM HAUSMUSTER [10.09.2026]: bis dahin stand hier ein nackter
+  // T-Satz ohne (WERKZEUG)-Tag und OHNE tSatz - ein Lagerwerkzeug auf einem
+  // Revolverplatz haette hier seine Lagernummer gerufen, die Werkzeugliste
+  // im Kopf und die T-Wache sahen den Satz nicht, der EILGANG-F fuer den
+  // Wiedereinstieg fehlte, und nach der Abfahrt (M09) lief das Abstechen
+  // ohne Kuehlmittel. Jetzt wie jeder Zyklus; Baseline neu (Kuehlbeweis).
+  lines.push(`${N()} (WERKZEUG) ${MASCHINENPROFIL.tSatz(p.t)}`); bump();
+  lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${Math.round(p.sr)} M03`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (ANFAHRT ) G94 G00 X${fmt(xS)} Z${fmt(p.z0)}`); bump();
   if(ka>0){
     // KANTE MIT VORSTICH [Daniel, IMG-Fund]: die Klinge ragt bw nach LINKS —
@@ -25477,7 +25556,7 @@ function genEinstechen(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
     lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
     // Vorposition über dem Rohteil (gleiche Verkettungsfalle wie radial:
     // der Vorgängerschritt kann in der Mitte enden)
     if(innen){
@@ -25623,7 +25702,7 @@ function genEinstechen(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)} S${p.sr}`); bump();
   // Vorposition NACH dem Werkzeugwechsel ([Daniel], NC-Review: die X84-
   // Fahrt stand VOR dem T-Satz — der Revolver haette bei X84 geschwenkt
@@ -25878,7 +25957,7 @@ function bohrerSpitzenlaenge(tNr){
 function genBohren(p, N, bump, lines, warnings){
   const zyklusModus = (p.ausg==='zyklus' || p.ausg==='zyklus81');
   let simStart = -1;
-  const kuehl = ()=>{ lines.push(`${N()} (M-BEFEHL) M07`); bump(); };
+  const kuehl = ()=>{ lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump(); };
   // MONFORTS-BOHRZYKLEN [Daniel] (DV 610-0C Kap. 3.42, DIN-66025-Familie):
   // Zentrieren/Bohren -> G81 · Tiefloch Spänebrechen -> G82 · Tiefloch
   // Entspanen -> G83. Der Zyklussatz wird NACH Kopf und Anfahrt gesetzt
@@ -26092,7 +26171,7 @@ function genGewindePlan(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) G97 S${p.s}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   // Schnittaufteilung woertlich wie im Laengsgewinde (DV 594 4.6.1.4)
   const K = p.h1;
   const U = doFinish ? (p.u||0) : 0;
@@ -26209,7 +26288,7 @@ function genGewinde(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) G97 S${p.s}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
 
   // außen: Zustellung X0 (Nenn-⌀, groß) → kleiner, in Richtung Kerndurchmesser.
   // innen: Zustellung X0 (Kern-⌀ der Vorbohrung, klein) → größer, in Richtung Nenn-⌀ des Gewindes.
@@ -26666,7 +26745,7 @@ function genStechdrehen(p, N, bump, lines, warnings){
   lines.push(`${N()} (EILGANG ) G94 F${fmt(eilgangMmMin())}`); bump();
   lines.push(`${N()} (DREHZAHL) ${p.sMode==='vc'?'G96':'G97'} S${p.sr}`); bump();
   lines.push(`${N()} (M-BEFEHL) M03`); bump();
-  lines.push(`${N()} (M-BEFEHL) M07`); bump();
+  lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)} S${p.sr}`); bump();
   lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(xSicher)} Z${fmt(zAppr)}`); bump();
 
@@ -27459,6 +27538,14 @@ function nmaxWache(lines, warnings){
 // ')', s. Fehler 153 am selben Tag; Umlaute ersetzt die Endstufe von
 // buildProgram) und die geordnete M-Liste: nur bekannte Woerter aus
 // M_BEFEHLE in Listenfolge, ein freies M-Wort (Nummer) hinten dran.
+// KUEHLMITTEL JE ZYKLUS [Daniel, 10.09.2026 spaetabends: "Kuehlmittel an oder
+// aus, ein Antipp-Knopf in der Naehe von Drehzahl und Vorschub, Standard
+// immer an"]: der Kopfsatz jedes Zyklus schreibt nach M03 das Kuehlmittel-
+// wort - M07 (Vorgabe, alle Vorlagen und alten Programme bitgenau) oder M09
+// bei kuehl:'aus'. Vorher fehlte das Wort beim Abstechen und beim Wechsel
+// auf das Schlichtwerkzeug T2 ganz: nach der Abfahrt (M09) lief beides
+// OHNE Kuehlmittel - Daniel ging vom Gegenteil aus.
+function kuehlWort(p){ return (p && p.kuehl==='aus') ? 'M09' : 'M07'; }
 function zwischenText(s){
   return String(s||'').replace(/[()]/g,'-').replace(/[\r\n\t]+/g,' ').replace(/\s{2,}/g,' ').trim().slice(0,120);
 }
@@ -27662,6 +27749,8 @@ function buildProgram(){
     // dieselbe Aufloesung wie der T-Satz — sonst stuende im Kopf T21
     // und im Satz T14 [05.09.2026]. Fuer Lagerwerkzeuge (alle Demos)
     // ist wzPlatzNr die Identitaet und die Baseline bleibt bitgenau.
+    // KUEHLMITTEL AUS im Kopf [10.09.2026]: wer das NC liest, sieht es hier.
+    if(q.kuehl==='aus') info=(info? info+' \u00b7 ' : '')+'KUEHLMITTEL AUS';
     const wz = q.t!==undefined ? ' | T'+wzPlatzNr(q.t) : '';
     return '(=== SCHRITT '+nr+': '+name+wz+(info?' | '+info:'')+' ===)';
   };
@@ -27950,8 +28039,8 @@ function buildProgram(){
     let iT=-1, iM=-1;
     for(let li=0; li<lines.length; li++){
       if(iT<0 && /\(WERKZEUG\)/.test(lines[li])){ iT=li; continue; }
-      if(iT>=0 && /\(M-BEFEHL\) M07\b/.test(lines[li])){ iM=li; break; }
-      if(iT>=0 && /\(GERADE|\(SCHRAEG|\(RADIUS/.test(lines[li])) break; // Kopf zu Ende, kein M07
+      if(iT>=0 && /\(M-BEFEHL\) M0[79]\b/.test(lines[li])){ iM=li; break; }   // M09 bei Kuehlmittel aus
+      if(iT>=0 && /\(GERADE|\(SCHRAEG|\(RADIUS/.test(lines[li])) break; // Kopf zu Ende, kein M07/M09
     }
     const ziel = iM>=0 ? iM : iT;
     if(ziel>=0){
