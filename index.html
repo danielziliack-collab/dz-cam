@@ -2432,6 +2432,8 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="mrow" id="gTransValRow" style="display:none;">
               <label id="gTransValLabel">R</label><input type="number" step="any" id="gTransVal" value="2"><span class="unit">mm</span>
             </div>
+            <!-- VORSCHUB JE ELEMENT [Daniel, 10.09.2026; ShopTurn-Vorbild]: leer = Zyklusvorschub, wirkt im Schlichtzug. -->
+            <div class="mrow"><label>F Vorschub je Element (Schlichten)</label><input type="number" step="any" id="gF" min="0" placeholder="Zyklus" style="width:68px;"><span class="unit">mm/U</span></div>
             <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnGeradeOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnGeradeCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
           </div>
         </div>
@@ -2471,6 +2473,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
             <div class="mrow" id="kTransValRow" style="display:none;">
               <label id="kTransValLabel">R</label><input type="number" step="any" id="kTransVal" value="2"><span class="unit">mm</span>
             </div>
+            <div class="mrow"><label>F Vorschub je Element (Schlichten)</label><input type="number" step="any" id="kF" min="0" placeholder="Zyklus" style="width:68px;"><span class="unit">mm/U</span></div>
             <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnKreisOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnKreisCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
           </div>
         </div>
@@ -3579,6 +3582,18 @@ Bogen mit falschem Drehsinn schuld (er l&auml;uft als 270&deg;- statt
 <dd>Jeder Eckpunkt kann eine Fase oder Rundung tragen &mdash; als Eigenschaft des
 Punkts, nicht als eigenes Element. Der hohle Punktmarker zeigt die gebrochene Ecke;
 editiert wird immer der theoretische Eckpunkt.</dd>
+<dt id="ba-k03-vorschub">F Vorschub je Element (Schlichten)</dt>
+<dd>Wie bei ShopTurn kann jede Gerade und jeder Kreis einen eigenen Vorschub tragen
+(seit 10.09.2026, Daniels Wunsch): Feld <b>F Vorschub je Element</b> in der
+Gerade- und Kreis-Maske, leer = Vorschub des Zyklus. Er wirkt NUR im Schlichtzug des
+Konturzyklus (Abspanen Kontur, au&szlig;en und innen, beide Schlichtrichtungen, auch mit
+Drehzahlvariation): vor den S&auml;tzen des Elements steht <code>(VORSCHUB) G95 F&lt;f&gt;</code>,
+danach schaltet der n&auml;chste Satz auf den Schlichtvorschub zur&uuml;ck. Eine Fase oder
+Rundung am Ende des Elements f&auml;hrt mit dessen Vorschub. Das Schruppen, Stechdrehen und
+die Ecke lesen das Feld nicht. Im Element-Streifen und in der Liste steht der Wert als
+&bdquo;F 0,05&ldquo;; Ablage, Umkehren und Transformieren nehmen ihn mit, ein DXF-Import hat
+keinen. Sinn: feine Elemente (kleine Radien, kurze Schr&auml;gen) mit reduziertem Vorschub
+sauber ausdrehen, ohne den ganzen Zyklus zu bremsen.</dd>
 </dl>
 <h3 id="ba-k03-richtung">Richtung und Nullpunkt drehen</h3>
 <p>In der Softkey-Gruppe <b>Import u. Drehen</b>:</p>
@@ -5682,7 +5697,7 @@ function konturTransformieren(els0, opt){
     const mitte=Math.max(...zs)+Math.min(...zs);
     const sz=(v)=>mitte-v;
     // Punkte und ihre Uebergaenge einsammeln
-    const P=els.map(e=>({z:e.z, x:e.x, trans:e.trans?JSON.parse(JSON.stringify(e.trans)):{type:'none',val:0}}));
+    const P=els.map(e=>({z:e.z, x:e.x, trans:e.trans?JSON.parse(JSON.stringify(e.trans)):{type:'none',val:0}, f:(+e.f>0? +e.f : undefined)}));   // f: Vorschub je Element [10.09.2026]
     const n=P.length-1;
     const neu=[];
     for(let j=0;j<=n;j++){
@@ -5699,9 +5714,9 @@ function konturTransformieren(els0, opt){
                   cz:sz(q.cz), cx:q.cx,
                   // Spiegeln kippt den Drehsinn, Rueckwaertsfahren
                   // kippt ihn ein zweites Mal — er bleibt also.
-                  cw:q.cw, trans:alt.trans});
+                  cw:q.cw, trans:alt.trans, f:alt.f});
       } else {
-        neu.push({kind:'gerade', z:sz(alt.z), x:alt.x, trans:alt.trans});
+        neu.push({kind:'gerade', z:sz(alt.z), x:alt.x, trans:alt.trans, f:alt.f});
       }
     }
     els=neu;
@@ -6394,6 +6409,9 @@ function expandContour(srcContour){
     return q;
   });
   // returns list of segments: {type:'line', z1,x1,z2,x2} or {type:'arc', z1,x1,z2,x2,cz,cx,cw}
+  // el = Index des QUELLELEMENTS in der Kontur [10.09.2026, Vorschub je
+  // Element]: das eigene Segment traegt i, Fase/Rundung an der Ecke davor
+  // traegt i-1 (der Uebergang ist Eigenschaft des vorigen Elements).
   const segs=[];
   if(src.length<2) return segs;
   let cur = {z:src[0].z, x:src[0].x};
@@ -6429,8 +6447,8 @@ function expandContour(srcContour){
         if(segs.length) segs.pop();
         const T1 = {z:cur.z+v1.z*fs, x:cur.x+v1.x*fs};
         const T2 = {z:cur.z+v2.z*fs, x:cur.x+v2.x*fs};
-        segs.push({type:'line', z1:prevPoint.z,x1:prevPoint.x, z2:T1.z,x2:T1.x});
-        segs.push({type:'line', z1:T1.z,x1:T1.x, z2:T2.z,x2:T2.x});
+        segs.push({type:'line', z1:prevPoint.z,x1:prevPoint.x, z2:T1.z,x2:T1.x, el:i-1});
+        segs.push({type:'line', z1:T1.z,x1:T1.x, z2:T2.z,x2:T2.x, el:i-1});
         cur = T2;
         }
       } else if(prevTrans.type==='radius' && angle>0.001 && angle<Math.PI-0.001){
@@ -6445,18 +6463,18 @@ function expandContour(srcContour){
         const distC = rEff/Math.sin(angle/2);
         const center = {z:cur.z+bis.z*distC, x:cur.x+bis.x*distC};
         const cross = v1.z*v2.x - v1.x*v2.z;
-        segs.push({type:'line', z1:prevPoint.z,x1:prevPoint.x, z2:T1.z,x2:T1.x});
-        segs.push({type:'arc', z1:T1.z,x1:T1.x, z2:T2.z,x2:T2.x, cz:center.z,cx:center.x, cw: cross>0});
+        segs.push({type:'line', z1:prevPoint.z,x1:prevPoint.x, z2:T1.z,x2:T1.x, el:i-1});
+        segs.push({type:'arc', z1:T1.z,x1:T1.x, z2:T2.z,x2:T2.x, cz:center.z,cx:center.x, cw: cross>0, el:i-1});
         cur = T2;
         }
       }
     }
 
     if(el.kind==='gerade'){
-      segs.push({type:'line', z1:cur.z,x1:cur.x, z2:target.z,x2:target.x});
+      segs.push({type:'line', z1:cur.z,x1:cur.x, z2:target.z,x2:target.x, el:i});
       cur = target;
     } else if(el.kind==='kreis'){
-      segs.push({type:'arc', z1:cur.z,x1:cur.x, z2:target.z,x2:target.x, cz:el.cz,cx:el.cx, cw:el.cw});
+      segs.push({type:'arc', z1:cur.z,x1:cur.x, z2:target.z,x2:target.x, cz:el.cz,cx:el.cx, cw:el.cw, el:i});
       cur = target;
     }
   }
@@ -9463,6 +9481,7 @@ function openGeradeMask(axis, idx){
   document.getElementById('gTransValRow').style.display = trans.type==='none'?'none':'flex';
   document.getElementById('gTransValLabel').textContent = trans.type==='radius'?'R':'FS';
   document.getElementById('gTransVal').value = trans.val || 2;
+  { const fe=document.getElementById('gF'); if(fe) fe.value=(editing && +src.f>0) ? src.f : ''; }
   document.getElementById('btnGeradeOk').textContent = editing ? '✓ Änderung übernehmen' : '✓ Übernehmen';
   document.getElementById('maskGerade').classList.add('show');
   // Nachsehen, ob sie wirklich im Bild steht. [Daniel]
@@ -9678,6 +9697,11 @@ document.getElementById('gTransBtns').addEventListener('click',(e)=>{
   document.getElementById('gTransValRow').style.display = v==='none'?'none':'flex';
   document.getElementById('gTransValLabel').textContent = v==='radius'?'R':'FS';
 });
+// VORSCHUB JE ELEMENT [Daniel, 10.09.2026 spaetabends]: Feld gF/kF in den
+// Element-Dialogen, leer = Zyklusvorschub. Wirkt nur im Schlichtzug des
+// Konturzyklus (90-gen-abspanen.js, fElement).
+function fElementLesen(id){ const e=document.getElementById(id); const v=e? parseFloat(String(e.value).replace(',','.')) : NaN; return (isFinite(v) && v>0) ? +v.toFixed(4) : null; }
+function fElementObj(id){ const v=fElementLesen(id); return v? {f:v} : {}; }
 document.getElementById('btnGeradeOk').onclick=()=>{
   const editing = editIndex>=0;
   snapshot();
@@ -9710,6 +9734,7 @@ document.getElementById('btnGeradeOk').onclick=()=>{
                z:+(refO.z - 25*Math.cos(aR)).toFixed(4),
                x:+r2d(d2r(refO.x) + 25*Math.sin(aR)).toFixed(4),
                trans:{type:"none", val:0}};
+    Object.assign(elO, fElementObj('gF'));
     const atO=(selectedIdx>=0 && selectedIdx<contour.length-1) ? selectedIdx+1 : contour.length;
     contour.splice(atO, 0, elO);
     selectedIdx=atO;
@@ -9790,6 +9815,7 @@ document.getElementById('btnGeradeOk').onclick=()=>{
         }
         const aR=f.a*Math.PI/180;
         const el={kind:'gerade', offen:true, alpha:f.a, trans:{type:'none',val:0}};
+        Object.assign(el, fElementObj('gF'));
         if(f.x!==null){
           el.zielX=f.x;
           const dxr=d2r(f.x)-d2r(ref.x);
@@ -9827,6 +9853,7 @@ document.getElementById('btnGeradeOk').onclick=()=>{
   const trans = (erg.offen || !tbtn) ? {type:'none',val:0}
     : {type:tbtn.dataset.v, val:parseFloat(document.getElementById('gTransVal').value)||0};
   const neuEl = {kind:'gerade', x, z, trans};
+  Object.assign(neuEl, fElementObj('gF'));
   if(erg.offen){ neuEl.offen=true; neuEl.alpha=erg.alpha; }
   if(editing){
     contour[editIndex] = neuEl;
@@ -9871,6 +9898,7 @@ function openKreisMask(idx){
   document.getElementById('kTransValRow').style.display = trans.type==='none'?'none':'flex';
   document.getElementById('kTransValLabel').textContent = trans.type==='radius'?'R':'FS';
   document.getElementById('kTransVal').value = trans.val || 2;
+  { const fe=document.getElementById('kF'); if(fe) fe.value=(editing && src && +src.f>0) ? src.f : ''; }
   document.getElementById('btnKreisOk').textContent = editing ? '✓ Änderung übernehmen' : '✓ Übernehmen';
   inkReset(['kZmode','kXmode','kKmode','kImode']);
   document.getElementById('maskKreis').classList.add('show');
@@ -10056,6 +10084,7 @@ document.getElementById('btnKreisOk').onclick=()=>{
     const el={kind:"kreis", offen:true, cz, cx, cw, trans,
               z:+(cz+rB*Math.cos(a1)).toFixed(4),
               x:+r2d(d2r(cx)+rB*Math.sin(a1)).toFixed(4)};
+    Object.assign(el, fElementObj('kF'));
     const at0=(selectedIdx>=0 && selectedIdx<contour.length-1) ? selectedIdx+1 : contour.length;
     contour.splice(at0, 0, el);
     selectedIdx=at0;
@@ -10105,11 +10134,11 @@ document.getElementById('btnKreisOk').onclick=()=>{
     }
   }
   if(editIndex>=0){
-    contour[editIndex] = {kind:'kreis', x, z, cx, cz, cw, trans};
+    contour[editIndex] = Object.assign({kind:'kreis', x, z, cx, cz, cw, trans}, fElementObj('kF'));
     selectedIdx = editIndex;
   } else {
     const at = (selectedIdx>=0 && selectedIdx<contour.length-1) ? selectedIdx+1 : contour.length;
-    contour.splice(at, 0, {kind:'kreis', x, z, cx, cz, cw, trans});
+    contour.splice(at, 0, Object.assign({kind:'kreis', x, z, cx, cz, cw, trans}, fElementObj('kF')));
     selectedIdx = at;
   }
   editIndex=-1;
@@ -13130,6 +13159,7 @@ function refreshPointList(){
     else if(el.kind==='gerade'){ icon='G'; name='Gerade'; detail=`→ Z${el.z} X⌀${el.x}`; }
     else if(el.kind==='kreis'){ icon='◠'; name='Kreis'; detail=`→ Z${el.z} X⌀${el.x} · ${el.cw?'rechts':'links'}`; }
     if(el.trans && el.trans.type!=='none'){ detail += ` · Übergang ${el.trans.type==='radius'?'R':'FS'}${el.trans.val}`; }
+    if(+el.f>0) detail += ' · F '+String(el.f).replace('.',',')+' (Schlichten)';   // Vorschub je Element [10.09.2026]
     row.innerHTML = `<div class="ap-icon ${el.kind==='start'?'start':(el.kind==='kreis'?'arc':'')}">${icon}</div>
       <div class="ap-name">${name}</div><div class="ap-detail">${detail}</div>
       <button class="ap-edit" data-ei="${i}">✎</button>
@@ -15156,6 +15186,7 @@ function baSchliessen(){ document.getElementById('baPanel').classList.remove('sh
 // damit Pruefung 133 sie bei jedem Lauf gegen die vorhandenen Anker
 // halten kann.
 const BA_ANKER={
+  gF:'ba-k03-vorschub', kF:'ba-k03-vorschub',
   aeKuehlBtns:'ba-k05-kuehl', akKuehlBtns:'ba-k05-kuehl', esKuehlBtns:'ba-k05-kuehl', stKuehlBtns:'ba-k05-kuehl',
   fsKuehlBtns:'ba-k05-kuehl', abKuehlBtns:'ba-k05-kuehl', boKuehlBtns:'ba-k05-kuehl', gwKuehlBtns:'ba-k05-kuehl',
   safeZ:'ba-pk-sc', stockDia:'ba-pk-rohteil', pkForm:'ba-pk-rohteil',
@@ -19751,6 +19782,7 @@ function konturRichtungUmkehren(els){
     if(e.kind==='kreis'){ q.cz=e.cz; q.cx=e.cx; q.cw=!e.cw; }
     if(e.offen) q.offen=true;
     if(e.alpha!==undefined) q.alpha=e.alpha;
+    if(+e.f>0) q.f=+e.f;   // Vorschub je Element wandert mit seinem Segment [10.09.2026]
     neu.push(q);
   }
   return neu;
@@ -21187,6 +21219,7 @@ const PP_FEST=[
   'D Zustelltiefe und UX Aufmass gelten RADIAL (ap, je Seite); axiale Werte (Planzustellung, UZ) 1:1.',
   'Schneidenradiuskorrektur automatisch: Schruppen ohne, Schlichten G41/G42 nach Lage.',
   'NMAX-Drehzahlgrenze (Programmkopf): jede G96-Anwahl steht als G97 S<NMAX>, G96 erst vor dem ersten Satz, dessen Start und Ziel ueber dem Grenz-Durchmesser liegen; unter der Klemme keine S-Woerter (10.09.2026: Alarm 007 an der 1000er, G96 am kleinen X angewaehlt). Leer = keine Wache, die Ampel sagt es an.',
+  'Vorschub je Konturelement (Kontureditor, Feld F an Gerade und Kreis): im Schlichtzug des Konturzyklus steht vor den Saetzen des Elements (VORSCHUB) G95 F<f>, danach zurueck auf den Schlichtvorschub; Schruppen, Stechdrehen und Ecke lesen es nicht (ShopTurn-Vorbild, 10.09.2026).',
   'Zwischenschritt Bemerkung / M-Befehl (Arbeitsplan, Softkey Zyklen): die Bemerkung steht als Kommentarzeile (BEMERKUNG: ...) an ihrer Stelle im NC, M-Befehle einzeln als (M-BEFEHL)-Saetze in fester Folge Kuehlmittel, Spindel, Halt (DV 610 Kap. 4.1); wahlweise vorher zum Wechselpunkt. Der naechste Werkzeugaufruf schreibt M03/M07 wieder - Kuehlmittel an bleibt die Vorgabe; je Zyklus schaltet der Schalter bei F/S auf aus (Kopfsatz M09 statt M07). Seit dem 10.09.2026 auch beim Abstechen und nach dem Wechsel auf T2 (vorher ohne Kuehlmittelwort).',
   'WIEDEREINSTIEG: nach jedem T-Aufruf stehen G94-Eilgangvorschub, Drehzahl, M03/M07 und G95-F neu im Programm — ein Satzvorlauf mitten hinein findet alles Modale vor (Daniels Ansage; G94-F belegt am Originalprogramm 01.10.2025).',
 ];
@@ -24666,10 +24699,26 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
 
     let bogenFehler=false;
     if(typeof window!=='undefined') window.__bogenFehler=false;
+    // VORSCHUB JE ELEMENT [Daniel, 10.09.2026 spaetabends: "bei sehr kleinen,
+    // feinen Konturelementen den Vorschub reduzieren, wie bei ShopTurn"]:
+    // traegt das Quellelement eines Segments ein eigenes F (Kontureditor,
+    // Feld je Gerade/Kreis), steht davor ein (VORSCHUB) G95 F<f>-Satz; das
+    // naechste Element ohne eigenes F schaltet auf den Schlichtvorschub
+    // zurueck, ebenso das Ende jedes Laufs (die Anfahrten setzen F selbst).
+    // Nur im Schlichtzug - das Schruppen faehrt wie bisher. Ein eigener
+    // Satz statt eines F-Worts im Fahrsatz, damit Boegen und SSV-Stufen
+    // unveraendert bleiben. Ohne Element-F kein Satz: Baseline bitgenau.
+    let fModal=p.ff;
+    const fElement=(sg)=>{
+      const e=(sg && sg.el!==undefined && contour) ? contour[sg.el] : null;
+      const f=(e && +e.f>0) ? +e.f : +p.ff;
+      if(Math.abs(f-fModal)>1e-9){ lines.push(`${N()} (VORSCHUB) G95 F${fmt(f)}`); bump(); fModal=f; }
+    };
     const emitSeg=(sg)=>{
       const x1d = r2d(sg.x1), x2d = r2d(sg.x2);
       // Segmente, die komplett innerhalb des Schutzdurchmessers liegen, werden übersprungen
       if(xmin>0 && x1d < xmin-1e-6 && x2d < xmin-1e-6) return;
+      fElement(sg);
       const isSchraeg = Math.abs(x2d-x1d)>0.001 && Math.abs(sg.z2-sg.z1)>0.001;
       if(sg.type==='arc'){
         const gcode = sg.cw ? 'G02':'G03';
@@ -24695,6 +24744,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
     const emitSegRev=(sg)=>{
       const x1d = r2d(sg.x2), x2d = r2d(sg.x1);   // rückwärts
       if(xmin>0 && x1d < xmin-1e-6 && x2d < xmin-1e-6) return;
+      fElement(sg);
       const isSchraeg = Math.abs(x2d-x1d)>0.001 && Math.abs(sg.z2-sg.z1)>0.001;
       if(sg.type==='arc'){
         const gcode = sg.cw ? 'G03':'G02';        // Drehsinn kippt mit der Richtung
@@ -24812,6 +24862,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         }
         if(!tangential){ lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${cc}X${fmt(limX(sx))}`); bump(); }
         for(let si=r.end; si>=r.start; si--) emitSegRev(segs[si]);
+        fElement(null);
         const isLast = ri===revRuns.length-1;
         const endSeg=segs[r.start];
         const endX=cx(r2d(endSeg.x1));
@@ -24838,6 +24889,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${cc}X${fmt(sx)}`); bump();
       }
       for(let si=r.start; si<=r.end; si++) emitSeg(segs[si]);
+      fElement(null);
       const isLast = ri===mainRuns.length-1;
       const endSeg=segs[r.end];
       const endX=cx(r2d(endSeg.x2));
@@ -24872,6 +24924,7 @@ function genAbspanenKontur(p, N, bump, lines, warnings){
         lines.push(`${N()} (GERADE  ) G94 G00 X${fmt(pk.mouthX + anWeg2)} Z${fmt(sg0.z1)}`); bump();
         lines.push(`${N()} (GERADE  ) G95 F${fmt(p.ff)} G01 ${cc}X${fmt(sx)}`); bump();
         for(let si=r.start; si<=r.end; si++) emitSeg(segs[si]);
+      fElement(null);
         lines.push(`${N()} (GERADE  ) G01 G40 X${fmt(pk.mouthX + anWeg2)}`); bump();
         lines.push(`${N()} (GERADE  ) G94 G00 Z${fmt(zAppr)}`); bump();
       });
