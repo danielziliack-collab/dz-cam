@@ -4728,10 +4728,31 @@ liegt auch als Datei: &bdquo;1500 Monforts/UEBERTRAGUNG-EINSTELLUNGEN.md&ldquo;.
 Diese Werte stehen zudem in der G-Code-Maske unter &bdquo;Merkmale&ldquo;.</dd>
 <dl>
 <dt id="ba-ma-1500">Monforts 1500 EuroTurn</dt>
-<dd>Die Hauptmaschine der Zyklusausgabe. Belegt aus der eigenen Benutzeranleitung
-DV 594-0B: Bohrzyklus mit W Vorhalt (Kap. 4.6.6.1, Ablauf deckt sich Zeile f&uuml;r
-Zeile mit dem Generator), Gewinde-U im Werkzeug-Offset (S. 132), fester
-1-mm-Wiederanfahrweg beim Tieflochbohren.</dd>
+<dd><b>Stand 11.09.2026.</b> Die Chronik steht in <code>maschinentermin/ERGEBNISSE-2026-09-03.md</code>;
+die Merkmale (Knopf in der G-Code-Ansicht) zeigen denselben Stand in drei Gruppen.
+<br><b>Best&auml;tigt an der Maschine (03.09.2026):</b> &Uuml;bertragung 9600/7/N/1 mit Xon/Xoff in
+beide Richtungen; Wiedereinstieg per Satzvorlauf (G96-Drehzahl exakt, CRC aktiv);
+Drehzahlvariation SSV fliegend; Spanbrechen G04 F2; kurzer T-Aufruf; 42 Bestandsprogramme
+gesichert.
+<br><b>Satz belegt, Lauf am Teil offen:</b> G71 Einstich (radiale Au&szlig;ennut) und G72
+Abspanen (au&szlig;en, innen, Schenkelwinkel) schreibt die App in der Realform der 7.210i, aus
+der Zyklen-Maske gezogen; das PE1 im G72 ist der Sicherheitsabstand Abspanen aus Parameter
+5205 (1,0 mm laut IBN 2004).
+<br><b>Am Handbuch belegt, nie gefahren:</b> G74 Bohren (W Vorhalt, Kap. 4.6.6.1 der DV 594
+deckt sich Zeile f&uuml;r Zeile mit dem Generator), G75 L&auml;ngsgewinde, G76 Kegel- und G77
+Plangewinde, G73 DIN 76, G78/G79 Form F/E &mdash; nach DV 610-0C. Vorsicht: beim G71/G72 schrieb
+die Maske anders als das Handbuch. Deshalb vor dem ersten Lauf je einen Satz aus der
+Zyklen-Maske ziehen (Probenzettel 1500er) und mit der App-Ausgabe vergleichen.
+<br><b>Aus der Steuerungssoftware gelesen (11.09.2026):</b> das Programm MTC0.EXE der
+Diskettenkopie belegt das P-Wort-Alphabet mit Formaten, die drei T-Formen und die
+Parameterliste des Einstichs (Sicherheitsabstand, Schneidenradius, U, &alpha;1/&alpha;2, B, T,
+Radius oder Fase je Ecke, BS, N, Abstand, D, Kegelwinkel); Hypothese daraus: PE =
+Sicherheitsabstand, PF = Schneidenradius. Maskentexte und Hilfebilder liegen nicht im Programm.
+<br><b>Belegt aus der Maschine:</b> IBN-Sicherung 22.01.2004 (N4036=0 Durchmesserachse,
+Freigaben G74/G75/Einstich/Freistich/Abspanen, G81ff gesperrt A019G=0, Sicherheitsabst&auml;nde
+5200&ndash;5205 je 1,0 mm), Gewinde-U im Werkzeug-Offset (DV 594 S. 132), fester
+1-mm-Wiederanfahrweg beim Tieflochbohren; Futter Bauh&ouml;he 95, Backen 32 (&Uuml;berstand 45
+als Annahme).</dd>
 <dt id="ba-ma-1000">Monforts 1000 MTC-K</dt>
 <dd><b>Stand 11.09.2026.</b> Die Chronik der Termine steht in den Protokollen
 <code>maschinentermin/ERGEBNISSE-*.md</code>; die Merkmale (Knopf in der G-Code-Ansicht)
@@ -4767,8 +4788,9 @@ Offen-Zeilen steht. <b>1000er:</b> die Testl&auml;ufe O9167&ndash;O9169 (kl&auml
 Gewinde, die kurze Zentrierform und die Nutkante), die Programme O102&ndash;O105 (G73, Form E)
 aus der Steuerung ziehen, die fehlenden Grundformen Form F, G72 und Gewinde Kegel/Plan aus der
 Zyklen-Maske, PF/PX1/PW90/PY1/PZ1 ungedeutet, Abfahrt X-zuerst au&szlig;en. <b>1500er:</b> die
-G74/G75/G73/G77-S&auml;tze sind nie gefahren, G71/G72 Lauf am Teil, T-Grenze (MINI_T33),
-Backen&uuml;berstand messen. <b>Beide:</b> Reitstock und Backen-Stufentiefen,
+Handbuch-S&auml;tze G74/G75/G76/G77/G73/G78/G79 sind nie gefahren und noch nicht an der
+Zyklen-Maske gegengepr&uuml;ft (Probenzettel 1500er), G71/G72 Lauf am Teil, T-Grenze
+(MINI_T33), Backen&uuml;berstand messen. <b>Beide:</b> Reitstock und Backen-Stufentiefen,
 Standard-Werkzeugtabelle (Pl&auml;tze 1&ndash;5 und 11&ndash;16, alle linke Schneide). Die
 vollst&auml;ndige Liste steht in MASCHINENTERMIN.md.</dd>
 </dl>
@@ -20979,7 +21001,7 @@ const MASCHINEN_PROFILE = {
     // (uebertragung steht weiter oben im Profil — am Geraet bewiesen
     // 03.09.2026; hier nur der Fahrtest-Ertrag des Termins.)
     fahrtests:'gefahren 03.09.2026: Wiedereinstieg per Satzvorlauf (G96-Drehzahl exakt, CRC aktiv), Drehzahlvariation SSV fliegend, Spanbrechen G04 F2; Uebertragung in beide Richtungen',
-    fahrtestsOffen:'G71/G72/G74/G75-Zyklussaetze am Teil; T61_1500_KOMPAKT (O9161); MINI_T33 (T-Grenze)',
+    fahrtestsOffen:'G71/G72/G74/G75-Zyklussaetze am Teil; Maskensaetze G74/G75/G76/G77/G73/G78/G79 aus der Zyklen-Maske ziehen (Probenzettel 1500er); T61_1500_KOMPAKT (O9161); MINI_T33 (T-Grenze)',
     termine:'03.09.2026 — Uebertragung 9600/7/N/1 bewiesen, 42 Bestandsprogramme gesichert, G72 innen und mit Winkeln sowie G71 aus der Zyklen-Maske gezogen, Futter gemessen (Bauhoehe 95, Backen 32)',
     statusZeilen:[
       '(PROFIL: Monforts 1500 - EuroTurn | Zyklussyntax aus DV 610-0C belegt,)',
@@ -21107,6 +21129,10 @@ const PP_STATUS={
   machine_syntax:{txt:'Maschinensatz belegt — Lauf am Teil offen', cls:'ibn', grp:'satz'},
   machine_syntax_1000:{txt:'Maschinensatz belegt — Lauf am Teil offen', cls:'ibn', grp:'satz'},
   documented_for_control:{txt:'am Handbuch belegt — nie gefahren', cls:'doc', grp:'satz'},
+  // [11.09.2026 spaet] Die Steuerungssoftware der 1500er (MTC0.EXE der
+  // Diskettenkopie) ist lesbar; was daraus stammt, ist weder Maschinensatz
+  // noch Handbuch — eigene Stufe, damit Daniel die Quelle sieht.
+  software_read:{txt:'aus der Steuerungssoftware gelesen — Satz offen', cls:'doc', grp:'satz'},
   unknown_for_target_machine:{txt:'Annahme — nicht belegt', cls:'ann', grp:'offen'},
   disabled:{txt:'gesperrt — Einzelsaetze', cls:'aus', grp:'offen'},
 };
@@ -21181,31 +21207,39 @@ function ppMerkmale(){
   if(e){
     M.push({t:'Bohrzyklus G74', s:'documented_for_control',
       w:'freigegeben (IBN N9170) — Satz nach DV 610 S. 3-47, Vorlauf W statt SC',
-      offen:'Satz nie gefahren (weder Prog. Pruefen noch Lauf)'});
+      offen:'Satz nie gefahren; Maskensatz ziehen (Probenzettel 1500er) — beim G71/G72 wich die Maske vom Handbuch ab'});
     M.push({t:'Gewindezyklus G75', s:'documented_for_control',
-      w:'freigegeben (IBN N9220/9230) — Satz nach DV 610 S. 3-54: PO aussen negativ, PT aus dem Programmkopf-SC, G97 zwingend',
-      offen:'Satz nie gefahren; Stufenbolzen O9001 als Testteil'});
+      w:'freigegeben (IBN N9220/9230) — Satz nach DV 610 S. 3-54: PO aussen negativ, PT aus dem Programmkopf-SC, G97 zwingend; Maske lt. DV 594 Kap. 4.6.1 mit E = Eintauchtiefe (Leerschnitte beim Nachschneiden), L Gangzahl, A Gangwechseltiefe',
+      offen:'Satz nie gefahren; Maskensatz ziehen (Probenzettel 1500er); Stufenbolzen O9001 als Testteil'});
     M.push({t:'Bohrzyklen G81 ff', s:'disabled',
       w:'gesperrt — im Handbuch dokumentiert, aber Option A019G lt. IBN nicht freigeschaltet (N9177=0); Ausgabe als G74'});
     M.push({t:'Einstechzyklus G71', s:'machine_syntax',
       w:'freigegeben (IBN N9150) — Realform der 7.210i belegt (radiale Aussennut, per DNC gezogen): PG = U, PY = N, PZ = Z0-BS, P230 = BS; axial, innen, N>1 und Flankenwinkel fallen auf Einzelsaetze zurueck',
-      offen:'Lauf am Teil (T8_G71_EINSTICH); PE1 ungedeutet'});
+      offen:'Lauf am Teil (T8_G71_EINSTICH); der Kegelwinkel W steht in der Software (CONICAL_ANGLE), sein Satzwort ist offen'});
+    // PE1 [11.09.2026 spaet]: die Einstich-Parameterliste in MTC0.EXE beginnt
+    // mit SAFETY_GAP, und die IBN 2004 fuehrt N5205 Sicherheitsabstand
+    // Abspanen = 1,000 mm — exakt das PE1 des gezogenen G72-Satzes.
     M.push({t:'Abspanzyklus G72 (Ecke)', s:'machine_syntax',
-      w:'freigegeben (IBN N9180) — Realform belegt, AUSSEN UND INNEN, mit Schenkelwinkeln (P236/P237); Eckuebergang K2, Rundungskanten und plan fallen auf Einzelsaetze zurueck; der SC des Zyklus kommt aus Parameter 5205, nicht aus dem Programmkopf',
-      offen:'Lauf am Teil; PE1 und P235:6 ungedeutet'});
+      w:'freigegeben (IBN N9180) — Realform belegt, AUSSEN UND INNEN, mit Schenkelwinkeln (P236/P237); Eckuebergang K2, Rundungskanten und plan fallen auf Einzelsaetze zurueck; PE1 = Sicherheitsabstand Abspanen aus Parameter 5205 (1,0 mm lt. IBN 2004), nicht aus dem Programmkopf',
+      offen:'Lauf am Teil; P235:6 ungedeutet'});
     M.push({t:'Freistichzyklen G78/G79/G73', s:'documented_for_control',
       w:'freigegeben (IBN N9160) — Saetze nach DV 610 S. 3-45/46 (Form E/F, DIN 76)',
-      offen:'nie gefahren'});
+      offen:'nie gefahren; Maskensaetze ziehen (Probenzettel 1500er)'});
     M.push({t:'Plangewinde G77', s:'documented_for_control',
       w:'Freigabe unter A016 angenommen — Satz nach DV 610 S. 3-58/59',
-      offen:'nie gefahren'});
+      offen:'nie gefahren; Maskensatz ziehen (Probenzettel 1500er)'});
+    // STEUERUNGSSOFTWARE GELESEN [11.09.2026 spaet, Daniels Frage "kommt man
+    // von aussen in die Software?"]: maschinentermin/MTC0-ZEICHENKETTEN-1500er.md.
+    M.push({t:'Steuerungssoftware 7.210i', s:'software_read',
+      w:'MTC0.EXE der Diskettenkopie gelesen (Borland C++ 1995, ungepackt): P-Wort-Alphabet PA-PZ und P226-P254 mit Formaten, drei T-Formen, Zyklusinventar und die Einstich-Parameterliste (Sicherheitsabstand, Schneidenradius, U, alpha1/2, B, T, Radius oder Fase je Ecke, BS, N, Abstand, D, Kegelwinkel)',
+      offen:'PE = Sicherheitsabstand und PF = Schneidenradius sind Hypothesen aus der Reihenfolge; Maskentexte und Hilfebilder liegen nicht im Programm'});
   } else {
     M.push({t:'Bohrzyklus G74', s:'machine_syntax_1000',
       w:'freigegeben (P9170) — Realform aus der Zyklen-Maske: PK1 nur bei Spaenebrechen, PL W, PM D, PN DF, PO Tiefe, PP U, PQ V, PR/PT Zeitbasis 95, kein F im Satz; hinter dem Satz ein explizites G90; Vorlauf W statt SC',
       offen:'Lauf am Teil (O9168); W und D waren in beiden Proben 5 — PL/PM nach der DV-610-Reihenfolge angenommen; PW90 PY1 PZ1 ungedeutet'});
     M.push({t:'Gewindezyklus G75', s:'machine_syntax_1000',
       w:'freigegeben (P9220/9230) — Realform aus der Zyklen-Maske: Steigung im F-Wort vor dem G75, PO aussen positiv, PX Flankenwinkel, PT aus dem Programmkopf-SC, G97 zwingend; innen und mehrgaengig als G33-Einzelsaetze',
-      offen:'Lauf am Teil (O9167) klaert E — erster Schnitt D oder E; Q/I fuer mehrgaengig'});
+      offen:'Lauf am Teil (O9167) klaert E — lt. DV 594 (1500er-Maske) ist E die EINTAUCHTIEFE, nicht die kleinste Zustellung; Q/I fuer mehrgaengig'});
     M.push({t:'Bohrzyklen G81 ff', s:'disabled',
       w:'gesperrt — in R&D 95.05 nicht dokumentiert; Ausgabe als G74'});
     M.push({t:'Einstechzyklus G71', s:'machine_syntax_1000',
