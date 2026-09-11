@@ -4759,7 +4759,12 @@ App-Programms:</b> Kantenwelle O9016 mit NMAX 600 komplett gefahren, Spanbruch G
 unterbricht den Span wie vorgesehen. <b>Drehzahlvariation SSV am 11.09.2026 belegt</b>
 (SSV_1000_O9162, &empty;130 &uuml;ber dem NMAX-Grenz-Durchmesser): die Drehzahl pendelt
 fliegend, kein Vorschubverlust, kein Alarm &mdash; unter dem Grenz-Durchmesser h&auml;lt
-die Wache sie korrekt konstant auf NMAX.</dd>
+die Wache sie korrekt konstant auf NMAX. <b>G75-Zyklus der 1000er:</b> die native
+Form mit P-Nummern war eine Annahme aus der R&amp;D 95.05 und schnitt am 11.09.2026
+mit dem modalen Vorschub statt der Steigung. Die Realform kam aus der Zyklen-Maske
+der Maschine (Steigung im F-Wort vor dem G75, P-Buchstaben-Parameter, PX =
+Flankenwinkel) und ist seither die Ausgabe; Innengewinde und mehrg&auml;ngige
+Gewinde fallen an der 1000er mit Ansage auf G33-Einzels&auml;tze zur&uuml;ck.</dd>
 <dt id="ba-ma-offen">Ehrlich offen</dt>
 <dd>Die Programmieranleitung DV 610-0C ist seit dem 31.08.2026 LESBAR (die
 Scan-Seiten werden im Browser gerendert). Damit belegt: P229 = SV Vorhalt vor dem
@@ -21007,7 +21012,7 @@ const MASCHINEN_PROFILE = {
     // aus der App eingespielt, G74 (130 Zeichen) und G75 (135) bestehen
     // 'Prog. Pruefen' - Lauf am Teil offen.
     g74Beleg:'Satz mit 130 Zeichen am 10.09.2026 aus der App eingespielt, Prog. Pruefen ohne Fehler; Lauf am Teil offen',
-    g75Beleg:'Satz mit 135 Zeichen am 10.09.2026 aus der App eingespielt, Prog. Pruefen ohne Fehler; Lauf am Teil offen',
+    g75Beleg:'Lauf am Teil 11.09.2026: die P-Nummern-Form schnitt mit dem modalen F statt der Steigung - WIDERLEGT. Realform aus der Zyklen-Maske der Maschine per DNC belegt (F-Wort = Steigung, P-Buchstaben, PX = Flankenwinkel); Generator seit 11.09. abends darauf umgestellt, Lauf der Realform am Teil offen',
     fahrtests:'Maschinentermine 09.-11.09.2026: Web-Serial beide Richtungen (App-Ausgabe kommt byteidentisch zurueck), Zeichenbremse bringt die langen G74/G75-Zyklussaetze ganz an, Kantenwelle O9016 komplett gefahren; Spanbrechen G04 F2 und Drehzahlvariation SSV (11.09.2026, O9162 mit DM130: die Drehzahl pendelt fliegend durch) im FAHRTEST gruen; die NMAX-Wache haelt jede G96-Anwahl auf G97 S<NMAX>, Alarm 007 bleibt aus.',
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
     // unter G90 ebenfalls im DURCHMESSERMASS ausgegeben (IBN-belegt).
@@ -21257,17 +21262,21 @@ const ZYKLUS_PARAM=[
      ['PW','Schnittaufteilung 0=fest/linear, 1=degressiv','Maske Schnittaufteilung'],
      ['PY','L Anzahl Gewindegaenge (nur wenn >1)','Maske Gangzahl'],
      ['P240:1','Schruppen UND Schlichten in einem Lauf','Maske Bearbeitung beide']]},
- {g:'G75 Gewinde (1000er-Langform)', nur:'MONFORTS_1000_MTC_K_6624B', q:'R&D 95.05, Abnahme-Annahme P214',
-  p:[['X / Z','Nenn-⌀ / Gewindeanfang','Maske X0 / Z0'],
-     ['K (G91)','Gewindelaenge inkremental','aus Z1-Z0'],
-     ['P206','U Schlichtaufmass','Maske U'],
-     ['P212 / P213','LW Vorlauf / LR Auslauf','Maske LW / LR'],
-     ['P214','Gesamtzustellung signiert (ANNAHME, Abnahmetest!)','Maske H1'],
-     ['P215','Flankenbreite axial','Maske alpha, gerechnet'],
-     ['P216','1. Zustellung','Maske D'],
-     ['P220','Steigung','Maske P'],
-     ['P222','1=degressiv','Maske Schnittaufteilung'],
-     ['P224','Gangzahl (nur >1)','Maske Gangzahl']]},
+ {g:'G75 Gewinde (1000er-Langform)', nur:'MONFORTS_1000_MTC_K_6624B', q:'Realform aus der Zyklen-Maske der Maschine, per DNC gezogen 11.09.2026 (P11111..P66666)',
+  p:[['F','Steigung als F-WORT vor dem G75 — bis 11.09. fehlte es, die Maschine nahm den modalen Vorschub','Maske P'],
+     ['X / Z','Nenn-⌀ / Gewindeanfang absolut','Maske X0 / Z0'],
+     ['I (G91)','Gangwinkel Q, 0 bei eingaengig (mehrgaengig faellt auf G33 zurueck)','fest 0'],
+     ['K / PL','Gewindelaenge inkremental, zweimal','aus Z1-Z0'],
+     ['PG','U Schlichtaufmass','Maske U'],
+     ['PM / PN','W Anlauf / R Auslauf','Maske LW / LR'],
+     ['PO','Gewindetiefe, aussen POSITIV (innen unbelegt, faellt auf G33 zurueck)','Maske H1'],
+     ['PP / PX','Flankenversatz axial = H1*tan(alpha) / alpha in Grad','Maske alpha'],
+     ['PQ / PZ','1. Zustellung D, zweimal','Maske D'],
+     ['PR','E, Band ueber dem Grund im Hilfebild — Lesart kleinste Zustellung, am Teil offen','Vorgabe 0,05'],
+     ['PT','V radialer Abstand zum Abheben','Programmkopf SC'],
+     ['PU','Steigung nochmals','Maske P'],
+     ['PW1','nur bei degressiver Zustellung, linear ohne PW','Maske Schnittaufteilung'],
+     ['P240:1','Schruppen UND Schlichten','Maske Bearbeitung beide']]},
  {g:'G77 Plangewinde (Stirn)', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-58/59',
   p:[['X / Z','Start-⌀ aussen / Stirnflaeche','Maske X0 / Z0'],
      ['I','X1 End-⌀ innen','Maske X1'],
@@ -26414,6 +26423,17 @@ function genGewinde(p, N, bump, lines, warnings){
     warnings.push('Kegelgewinde-Zyklus am 1000er-Profil (R&D 95.05) nicht belegt — Ausgabe erfolgt als G33-Einzelsaetze.');
     zyklusModus=false;
   }
+  // 1000er-REALFORM 11.09.2026 kennt nur das AUSSENGEWINDE (PO positiv) und
+  // den Gangwinkel Q im I-Wort (bei Q 0 nie geprueft): innen und mehrgaengig
+  // fallen an der MTC-K mit Ansage auf G33-Einzelsaetze zurueck.
+  if(zyklusModus && MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B' && p.lage==='innen'){
+    warnings.push('Innengewinde als G75-Zyklus an der 1000er unbelegt (Realform 11.09.2026 ist ein Aussengewinde, PO positiv) — Ausgabe als G33-Einzelsaetze.');
+    zyklusModus=false;
+  }
+  if(zyklusModus && MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B' && (p.n||1)>1){
+    warnings.push('Mehrgaengiges Gewinde als G75-Zyklus an der 1000er: der Gangwinkel Q im Satz ist unbelegt — Ausgabe als G33-Einzelsaetze mit Q-Versatz.');
+    zyklusModus=false;
+  }
   const alphaZ = Math.max(0, Math.min(45, +p.alpha||0));
   if(zyklusModus){
     // =========================================================
@@ -26431,21 +26451,44 @@ function genGewinde(p, N, bump, lines, warnings){
     const degr = (p.verf==='fest') ? 0 : 1;
     let worte;
     if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'){
-      // Lange P-Adressen, Steigung P220, Laenge inkremental unter G91
+      // REALFORM DER 1000er [Daniels Zyklus-Saetze 11.09.2026, P11111..P66666,
+      // maschinentermin/G75-REALFORM-1000er-2026-09-11.md]. Die alte
+      // P-Nummern-Form (P206..P224, ohne F) war eine Annahme aus der R&D 95.05
+      // und schnitt am Teil mit dem MODALEN F (0,05 vom Einstich davor) statt
+      // mit der Steigung: die 1000er liest die Steigung aus dem F-WORT VOR dem
+      // G75 (und nochmals als PU). Reihenfolge und Schreibweise wie die
+      // Steuerung selbst: X/Z absolut, dann G91 fuer I (Gangwinkel Q) und K
+      // (Laenge inkremental), die P-Buchstaben OHNE Leerzeichen:
+      //   PG U Aufmass | PL Laenge (Kopie von K) | PM W Anlauf | PN R Auslauf
+      //   PO Gewindetiefe, aussen POSITIV (anders als das PO der 1500er)
+      //   PP axialer Flankenversatz = Tiefe*tan(alpha) | PQ D 1. Zustellung
+      //   PR E = Band ueber dem Grund im Hilfebild; Lesart wie 1500er: kleinste
+      //      Zustellung. AM TEIL OFFEN: geht der erste Schnitt D oder E tief?
+      //   PT V radialer Abstand (= Programmkopf-SC) | PU Steigung
+      //   PW1 nur bei degressiver Zustellung (linear: kein PW)
+      //   PX alpha in Grad, 6 Stellen (die Maske rechnet I<->alpha um;
+      //      atan(0.3/2) = 8.530766 stand exakt so im Satz) | PZ Kopie von D
+      //   P240:1 Schruppen+Schlichten
+      // G91 bleibt danach MODAL — der erste Satz nach dem Zyklus schreibt G90.
       const threadLength = p.z1 - p.z0;
-      worte = [
-        'G95','G75','G90','X'+fmt(p.x0),'G90','Z'+fmt(p.z0),
-        'G91','K'+fmt(threadLength),
-        'P206:'+fmt(p.u||0),
-        'P212:'+fmt(p.lw||0),'P213:'+fmt(p.lr||0),
-        'P214:'+fmt(po),
-        (flankeI>0?'P215:'+fmt(flankeI):null),
-        'P216:'+fmt(p.dz1||0.3),
-        'P220:'+fmt(p.p),
-        'P222:'+degr,
-        ((p.n||1)>1?'P224:'+p.n:null),
+      const fmt6 = v => String(Math.round(v*1e6)/1e6);
+      const eMin = (p.pe!==undefined && p.pe!=='' && isFinite(+p.pe)) ? +p.pe : 0.05;
+      const pblock = [
+        'PG'+fmt(p.u||0),
+        'PL'+fmt(threadLength),
+        'PM'+fmt(p.lw||0),'PN'+fmt(p.lr||0),
+        'PO'+fmt(p.h1),
+        'PP'+fmt(flankeI),
+        'PQ'+fmt(p.dz1||0.3),
+        'PR'+fmt(eMin),
+        'PT'+fmt(pkSC()),
+        'PU'+fmt(p.p),
+        (degr?'PW1':null),
+        'PX'+fmt6(alphaZ),
+        'PZ'+fmt(p.dz1||0.3),
         (p.bearbeitung==='beide'?'P240:1':null)
-      ].filter(Boolean);
+      ].filter(Boolean).join('');
+      worte = ['F'+fmt(p.p),'G75','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),'G91','I0','K'+fmt(threadLength), pblock];
     } else {
       // EuroTurn: Kurzadressen, Steigung im F-Wort, K=Z1 absolut,
       // KEIN Achs-I im zylindrischen Satz. BELEGT am 31.08.2026:
@@ -26477,7 +26520,7 @@ function genGewinde(p, N, bump, lines, warnings){
     }
     lines.push('(=== NATIVER '+(kegel?'G76-KEGELGEWINDEZYKLUS':'G75-LAENGSGEWINDEZYKLUS')+' - Schnittaufteilung macht die Steuerung ===)');
     lines.push(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'
-      ? '(ANNAHME zu pruefen: P214-Vorzeichen und Flankenbreite im Abnahmetest verifizieren)'
+      ? '(1000er-REALFORM 11.09.2026: F = Steigung, P-Buchstaben, PX = Flankenwinkel)'
       : '(PO aussen negativ und Flanke I axial: DV 610-0C S. 3-55 belegt)');
     lines.push(`${N()} (GEWINDE ) ${worte.join(' ')}`); bump();
     lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
@@ -26544,7 +26587,10 @@ function genGewinde(p, N, bump, lines, warnings){
       if(lines[i2] && lines[i2][0] !== '(') lines[i2]='(SIM: '+lines[i2].replace(/\(([^)]*)\)/g,'').replace(/  +/g,' ')+')';
     }
   }
-  lines.push(`${N()} (GERADE  ) G00 Z${fmt(zApproach+5)}`); bump();
+  // Nach dem 1000er-Zyklussatz ist G91 modal (die Realform schaltet nicht
+  // zurueck) — der erste Fahrsatz danach traegt G90, sonst faehrt er relativ.
+  const g90nach = (zyklusModus && MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B') ? 'G90 ' : '';
+  lines.push(`${N()} (GERADE  ) ${g90nach}G00 Z${fmt(zApproach+5)}`); bump();
 }
 
 // =================================================================
