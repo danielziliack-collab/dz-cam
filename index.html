@@ -3845,9 +3845,11 @@ Spandicke bleibt konstant. Die Bahn selbst ist unver&auml;ndert (kollinear
 geteilt, im Pr&uuml;fstand nachgemessen). <b>An der 1500er verifiziert
 (Fahrtest 03.09.2026):</b> die EuroTurn f&uuml;hrt S-Wechsel im laufenden G01
 fliegend aus &mdash; die Achse zog gleichm&auml;&szlig;ig durch, kein
-Vorschubverlust. Die 1000er ist noch ungetestet und beh&auml;lt ihre
-Unverifiziert-Warnung. In beiden F&auml;llen den Drehzahlw&auml;chter von Hand
-auf Basisdrehzahl PLUS Amplitude stellen. Der
+Vorschubverlust. <b>Am 11.09.2026 auch an der 1000er belegt</b> (&empty;130-Teil
+&uuml;ber dem NMAX-Grenz-Durchmesser: die MTC-K zog den Sinus fliegend durch);
+&uuml;ber die kleinen Durchmesser unter dem Grenz-Durchmesser ruht die Variation,
+weil die NMAX-Wache dort die Drehzahl auf NMAX festh&auml;lt. In beiden F&auml;llen
+den Drehzahlw&auml;chter von Hand auf Basisdrehzahl PLUS Amplitude stellen. Der
 native G72/G71-Zyklussatz kennt keine S-Modulation &mdash; bei aktiver
 Variation f&auml;llt die Ausgabe mit Ansage auf G-Einzels&auml;tze zur&uuml;ck.</dd>
 <dt id="ba-ak-kanten">K1&hellip;K3 Kanten</dt>
@@ -4163,7 +4165,10 @@ ordnen, stilllegen und l&ouml;schen &mdash; nur bewegt er nichts. <b>Bemerkung:<
 Text steht an seiner Stelle als Kommentarzeile <code>(BEMERKUNG: ...)</code> im NC,
 etwa &bdquo;Mass pr&uuml;fen&ldquo; oder &bdquo;Backen l&ouml;sen&ldquo;; Klammern im Text werden zu
 Bindestrichen (die Steuerung schlie&szlig;t den Kommentar an der ersten Klammer),
-Umlaute werden ersetzt. <b>M-Befehle:</b> H&auml;kchen in der Liste, jeder wird ein eigener
+Umlaute werden ersetzt. Die <code>(BEMERKUNG:)</code>-Zeile steht seit dem
+11.09.2026 <b>hinter den M-Befehlen</b> (bei einem M00 unter dem Haltesatz),
+damit sie beim Halt lesbar bleibt &mdash; ein Kommentar &uuml;ber dem Stopp
+w&auml;re aus dem Editorfenster gescrollt; das gilt f&uuml;r beide Maschinen. <b>M-Befehle:</b> H&auml;kchen in der Liste, jeder wird ein eigener
 Satz <code>(M-BEFEHL) Mxx</code>, immer in der Reihenfolge der Liste &mdash;
 K&uuml;hlmittel, Spindel, Halt (DV 610-0C Kap. 4.1, Seiten 4-1 bis 4-3; gilt f&uuml;r beide
 Maschinen). Ein <b>Messhalt</b> ist die Vorlage: M09 K&uuml;hlmittel aus, M05 Spindel halt,
@@ -4751,8 +4756,10 @@ Ampel und beim Senden eine Warnung &mdash; im Werkzeuglager auf einen Platz lege
 ruft die NC den Platz. <b>Editor:</b> rund 62 Zeichen je Zeile, l&auml;ngere S&auml;tze
 scrollen; freier Programmspeicher am 10.09.2026: 33280 Bytes. <b>Erster Lauf eines
 App-Programms:</b> Kantenwelle O9016 mit NMAX 600 komplett gefahren, Spanbruch G04 F2
-unterbricht den Span wie vorgesehen; die Drehzahlvariation SSV ist an der 1000er noch
-nicht beobachtet (der Lauf brach vorher mit Alarm 007 ab, s. NMAX im Programmkopf).</dd>
+unterbricht den Span wie vorgesehen. <b>Drehzahlvariation SSV am 11.09.2026 belegt</b>
+(SSV_1000_O9162, &empty;130 &uuml;ber dem NMAX-Grenz-Durchmesser): die Drehzahl pendelt
+fliegend, kein Vorschubverlust, kein Alarm &mdash; unter dem Grenz-Durchmesser h&auml;lt
+die Wache sie korrekt konstant auf NMAX.</dd>
 <dt id="ba-ma-offen">Ehrlich offen</dt>
 <dd>Die Programmieranleitung DV 610-0C ist seit dem 31.08.2026 LESBAR (die
 Scan-Seiten werden im Browser gerendert). Damit belegt: P229 = SV Vorhalt vor dem
@@ -4974,7 +4981,7 @@ vorschruppen.</dd>
      TT.MM.JJJJ" ergaenzt, MUSS dieses Datum mitziehen — sonst schlaegt
      der Pruefstand an. [Daniels Befund 06.09.2026: die Anleitung war
      inhaltlich nachgezogen, das Standdatum stand noch auf 31.08.] -->
-<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 10.09.2026. Sie
+<p style="margin-top:18px;color:#7c8790;">Stand dieser Anleitung: 11.09.2026. Sie
 w&auml;chst mit der App &mdash; das Inhaltsverzeichnis wird aus den Kapiteln
 erzeugt und ist damit immer vollst&auml;ndig.</p>
 
@@ -21001,6 +21008,7 @@ const MASCHINEN_PROFILE = {
     // 'Prog. Pruefen' - Lauf am Teil offen.
     g74Beleg:'Satz mit 130 Zeichen am 10.09.2026 aus der App eingespielt, Prog. Pruefen ohne Fehler; Lauf am Teil offen',
     g75Beleg:'Satz mit 135 Zeichen am 10.09.2026 aus der App eingespielt, Prog. Pruefen ohne Fehler; Lauf am Teil offen',
+    fahrtests:'Maschinentermine 09.-11.09.2026: Web-Serial beide Richtungen (App-Ausgabe kommt byteidentisch zurueck), Zeichenbremse bringt die langen G74/G75-Zyklussaetze ganz an, Kantenwelle O9016 komplett gefahren; Spanbrechen G04 F2 und Drehzahlvariation SSV (11.09.2026, O9162 mit DM130: die Drehzahl pendelt fliegend durch) im FAHRTEST gruen; die NMAX-Wache haelt jede G96-Anwahl auf G97 S<NMAX>, Alarm 007 bleibt aus.',
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
     // unter G90 ebenfalls im DURCHMESSERMASS ausgegeben (IBN-belegt).
     ikDurchmesser:true, ikStatus:'confirmed_on_machine', ikBeleg:'P5105=1, IBN',
@@ -21650,14 +21658,16 @@ function sbZug(lines, N, bump, wort, start, ziel, sb, fWert){
 // AN DER 1500er VERIFIZIERT (Daniels Fahrtest 03.09.2026,
 // O00009104): die EuroTurn fuehrt S-Wechsel im laufenden G01
 // FLIEGEND aus — die Achse zog gleichmaessig durch, kein
-// Vorschubverlust, die Drehzahl pendelte hoerbar. Die 1000er ist
-// weiter ungetestet, dort bleibt die Unverifiziert-Warnung.
+// Vorschubverlust, die Drehzahl pendelte hoerbar. Am 11.09.2026
+// auch an der 1000er bewiesen (SSV_1000_O9162, DM130 ueber dem
+// NMAX-Grenz-Durchmesser): die MTC-K zog den Sinus fliegend durch,
+// Daniels Wort "liegt fluessig durch, testbestanden".
 function svNeu(p, doFinish, warnings){
   if((p.svArt||'aus')!=='an' || !doFinish) return null;
   const amp=Math.min(30, Math.max(1, +p.svAmp||10));
   const weg=Math.max(2, +p.svWeg||20);
   if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B')
-    warnings.push('Drehzahlvariation Schlichten: S pendelt sinusfoermig um ±'+fmt(amp)+'% je '+fmt(weg)+' mm Bahnweg. AN DER 1000er UNVERIFIZIERT (die 1500er zieht fliegend durch, Fahrtest 03.09.2026 — die MTC-K ist noch ungetestet) — ersten Lauf im Einzelsatz fahren. Drehzahlwaechter von Hand auf Basisdrehzahl PLUS Amplitude stellen.');
+    warnings.push('Drehzahlvariation Schlichten: S pendelt sinusfoermig um ±'+fmt(amp)+'% je '+fmt(weg)+' mm Bahnweg (an beiden Maschinen verifiziert; 1000er Fahrtest 11.09.2026: zieht fliegend durch — aber NUR ueber dem NMAX-Grenz-Durchmesser Vc*1000/(pi*NMAX); darunter haelt die Wache die Drehzahl konstant auf NMAX und die Variation ruht). Drehzahlwaechter von Hand auf Basisdrehzahl PLUS Amplitude stellen.');
   else
     warnings.push('Drehzahlvariation Schlichten: S pendelt sinusfoermig um ±'+fmt(amp)+'% je '+fmt(weg)+' mm Bahnweg (an der 1500er verifiziert, Fahrtest 03.09.2026: zieht fliegend durch). Drehzahlwaechter von Hand auf Basisdrehzahl PLUS Amplitude stellen.');
   return {amp, weg, pfad:0, letztS:null};
@@ -27854,12 +27864,17 @@ function buildProgram(){
       const q=st.params||{};
       const txt=zwischenText(q.text);
       let ms=zwischenMListe(q);
-      if(txt) lines.push('(BEMERKUNG: '+txt+')');
       if(q.wwp==='ja'){
         if(aktT!==null){ wechselAbfahrt(zuerstZ(vorherigerSchritt)); schonAmWWP=true; }
         ms=ms.filter(m=>m!=='M09' && m!=='M05');
       }
       ms.forEach(m=>{ lines.push(N()+' (M-BEFEHL) '+m); bump(); });
+      // Die Bemerkung steht NACH dem M-Block (Daniel 11.09.2026, am Teil
+      // gesehen): bei einem M00 scrollt der Editor den Haltesatz an den
+      // oberen Fensterrand — eine Bemerkung DARUEBER liefe aus dem Bild.
+      // Unter dem M00 bleibt sie beim Messhalt lesbar. Ein Kommentar ist
+      // fuer den Ablauf ohnehin lagegleich.
+      if(txt) lines.push('(BEMERKUNG: '+txt+')');
       const bekannt=(typeof M_BEFEHLE!=='undefined')? M_BEFEHLE.map(e=>e.m) : [];
       ms.filter(m=>!bekannt.includes(m)).forEach(m=>warnings.push('Schritt '+(idx+1)+': '+m+' steht nicht in der M-Liste (DV 610 Kap. 4.1) - an der Maschine unbelegt, Wirkung haengt am PLC-Programm.'));
       if(!txt && !ms.length && q.wwp!=='ja') warnings.push('Schritt '+(idx+1)+' (Bemerkung / M-Befehl) ist leer und erzeugt nichts.');
