@@ -2846,7 +2846,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <button data-v="3">am Kegel</button>
             </div></div>
             <div class="mrow"><label id="esX0Label">X0 Bezugspunkt ⌀ (abs)</label><input type="number" step="any" id="esX0" value="82"><span class="unit">mm</span></div>
-            <div class="mrow"><label id="esZ0Label">Z0 Bezugspunkt (abs)</label><span class="radiobtns" id="esZ0BezBtns" style="width:51px;min-width:51px;"><button data-v="rechts" class="sel">re</button><button data-v="links">li</button></span><input type="number" step="any" id="esZ0" value="-40"><span class="unit">mm</span></div>
+            <div class="mrow"><label id="esZ0Label">Z0 Bezugspunkt (abs)</label><span class="radiobtns" id="esZ0BezBtns" style="width:51px;min-width:51px;"><button data-v="rechts">re</button><button data-v="links" class="sel">li</button></span><input type="number" step="any" id="esZ0" value="-40"><span class="unit">mm</span></div>
             <div class="mrow"><label id="esB1Label">B1 Einstichbreite</label><input type="number" step="any" id="esB1" value="6"><span class="unit">mm</span></div>
             <div class="mrow mit-ink"><label id="esT1Label">T1 Einstichtiefe ⌀ (abs)</label><input type="number" step="any" id="esT1" value="70"><button class="inkbtn" id="esT1mode" data-m="abs" type="button">abs</button><span class="unit">mm</span></div>
             <!-- N UND DP IN EINE ZEILE, wie UX/UZ darueber. Das Lage-Feld
@@ -3982,7 +3982,7 @@ Lauf im Einzelsatz fahren.</dd>
 <dt id="ba-es-x0">X0 Bezugspunkt &empty; / Z0 Bezugskante</dt>
 <dd>X0 ist der Nutrand-Durchmesser (die Kante, von der die Tiefe z&auml;hlt), Z0 die
 w&auml;hlbare Bezugskante rechts/links. Beim axialen Stich dreht der ob/un-Bezug den
-X0-Bezug (x0+2&middot;b1) statt die Planfl&auml;che zu verschieben.</dd>
+X0-Bezug (x0+2&middot;b1) statt die Planfl&auml;che zu verschieben. <b>Vorgabe seit dem 11.09.2026: linke Bezugskante</b> &mdash; Daniels Standard (&bdquo;im Standardfall immer die linke Bezugskante&ldquo;). Der Umschalter re/li steht bei neuen Einstichen auf li; gespeicherte Schritte behalten ihre Kante.</dd>
 <dt id="ba-es-b1t1">B1 Breite / T1 Grund</dt>
 <dd>Nutbreite und Grunddurchmesser (bzw. Grundtiefe axial). T1 l&auml;sst sich per
 Umschalter auch inkremental eingeben.</dd>
@@ -4738,13 +4738,21 @@ Breite/Tiefe, PO&ndash;PR = R1&ndash;R4 in unserer Z&auml;hlung, PG = U, BS steh
 DOPPELT (PW und P230), PY = N, P240/P241 = Schruppen/Schlichten. <b>Keine PA/PB im G71</b> &mdash; auch nicht mit Flankenwinkeln (09.09.2026,
 Maske D&nbsp;1 / &alpha;1&nbsp;10 / &alpha;2&nbsp;20, O12345): <code>PK/PL =
 &alpha;1/&alpha;2, P227 = t1, P228 = D</code>; <code>I0 K0</code> und <code>PF0.4</code>
-bleiben konstant, <code>PX1</code> ist vermutlich die Lage au&szlig;en (Innenstich
-offen). PA/PB geh&ouml;ren zum G72. <b>Die App gibt den Einstich an der 1000er weiter als Einzels&auml;tze aus</b>: der
-Generator schreibt das 1000er-Format noch nicht. Die L&auml;nge ist seit dem 10.09.2026
-kein Hindernis mehr &mdash; der 115er-Satz kommt aus der App mit der Zeichenbremse ganz
-an (O126), ebenso die 130/135-Zeichen-S&auml;tze G74/G75 des Stufenbolzens, die
-&bdquo;Prog. Pr&uuml;fen&ldquo; annimmt (Lauf am Teil offen). In den Merkmalen steht er
-darum als &bdquo;Maschinensatz belegt &mdash; Ausgabe noch Einzels&auml;tze&ldquo;.
+bleiben konstant, <code>PX1</code> bleibt auch beim Innenstich 1 (11.09.2026, P99999) &mdash; die Lage
+innen tr&auml;gt das Wort <code>PJ1</code>, au&szlig;en fehlt es. PA/PB geh&ouml;ren zum G72.
+<b>Seit dem 11.09.2026 abends schreibt die App den G71 der 1000er in dieser Realform</b>
+(au&szlig;en, innen und freie Stirnnut &mdash; PJ1 innen, PJ2 Stirn ohne PF0.4, Probe P101 &mdash; Flankenwinkel als PK/PL, D als P228; Z im Satz ist die LINKE
+Nutkante, wie die Marke im Maskenbild &mdash; Daniels Standard; bei der Stirnnut ist X der INNENRAND). Fasen an den Nutecken,
+die Stirnnut in der Bohrung und N&nbsp;&gt;&nbsp;1 fallen mit Ansage auf Einzels&auml;tze zur&uuml;ck (im Satz
+unbelegt). Die drei Maschinens&auml;tze sind die Pr&uuml;fvorlagen (Pr&uuml;fung 190); der
+115er-Satz kommt aus der App mit der Zeichenbremse ganz an (O126, 10.09.2026). Lauf am
+Teil offen. <b>G74 der 1000er:</b> die P-Nummern-Form (P210&ndash;P216) war dieselbe
+Annahme wie beim G75; die Realform aus der Zyklen-Maske (P77777 R&uuml;ckzug bis
+Startposition, P88888 um Betrag V) ist seit dem 11.09.2026 abends die Ausgabe:
+<code>PK1</code> nur bei Sp&auml;nebrechen, PL W, PM D, PN DF, PO Tiefe, PP U, PQ V,
+PR/PT Zeitbasis 95, PW90 PY1 PZ1 konstant, kein F im Satz. Hinter dem Zyklussatz
+schreibt die App ein explizites G90 &mdash; das G91 des Satzes bleibt sonst modal,
+Daniels eigene 1000er-Programme tun dasselbe. Lauf am Teil offen.
 <br><b>G72 der 1000er:</b> Die Maschine f&auml;hrt ihn (Bestandsprogramme, alle
 mit steuerungsberechneten PA/PB-Werten). Ob sie den Satz auch OHNE PA/PB
 annimmt, pr&uuml;ft die Datei MINI_G72 am n&auml;chsten Termin; bis dahin
@@ -21011,7 +21019,7 @@ const MASCHINEN_PROFILE = {
     // ZYKLUSSAETZE AN DER MASCHINE [Termin 10.09.2026]: Stufenbolzen O9001
     // aus der App eingespielt, G74 (130 Zeichen) und G75 (135) bestehen
     // 'Prog. Pruefen' - Lauf am Teil offen.
-    g74Beleg:'Satz mit 130 Zeichen am 10.09.2026 aus der App eingespielt, Prog. Pruefen ohne Fehler; Lauf am Teil offen',
+    g74Beleg:'Prog. Pruefen am 10.09.2026 galt der alten P-Nummern-Form; am 11.09.2026 Realform aus der Zyklen-Maske per DNC belegt (P77777/P88888: PK1 nur Spaenebrechen, PL W, PM D, PN DF, PO Tiefe, PP U, PQ V, PR/PT Zeitbasis) — Generator seit 11.09. abends darauf umgestellt, Lauf am Teil offen',
     g75Beleg:'Lauf am Teil 11.09.2026: die P-Nummern-Form schnitt mit dem modalen F statt der Steigung - WIDERLEGT. Realform aus der Zyklen-Maske der Maschine per DNC belegt (F-Wort = Steigung, P-Buchstaben, PX = Flankenwinkel); Generator seit 11.09. abends darauf umgestellt, Lauf der Realform am Teil offen',
     fahrtests:'Maschinentermine 09.-11.09.2026: Web-Serial beide Richtungen (App-Ausgabe kommt byteidentisch zurueck), Zeichenbremse bringt die langen G74/G75-Zyklussaetze ganz an, Kantenwelle O9016 komplett gefahren; Spanbrechen G04 F2 und Drehzahlvariation SSV (11.09.2026, O9162 mit DM130: die Drehzahl pendelt fliegend durch) im FAHRTEST gruen; die NMAX-Wache haelt jede G96-Anwahl auf G97 S<NMAX>, Alarm 007 bleibt aus.',
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
@@ -21196,7 +21204,7 @@ function ppMerkmale(){
     // Maschine (Bestandsprogramme), offen ist nur, ob sie ihn OHNE
     // PA/PB annimmt. Deshalb getrennte Zeilen mit ehrlichem Stand.
     M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
-      w:'Satz an Daniels Maskeneingabe belegt (07.09.2026, O123 per DNC gezogen): X/Z Bezugspunkt, PM/PN = B/T, PO-PR = R1-R4, PG = U, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten — am 09.09.2026 mit alpha1 10 / alpha2 20 / D 1 / t1 3 nachgezogen (O12345, Fotos): PK/PL = alpha1/alpha2, P227 = t1, P228 = D; I0 K0 und PF0.4 bleiben konstant (keine Winkel, kein D - PF vermutlich Maschinenwert), PX1 vermutlich Lage aussen (Innenstich offen); KEINE PA/PB, auch nicht mit Winkeln. Die App gibt weiter EINZELSAETZE aus: der 115-Zeichen-Satz kommt per DNC Precision nicht durch (Empfangspuffer reisst ab ~45 Zeichen, und Fortsetzungszeilen setzt die Steuerung NIE zusammen - 09.09.2026), aus der App geht er zeichenweise gebremst (10.09.2026 bewiesen: O126 ganz da, Prog. Pruefen ohne Fehler), und der Generator schreibt das 1000er-Format noch nicht. Fahrtest offen.'});
+      w:'Realform an drei Maschinensaetzen belegt (07.09.2026 O123 ohne Winkel, 09.09. O12345 mit alpha1 10 / alpha2 20 / D 1 / t1 3, 11.09.2026 P99999 INNEN): X/Z Bezugspunkt (Z = LINKE Nutkante), PM/PN = B/T, PO-PR = R1-R4, PG = U, PK/PL = alpha1/alpha2, P227 = t1, P228 = D, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten; PJ1 = Lage innen, PJ2 = Stirnnut (P101, dort OHNE PF0.4; aussen fehlt das Wort), PX1 bleibt auch innen konstant, I0 K0 und PF0.4 konstant; KEINE PA/PB. Seit dem 11.09.2026 abends schreibt der Generator dieses Format (aussen, innen und Stirnnut, Winkel, D); Fasen an den Ecken, Stirnnut in der Bohrung und N>1 fallen mit Ansage auf Einzelsaetze zurueck. Der 115er-Satz kommt aus der App zeichenweise gebremst ganz an (10.09.2026, O126). Lauf am Teil offen.'});
     M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
       w:'die Maschine faehrt ihn (Bestandsprogramme, alle mit steuerungsberechneten PA/PB) — ob sie den Satz OHNE PA/PB annimmt, prueft MINI_G72 am naechsten Termin; bis dahin Ausgabe als Einzelsaetze'});
     M.push({t:'Freistich G73 / Plangewinde G77', s:pr.zyklen.g73,
@@ -21297,15 +21305,18 @@ const ZYKLUS_PARAM=[
      ['PP','U Mindestbohrtiefe','Maske U'],
      ['PQ','V Rueckzugsbetrag (nur Spaenebrechen)','Maske V'],
      ['PT95 / PU0.4','Zeitbasis Umdrehungen / fester Dokumentationswert','fest']]},
- {g:'G74 Bohren (1000er-Langform)', nur:'MONFORTS_1000_MTC_K_6624B', q:'R&D 95.05 S. 3.35 (P-Werte sind RADIUS-Werte)',
-  p:[['Z','Z0 Bezugspunkt','Maske Z0'],
-     ['P210','0=Rueckzug zur Startposition, 1=um Rueckzugsbetrag','Maske Bearbeitung'],
-     ['P211','W Vorlauf','Maske W (man/auto)'],
-     ['P212','D 1. Zustellung','Maske D'],
-     ['P213','DF Degressionsfaktor','Maske DF'],
-     ['P214','Gesamt-Bohrtiefe','aus Z1'],
-     ['P215','U Mindestbohrtiefe','Maske U'],
-     ['P216','V Rueckzugsbetrag','Maske V']]},
+ {g:'G74 Bohren (1000er-Langform)', nur:'MONFORTS_1000_MTC_K_6624B', q:'Realform aus der Zyklen-Maske der Maschine, per DNC gezogen 11.09.2026 (P77777 bis Startposition, P88888 um Betrag V)',
+  p:[['X0 Z / G91 I0 K0','Z0 Bezugspunkt absolut, dann der inkrementale P-Block','Maske Z0'],
+     ['PK1','nur bei Spaenebrechen (Rueckzug um Betrag V); bei Entspanen fehlt das Wort','Maske Bearbeitung'],
+     ['PL','W Vorlauf','Maske W (man/auto)'],
+     ['PM','D 1. Zustellung (Zentrieren/einfach: volle Tiefe — ANNAHME)','Maske D'],
+     ['PN','DF Degressionsfaktor (nur Tieflochbohren)','Maske DF'],
+     ['PO','Gesamt-Bohrtiefe positiv','aus Z1'],
+     ['PP','U Mindestbohrtiefe (nur Tieflochbohren)','Maske U'],
+     ['PQ','V Rueckzugsbetrag — steht auch bei Entspanen im Satz (Vorgabe 1)','Maske V'],
+     ['PR95 / PT95','Zeitbasis der Verweilzeiten t1/t2 in Umdrehungen (folgt G94/G95; die Werte selbst sind Steuerungsparameter)','fest, wir stehen unter G95'],
+     ['PW90 PY1 PZ1','in beiden Proben konstant, Bedeutung offen','fest'],
+     ['G90 danach','explizites G90 im Rueckzugssatz hinter dem Zyklus (G91 bleibt sonst modal)','erzeugt']]},
  {g:'G81 / G82 / G83 Bohren (DIN-Familie)', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-67/68',
   p:[['Z','Z0 Bezugspunkt','Maske Z0'],
      ['PQ','Bohrtiefe relativ/positiv','aus Z1'],
@@ -21346,6 +21357,20 @@ const ZYKLUS_PARAM=[
      ['P230 / P231','K1: Fase-FLAG / Mass','Maske K1'],
      ['P232 / P233','K3: Fase-FLAG / Mass','Maske K3'],
      ['P240 / P241','Schruppen / Schlichten','Maske Bearbeitung']]},
+ {g:'G71 Einstechen (1000er)', nur:'MONFORTS_1000_MTC_K_6624B', q:'Realform aus der Zyklen-Maske der Maschine, per DNC gezogen (O123 07.09., O12345 09.09., P99999 innen 11.09.2026)',
+  p:[['X / Z','Bezugs-⌀ am Nutmund (innen: Bohrungs-⌀) / LINKE Nutkante; Stirnnut: X = INNENRAND der Nut, Z = Stirnflaeche','Maske X0 / Z0 (li)'],
+     ['G91 I0 K0','konstant, Bedeutung offen','fest'],
+     ['PF0.4 / PX1','konstant in jeder Probe, kein Maskenfeld (PX1 auch innen)','fest'],
+     ['PG','U Schlichtaufmass (nur EIN Aufmass, UZ entfaellt)','Maske UX'],
+     ['PJ1 / PJ2','Lage innen / Stirnnut (aussen fehlt das Wort); PF0.4 steht nur bei radialen Stichen','Maske Lage / Ausrichtung'],
+     ['PK / PL','alpha1 / alpha2 Flankenwinkel, nur wenn > 0','Maske Flanken'],
+     ['PM / PN','B Breite / T Tiefe (radial aus dem Grund-DM T1; Stirnnut: axiale Tiefe T1)','Maske B1 / T1'],
+     ['PO PP PQ PR','R1-R4 Eckenradien (Fasen unbelegt: Einzelsaetze)','Maske Ecken'],
+     ['PW / P230','BS Meisselbreite doppelt','Werkzeugtabelle'],
+     ['PY','N Anzahl (N>1 unbelegt: Einzelsaetze)','Maske N'],
+     ['P227 / P228','t1 Verweilzeit am Grund (kein Maskenfeld) / D Spanbrecher, nur wenn > 0','Maske D'],
+     ['P240:1 / P241:1','Schruppen / Schlichten','Maske Bearbeitung'],
+     ['G90 danach','der Endrueckzug traegt G90 (G91 bleibt sonst modal)','erzeugt']]},
  {g:'G71 Einstechen', nur:'MONFORTS_1500_EUROTURN', q:'DV 610 S. 3-40/41 (Tabelle, Beispielsatz und Grafik decken sich)',
   p:[['X / Z','X0 / Z0 Bezugspunkt (rechte Nutkante, P233:0)','Maske X0 / Z0'],
      ['PG (G91)','U Schlichtaufmass (EIN Wert — UZ entfaellt)','Maske UX'],
@@ -25310,9 +25335,12 @@ function genAbstechen(p, N, bump, lines, warnings){
 // (Muster G75/G72). Kopfsaetze (T/Drehzahl/M/Anfahrt) bleiben
 // echt, der Endrueckzug ebenfalls.
 //
-// NUR EUROTURN: die 1000er schreibt ihre Zyklen mit PA/PB-Adressen,
-// deren Werte die Steuerung selbst errechnet — dort fallen die
-// G-Einzelsaetze mit Ansage (wie G72/G73).
+// BEIDE MASCHINEN seit dem 11.09.2026: die 1000er schreibt den G71 in
+// ihrer eigenen Realform (Daniels Zyklen-Maske, drei Proben: O123 am
+// 07.09. ohne Winkel, O12345 am 09.09. mit alpha1/alpha2 und D/t1,
+// P99999 am 11.09. INNEN — alle in maschinentermin/). Die alte Sperre
+// "PA/PB-Adressen" war ein Irrtum: PA/PB gehoeren zum G72, im G71 der
+// 1000er stehen sie nie, auch nicht mit Flankenwinkeln (09.09.2026).
 // ============================================================
 function genEinstechen71(p, N, bump, lines, warnings){
   // Bezugskante wie im Hauptgenerator EINMAL normalisieren — der
@@ -25325,10 +25353,7 @@ function genEinstechen71(p, N, bump, lines, warnings){
   const doRough = p.bearbeitung!=='schlichten';
   const doFinish = p.bearbeitung!=='schruppen';
   let zyk = true;
-  if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'){
-    warnings.push('G71-Zyklussatz am 1000er-Profil nicht erzeugbar: die MTC-K nutzt PA/PB-Adressen mit steuerungsberechneten Werten (Beleg: Daniels TAP-Programme). Ausgabe erfolgt als G-Einzelsaetze.');
-    zyk=false;
-  }
+  const mtck = MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B';
   // Expansion in ein eigenes Feld — bei zyk wird sie zu (SIM:)-Zeilen,
   // sonst ist sie direkt die Ausgabe. __exp verhindert die Rekursion.
   const tmp=[];
@@ -25351,15 +25376,17 @@ function genEinstechen71(p, N, bump, lines, warnings){
   // unserer (Mund links, Grund links, Mund rechts, Grund rechts).
   const stTool = toolTable.find(x=>String(x.t)===String(p.t));
   const bw = Math.max(0.5, +((stTool&&stTool.len) || 3));
-  if(zyk && p.ausr==='axial'){
-    warnings.push('G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — die Stirnnut wird als G-Einzelsaetze ausgegeben (das fruehere PJ2 stand in keinem echten Satz).');
+  if(zyk && p.ausr==='axial' && (!mtck || p.lage==='innen')){
+    warnings.push(mtck
+      ? 'G71-Zyklussatz der 1000er: die Stirnnut in der BOHRUNG ist unbelegt (Daniels Probe P101 vom 11.09.2026 war die freie Stirnnut, PJ2) — Ausgabe erfolgt als G-Einzelsaetze.'
+      : 'G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — die Stirnnut wird als G-Einzelsaetze ausgegeben (das fruehere PJ2 stand in keinem echten Satz der 1500er; die 1000er schreibt es seit dem 11.09.2026).');
     zyk=false;
   }
-  if(zyk && p.lage==='innen'){
-    warnings.push('G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — innen wird als G-Einzelsaetze ausgegeben (das fruehere PJ1 stand in keinem echten Satz).');
+  if(zyk && !mtck && p.lage==='innen'){
+    warnings.push('G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — innen wird als G-Einzelsaetze ausgegeben (das fruehere PJ1 stand in keinem echten Satz der 1500er; die 1000er schreibt es seit dem 11.09.2026).');
     zyk=false;
   }
-  if(zyk && ((+p.a1||0)>0 || (+p.a2||0)>0)){
+  if(zyk && !mtck && ((+p.a1||0)>0 || (+p.a2||0)>0)){
     warnings.push('G71-Zyklussatz: Flankenwinkel sind am Maschinensatz nicht belegt (im Belegsatz standen beide auf 0) — Ausgabe erfolgt als G-Einzelsaetze.');
     zyk=false;
   }
@@ -25371,12 +25398,18 @@ function genEinstechen71(p, N, bump, lines, warnings){
     warnings.push('G71-Zyklussatz: der Kegelwinkel W hat kein belegtes Satzwort — Ausgabe erfolgt als G-Einzelsaetze.');
     zyk=false;
   }
+  // 1000er: alle drei Proben trugen RADIEN an den vier Ecken (PO..PR) —
+  // wie die Steuerung eine FASE kodiert, steht in keinem Satz.
+  if(zyk && mtck && [['f1','r1'],['f2','r2'],['f3','r3'],['f4','r4']].some(([f,r])=>(+p[f]||0)>0.005 && (+p[f]||0)>(+p[r]||0))){
+    warnings.push('G71-Zyklussatz der 1000er: Fasen an den Nutecken sind im Satz unbelegt (alle Proben 07.-11.09.2026 hatten Radien R1-R4) — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyk=false;
+  }
   if(!zyk){ tmp.forEach(z=>lines.push(z)); return; }
   if(doFinish && Math.abs((+p.uz||0)-(+p.ux||0))>1e-9)
     warnings.push('G71: der Zyklus kennt nur EIN Schlichtaufmass U (PG'+fmt(p.ux||0)+', allseitig). UZ '+fmt(p.uz||0)+' wird im Zyklussatz nicht abgebildet.');
   if(doFinish && doRough && (Math.abs((+p.ff||0)-(+p.fr||0))>1e-9 || Math.abs((+p.sf||0)-(+p.sr||0))>1e-9))
     warnings.push('G71: der Zyklus faehrt komplett mit den aktiven Schnittwerten F'+fmt(p.fr)+'/S'+fmt(p.sr)+' — die Schlichtwerte F'+fmt(p.ff)+'/S'+fmt(p.sf)+' wirken nur in der Simulation.');
-  if(doRough && (+p.d||0)>0)
+  if(doRough && !mtck && (+p.d||0)>0)
     warnings.push('G71: fuer die Spanbrech-Zustellung D gibt es im Maschinensatz kein Wort — die Schnittaufteilung im Stich macht die Steuerung selbst.');
   // Tiefe PN in mm: t1 ist radial der GRUND-Durchmesser (absolut) —
   // Belegsatz: (120-80)/2 = PN20.
@@ -25405,15 +25438,52 @@ function genEinstechen71(p, N, bump, lines, warnings){
     'P230:'+fmt(bw),
     (doRough?'P240:1':null),(doFinish?'P241:1':null)
     ]).filter(Boolean);
+  // REALFORM DER 1000er (Daniels Zyklen-Maske, byteexakt in maschinentermin/):
+  //   O123   07.09.: G71 G90 X50 Z-50 G91 I0 K0 PF0.4PG0.2PM10PN10PO0.5PP0.6PQ0.7PR0.8PW3.15PX1PY1P230:3.15P240:1P241:1
+  //   O12345 09.09.: ... PF0.4PG0.2PK10PL20PM10PN10PO0.5...PR0.8PW3.15PX1PY1P227:3P228:1P230:3.15P240:1P241:1
+  //   P99999 11.09.: G71 G90 X50 Z-30 G91 I0 K0 PF0.4PG0.2PJ1PK10PL20PM20PN7PO0.5PP0.6PQ0.7PR0.8PW3.15PX1PY1P227:3P228:1P230:3.15P240:1P241:1
+  // Z im Satz ist die LINKE Nutkante (Marke im Maskenbild an R1; Daniels
+  // Standard 11.09.2026: "im Standardfall immer die linke Bezugskante") —
+  // unser p.z0 ist nach der Normalisierung oben die RECHTE Kante, also
+  // z0-b1. PF0.4 und PX1 stehen in jeder Probe konstant (PX1 auch innen:
+  // es ist NICHT die Lage — innen traegt PJ1, aussen fehlt das Wort),
+  // PK/PL = alpha1/alpha2 nur wenn > 0, P227 = t1 Verweilzeit am Grund
+  // (kein Maskenfeld; p.tv, nur > 0), P228 = D Spanbrecher nur wenn > 0,
+  // PW und P230 tragen beide die Meisselbreite BS. Innen ist X der
+  // Bohrungs-Durchmesser am Nutmund und PN die radiale Tiefe nach aussen.
+  //   P101   11.09.: G71 G90 X50 Z-10 G91 I0 K0 PG0.2PJ2PK10PL20PM20PN7PO0.5PP0.6PQ0.7PR0.8PW3.15PX1PY1P227:3P228:1P230:3.15P240:1P241:1
+  // STIRNNUT (P101): PJ2, KEIN PF0.4 (das steht nur bei radialen Stichen),
+  // X = INNENRAND der Nut (Marke im Maskenbild an der Ecke mit dem kleineren
+  // Durchmesser — unser interner x0 ist der Aussenrand, also x0-2*b1),
+  // Z = Stirnflaeche, PM = radiale Breite b1, PN = axiale Tiefe t1.
+  // G91 bleibt danach MODAL — der Endrueckzug traegt G90 (unten).
+  let satzWorte = worte;
+  if(mtck){
+    const axialM = p.ausr==='axial';
+    const pblock=[
+      (axialM?null:'PF0.4'), 'PG'+fmt(p.ux||0), (p.lage==='innen'?'PJ1':(axialM?'PJ2':null)),
+      ((+p.a1||0)>0?'PK'+fmt(+p.a1):null), ((+p.a2||0)>0?'PL'+fmt(+p.a2):null),
+      'PM'+fmt(p.b1), 'PN'+fmt(axialM? +p.t1 : tiefeMm),
+      'PO'+fmt(+p.r1||0), 'PP'+fmt(+p.r2||0), 'PQ'+fmt(+p.r3||0), 'PR'+fmt(+p.r4||0),
+      'PW'+fmt(bw), 'PX1', 'PY'+(+p.n||1),
+      ((+p.tv||0)>0?'P227:'+fmt(+p.tv):null), ((+p.d||0)>0?'P228:'+fmt(+p.d):null),
+      'P230:'+fmt(bw), (doRough?'P240:1':null), (doFinish?'P241:1':null)
+    ].filter(Boolean).join('');
+    satzWorte=['G71','G90','X'+fmt(axialM? (+p.x0)-2*(+p.b1) : +p.x0),'Z'+fmt(axialM? +p.z0 : (+p.z0)-(+p.b1)),'G91','I0','K0', pblock];
+  }
   // Kopf (bis einschliesslich VORSCHUB) bleibt echt, danach der
   // Zyklussatz, der Rest der Expansion wird eingehuellt.
   let kopfEnde=tmp.findIndex(z=>z.indexOf('(VORSCHUB)')>=0);
   if(kopfEnde<0) kopfEnde=Math.min(5,tmp.length-1);
   for(let i2=0;i2<=kopfEnde;i2++) lines.push(tmp[i2]);
   lines.push('(=== NATIVER G71-EINSTECHZYKLUS - Schnittaufteilung macht die Steuerung ===)');
-  lines.push('(REALFORM vom Maschinensatz 03.09.2026: P230=BS Meisselbreite aus der CAM-Werkzeugtabelle, PZ=Z0-BS erster Stich)');
-  lines.push('(ANNAHME: PE1 stand konstant im Belegsatz - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
-  lines.push(`${N()} (EINSTICH) ${worte.join(' ')}`); bump();
+  if(mtck){
+    lines.push('(1000er-REALFORM 11.09.: Z linke Kante, PJ1 innen, PJ2 Stirn)');
+  } else {
+    lines.push('(REALFORM vom Maschinensatz 03.09.2026: P230=BS Meisselbreite aus der CAM-Werkzeugtabelle, PZ=Z0-BS erster Stich)');
+    lines.push('(ANNAHME: PE1 stand konstant im Belegsatz - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
+  }
+  lines.push(`${N()} (EINSTICH) ${satzWorte.join(' ')}`); bump();
   lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
   let letzterSatz=-1;
   for(let i2=tmp.length-1;i2>=0;i2--){ if(tmp[i2] && tmp[i2][0]!=='('){ letzterSatz=i2; break; } }
@@ -25422,6 +25492,10 @@ function genEinstechen71(p, N, bump, lines, warnings){
     // Der letzte Fahrsatz ist der Endrueckzug — er bleibt echt, damit
     // das Werkzeug auch im Zyklusbetrieb definiert aus dem Schnitt geht.
     if(z && z[0] !== '(' && i2!==letzterSatz) z='(SIM: '+z.replace(/\(([^)]*)\)/g,'').replace(/  +/g,' ')+')';
+    // 1000er: G91 des Zyklussatzes ist modal — der echte Endrueckzug
+    // schaltet auf G90 zurueck (Daniels eigene 1000er-Programme schreiben
+    // hinter jedem G70/G72 ein explizites G90 im naechsten Fahrsatz).
+    else if(mtck && z && z[0] !== '(' && i2===letzterSatz && z.indexOf(' G90')<0) z=z.replace(' G00 ', ' G90 G00 ');
     lines.push(z);
   }
 }
@@ -26083,17 +26157,30 @@ function genBohren(p, N, bump, lines, warnings){
     const dWert = tiefBohr ? (p.d||0) : depth;
     let worte;
     if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'){
-      // Lange P-Adressen (R&D 95.05): t1/t2 sind Steuerungsparameter,
-      // keine freien NC-Adressen.
-      worte = ['G95','F'+fmt(p.f),'G74','G90','Z'+fmt(p.z0),
-        'P210:'+(brechen?1:0),
-        'P211:'+fmt(boVorlauf(p)),
-        'P212:'+fmt(dWert),
-        (tiefBohr&&p.df?'P213:'+fmt(p.df):null),
-        'P214:'+fmt(depth),
-        (tiefBohr&&p.u?'P215:'+fmt(p.u):null),
-        (brechen&&p.v2?'P216:'+fmt(p.v2):null)
-      ].filter(Boolean);
+      // REALFORM DER 1000er [Daniels Zyklen-Maske 11.09.2026, P77777 (Rueckzug
+      // bis Startposition) und P88888 (Rueckzug um Betrag V), byteexakt in
+      // maschinentermin/]. Die alte P-Nummern-Form (P210..P216 mit G95 F) war
+      // eine Annahme aus der R&D 95.05 — dieselbe Fehlerklasse wie beim G75.
+      // Buchstaben wie in der DV 610 der 1500er: PK1 NUR bei Spaenebrechen
+      // (bei "bis Startposition" fehlt das Wort), PL W Vorlauf, PM D
+      // 1. Zustellung, PN DF, PO Tiefe positiv, PP U Mindestbohrtiefe, PQ V
+      // Rueckzugsbetrag (steht auch ohne PK im Satz, Maskenvorgabe 1), PR/PT
+      // Zeitbasis der Verweilzeiten t1/t2 (95 = Umdrehungen; P88888 lief
+      // unter G94 und trug 94 — unser Satz steht immer hinter einem G95),
+      // PW90 PY1 PZ1 in beiden Proben konstant. t1/t2 selbst stehen nicht
+      // im Satz (Steuerungsparameter). KEIN F im Satz: der Vorschub ist der
+      // modale aus dem VORSCHUB-Satz davor. P-Woerter ohne Leerzeichen.
+      const pblock=[
+        (brechen?'PK1':null),
+        'PL'+fmt(boVorlauf(p)),
+        'PM'+fmt(dWert),
+        (tiefBohr&&p.df?'PN'+fmt(p.df):null),
+        'PO'+fmt(depth),
+        (tiefBohr&&p.u?'PP'+fmt(p.u):null),
+        'PQ'+fmt((brechen&&p.v2)?p.v2:1),
+        'PR95','PT95','PW90','PY1','PZ1'
+      ].filter(Boolean).join('');
+      worte = ['G74','G90','X0','Z'+fmt(p.z0),'G91','I0','K0', pblock];
     } else {
       // EuroTurn: Kurzadressen; Zykluswerte inkremental nach G91;
       // Zeitbasis PT95 = Umdrehungen (wir stehen unter G95), PU0.4 ist
@@ -26110,8 +26197,19 @@ function genBohren(p, N, bump, lines, warnings){
       ].filter(Boolean);
     }
     lines.push('(=== NATIVER G74-BOHRZYKLUS - Ablauf macht die Steuerung ===)');
-    lines.push('(ANNAHME zu pruefen: D=Tiefe bei Zentrieren/Bohren mit trockenem Testsatz bestaetigen)');
+    if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B')
+      lines.push('(1000er-REALFORM 11.09.2026: PK1 nur Spaenebrechen, PR/PT 95, PW90 PY1 PZ1 fest)');
+    else
+      lines.push('(ANNAHME zu pruefen: D=Tiefe bei Zentrieren/Bohren mit trockenem Testsatz bestaetigen)');
     lines.push(`${N()} (BOHREN  ) ${worte.join(' ')}`); bump();
+    if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'){
+      // Das G91 des Zyklussatzes bleibt MODAL — Daniels eigene 1000er-
+      // Programme schreiben hinter jedem G70/G72 ein explizites G90 im
+      // naechsten Fahrsatz. Der Rueckzug auf die Startposition Z0+W (dort
+      // endet der Zyklus ohnehin) traegt es hier; ohne ihn liefe die
+      // Abfahrt zum Wechselpunkt (X300 Z20) inkremental.
+      lines.push(`${N()} (GERADE  ) G90 G00 Z${fmt(p.z0+boVorlauf(p))}`); bump();
+    }
     lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation ---)');
     simStart = lines.length;
   };
