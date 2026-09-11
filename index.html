@@ -6622,16 +6622,17 @@ function toWorld(sx,sy){
 // - 1000er: Forkardt F 315 KEILSTANGENFUTTER ⌀315, Bauhoehe ~117.
 //   Aufsatzbacken 107 radial, 35 breit, axial ca. 57 (Stufen ~40/95).
 // backeH ist die GEZEICHNETE Treppe ueber der Spannstufe (radiale
-// Backenlaenge minus unterster Stufe). ANNAHME bleibt backeL, der
-// axiale UEBERSTAND der Backe vor der Futterstirn: die Backen waren
-// am Termin demontiert, der Sitz im Koerper ist ungemessen — 45 mm
-// als plausibler Wert unter den belegten Gesamthoehen (73 bzw. 57),
-// nachmessen am montierten Futter steht auf der Terminliste.
+// Backenlaenge minus unterster Stufe). backeL ist der axiale
+// UEBERSTAND der Backe vor der Futterstirn: 1000er 65 mm GEMESSEN
+// (Daniel 11.09.2026, am montierten Futter — die Annahme 45 lag 20 mm
+// daneben; die Backenfront selbst haengt an LA und wandert nicht, nur
+// der Futterkoerper sitzt entsprechend weiter hinten). 1500er: 45 mm
+// bleibt ANNAHME (Backen waren am 03.09. demontiert), nachmessen.
 const FUTTER_JE_MASCHINE = {
   MONFORTS_1500_EUROTURN:   { rAussen:157.5, hoehe:95,  rBohrung:41,
                               backeB:32, backeH:90, backeL:45 },
   MONFORTS_1000_MTC_K_6624B:{ rAussen:157.5, hoehe:117, rBohrung:41,
-                              backeB:35, backeH:67, backeL:45 }
+                              backeB:35, backeH:67, backeL:65 }
 };
 const FUTTER = Object.assign({}, FUTTER_JE_MASCHINE.MONFORTS_1500_EUROTURN);
 function futterGeometrie(){
