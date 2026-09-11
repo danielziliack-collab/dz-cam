@@ -4737,7 +4737,10 @@ gesichert.
 <br><b>Satz belegt, Lauf am Teil offen:</b> G71 Einstich (radiale Au&szlig;ennut) und G72
 Abspanen (au&szlig;en, innen, Schenkelwinkel) schreibt die App in der Realform der 7.210i, aus
 der Zyklen-Maske gezogen; das PE1 im G72 ist der Sicherheitsabstand Abspanen aus Parameter
-5205 (1,0 mm laut IBN 2004).
+5205 (1,0 mm laut IBN 2004). <b>Hergeleitet</b> (plausibel, an der 1500er zu pr&uuml;fen): Einstich
+innen (PJ1) und mit Flankenwinkeln (PK/PL) &mdash; DV 610 und die 1000er-Realform sagen dasselbe;
+Maskensatz ziehen (Probenzettel 351), bevor er gefahren wird. Stirnnut und N&nbsp;2 bleiben
+Einzels&auml;tze.
 <br><b>Am Handbuch belegt, nie gefahren:</b> G74 Bohren (W Vorhalt, Kap. 4.6.6.1 der DV 594
 deckt sich Zeile f&uuml;r Zeile mit dem Generator), G75 L&auml;ngsgewinde, G76 Kegel- und G77
 Plangewinde, G73 DIN 76, G78/G79 Form F/E &mdash; nach DV 610-0C. Vorsicht: beim G71/G72 schrieb
@@ -4769,9 +4772,18 @@ Zyklen-Maske gezogen: Steigung im F-Wort vor dem G75, PO au&szlig;en positiv; PK
 Sp&auml;nebrechen; Z des Einstichs ist die LINKE Nutkante. Hinter jedem Zyklussatz steht ein
 explizites G90, weil das G91 des Satzes sonst modal bliebe. Die Testl&auml;ufe O9167 bis O9169
 stehen aus.
-<br><b>Noch zu testen:</b> G72 (die Maschine schreibt steuerungsberechnete PA/PB &mdash; Satz aus
-der Maske ziehen), G73 DIN 76 und Freistich Form E (gelesen, nicht gebaut), Form F, Gewinde
-Kegel und Plan, W ungleich D beim Bohren, N&nbsp;2 beim Einstich. Bis dahin Einzels&auml;tze.
+<br><b>Aus Maskenfotos gebaut (Dateien noch zu ziehen):</b> G73 Gewinde-Freistich DIN 76 und
+Freistich Form E (G79) schreibt die App in der Form der Fotos P102&ndash;P105: PH ist V/2, beim
+Form E ist X der Freistichgrund und I die Welle, innen PJ1 (G79) bzw. PN1 (G73).
+<br><b>Hergeleitet &mdash; plausibel, an der Maschine zu pr&uuml;fen:</b> G72 Abspanen (aus Deinen
+eigenen Bestandss&auml;tzen: PA/PB sind der Anfahrpunkt relativ zum Bezugspunkt, PE0.5 der
+Sicherheitsabstand aus Parameter 5205, PF = D, PG = U &mdash; au&szlig;en, innen, Schenkelwinkel;
+Stirnkante, Rundungskanten und plan bleiben Einzels&auml;tze), Freistich Form F (G78, aus dem
+Form-E-Satz) und Kegelgewinde G76 (aus der G75-Realform, I = X1&minus;X0). Jeder dieser S&auml;tze
+tr&auml;gt im Programm die Zeile HERGELEITET und eine gelbe Warnung: <b>vor dem ersten Lauf den
+Maskensatz ziehen</b> (Probenzettel 231, 251/252, 261&ndash;264) und mit der App-Ausgabe vergleichen.
+<br><b>Noch zu testen:</b> Plangewinde G77 (bewusst nicht hergeleitet, G33-Einzels&auml;tze), W
+ungleich D beim Bohren, N&nbsp;2 und Fasen beim Einstich, die L&auml;ufe O9167&ndash;O9169.
 <br><b>Dateiregeln:</b> ASCII, CR LF, Kommentare bis 62 Zeichen ohne innere Klammer
 (Fehler 153), T nur bis 32 (Fehler 152, real 16 Pl&auml;tze &mdash; Lagerwerkzeuge im
 Werkzeuglager auf Pl&auml;tze legen, dann ruft die NC den Platz), Fortsetzungszeilen setzt
@@ -21030,7 +21042,7 @@ const MASCHINEN_PROFILE = {
     // aus der App eingespielt, G74 (130 Zeichen) und G75 (135) bestehen
     // 'Prog. Pruefen' - Lauf am Teil offen.
     fahrtests:'gefahren: Kantenwelle O9016 komplett (NMAX 600), Spanbrechen G04 F2, NMAX-Wache haelt die G96-Anwahl (Alarm 007 bleibt aus), SSV auf DM130 pendelt fliegend, M00-Messhalt haelt, Vorschub je Element wirkt, Bemerkung hinter dem Stopp, G33-Gewinde zieht in der Steigung',
-    fahrtestsOffen:'Laeufe der Realformen O9167 (G75), O9168 (G74), O9169 (G71)',
+    fahrtestsOffen:'Laeufe der Realformen O9167 (G75), O9168 (G74), O9169 (G71); hergeleitete Formen (G72, G76, Form F) erst nach dem Maskensatz fahren (Probenzettel)',
     termine:'07.09.2026 — Uebertragung 9600/7/E/2 RTS/CTS bewiesen, 17 Bestandsprogramme gesichert, G71-Satz aus der Maske · 09.09.2026 — Web-Serial beide Richtungen, Fortsetzungszeilen tot, G71 mit Winkeln und D · 10.09.2026 — Zeichenbremse, M30 kommt an, erster kompletter Lauf, Alarm 007 = Anwahlfalle · 11.09.2026 — SSV, M00, Realformen G75/G74/G71, G73/G79 gelesen, Backenueberstand 65',
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
     // unter G90 ebenfalls im DURCHMESSERMASS ausgegeben (IBN-belegt).
@@ -21133,6 +21145,11 @@ const PP_STATUS={
   // Diskettenkopie) ist lesbar; was daraus stammt, ist weder Maschinensatz
   // noch Handbuch — eigene Stufe, damit Daniel die Quelle sieht.
   software_read:{txt:'aus der Steuerungssoftware gelesen — Satz offen', cls:'doc', grp:'satz'},
+  // [Daniels Methode 11.09.2026 spaet, "go"]: Satzformen, die von der
+  // Schwestermaschine, den eigenen Bestandssaetzen oder Maskenfotos
+  // ABGELEITET sind — die App schreibt sie nativ, mit stehender Warnung;
+  // vor dem ersten Lauf gehoert der Maskensatz gezogen (Probenzettel).
+  derived:{txt:'hergeleitet — plausibel, an der Maschine zu pruefen', cls:'ann', grp:'offen'},
   unknown_for_target_machine:{txt:'Annahme — nicht belegt', cls:'ann', grp:'offen'},
   disabled:{txt:'gesperrt — Einzelsaetze', cls:'aus', grp:'offen'},
 };
@@ -21214,8 +21231,8 @@ function ppMerkmale(){
     M.push({t:'Bohrzyklen G81 ff', s:'disabled',
       w:'gesperrt — im Handbuch dokumentiert, aber Option A019G lt. IBN nicht freigeschaltet (N9177=0); Ausgabe als G74'});
     M.push({t:'Einstechzyklus G71', s:'machine_syntax',
-      w:'freigegeben (IBN N9150) — Realform der 7.210i belegt (radiale Aussennut, per DNC gezogen): PG = U, PY = N, PZ = Z0-BS, P230 = BS; axial, innen, N>1 und Flankenwinkel fallen auf Einzelsaetze zurueck',
-      offen:'Lauf am Teil (T8_G71_EINSTICH); der Kegelwinkel W steht in der Software (CONICAL_ANGLE), sein Satzwort ist offen'});
+      w:'freigegeben (IBN N9150) — Realform der 7.210i belegt (radiale Aussennut, per DNC gezogen): PG = U, PY = N, PZ = Z0-BS, P230 = BS, PE1 = Sicherheitsabstand 5203; innen (PJ1) und Flankenwinkel (PK/PL) HERGELEITET aus DV 610 und 1000er-Realform; Stirnnut und N>1 fallen auf Einzelsaetze zurueck (PZ nicht ableitbar)',
+      offen:'Lauf am Teil (T8_G71_EINSTICH); Maskensatz innen/Winkel ziehen (Probenzettel 351); der Kegelwinkel W steht in der Software (CONICAL_ANGLE), sein Satzwort ist offen'});
     // PE1 [11.09.2026 spaet]: die Einstich-Parameterliste in MTC0.EXE beginnt
     // mit SAFETY_GAP, und die IBN 2004 fuehrt N5205 Sicherheitsabstand
     // Abspanen = 1,000 mm — exakt das PE1 des gezogenen G72-Satzes.
@@ -21245,12 +21262,21 @@ function ppMerkmale(){
     M.push({t:'Einstechzyklus G71', s:'machine_syntax_1000',
       w:'Realform an drei Maschinensaetzen belegt: Z = LINKE Nutkante, PM/PN = B/T, PO-PR = R1-R4, PG = U, PK/PL = alpha1/alpha2, P228 = D, PW und P230 = BS, PJ1 innen, PJ2 Stirnnut — aussen, innen und Stirnnut werden nativ geschrieben, hinter dem Satz ein explizites G90',
       offen:'Lauf am Teil (O9169, Nut Z-30..-25 erwartet); Fasen, Stirnnut in der Bohrung und N>1 fallen auf Einzelsaetze zurueck; PX1 und PF ungedeutet (PF vermutlich Schneidenradius)'});
-    M.push({t:'Abspanzyklus G72 (Ecke)', s:'disabled',
-      w:'gesperrt — die Maschine faehrt ihn nur mit steuerungsberechneten PA/PB (Bestandsprogramme); Ausgabe als Einzelsaetze',
-      offen:'Satz aus der Zyklen-Maske ziehen (aussen und innen, mit und ohne Fase); MINI_G72 OHNE PA/PB'});
-    M.push({t:'Freistich G73 / Form E G79 / Plangewinde G77', s:'disabled',
-      w:'gesperrt — G73 und G79 sind aus der Zyklen-Maske gelesen (P102-P105, nur Fotos: PH als Radius, PN1 bzw. PJ1 innen, P227:90, Form E mit X0 = Freistichgrund), Ausgabe noch Einzelsaetze; G77 unbelegt',
-      offen:'Dateien O102-O105 und Form F aus der Steuerung ziehen, dann bauen'});
+    // HERGELEITETE FORMEN [Daniels "go" 11.09.2026 spaet]: die App schreibt
+    // sie nativ mit stehender Warnung; Status "hergeleitet" (Gruppe offen),
+    // der Maskensatz vom Probenzettel entscheidet.
+    M.push({t:'Abspanzyklus G72 (Ecke)', s:'derived',
+      w:'HERGELEITET aus Daniels eigenen 1000er-Saetzen (G95 F G72 X Z I K PA PB PC95 PD PE0.5 PF PG PK PL PM PN PQ PR P240/P241) und der 1500er-Realform: PA/PB = Anfahrpunkt relativ zum Bezugspunkt (aus dem Anfahrsatz gerechnet), PE0.5 = Parameter 5205, PF = D, PG = U; aussen, innen und Schenkelwinkel nativ — Stirnkante K1, Rundungskanten und plan fallen auf Einzelsaetze zurueck',
+      offen:'Maskensatz ziehen (Probenzettel 261-264) VOR dem ersten Lauf; PQ1PR1 der Bestandssaetze als Auslauffase gelesen; MINI_G72 ohne PA/PB'});
+    M.push({t:'Freistich G73 / Form E G79', s:'machine_syntax_1000',
+      w:'Realform aus den Maskenfotos P102-P105 (11.09.2026), nativ geschrieben: G73 mit PH = V/2 absolut, PN1 innen, P227:90; G79 mit X = Freistichgrund, I = Welle, G91 K0, PH = V/2, PK = Tiefe mit Vorzeichen, PJ1 innen; PF (Schneidenradius der Maschinentabelle) schreibt die App nicht',
+      offen:'Dateien O102-O105 ziehen und mit der App-Ausgabe vergleichen; Lauf am Teil; Lage Schulter rechts faellt auf Einzelsaetze zurueck'});
+    M.push({t:'Form F G78 / Kegelgewinde G76', s:'derived',
+      w:'HERGELEITET: G78 aus dem Form-E-Satz (G91 K0, kein Z-Aufmass, t2 ueber PM); G76 aus der G75-Realform mit I = X1-X0 als Gewindeschraege (DV 594 Kap. 4.6.2)',
+      offen:'Maskensatz ziehen (Probenzettel 251/252 und 231) VOR dem ersten Lauf — ob I im Radius- oder Durchmessermass gilt, ist offen'});
+    M.push({t:'Plangewinde G77', s:'disabled',
+      w:'gesperrt — die Achswoerter des Plangewindes sind aus der G75-Realform nicht ableitbar (bewusst nicht hergeleitet); Ausgabe als G33-Einzelsaetze',
+      offen:'Maskensatz ziehen (Probenzettel 241)'});
   }
   // Der Wechselpunkt ist BEDIENERSACHE je Bauteil [Daniel, 31.08.]:
   // die Zeile zeigt das LIVE-Kopffeld, keine Maschinen-Annahme mehr.
@@ -22001,10 +22027,32 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
   // G-Einzelsaetze zurueck, mit Ansage.
   // ============================================================
   let zyklusModusAe = (p.ausg==='zyklus');
-  if(zyklusModusAe && MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'){
-    warnings.push('G72-Zyklussatz am 1000er-Profil nicht erzeugbar: die MTC-K nutzt PA/PB-Adressen mit steuerungsberechneten Werten (Beleg: Daniels TAP-Programme). Ausgabe erfolgt als G-Einzelsaetze.');
-    zyklusModusAe=false;
-  }
+  const mtckAe = MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B';
+  // ===================================================================
+  // 1000er-G72 HERGELEITET [Daniels "go" 11.09.2026 spaet]. Bis dahin
+  // galt "PA/PB steuerungsberechnet, nicht erzeugbar". Die Aufloesung
+  // kam aus Daniels eigenen ATE-Programmen (1000 Sicherung 2026-09-10):
+  //   N0040 (SCHRAEG ) G00 G40 G90 X170 Z20
+  //   N0050 (ABSPANEN) G95 F0.2 G72 X162 Z1.5 I148 K0 PA-4PB-18.5PC95
+  //         PD0.2PE0.5PF0.4PG0.75PK-7PL-1.5PM7PN1.5PQ1PR1P240:1
+  //   (zweites Programm: X165 Z5 davor -> PA-1.75 PB-3.5)
+  // PA = -(Xstart-X0)/2 und PB = -(Zstart-Z0): der ANFAHRPUNKT relativ
+  // zum Bezugspunkt, radial und axial — die Steuerung hat ihn beim
+  // Teach-In aus der Werkzeugposition errechnet, wir schreiben ihn aus
+  // unserem eigenen Anfahrsatz. PC95 = Vorschubart, PD = F (Kopien),
+  // PE0.5 = Sicherheitsabstand Abspanen (Parameter 5205 der 1000er,
+  // IBN 29.11.2025 — die 1500er schreibt dort PE1 = ihr 5205 von 1,0),
+  // PF = D und PG = U wie in der 1500er-Realform (03.09.), PK/PL/PM/PN
+  // wie dort, P240/P241. PQ1PR1 stand in allen fuenf Bestandssaetzen —
+  // Lesart: Auslaufkante Fase 1 mm plus Flag (PQ Mass, PR Flag); ohne
+  // Fase schreiben wir beides nicht. Kein P235/P236/P237 in Daniels
+  // 90/90-Saetzen; bei Winkeln kommen P236/P237 wie an der 1500er dazu.
+  // Innen (PK positiv, X<I) und die Stirnkante K1 (Flag-Wort unbelegt)
+  // sind von der 1500er uebernommen bzw. gesperrt. ALLES ist Annahme,
+  // bis der Maskensatz gezogen ist (Probenzettel 261-264).
+  // ===================================================================
+  // (Die HERGELEITET-Warnung steht unten im Satzzweig — nur wenn der Satz
+  // wirklich geschrieben wird; bei einem Rueckfall waere sie irrefuehrend.)
   // ===================================================================
   // MASCHINENBELEG 03.09.2026 (Daniels Termin, "1500 Zyklen.TAP"):
   // Daniel hat an der 7.210i einen Innen- und einen Winkel-Abspanzyklus
@@ -22079,6 +22127,13 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     warnings.push('G72: wie der Satz FASE und RUNDUNG an den Endkanten unterscheidet, ist am Maschinensatz nicht belegt (P235 stand in beiden Belegen auf 6) — bei Rundungskanten erfolgt die Ausgabe als G-Einzelsaetze.');
     zyklusModusAe=false;
   }
+  if(zyklusModusAe && mtckAe && kantStirnAe>0){
+    // Daniels Bestandssaetze tragen nur PQ1PR1 (Auslaufkante) — fuer die
+    // Stirnkante K1 gibt es dort kein Wortpaar; die 1500er-Form (PO) ohne
+    // Flag koennte die Maschine als Rundung lesen. Einzelsaetze, mit Ansage.
+    warnings.push('G72 der 1000er: fuer die Stirnkante K1 gibt es in Daniels Bestandssaetzen kein Vorbild (Flag-Wort unbelegt) — Ausgabe erfolgt als G-Einzelsaetze.');
+    zyklusModusAe=false;
+  }
   if(zyklusModusAe && sbAe){
     // Der native G72-Satz kennt kein Spanbrechen — die Maschine
     // fuehre den Zyklus durchgehend, waehrend die Simulation Pausen
@@ -22114,7 +22169,7 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
     const rDAe=((+p.x0)-(+p.x1))/2, zmAe2=(+p.z1)-(+p.z0);
     const pnAe=Math.abs((zmAe2 + rDAe*t2Ae)/(t1Ae*t2Ae - 1));
     const pmAe=Math.abs(rDAe - t1Ae*pnAe);
-    const worteAe=[
+    let worteAe=[
       'G72','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),'I'+fmt(p.x1),'K'+fmt(p.z1),
       'PE1','PF'+fmt(p.d),'PG'+fmt(p.ux||0),
       'PK'+fmt(((+p.x1)-(+p.x0))/2),'PL'+fmt(zmAe2),
@@ -22125,9 +22180,33 @@ function genAbspanenEinfach(p, N, bump, lines, warnings){
       (doRough?'P240:1':null),(doFinish?'P241:1':null)
     ].filter(Boolean);
     lines.push('(=== NATIVER G72-ABSPANZYKLUS - Schnittaufteilung macht die Steuerung ===)');
-    lines.push('(REALFORM vom Maschinensatz 03.09.2026: P236/P237=Winkel, PM/PN=Schenkel-Schnittpunkt)');
-    lines.push('(ANNAHME: PE1 und P235:6 standen konstant in den Belegsaetzen - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
-    lines.push('(HINWEIS: der G72 traegt kein SC-Wort - sein Sicherheitsabstand kommt aus Maschinenparameter 5205, NICHT aus dem Programmkopf-SC. DV 610 S. 3-44)');
+    if(mtckAe){
+      // Anfahrpunkt wie in Daniels Programmen: ueber dem Rohteil (aussen)
+      // bzw. in der Vorbohrung (innen), um SC vor dem Bezugspunkt —
+      // daraus PA/PB. Der Anfahrsatz ist ECHT (kein SIM), damit die
+      // Position stimmt, auf die sich PA/PB beziehen.
+      const scAe=pkSC();
+      const xsAe = innen ? Math.max(0.5, (+p.x0)-2*scAe) : (+p.x0)+2*scAe;
+      const zsAe = (+p.z0)+scAe;
+      const pblockAe=[
+        'PA'+fmt(-(xsAe-(+p.x0))/2), 'PB'+fmt(-(zsAe-(+p.z0))),
+        'PC95', 'PD'+fmt(p.fr), 'PE0.5', 'PF'+fmt(p.d), 'PG'+fmt(p.ux||0),
+        'PK'+fmt(((+p.x1)-(+p.x0))/2), 'PL'+fmt(zmAe2),
+        'PM'+fmt(pmAe), 'PN'+fmt(pnAe),
+        (kantAuslaufAe>0?'PQ'+fmt(kantAuslaufAe):null), (kantAuslaufAe>0?'PR1':null),
+        (winkelModus?'P236:'+fmt(w1Ae):null), (winkelModus?'P237:'+fmt(w2Ae):null),
+        (doRough?'P240:1':null),(doFinish?'P241:1':null)
+      ].filter(Boolean).join('');
+      worteAe=['G95','F'+fmt(p.fr),'G72','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),'I'+fmt(p.x1),'K'+fmt(p.z1), pblockAe];
+      warnings.push('G72-Zyklussatz der 1000er ist HERGELEITET aus Daniels Bestandssaetzen und der 1500er-Realform (PA/PB = Anfahrpunkt, PE0.5 = Parameter 5205, PF = D, PG = U) — plausibel, an der Maschine ungeprueft: Maskensatz ziehen (Probenzettel 261-264) und mit der App-Ausgabe vergleichen, bevor er gefahren wird.');
+      lines.push('(HERGELEITET aus Daniels 1000er-Bestandssaetzen und der 1500er-Realform: PA/PB = Anfahrpunkt, PE0.5 = Parameter 5205, PF = D, PG = U)');
+      lines.push('(MASKENSATZ ZIEHEN vor dem ersten Lauf - Probenzettel 261-264; PQ1PR1 der Bestandssaetze als Auslauffase gelesen)');
+      lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(xsAe)} Z${fmt(zsAe)}`); bump();
+    } else {
+      lines.push('(REALFORM vom Maschinensatz 03.09.2026: P236/P237=Winkel, PM/PN=Schenkel-Schnittpunkt)');
+      lines.push('(PE1 = Sicherheitsabstand Abspanen aus Parameter 5205 = 1,0 mm lt. IBN 2004; P235:6 stand konstant - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
+      lines.push('(HINWEIS: der G72 traegt kein SC-Wort - sein Sicherheitsabstand kommt aus Maschinenparameter 5205, NICHT aus dem Programmkopf-SC. DV 610 S. 3-44)');
+    }
     lines.push(`${N()} (ABSPANEN) ${worteAe.join(' ')}`); bump();
     lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
   }
@@ -25077,10 +25156,36 @@ function genFreistich(p, N, bump, lines, warnings){
   // wird in der Standardlage gerechnet und am Ende gespiegelt
   // (fsLageWandeln). Vorher fiel jede Sonderlage stumm auf den
   // Zyklussatz zurueck und die Simulation blieb komplett leer.
-  const gcodeAus = (p.ausg==='gcode');
+  let gcodeAus = (p.ausg==='gcode');
   const pjW=+p.pj||0, spW=(pjW===2||pjW===3), innW=(pjW===1||pjW===3);
-  if(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B' && !gcodeAus)
-    warnings.push('Freistich-Zyklus (G78/G79) am 1000er-Profil nicht belegt — Trockenlauf im Einzelsatz ODER NC-Ausgabe auf G-Einzelsaetze stellen.');
+  // ===================================================================
+  // 1000er-REALFORM aus Daniels Maskenfotos 11.09.2026 (P104 aussen, P105
+  // innen; Dateien O104/O105 noch in der Steuerung):
+  //   P104: G79 G90 X29.2 Z-25 I30 G91 K0 PH17PK0.4PM5P227:90
+  //   P105: G79 G90 X30 Z-25 I29.2 G91 K0 PF1.2PH13PJ1PK-0.4PM5P227:90
+  // X ist der FREISTICHGRUND (nicht die Welle — Daniels erster Versuch
+  // mit X0=Welle gab "Wert nicht im Wertebereich"), I die Welle bzw.
+  // innen die Bohrung, PH = V/2 (P-Werte sind Radiuswerte, R&D 95.05),
+  // PK = Tiefe t mit Vorzeichen (innen negativ), PM = unser FS_NORM-
+  // Index, PJ1 innen (aussen kein Wort). PF (1,2 bei T12) ist der
+  // Schneidenradius aus der Werkzeugtabelle der MASCHINE — die App
+  // schreibt ihn nicht (DV 610 S. 3-45: "nur informativ"). Der P-Block
+  // steht wie bei der 1000er ueblich OHNE Leerzeichen hinter "G91 K0".
+  // Form F (G78) ist HERGELEITET [Daniels "go" 11.09. spaet]: derselbe
+  // Satz mit G78 und K0 (kein Z-Aufmass; t2 setzt die Steuerung ueber
+  // PM nach DIN 509) — Maskensatz ziehen (Probenzettel 251/252), bevor
+  // er gefahren wird. Lage "Schulter rechts" hat kein Foto-Vorbild und
+  // faellt an der 1000er auf Einzelsaetze zurueck.
+  // ===================================================================
+  const mtckFs = MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B';
+  if(mtckFs && !gcodeAus && spW){
+    warnings.push('Freistich-Zyklussatz der 1000er: die Lage "Schulter rechts" (PJ'+pjW+') hat in den Maskenproben P104/P105 kein Vorbild — Ausgabe erfolgt als G-Einzelsaetze.');
+    gcodeAus=true;
+  }
+  if(mtckFs && !gcodeAus){
+    if(formF) warnings.push('Freistich Form F (G78) der 1000er ist HERGELEITET aus dem Form-E-Satz (P104/P105) — plausibel, an der Maschine ungeprueft: Maskensatz ziehen (Probenzettel 251/252) und mit der App-Ausgabe vergleichen, bevor er gefahren wird.');
+    else warnings.push('Freistich Form E (G79) der 1000er: Realform aus den Maskenfotos P104/P105 (11.09.2026), Datei noch nicht gezogen — vor dem ersten Lauf Prog. Pruefen und Einzelsatz.');
+  }
   if(pjW!==0)
     warnings.push('Freistich: Lage PJ'+pjW+' — Bahn als Spiegelung der Standardbahn gerechnet, an der Maschine unverifiziert; ersten Lauf im Einzelsatz fahren.');
   if(innW && t && t.art!=='innen')
@@ -25105,7 +25210,19 @@ function genFreistich(p, N, bump, lines, warnings){
   lines.push(`${N()} (M-BEFEHL) ${kuehlWort(p)}`); bump();
   lines.push(`${N()} (VORSCHUB) G95 F${fmt(p.fr)}`); bump();
   lines.push(`${N()} (GERADE  ) G94 G00 G90 X${fmt(p.x0+4)} Z${fmt(p.z0+4)}`); bump();
-  if(!gcodeAus){
+  if(!gcodeAus && mtckFs){
+    // Grund = Welle minus 2t (aussen) bzw. Bohrung plus 2t (innen: der
+    // Grund liegt in der Wand). V roh wie getippt (innen der kleinere
+    // Absatz-⌀: P105 hatte V 26 bei Bohrung 29,2 -> PH13).
+    const tFs=nrm.t;
+    const grundFs = innW ? (+p.x0)+2*tFs : (+p.x0)-2*tFs;
+    const vFs = (+p.v>0) ? +p.v : (innW ? Math.max(0.5,(+p.x0)-10) : (+p.x0)+10);
+    const pblockFs=[ 'PH'+fmt(vFs/2), (innW?'PJ1':null), 'PK'+fmt(innW? -tFs : tFs), 'PM'+p.pm, 'P227:90' ].filter(Boolean).join('');
+    lines.push(formF
+      ? '(HERGELEITET aus dem Form-E-Satz P104/P105: G78 mit G91 K0 - Maskensatz ziehen vor dem ersten Lauf)'
+      : '(1000er-REALFORM 11.09.2026 aus Maskenfotos P104/P105: X = Freistichgrund, I = Welle, PH = V/2, PK = Tiefe mit Vorzeichen)');
+    lines.push(`${N()} (FREISTI ) ${formF?'G78':'G79'} G90 X${fmt(grundFs)} Z${fmt(p.z0)} I${fmt(p.x0)} G91 K0 ${pblockFs}`); bump();
+  } else if(!gcodeAus){
     if(formF){
       lines.push(`${N()} (FREISTI ) G78 G90 X${fmt(p.x0)} Z${fmt(p.z0)} I${fmt(p.i||0)} K${fmt(p.k||0)} PJ${p.pj||0} PM${p.pm}`); bump();
     } else {
@@ -25201,10 +25318,21 @@ function genFreistich76(p, N, bump, lines, warnings){
   const n76=D76_NORM[p.p76];
   const pmIdx=D76_PM[p.p76];
   let ausg=p.ausg||'zyklus';
-  if(ausg==='zyklus' && MASCHINENPROFIL.id!=='MONFORTS_1500_EUROTURN'){
-    warnings.push('Freistich DIN 76: G73-Satzformat der 1000er unbelegt (sie nutzt PA/PB-Adressen) — es werden G-Einzelsaetze ausgegeben.');
+  // 1000er-REALFORM aus Daniels Maskenfotos 11.09.2026 (P102 aussen, P103
+  // innen; Dateien O102/O103 noch in der Steuerung):
+  //   P102: G73 G90 X30 Z-40 G91 I0 K0 PG0.5PH17.5PI0.2PK30PM14P227:90P240:1P241:1
+  //   P103: ... PK30PM14PN1P227:90P240:1P241:1
+  // Die DV-610-Tabelle S. 3-45 gilt Wort fuer Wort: PG D, PH V als
+  // RADIUS (35/2), PI U, PK alpha, PM Steigungsindex, PN1 = X0 ist der
+  // Kern-/Bohrungsdurchmesser (innen), P227:90 = V absolut. Kein PJ,
+  // kein F, kein PF. Lage "Schulter rechts" ohne Vorbild -> Einzelsaetze.
+  const mtck76 = MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B';
+  if(ausg==='zyklus' && mtck76 && ((+p.pj||0)===2 || (+p.pj||0)===3)){
+    warnings.push('Freistich DIN 76 (G73) der 1000er: die Lage "Schulter rechts" hat in den Maskenproben P102/P103 kein Vorbild — Ausgabe erfolgt als G-Einzelsaetze.');
     ausg='gcode';
   }
+  if(ausg==='zyklus' && mtck76)
+    warnings.push('Freistich DIN 76 (G73) der 1000er: Realform aus den Maskenfotos P102/P103 (11.09.2026), Datei noch nicht gezogen — vor dem ersten Lauf Prog. Pruefen und Einzelsatz.');
   if(ausg==='gcode' && !n76){
     warnings.push('Freistich DIN 76: fuer Steigung '+fmt(p.p76)+' liegt keine Normtabelle in der App — nur Zyklusausgabe moeglich.');
     return;
@@ -25236,9 +25364,18 @@ function genFreistich76(p, N, bump, lines, warnings){
     // PI0.5 PJ0 PK60 PM19 P227:91 P240:1 P241:1. PH = Planzug
     // inkremental; die P-Parameter der X-Achse sind RADIUS-Werte
     // (S. 3-46) — PH rechnet deshalb (V-X0)/2.
+    if(mtck76){
+      // Realform 1000er (s. o.): PH = V/2 ABSOLUT (P227:90), P-Block ohne
+      // Leerzeichen hinter "G91 I0 K0", PN1 nur innen, keine Lagewahl PJ.
+      const vFs76 = (+p.v>0) ? +p.v : (innW ? Math.max(0.5,(+p.x0)-10) : (+p.x0)+10);
+      const pblock76=[ 'PG'+fmt(p.d76||2), 'PH'+fmt(vFs76/2), 'PI'+fmt(p.u76||0), 'PK'+fmt(p.al76||60), 'PM'+(pmIdx||14), (innW?'PN1':null), 'P227:90', 'P240:1', 'P241:1' ].filter(Boolean).join('');
+      lines.push('(1000er-REALFORM 11.09.2026 aus Maskenfotos P102/P103: PH = V/2 absolut, PN1 innen, kein PJ)');
+      lines.push(`${N()} (FREISTI ) G73 G90 X${fmt(p.x0)} Z${fmt(p.z0)} G91 I0 K0 ${pblock76}`); bump();
+    } else {
     const ph=Math.max(0, ((+p.v||p.x0+10)-p.x0)/2);
     lines.push(`${N()} (FREISTI ) G73 G90 X${fmt(p.x0)} Z${fmt(p.z0)} G91 PG${fmt(p.d76||2)} PH${fmt(ph)} PI${fmt(p.u76||0)} PJ${p.pj||0} PK${fmt(p.al76||60)} PM${pmIdx||14} P227:91 P240:1 P241:1`); bump();
     lines.push('(ANNAHME zu pruefen: PH-Skalierung radial - erster Lauf im Einzelsatz)');
+    }
   }
   // --- Einzelsaetze/SIM: identische Bahn fuer beide — gcodeAus
   // schreibt SAETZE, sonst laufen dieselben Zuege als (SIM:).
@@ -25428,14 +25565,16 @@ function genEinstechen71(p, N, bump, lines, warnings){
       : 'G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — die Stirnnut wird als G-Einzelsaetze ausgegeben (das fruehere PJ2 stand in keinem echten Satz der 1500er; die 1000er schreibt es seit dem 11.09.2026).');
     zyk=false;
   }
-  if(zyk && !mtck && p.lage==='innen'){
-    warnings.push('G71-Zyklussatz: nur die radiale Aussennut ist am Maschinensatz belegt (03.09.2026) — innen wird als G-Einzelsaetze ausgegeben (das fruehere PJ1 stand in keinem echten Satz der 1500er; die 1000er schreibt es seit dem 11.09.2026).');
-    zyk=false;
-  }
-  if(zyk && !mtck && ((+p.a1||0)>0 || (+p.a2||0)>0)){
-    warnings.push('G71-Zyklussatz: Flankenwinkel sind am Maschinensatz nicht belegt (im Belegsatz standen beide auf 0) — Ausgabe erfolgt als G-Einzelsaetze.');
-    zyk=false;
-  }
+  // 1500er-VARIANTEN HERGELEITET [Daniels "go" 11.09.2026 spaet]: innen
+  // (PJ1) und Flankenwinkel (PK/PL) stehen so in der DV 610 (S. 3-40/41)
+  // UND in der 1000er-Realform (P99999, O12345) — beide Quellen sagen
+  // dasselbe, im Belegsatz der 1500er vom 03.09. kamen sie nur nicht vor
+  // (Aussennut ohne Winkel). Die App schreibt sie nativ, mit Ansage;
+  // der Maskensatz (Probenzettel 351) entscheidet. Stirnnut und N>1
+  // bleiben Einzelsaetze: PZ (Bahnpunkt des ersten Stichs) ist fuer sie
+  // nicht ableitbar.
+  const herg71 = !mtck && (p.lage==='innen' || (+p.a1||0)>0 || (+p.a2||0)>0);
+  // (Warnung dazu erst hinter allen Rueckfall-Pruefungen, s. u.)
   if(zyk && (+p.n||1)>1){
     warnings.push('G71-Zyklussatz: bei mehreren Stichen (N>1) ist die PZ/Abstands-Kodierung unbelegt (der Belegsatz hatte N=1, PZ war dort der Bahnpunkt des ERSTEN Stichs) — Ausgabe erfolgt als G-Einzelsaetze.');
     zyk=false;
@@ -25451,6 +25590,8 @@ function genEinstechen71(p, N, bump, lines, warnings){
     zyk=false;
   }
   if(!zyk){ tmp.forEach(z=>lines.push(z)); return; }
+  if(herg71)
+    warnings.push('G71-Zyklussatz der 1500er: '+(p.lage==='innen'?'Lage innen (PJ1)':'Flankenwinkel (PK/PL)')+' ist HERGELEITET aus DV 610 und der 1000er-Realform — plausibel, an der 1500er ungeprueft: Maskensatz ziehen (Probenzettel 351) und mit der App-Ausgabe vergleichen, bevor er gefahren wird.');
   if(doFinish && Math.abs((+p.uz||0)-(+p.ux||0))>1e-9)
     warnings.push('G71: der Zyklus kennt nur EIN Schlichtaufmass U (PG'+fmt(p.ux||0)+', allseitig). UZ '+fmt(p.uz||0)+' wird im Zyklussatz nicht abgebildet.');
   if(doFinish && doRough && (Math.abs((+p.ff||0)-(+p.fr||0))>1e-9 || Math.abs((+p.sf||0)-(+p.sr||0))>1e-9))
@@ -25473,6 +25614,8 @@ function genEinstechen71(p, N, bump, lines, warnings){
   const worte=[
     'G71','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),
     'PE1','PG'+fmt(p.ux||0),
+    (p.lage==='innen'?'PJ1':null),
+    ((+p.a1||0)>0?'PK'+fmt(+p.a1):null), ((+p.a2||0)>0?'PL'+fmt(+p.a2):null),
     'PM'+fmt(p.b1),'PN'+fmt(tiefeMm)]
     .concat(eckM('PO','r1','f1')).concat(eckM('PP','r2','f2'))
     .concat(eckM('PQ','r3','f3')).concat(eckM('PR','r4','f4'))
@@ -25527,7 +25670,8 @@ function genEinstechen71(p, N, bump, lines, warnings){
     lines.push('(1000er-REALFORM 11.09.: Z linke Kante, PJ1 innen, PJ2 Stirn)');
   } else {
     lines.push('(REALFORM vom Maschinensatz 03.09.2026: P230=BS Meisselbreite aus der CAM-Werkzeugtabelle, PZ=Z0-BS erster Stich)');
-    lines.push('(ANNAHME: PE1 stand konstant im Belegsatz - Bedeutung offen. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
+    lines.push('(PE1 = Sicherheitsabstand Einstich aus Parameter 5203 = 1,0 mm lt. IBN 2004. Ersten Lauf gegen die G-Einzelsaetze fahren.)');
+    if(herg71) lines.push('(HERGELEITET: PJ1 innen / PK PL Flankenwinkel nach DV 610 und 1000er-Realform - Maskensatz ziehen vor dem ersten Lauf, Probenzettel 351)');
   }
   lines.push(`${N()} (EINSTICH) ${satzWorte.join(' ')}`); bump();
   lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
@@ -25980,9 +26124,15 @@ function genEinstechen(p, N, bump, lines, warnings){
       // Bohrungswand und nach GROESSEREM Durchmesser zugestellt.
       let dia=p.x0;
       const passes=[];
+      // ENDLOSSCHLEIFE [gefunden 11.09.2026 spaet beim Bau der hergeleiteten
+      // Formen]: mit D = 0 (Maskenfeld "0 = kein Spanbrecher") blieb dia
+      // stehen und die Leiter lief bis zum Speicherende — im Browser ein
+      // eingefrorener Tab. Der winkelfreie Zweig hat den Mindestschritt
+      // Math.max(0.2, p.d) seit jeher; hier fehlte er.
+      const dSchritt=Math.max(0.2, +p.d||0);
       while(zuTief(dia,finishDia)){
         passes.push(innen ? Math.min(dia,finishDia) : Math.max(dia,finishDia));
-        dia -= sIn*p.d;
+        dia -= sIn*dSchritt;
       }
       if(passes.length===0 || zuTief(passes[passes.length-1],finishDia)) passes.push(finishDia);
       passes.forEach(dv=>{
@@ -26418,7 +26568,7 @@ function genGewindePlan(p, N, bump, lines, warnings){
   }
   let zyklusModus = (p.ausg==='zyklus');
   if(zyklusModus && MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'){
-    warnings.push('G77-Zyklussatz am 1000er-Profil nicht erzeugbar (PA/PB-Adressen steuerungsberechnet) — Ausgabe erfolgt als G33-Einzelsaetze. ACHTUNG: G33 mit I-Steigung ist am 1000er-Handbuch nicht belegt.');
+    warnings.push('G77-Zyklussatz der 1000er: die Achswoerter des Plangewindes sind aus der G75-Realform nicht ableitbar (bewusst NICHT hergeleitet) — Ausgabe erfolgt als G33-Einzelsaetze, Maskensatz ziehen (Probenzettel 241). ACHTUNG: G33 mit I-Steigung ist am 1000er-Handbuch nicht belegt.');
     zyklusModus=false;
   }
   if(zyklusModus){
@@ -26563,10 +26713,16 @@ function genGewinde(p, N, bump, lines, warnings){
   // -> 15°).
   // =========================================================
   let zyklusModus = (p.ausg==='zyklus');
-  if(zyklusModus && kegel && MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'){
-    warnings.push('Kegelgewinde-Zyklus am 1000er-Profil (R&D 95.05) nicht belegt — Ausgabe erfolgt als G33-Einzelsaetze.');
-    zyklusModus=false;
-  }
+  // KEGELGEWINDE G76 der 1000er HERGELEITET [Daniels "go" 11.09.2026 spaet]:
+  // DV 594 Kap. 4.6.2 — "identisch mit dem Laengsgewinde, zur Bemassung
+  // des Kegels wurde der Parameter X1 hinzugefuegt (Gewindeschraege
+  // inkremental / Endpunkt absolut)". Im G75-Satz der 1000er steht hinter
+  // G91 "I0 K<Laenge>": das I0 ist damit die Gewindeschraege 0 (zylindrisch),
+  // nicht der Gangwinkel. Fuer den Kegel schreiben wir I = X1-X0 als
+  // DURCHMESSERDIFFERENZ (X ist die Durchmesserachse, P5105=1) — ob die
+  // Steuerung I im Radius liest, klaert Probe 231 des Probenzettels.
+  // (Die HERGELEITET-Warnung kommt unten im Satzzweig, damit sie nicht
+  // neben einer Rueckfall-Ansage steht — innen/mehrgaengig fallen weiter zurueck.)
   // 1000er-REALFORM 11.09.2026 kennt nur das AUSSENGEWINDE (PO positiv) und
   // den Gangwinkel Q im I-Wort (bei Q 0 nie geprueft): innen und mehrgaengig
   // fallen an der MTC-K mit Ansage auf G33-Einzelsaetze zurueck.
@@ -26632,7 +26788,8 @@ function genGewinde(p, N, bump, lines, warnings){
         'PZ'+fmt(p.dz1||0.3),
         (p.bearbeitung==='beide'?'P240:1':null)
       ].filter(Boolean).join('');
-      worte = ['F'+fmt(p.p),'G75','G90','X'+fmt(p.x0),'Z'+fmt(p.z0),'G91','I0','K'+fmt(threadLength), pblock];
+      worte = ['F'+fmt(p.p), kegel?'G76':'G75', 'G90','X'+fmt(p.x0),'Z'+fmt(p.z0),'G91','I'+fmt(kegel? (+p.x1)-(+p.x0) : 0),'K'+fmt(threadLength), pblock];
+      if(kegel) warnings.push('Kegelgewinde G76 der 1000er ist HERGELEITET aus der G75-Realform (I = X1-X0 als Gewindeschraege, DV 594 Kap. 4.6.2) — plausibel, an der Maschine ungeprueft: Maskensatz ziehen (Probenzettel 231) und mit der App-Ausgabe vergleichen, bevor er gefahren wird. Radius- oder Durchmessermass von I ist offen.');
     } else {
       // EuroTurn: Kurzadressen, Steigung im F-Wort, K=Z1 absolut,
       // KEIN Achs-I im zylindrischen Satz. BELEGT am 31.08.2026:
@@ -26664,7 +26821,8 @@ function genGewinde(p, N, bump, lines, warnings){
     }
     lines.push('(=== NATIVER '+(kegel?'G76-KEGELGEWINDEZYKLUS':'G75-LAENGSGEWINDEZYKLUS')+' - Schnittaufteilung macht die Steuerung ===)');
     lines.push(MASCHINENPROFIL.id==='MONFORTS_1000_MTC_K_6624B'
-      ? '(1000er-REALFORM 11.09.2026: F = Steigung, P-Buchstaben, PX = Flankenwinkel)'
+      ? (kegel ? '(HERGELEITET aus der G75-Realform der 1000er: G76 mit I = X1-X0 Gewindeschraege - Maskensatz ziehen vor dem ersten Lauf, Probenzettel 231)'
+               : '(1000er-REALFORM 11.09.2026: F = Steigung, P-Buchstaben, PX = Flankenwinkel)')
       : '(PO aussen negativ und Flanke I axial: DV 610-0C S. 3-55 belegt)');
     lines.push(`${N()} (GEWINDE ) ${worte.join(' ')}`); bump();
     lines.push('(--- SIM-EXPANSION: nur fuer die CAM-Simulation, Maschine ignoriert Kommentare ---)');
