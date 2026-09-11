@@ -1039,6 +1039,15 @@ body.artefakt .hsoftkeys{padding-right:48px;}
   .ppstat.ann{background:#fff3d9;color:#7a4a00;}
   .ppstat.aus{background:#e7e7e7;color:#666;}
   .ppz.fest{background:hsl(var(--ton), 40%, 97.5%);}
+  /* Merkmale in drei Gruppen [Daniel, 11.09.2026]: Gruppenkopf, Kopfzeile mit
+     den Zaehlern, und das Feld "Offen" in Warnfarbe — damit das Offene ins
+     Auge faellt und die Historie draussen bleibt. Dunkelregeln dabei (dncLog-
+     Lehre: Inline-Farben schlagen jede Klasse, deshalb nur Klassen). */
+  .ppgrp{padding:9px 12px 2px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:hsl(var(--ton), 55%, 30%);}
+  .ppz.ppkopf{background:hsl(var(--ton), 40%, 97.5%);}
+  .ppoffen{color:#8a5200;}
+  body.dunkel .ppgrp{color:hsl(var(--ton), 90%, 78%);}
+  body.dunkel .ppoffen{color:#ffb454;}
   .warn{font-size:11px;color:#7a4a00;background:#fff3d9;border-top:1px solid #e8c380;padding:6px 10px;line-height:1.4;}
   /* MELDUNGEN KLAPPBAR [Daniel, IMG_2631]: bei mehreren Warnungen schob die
      Liste den G-Code komplett aus dem Bild. Standard ist jetzt zugeklappt,
@@ -4724,69 +4733,44 @@ DV 594-0B: Bohrzyklus mit W Vorhalt (Kap. 4.6.6.1, Ablauf deckt sich Zeile f&uum
 Zeile mit dem Generator), Gewinde-U im Werkzeug-Offset (S. 132), fester
 1-mm-Wiederanfahrweg beim Tieflochbohren.</dd>
 <dt id="ba-ma-1000">Monforts 1000 MTC-K</dt>
-<dd>Belegt aus der KNC-Programmieranleitung (R&D 95.05): G74-Bohren mit P211 = W
-Vorlauf, P-Parameter immer als RADIUS-Werte, SC der Zyklen kommt dort aus einem
-MASCHINENparameter, nicht aus dem NC-Satz. P206 = Schlichtaufma&szlig; ist seit
-dem 03.09.2026 aus Daniels Novembersicherung der Maschine belegt (Parameter
-N5206, maximales Schlichtaufma&szlig;).
-<br><b>Einstechzyklus G71 der 1000er &mdash; seit 07.09.2026 belegt.</b> Daniel hat
-ihn an der Maschine &uuml;ber die ZYKLUS-Maske eingegeben (R1&ndash;R4 bewusst
-0,5/0,6/0,7/0,8, damit jede Ecke im Satz eindeutig ist) und das Programm per DNC
-gezogen. Der Satz: <code>G71 G90 X50 Z-50 G91 I0 K0 PF0.4 PG0.2 PM10 PN10 PO0.5
-PP0.6 PQ0.7 PR0.8 PW3.15 PX1 PY1 P230:3.15 P240:1 P241:1</code> &mdash; PM/PN =
-Breite/Tiefe, PO&ndash;PR = R1&ndash;R4 in unserer Z&auml;hlung, PG = U, BS steht
-DOPPELT (PW und P230), PY = N, P240/P241 = Schruppen/Schlichten. <b>Keine PA/PB im G71</b> &mdash; auch nicht mit Flankenwinkeln (09.09.2026,
-Maske D&nbsp;1 / &alpha;1&nbsp;10 / &alpha;2&nbsp;20, O12345): <code>PK/PL =
-&alpha;1/&alpha;2, P227 = t1, P228 = D</code>; <code>I0 K0</code> und <code>PF0.4</code>
-bleiben konstant, <code>PX1</code> bleibt auch beim Innenstich 1 (11.09.2026, P99999) &mdash; die Lage
-innen tr&auml;gt das Wort <code>PJ1</code>, au&szlig;en fehlt es. PA/PB geh&ouml;ren zum G72.
-<b>Seit dem 11.09.2026 abends schreibt die App den G71 der 1000er in dieser Realform</b>
-(au&szlig;en, innen und freie Stirnnut &mdash; PJ1 innen, PJ2 Stirn ohne PF0.4, Probe P101 &mdash; Flankenwinkel als PK/PL, D als P228; Z im Satz ist die LINKE
-Nutkante, wie die Marke im Maskenbild &mdash; Daniels Standard; bei der Stirnnut ist X der INNENRAND). Fasen an den Nutecken,
-die Stirnnut in der Bohrung und N&nbsp;&gt;&nbsp;1 fallen mit Ansage auf Einzels&auml;tze zur&uuml;ck (im Satz
-unbelegt). Die drei Maschinens&auml;tze sind die Pr&uuml;fvorlagen (Pr&uuml;fung 190); der
-115er-Satz kommt aus der App mit der Zeichenbremse ganz an (O126, 10.09.2026). Lauf am
-Teil offen. <b>G74 der 1000er:</b> die P-Nummern-Form (P210&ndash;P216) war dieselbe
-Annahme wie beim G75; die Realform aus der Zyklen-Maske (P77777 R&uuml;ckzug bis
-Startposition, P88888 um Betrag V) ist seit dem 11.09.2026 abends die Ausgabe:
-<code>PK1</code> nur bei Sp&auml;nebrechen, PL W, PM D, PN DF, PO Tiefe, PP U, PQ V,
-PR/PT Zeitbasis 95, PW90 PY1 PZ1 konstant, kein F im Satz. Hinter dem Zyklussatz
-schreibt die App ein explizites G90 &mdash; das G91 des Satzes bleibt sonst modal,
-Daniels eigene 1000er-Programme tun dasselbe. Lauf am Teil offen.
-<br><b>G72 der 1000er:</b> Die Maschine f&auml;hrt ihn (Bestandsprogramme, alle
-mit steuerungsberechneten PA/PB-Werten). Ob sie den Satz auch OHNE PA/PB
-annimmt, pr&uuml;ft die Datei MINI_G72 am n&auml;chsten Termin; bis dahin
-Einzels&auml;tze. <b>G73 (DIN 76) und G79 (Freistich Form E)</b> sind am 11.09.2026 aus der Zyklen-Maske gelesen (P102&ndash;P105, nur Fotos: PH als Radius, PN1 bzw. PJ1 f&uuml;r innen, P227:90 = V absolut, beim Form E ist X0 der Freistichgrund) &mdash; die App gibt beide an der 1000er weiter als Einzels&auml;tze aus, bis die Dateien gezogen und die Formen gebaut sind. G77 bleibt unbelegt.
-<br><b>Werkzeugnummern (10.09.2026):</b> die 1000er nimmt nur T1&ndash;T32 (T32
-angenommen, T33 &bdquo;Fehler 152&ldquo; bei Prog. Pr&uuml;fen), real hat sie 16 Pl&auml;tze.
-Ein Lagerwerkzeug mit h&ouml;herer Nummer (Testvorlagen: T33, T40, T41) bekommt in der
-Ampel und beim Senden eine Warnung &mdash; im Werkzeuglager auf einen Platz legen, dann
-ruft die NC den Platz. <b>Editor:</b> rund 62 Zeichen je Zeile, l&auml;ngere S&auml;tze
-scrollen; freier Programmspeicher am 10.09.2026: 33280 Bytes. <b>Erster Lauf eines
-App-Programms:</b> Kantenwelle O9016 mit NMAX 600 komplett gefahren, Spanbruch G04 F2
-unterbricht den Span wie vorgesehen. <b>Drehzahlvariation SSV am 11.09.2026 belegt</b>
-(SSV_1000_O9162, &empty;130 &uuml;ber dem NMAX-Grenz-Durchmesser): die Drehzahl pendelt
-fliegend, kein Vorschubverlust, kein Alarm &mdash; unter dem Grenz-Durchmesser h&auml;lt
-die Wache sie korrekt konstant auf NMAX. <b>G75-Zyklus der 1000er:</b> die native
-Form mit P-Nummern war eine Annahme aus der R&amp;D 95.05 und schnitt am 11.09.2026
-mit dem modalen Vorschub statt der Steigung. Die Realform kam aus der Zyklen-Maske
-der Maschine (Steigung im F-Wort vor dem G75, P-Buchstaben-Parameter, PX =
-Flankenwinkel) und ist seither die Ausgabe; Innengewinde und mehrg&auml;ngige
-Gewinde fallen an der 1000er mit Ansage auf G33-Einzels&auml;tze zur&uuml;ck.</dd>
+<dd><b>Stand 11.09.2026.</b> Die Chronik der Termine steht in den Protokollen
+<code>maschinentermin/ERGEBNISSE-*.md</code>; die Merkmale (Knopf in der G-Code-Ansicht)
+zeigen denselben Stand in drei Gruppen: best&auml;tigt, Satz belegt, noch zu testen.
+<br><b>Best&auml;tigt an der Maschine:</b> &Uuml;bertragung 9600/7/EVEN/2 mit RTS/CTS in beide
+Richtungen, auch per Web-Serial direkt aus der App (die Zeichenbremse von 3 ms bringt S&auml;tze
+bis 135 Zeichen ganz an); erster kompletter Programmlauf (Kantenwelle O9016); Spanbrechen
+G04 F2; NMAX-Wache (jede G96-Anwahl steht als G97 S&lt;NMAX&gt;, Alarm 007 bleibt aus);
+Drehzahlvariation SSV; M00-Messhalt; Vorschub je Konturelement; Bemerkung hinter dem
+Stoppbefehl; G33-Einzels&auml;tze ziehen die Steigung; Backen&uuml;berstand 65 mm gemessen.
+<br><b>Satz belegt, Lauf am Teil offen:</b> G75 L&auml;ngsgewinde, G74 Bohren und G71 Einstich
+(au&szlig;en, innen, Stirnnut) schreibt die App in der Realform der Steuerung, aus der
+Zyklen-Maske gezogen: Steigung im F-Wort vor dem G75, PO au&szlig;en positiv; PK1 nur bei
+Sp&auml;nebrechen; Z des Einstichs ist die LINKE Nutkante. Hinter jedem Zyklussatz steht ein
+explizites G90, weil das G91 des Satzes sonst modal bliebe. Die Testl&auml;ufe O9167 bis O9169
+stehen aus.
+<br><b>Noch zu testen:</b> G72 (die Maschine schreibt steuerungsberechnete PA/PB &mdash; Satz aus
+der Maske ziehen), G73 DIN 76 und Freistich Form E (gelesen, nicht gebaut), Form F, Gewinde
+Kegel und Plan, W ungleich D beim Bohren, N&nbsp;2 beim Einstich. Bis dahin Einzels&auml;tze.
+<br><b>Dateiregeln:</b> ASCII, CR LF, Kommentare bis 62 Zeichen ohne innere Klammer
+(Fehler 153), T nur bis 32 (Fehler 152, real 16 Pl&auml;tze &mdash; Lagerwerkzeuge im
+Werkzeuglager auf Pl&auml;tze legen, dann ruft die NC den Platz), Fortsetzungszeilen setzt
+die Steuerung nie zusammen; f&uuml;r DNC Precision Umbruch 45 und Opferzeile (Schalter im
+DNC-Block). Bedienung: Betriebsart Programme, Lade Alle (F8) = Einlesen, Speich Prog. (F7)
+= Ausgeben; Editor rund 62 Zeichen je Zeile; freier Programmspeicher am 10.09.2026: 33280
+Bytes.
+<br><b>Belegt aus der Maschine:</b> IBN-Sicherung 29.11.2025 (P9105=2 kurze T-Aufrufe,
+P5105=1 Durchmesser, P9170/P9220/P9230 Freigaben, N5206 maximales Schlichtaufma&szlig;),
+17 Bestandsprogramme als Klartext. Einstich-Bezugskante: Vorgabe links (Daniels Standard).</dd>
 <dt id="ba-ma-offen">Ehrlich offen</dt>
-<dd>Die Programmieranleitung DV 610-0C ist seit dem 31.08.2026 LESBAR (die
-Scan-Seiten werden im Browser gerendert). Damit belegt: P229 = SV Vorhalt vor dem
-Bezugspunkt und P230 = R R&uuml;ckzugsebene relativ (S.&nbsp;3-68), PL = W Vorhalt
-beim G74 (S.&nbsp;3-47), PG = U Schlichtaufma&szlig; beim G75 (S.&nbsp;3-54), das
-R-Wort beim Kreisbogen (S.&nbsp;3-10). Offen bleiben nur noch MASCHINENDATEN, die
-kein Handbuch beantwortet, kamen am 31.08.2026 aus Daniels DATENDISKETTE der
-1500er (IBN.PAR, Sicherung 22.01.2004): X-Durchmesserachse (N4036=0, damit I im
-&empty;), Werkzeugkonzept 2, alle Zyklusfreigaben, Eilgang 5000.
-<b>Maschinentermin 03.09.2026:</b> Steuerungssoftware real 7.210i (Diskette:
-7.210H); die Zyklens&auml;tze G72 (innen und mit Winkeln) und G71 sind an per
-DNC gezogenen ECHTEN S&auml;tzen der Maschine belegt, Wiedereinstieg, SSV und
-Spanbrechen im Fahrtest gr&uuml;n, P4037/P4038 = Durchmesser best&auml;tigt.
-Die Restliste liegt in MASCHINENTERMIN.md.</dd>
+<dd>Offen ist, was in den Merkmalen je Maschine unter &bdquo;noch zu testen&ldquo; und in den
+Offen-Zeilen steht. <b>1000er:</b> die Testl&auml;ufe O9167&ndash;O9169 (kl&auml;ren E beim
+Gewinde, die kurze Zentrierform und die Nutkante), die Programme O102&ndash;O105 (G73, Form E)
+aus der Steuerung ziehen, die fehlenden Grundformen Form F, G72 und Gewinde Kegel/Plan aus der
+Zyklen-Maske, PF/PX1/PW90/PY1/PZ1 ungedeutet, Abfahrt X-zuerst au&szlig;en. <b>1500er:</b> die
+G74/G75/G73/G77-S&auml;tze sind nie gefahren, G71/G72 Lauf am Teil, T-Grenze (MINI_T33),
+Backen&uuml;berstand messen. <b>Beide:</b> Reitstock und Backen-Stufentiefen,
+Standard-Werkzeugtabelle (Pl&auml;tze 1&ndash;5 und 11&ndash;16, alle linke Schneide). Die
+vollst&auml;ndige Liste steht in MASCHINENTERMIN.md.</dd>
 </dl>
 
 <h2 id="ba-k11">11 &nbsp;Werkzeugverwaltung</h2>
@@ -20968,7 +20952,8 @@ const MASCHINEN_PROFILE = {
     // steht HEUTE auf 9600/7/N/1 mit Xon/Xoff — die IBN-Diskette von
     // 2004 (4800/8/N/2, RTS/CTS) ist ueberholt; mit ihren Werten kam
     // Kauderwelsch mit Byteverlust (die verlorenen 2025er-Abzuege).
-    uebertragung:'9600 Baud, 7 Datenbits, keine Paritaet, 1 Stopbit, Xon/Xoff — Senden und Empfangen gleich (am Geraet bewiesen 03.09.2026; die IBN-2004-Werte sind ueberholt). Zeilenlaenge: bis ~40 Zeichen je Satz nachweislich angekommen; der einzige laengere Zyklussatz (G71 in T8, 137 Zeichen) wurde nie nachgesehen — die App meldet Saetze ueber 100 Zeichen beim Sichern als unbelegt, bis der Roundtrip gefahren ist (Nachtrag 07.09.2026)',
+    uebertragung:'9600 Baud, 7 Datenbits, keine Paritaet, 1 Stopbit, Xon/Xoff — Senden und Empfangen gleich, am Geraet bewiesen 03.09.2026 (die IBN-2004-Werte 4800/8N2 sind ueberholt); Saetze bis ~40 Zeichen nachweislich angekommen',
+    uebertragungOffen:'Roundtrip eines langen Zyklussatzes (G71 mit 137 Zeichen) nie nachgesehen; Kaestchen seriell an der Maschine',
     // Freigaben aus IBN.PAR (22.01.2004): N9170=1 Bohrzyklus,
     // N9220/N9230=1 Gewindezyklus samt Schnittaufteilung, N9080=1
     // mehrgaengig, N9150/9160/9180 Einstich/Freistich/Abspanen frei.
@@ -20993,7 +20978,9 @@ const MASCHINEN_PROFILE = {
              g73:'documented_for_control', g77:'documented_for_control' },
     // (uebertragung steht weiter oben im Profil — am Geraet bewiesen
     // 03.09.2026; hier nur der Fahrtest-Ertrag des Termins.)
-    fahrtests:'Maschinentermin 03.09.2026: Wiedereinstieg (Satzvorlauf, G96-Drehzahl exakt), Drehzahlvariation SSV und Spanbrechen (G04) im FAHRTEST gruen; Steuerungssoftware real 7.210i',
+    fahrtests:'gefahren 03.09.2026: Wiedereinstieg per Satzvorlauf (G96-Drehzahl exakt, CRC aktiv), Drehzahlvariation SSV fliegend, Spanbrechen G04 F2; Uebertragung in beide Richtungen',
+    fahrtestsOffen:'G71/G72/G74/G75-Zyklussaetze am Teil; T61_1500_KOMPAKT (O9161); MINI_T33 (T-Grenze)',
+    termine:'03.09.2026 — Uebertragung 9600/7/N/1 bewiesen, 42 Bestandsprogramme gesichert, G72 innen und mit Winkeln sowie G71 aus der Zyklen-Maske gezogen, Futter gemessen (Bauhoehe 95, Backen 32)',
     statusZeilen:[
       '(PROFIL: Monforts 1500 - EuroTurn | Zyklussyntax aus DV 610-0C belegt,)',
       '(  Maschinenkonfiguration aus Daniels IBN-Sicherung - Stand 22.01.2004.)',
@@ -21020,9 +21007,9 @@ const MASCHINEN_PROFILE = {
     // ZYKLUSSAETZE AN DER MASCHINE [Termin 10.09.2026]: Stufenbolzen O9001
     // aus der App eingespielt, G74 (130 Zeichen) und G75 (135) bestehen
     // 'Prog. Pruefen' - Lauf am Teil offen.
-    g74Beleg:'Prog. Pruefen am 10.09.2026 galt der alten P-Nummern-Form; am 11.09.2026 Realform aus der Zyklen-Maske per DNC belegt (P77777/P88888: PK1 nur Spaenebrechen, PL W, PM D, PN DF, PO Tiefe, PP U, PQ V, PR/PT Zeitbasis) — Generator seit 11.09. abends darauf umgestellt, Lauf am Teil offen',
-    g75Beleg:'Lauf am Teil 11.09.2026: die P-Nummern-Form schnitt mit dem modalen F statt der Steigung - WIDERLEGT. Realform aus der Zyklen-Maske der Maschine per DNC belegt (F-Wort = Steigung, P-Buchstaben, PX = Flankenwinkel); Generator seit 11.09. abends darauf umgestellt, Lauf der Realform am Teil offen',
-    fahrtests:'Maschinentermine 09.-11.09.2026: Web-Serial beide Richtungen (App-Ausgabe kommt byteidentisch zurueck), Zeichenbremse bringt die langen G74/G75-Zyklussaetze ganz an, Kantenwelle O9016 komplett gefahren; Spanbrechen G04 F2 und Drehzahlvariation SSV (11.09.2026, O9162 mit DM130: die Drehzahl pendelt fliegend durch) im FAHRTEST gruen; die NMAX-Wache haelt jede G96-Anwahl auf G97 S<NMAX>, Alarm 007 bleibt aus.',
+    fahrtests:'gefahren: Kantenwelle O9016 komplett (NMAX 600), Spanbrechen G04 F2, NMAX-Wache haelt die G96-Anwahl (Alarm 007 bleibt aus), SSV auf DM130 pendelt fliegend, M00-Messhalt haelt, Vorschub je Element wirkt, Bemerkung hinter dem Stopp, G33-Gewinde zieht in der Steigung',
+    fahrtestsOffen:'Laeufe der Realformen O9167 (G75), O9168 (G74), O9169 (G71)',
+    termine:'07.09.2026 — Uebertragung 9600/7/E/2 RTS/CTS bewiesen, 17 Bestandsprogramme gesichert, G71-Satz aus der Maske · 09.09.2026 — Web-Serial beide Richtungen, Fortsetzungszeilen tot, G71 mit Winkeln und D · 10.09.2026 — Zeichenbremse, M30 kommt an, erster kompletter Lauf, Alarm 007 = Anwahlfalle · 11.09.2026 — SSV, M00, Realformen G75/G74/G71, G73/G79 gelesen, Backenueberstand 65',
     // P5105=1: X = Durchmesserachse -> der ABSOLUTE X-Mittelpunkt I wird
     // unter G90 ebenfalls im DURCHMESSERMASS ausgegeben (IBN-belegt).
     ikDurchmesser:true, ikStatus:'confirmed_on_machine', ikBeleg:'P5105=1, IBN',
@@ -21033,7 +21020,8 @@ const MASCHINEN_PROFILE = {
     // traf. Sie bremst per RTS/CTS und schickt KEIN XOFF; ohne
     // Hardware-Handshake am Laptop kommt "194 Empfangsspeicher
     // ueberlauf". Dazu vier Dateiregeln, alle gemessen (s. BA).
-    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS (Hardware-Handshake), KEIN Xon/Xoff — beide Richtungen, am Geraet bewiesen 07.09.2026 (Parameter 2000-2010 per Foto; die fruehere Angabe "empfangen 2400" war eine Fehleinstellung). Beim Senden: DTR/DSR aus, Line delay 150 ms. WEB-SERIAL AUS DER APP am Geraet bewiesen 09.09.2026 (Kantenwelle, 126 Zeilen hin und zurueck byteidentisch, Prog. Pruefen ohne Meldung). Dateiregeln: Opferzeile hinter M30 (bei DNC Precision geht die letzte Zeile verloren, aus der App kommt sie an), Zeilen ueber ~45 Zeichen reissen im Empfangspuffer, und Fortsetzungszeilen setzt die Steuerung NIE zusammen (07.09. an der Wortgrenze, 09.09.2026 mitten im Wort mit Ziffer: "152 Fehlerhafte Zahlenangabe") - lange Saetze sendet die App deshalb zeichenweise gebremst (unverifiziert, Test naechster Termin), Programmspeicher ~50 kB — die App wendet sie beim Sichern und Senden an; Opferzeile im DNC-Block abschaltbar, Zeichen- und Zeilenpause dort einstellbar, Textdateien lassen sich roh senden (fuer den Termin 10.09.2026 vorbereitet) | 10.09.2026: Web-Serial mit Zeichenbremse 3 ms bringt Saetze von 115/130/135 Zeichen ganz an (G71 O126, G74/G75 im Stufenbolzen O9001 bestehen Prog. Pruefen), M30 kommt als letzte Zeile an - Opferzeile nur noch fuer DNC Precision (Schalter im DNC-Block), Kommentare bis 62 Zeichen (Editorbreite), innere Klammern in Kommentaren entschaerft (Fehler 153), T-Nummern nur bis 32 (T33 = Fehler 152); erstes App-Programm (Kantenwelle O9016 mit NMAX 600) komplett gefahren, Spanbruch G04 F2 wirkt',
+    uebertragung:'9600 Baud, 7 Datenbits, EVEN, 2 Stopbits, RTS/CTS, kein Xon/Xoff — beide Richtungen am Geraet bewiesen 07.09.2026; Web-Serial aus der App in beide Richtungen bewiesen 09.09.2026; Zeichenbremse 3 ms bringt Saetze bis 135 Zeichen ganz an (10.09.2026). Dateiregeln: ASCII, CR LF, Kommentare bis 62 Zeichen ohne innere Klammer, T nur bis 32, Fortsetzungszeilen nie; DNC Precision braucht Umbruch 45 und Opferzeile (Schalter im DNC-Block)',
+    uebertragungOffen:'Empfangs-Log bei Pausen ueber 3 s (Stille-Grenze); Kaestchen seriell an der Maschine',
     zyklen:{ g74:'confirmed_on_machine' /* P9170=1 */,
              g75:'confirmed_on_machine' /* P9220=1, P9230=1 */,
              g81ff:'disabled' /* in R&D 95.05 nicht dokumentiert -> gesperrt */,
@@ -21106,22 +21094,28 @@ document.addEventListener('DOMContentLoaded', ()=>{
 // hingeschriebener Text ueber die Maschine. Aendert jemand einen
 // Profilwert, steht er hier automatisch richtig; Pruefung 138 belegt
 // das ueber den Profilwechsel (T-Beispiel und Status kippen mit).
+// STATUS-STUFEN DER MERKMALE. Seit dem 11.09.2026 abends traegt jede Stufe
+// ihre GRUPPE fuers Panel — Daniels Ansage: "da steht so viel altes Zeug
+// drin ... mir nur zeigen, was noch getestet werden muss, was offen ist
+// und was bestaetigt ist". Die Texte sind ohne Datum: die Chronik steht
+// in der Merkmalzeile "Maschinentermine" und in den Protokollen.
+//   ok    = an der Maschine gefahren oder aus IBN/Originalprogrammen belegt
+//   satz  = Syntax belegt (Maschinensatz oder Handbuch), Lauf am Teil offen
+//   offen = Annahme oder gesperrt — hier steht, was noch zu testen ist
 const PP_STATUS={
-  confirmed_on_machine:{txt:'an der Maschine belegt (IBN)', cls:'ibn'},
-  // MASCHINENTERMIN 03.09.2026 [Daniels Nachfrage 05.09.]: die
-  // Zyklussaetze G72/G71 sind an per DNC gezogenen ECHTEN Saetzen
-  // der 7.210i belegt — staerker als "Handbuch", aber ehrlich
-  // schwaecher als IBN/gefahren: getippt und gezogen wurde die
-  // SYNTAX, ein Lauf am Teil steht noch aus.
-  machine_syntax:{txt:'Maschinensatz belegt (Termin 03.09.2026) — Lauf am Teil offen', cls:'ibn'},
-  // MASCHINENTERMIN 07.09.2026: der G71 der 1000er ist ebenso an einem
-  // per DNC gezogenen Maschinensatz belegt — die App gibt ihn trotzdem
-  // noch als Einzelsaetze aus (DNC-Zeilenlaenge, Generatorformat).
-  machine_syntax_1000:{txt:'Maschinensatz belegt (Termin 07.09.2026) — Ausgabe noch Einzelsaetze', cls:'ibn'},
-  documented_for_control:{txt:'am Handbuch belegt', cls:'doc'},
-  unknown_for_target_machine:{txt:'ANNAHME — nicht belegt', cls:'ann'},
-  disabled:{txt:'gesperrt', cls:'aus'},
+  confirmed_on_machine:{txt:'an der Maschine bestaetigt', cls:'ibn', grp:'ok'},
+  machine_syntax:{txt:'Maschinensatz belegt — Lauf am Teil offen', cls:'ibn', grp:'satz'},
+  machine_syntax_1000:{txt:'Maschinensatz belegt — Lauf am Teil offen', cls:'ibn', grp:'satz'},
+  documented_for_control:{txt:'am Handbuch belegt — nie gefahren', cls:'doc', grp:'satz'},
+  unknown_for_target_machine:{txt:'Annahme — nicht belegt', cls:'ann', grp:'offen'},
+  disabled:{txt:'gesperrt — Einzelsaetze', cls:'aus', grp:'offen'},
 };
+const PP_GRUPPEN=[
+  {k:'ok',    titel:'Bestaetigt an der Maschine'},
+  {k:'satz',  titel:'Satz belegt, Lauf am Teil offen'},
+  {k:'offen', titel:'Noch zu testen, Annahme oder gesperrt'},
+  {k:'fest',  titel:'Programmkopf und feste Regeln'},
+];
 // BETTKOMPENSATIONS-MASKE [Daniel, 03.09.2026]: je Maschine eine
 // Tabelle "Abstand vor der Backenfront -> gemessene ⌀-Abweichung
 // des Referenzschnitts". Gespeichert im Browserspeicher-Slot
@@ -21168,48 +21162,61 @@ function bettPanelMalen(){
   });
 }
 function ppMerkmale(){
-  const pr=MASCHINENPROFIL;
-  const zyk=k=>pr.zyklen[k]==='disabled'? {w:'gesperrt — es entstehen G-Einzelsaetze', s:'disabled'}
-    : {w:'freigegeben', s:pr.zyklen[k]};
+  // MERKMALE = STAND, KEINE HISTORIE [Daniels Ansage 11.09.2026 abends]. Jede
+  // Zeile: Status (Gruppe), EIN Satz Stand (w) und, wo etwas fehlt, das Feld
+  // `offen`. Die Chronik der Termine steht in der Zeile "Maschinentermine"
+  // (daran haelt Pruefung 138 die Terminwache: jedes Protokoll-Datum muss in
+  // den Merkmalen stehen) und in maschinentermin/ERGEBNISSE-*.md. Pruefung
+  // 138 haelt die Laenge: kein w ueber 450 Zeichen, kein offen ueber 250.
+  // Die 1500er-G74/G75 stehen bewusst NICHT als bestaetigt: die IBN belegt
+  // die Freigabe, gefahren wurde ihr Satz nie — das ist der Unterschied,
+  // den Daniel im Panel sehen will.
+  const pr=MASCHINENPROFIL, e=pr.id==='MONFORTS_1500_EUROTURN';
   const M=[];
   M.push({t:'Werkzeugaufruf', s:pr.tStatus,
     w:(pr.tLang? '6-stellig SSWWVV':'kurz, Abwahl T00')+' — Beispiel T1 → '+pr.tSatz(1)});
   M.push({t:'Bogenmitte I/K', s:pr.ikStatus,
     w:pr.ikDurchmesser? 'I/K absolut; X-Mittelpunkt I im DURCHMESSERMASS ('+(pr.ikBeleg||'IBN')+')'
       : 'R-Wort bevorzugt; im I/K-Rueckfall gilt das RADIUSMASS'});
-  // g74Beleg/g75Beleg [Termin 10.09.2026]: Satzsyntax an der Maschine
-  // geprueft (Prog. Pruefen), Lauf am Teil offen - als Text an der Zeile.
-  const g74=zyk('g74'); M.push({t:'Bohrzyklus G74', w:g74.w+' — Vorlauf W statt SC'+(pr.g74Beleg? ' — '+pr.g74Beleg : ''), s:g74.s});
-  const g75=zyk('g75'); M.push({t:'Gewindezyklus G75', w:g75.w+' — G97 zwingend'+(pr.g75Beleg? ' — '+pr.g75Beleg : ''), s:g75.s});
-  // G81ff: an BEIDEN Maschinen gesperrt, aber aus VERSCHIEDENEN
-  // Gruenden — Daniels Befund 01.09.2026 ("zweimal derselbe Eintrag"):
-  // vorher stand zweimal derselbe Text, der Unterschied gehoert benannt.
-  M.push({t:'Bohrzyklen G81 ff', s:pr.zyklen.g81ff,
-    w: pr.id==='MONFORTS_1500_EUROTURN'
-      ? 'gesperrt — im Handbuch dokumentiert, aber Maschinenoption A019G Bohren nach DIN lt. IBN NICHT freigeschaltet (N9177=0); Ausgabe als G74'
-      : 'gesperrt — in R&D 95.05 nicht dokumentiert; Ausgabe als G74'});
-  // Neue native Zyklusoptionen [01.09.2026] mit ihren IBN-Freigabebits.
-  if(pr.id==='MONFORTS_1500_EUROTURN'){
-    M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
-      w:'per Maske waehlbar (radiale Aussennut) — Option A020/A020B lt. IBN frei (N9150/9152=1). Syntax seit dem 03.09.2026 an Daniels per DNC gezogenem MASCHINENSATZ belegt (Realform der 7.210i, weicht vom Handbuchschema ab); axial/innen/mehrfach fallen mit Ansage auf Einzelsaetze zurueck. Lauf am Teil steht aus.'});
-    M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
-      w:'per Maske waehlbar, AUSSEN UND INNEN, auch mit Schenkelwinkeln (P236/P237) — Option A018 lt. IBN frei (N9180=1). Syntax seit dem 03.09.2026 an Daniels Maschinensaetzen belegt (innen + 75/70-Winkelfall, "1500 Zyklen.TAP"); Eckuebergang K2, Rundungskanten und plan fallen mit Ansage auf Einzelsaetze zurueck. Sicherheitsabstand des Zyklus kommt aus Maschinenparameter 5205, nicht aus dem Programmkopf-SC (S. 3-44). Lauf am Teil steht aus.'});
-    M.push({t:'Freistichzyklen G78/G79/G73', s:pr.zyklen.g73,
-      w:'Option A017 lt. IBN frei (N9160=1) — G78/G79 DIN 509, G73 DIN 76 per Maske, Syntax S. 3-45/46; Abnahme ausstehend'});
-    M.push({t:'Plangewinde G77', s:pr.zyklen.g77,
-      w:'per Maske (Gewinde-Form plan) — kein eigenes IBN-Bit, Freigabe unter A016 Gewindezyklus angenommen; Syntax S. 3-58/59'});
+  if(e){
+    M.push({t:'Bohrzyklus G74', s:'documented_for_control',
+      w:'freigegeben (IBN N9170) — Satz nach DV 610 S. 3-47, Vorlauf W statt SC',
+      offen:'Satz nie gefahren (weder Prog. Pruefen noch Lauf)'});
+    M.push({t:'Gewindezyklus G75', s:'documented_for_control',
+      w:'freigegeben (IBN N9220/9230) — Satz nach DV 610 S. 3-54: PO aussen negativ, PT aus dem Programmkopf-SC, G97 zwingend',
+      offen:'Satz nie gefahren; Stufenbolzen O9001 als Testteil'});
+    M.push({t:'Bohrzyklen G81 ff', s:'disabled',
+      w:'gesperrt — im Handbuch dokumentiert, aber Option A019G lt. IBN nicht freigeschaltet (N9177=0); Ausgabe als G74'});
+    M.push({t:'Einstechzyklus G71', s:'machine_syntax',
+      w:'freigegeben (IBN N9150) — Realform der 7.210i belegt (radiale Aussennut, per DNC gezogen): PG = U, PY = N, PZ = Z0-BS, P230 = BS; axial, innen, N>1 und Flankenwinkel fallen auf Einzelsaetze zurueck',
+      offen:'Lauf am Teil (T8_G71_EINSTICH); PE1 ungedeutet'});
+    M.push({t:'Abspanzyklus G72 (Ecke)', s:'machine_syntax',
+      w:'freigegeben (IBN N9180) — Realform belegt, AUSSEN UND INNEN, mit Schenkelwinkeln (P236/P237); Eckuebergang K2, Rundungskanten und plan fallen auf Einzelsaetze zurueck; der SC des Zyklus kommt aus Parameter 5205, nicht aus dem Programmkopf',
+      offen:'Lauf am Teil; PE1 und P235:6 ungedeutet'});
+    M.push({t:'Freistichzyklen G78/G79/G73', s:'documented_for_control',
+      w:'freigegeben (IBN N9160) — Saetze nach DV 610 S. 3-45/46 (Form E/F, DIN 76)',
+      offen:'nie gefahren'});
+    M.push({t:'Plangewinde G77', s:'documented_for_control',
+      w:'Freigabe unter A016 angenommen — Satz nach DV 610 S. 3-58/59',
+      offen:'nie gefahren'});
   } else {
-    // MASCHINENTERMIN 07.09.2026: die Sammelzeile "G71/G72/G73/G77 nicht
-    // erzeugbar, PA/PB" war danach in zwei Punkten falsch — der G71 hat
-    // keine PA/PB und ist komplett belegt; der G72 laeuft an der
-    // Maschine (Bestandsprogramme), offen ist nur, ob sie ihn OHNE
-    // PA/PB annimmt. Deshalb getrennte Zeilen mit ehrlichem Stand.
-    M.push({t:'Einstechzyklus G71', s:pr.zyklen.g71,
-      w:'Realform an drei Maschinensaetzen belegt (07.09.2026 O123 ohne Winkel, 09.09. O12345 mit alpha1 10 / alpha2 20 / D 1 / t1 3, 11.09.2026 P99999 INNEN): X/Z Bezugspunkt (Z = LINKE Nutkante), PM/PN = B/T, PO-PR = R1-R4, PG = U, PK/PL = alpha1/alpha2, P227 = t1, P228 = D, PW und P230 = BS, PY = N, P240/P241 Schruppen/Schlichten; PJ1 = Lage innen, PJ2 = Stirnnut (P101, dort OHNE PF0.4; aussen fehlt das Wort), PX1 bleibt auch innen konstant, I0 K0 und PF0.4 konstant; KEINE PA/PB. Seit dem 11.09.2026 abends schreibt der Generator dieses Format (aussen, innen und Stirnnut, Winkel, D); Fasen an den Ecken, Stirnnut in der Bohrung und N>1 fallen mit Ansage auf Einzelsaetze zurueck. Der 115er-Satz kommt aus der App zeichenweise gebremst ganz an (10.09.2026, O126). Lauf am Teil offen.'});
-    M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
-      w:'die Maschine faehrt ihn (Bestandsprogramme, alle mit steuerungsberechneten PA/PB) — ob sie den Satz OHNE PA/PB annimmt, prueft MINI_G72 am naechsten Termin; bis dahin Ausgabe als Einzelsaetze'});
-    M.push({t:'Freistich G73 / Plangewinde G77', s:pr.zyklen.g73,
-      w:'G73 (DIN 76) und G79 (Freistich Form E) am 11.09.2026 aus der Zyklen-Maske der 1000er gelesen (P102-P105, nur Fotos): Buchstaben wie DV 610 S. 3-45, PH = V als RADIUS, PN1 (G73) bzw. PJ1 (G79) fuer innen, P227:90 = V absolut, beim Form E ist X0 der FREISTICHGRUND — Ausgabe an der 1000er weiter Einzelsaetze, bis die Dateien gezogen und die Formen gebaut sind; G77 unbelegt'});
+    M.push({t:'Bohrzyklus G74', s:'machine_syntax_1000',
+      w:'freigegeben (P9170) — Realform aus der Zyklen-Maske: PK1 nur bei Spaenebrechen, PL W, PM D, PN DF, PO Tiefe, PP U, PQ V, PR/PT Zeitbasis 95, kein F im Satz; hinter dem Satz ein explizites G90; Vorlauf W statt SC',
+      offen:'Lauf am Teil (O9168); W und D waren in beiden Proben 5 — PL/PM nach der DV-610-Reihenfolge angenommen; PW90 PY1 PZ1 ungedeutet'});
+    M.push({t:'Gewindezyklus G75', s:'machine_syntax_1000',
+      w:'freigegeben (P9220/9230) — Realform aus der Zyklen-Maske: Steigung im F-Wort vor dem G75, PO aussen positiv, PX Flankenwinkel, PT aus dem Programmkopf-SC, G97 zwingend; innen und mehrgaengig als G33-Einzelsaetze',
+      offen:'Lauf am Teil (O9167) klaert E — erster Schnitt D oder E; Q/I fuer mehrgaengig'});
+    M.push({t:'Bohrzyklen G81 ff', s:'disabled',
+      w:'gesperrt — in R&D 95.05 nicht dokumentiert; Ausgabe als G74'});
+    M.push({t:'Einstechzyklus G71', s:'machine_syntax_1000',
+      w:'Realform an drei Maschinensaetzen belegt: Z = LINKE Nutkante, PM/PN = B/T, PO-PR = R1-R4, PG = U, PK/PL = alpha1/alpha2, P228 = D, PW und P230 = BS, PJ1 innen, PJ2 Stirnnut — aussen, innen und Stirnnut werden nativ geschrieben, hinter dem Satz ein explizites G90',
+      offen:'Lauf am Teil (O9169, Nut Z-30..-25 erwartet); Fasen, Stirnnut in der Bohrung und N>1 fallen auf Einzelsaetze zurueck; PX1 und PF ungedeutet (PF vermutlich Schneidenradius)'});
+    M.push({t:'Abspanzyklus G72 (Ecke)', s:'disabled',
+      w:'gesperrt — die Maschine faehrt ihn nur mit steuerungsberechneten PA/PB (Bestandsprogramme); Ausgabe als Einzelsaetze',
+      offen:'Satz aus der Zyklen-Maske ziehen (aussen und innen, mit und ohne Fase); MINI_G72 OHNE PA/PB'});
+    M.push({t:'Freistich G73 / Form E G79 / Plangewinde G77', s:'disabled',
+      w:'gesperrt — G73 und G79 sind aus der Zyklen-Maske gelesen (P102-P105, nur Fotos: PH als Radius, PN1 bzw. PJ1 innen, P227:90, Form E mit X0 = Freistichgrund), Ausgabe noch Einzelsaetze; G77 unbelegt',
+      offen:'Dateien O102-O105 und Form F aus der Steuerung ziehen, dann bauen'});
   }
   // Der Wechselpunkt ist BEDIENERSACHE je Bauteil [Daniel, 31.08.]:
   // die Zeile zeigt das LIVE-Kopffeld, keine Maschinen-Annahme mehr.
@@ -21219,16 +21226,11 @@ function ppMerkmale(){
     ' — je Bauteil vom Bediener zu setzen und zu pruefen (Vorgabe X⌀300/Z+20); Abfahrt lagerichtig (aussen X vor Z, innen Z vor X)'});
   M.push({t:'Eilgang', w:'aus dem Programmkopf-Feld (G94); ohne Eintrag '+pr.eilgang+' mm/min — gilt fuer Hauptzeit UND Simulation'});
   M.push({t:'Dialekt', w:pr.dialekt==='MTC'? 'MTC — Saetze bleiben unuebersetzt':'DIN-Umschreibung aktiv (G38→G18 …)'});
-  // Uebertragung [Daniel, 31.08.]: hier abgelegt, damit er die
-  // DNC-Werte je Maschine wiederfindet. Daniels Ansage: die NC geht
-  // 1:1 auf die Maschine — in DNC Precision muessen 'Remove spaces'
-  // und 'Ignore line prefix' AUS/LEER sein. Dass die Steuerungen
-  // Kommentare und Leerzeichen speichern, belegen seine Abzuege.
-  if(pr.uebertragung) M.push({t:'Uebertragung (V24, DNC Precision)', w:pr.uebertragung});
-  // Fahrtest-Belege vom Maschinentermin [Daniels Nachfrage 05.09.:
-  // "hast Du dir das nach dem Termin aktualisiert?"] — als eigene
-  // Zeile, damit der Terminertrag in den Merkmalen sichtbar ist.
-  if(pr.fahrtests) M.push({t:'Fahrtests', s:'confirmed_on_machine', w:pr.fahrtests});
+  // Uebertragung, Fahrtests und Termine kommen aus dem Profil — je Maschine
+  // verschieden, deshalb dort gepflegt (Regel 7: im selben Paket wie der Beleg).
+  if(pr.uebertragung) M.push({t:'Uebertragung (V24, DNC)', s:'confirmed_on_machine', w:pr.uebertragung, offen:pr.uebertragungOffen});
+  if(pr.fahrtests) M.push({t:'Fahrtests', s:'confirmed_on_machine', w:pr.fahrtests, offen:pr.fahrtestsOffen});
+  if(pr.termine) M.push({t:'Maschinentermine', s:'confirmed_on_machine', w:pr.termine});
   return M;
 }
 // Feste Uebersetzungsregeln — fuer BEIDE Maschinen gleich, im
@@ -21390,12 +21392,21 @@ const ZYKLUS_PARAM=[
 function ppInfoMalen(){
   const box=document.getElementById('ppInfo');
   if(!box) return;
+  // DREI GRUPPEN statt einer Liste [Daniel, 11.09.2026 abends]: was
+  // bestaetigt ist, was als Satz belegt aber ungefahren ist, was noch zu
+  // testen ist — und je Zeile das Feld `offen` in eigener Farbe. Zeilen
+  // ohne Status (Wechselpunkt, Eilgang, Dialekt) stehen bei den festen
+  // Regeln. Historie steht hier nicht mehr (Protokolle, Merkmalzeile
+  // Maschinentermine).
   let h='';
-  ppMerkmale().forEach(m=>{
-    const st=m.s? PP_STATUS[m.s] : null;
-    h+='<div class="ppz"><b>'+m.t+'</b>'+(st? '<span class="ppstat '+st.cls+'">'+st.txt+'</span>':'')
-      +'<br><span class="ppw">'+m.w+'</span></div>';
-  });
+  const alle=ppMerkmale();
+  const zeile=m=>{ const st=m.s? PP_STATUS[m.s] : null;
+    return '<div class="ppz"><b>'+m.t+'</b>'+(st? '<span class="ppstat '+st.cls+'">'+st.txt+'</span>':'')
+      +'<br><span class="ppw">'+m.w+'</span>'+(m.offen? '<br><span class="ppoffen">Offen: '+m.offen+'</span>':'')+'</div>'; };
+  const grp=k=>alle.filter(m=>k==='fest'? !m.s : (m.s && PP_STATUS[m.s] && PP_STATUS[m.s].grp===k));
+  h+='<div class="ppz ppkopf"><span class="ppw">'+grp('ok').length+' best&auml;tigt &middot; '+grp('satz').length+' Satz belegt, Lauf offen &middot; '+grp('offen').length+' noch zu testen. Stand, keine Historie &mdash; die Chronik steht in der Zeile Maschinentermine und in den Terminprotokollen.</span></div>';
+  PP_GRUPPEN.forEach(g=>{ const z=grp(g.k); if(!z.length) return;
+    h+='<div class="ppgrp">'+g.titel+'</div>'; z.forEach(m=>{ h+=zeile(m); }); });
   h+='<div class="ppz fest"><b>Fuer beide Maschinen gleich</b><br><span class="ppw">'+PP_FEST.join('<br>')+'</span></div>';
   // ZYKLUSSATZ-PARAMETER [Daniel, 01.09.2026]: aufklappbar je Zyklus,
   // gefiltert auf das AKTIVE Profil — beim 1000er stehen nur die dort
