@@ -4756,7 +4756,7 @@ Daniels eigene 1000er-Programme tun dasselbe. Lauf am Teil offen.
 <br><b>G72 der 1000er:</b> Die Maschine f&auml;hrt ihn (Bestandsprogramme, alle
 mit steuerungsberechneten PA/PB-Werten). Ob sie den Satz auch OHNE PA/PB
 annimmt, pr&uuml;ft die Datei MINI_G72 am n&auml;chsten Termin; bis dahin
-Einzels&auml;tze. G73 und G77 sind an der 1000er unbelegt.
+Einzels&auml;tze. <b>G73 (DIN 76) und G79 (Freistich Form E)</b> sind am 11.09.2026 aus der Zyklen-Maske gelesen (P102&ndash;P105, nur Fotos: PH als Radius, PN1 bzw. PJ1 f&uuml;r innen, P227:90 = V absolut, beim Form E ist X0 der Freistichgrund) &mdash; die App gibt beide an der 1000er weiter als Einzels&auml;tze aus, bis die Dateien gezogen und die Formen gebaut sind. G77 bleibt unbelegt.
 <br><b>Werkzeugnummern (10.09.2026):</b> die 1000er nimmt nur T1&ndash;T32 (T32
 angenommen, T33 &bdquo;Fehler 152&ldquo; bei Prog. Pr&uuml;fen), real hat sie 16 Pl&auml;tze.
 Ein Lagerwerkzeug mit h&ouml;herer Nummer (Testvorlagen: T33, T40, T41) bekommt in der
@@ -21209,7 +21209,7 @@ function ppMerkmale(){
     M.push({t:'Abspanzyklus G72 (Ecke)', s:pr.zyklen.g72,
       w:'die Maschine faehrt ihn (Bestandsprogramme, alle mit steuerungsberechneten PA/PB) — ob sie den Satz OHNE PA/PB annimmt, prueft MINI_G72 am naechsten Termin; bis dahin Ausgabe als Einzelsaetze'});
     M.push({t:'Freistich G73 / Plangewinde G77', s:pr.zyklen.g73,
-      w:'an der 1000er unbelegt — Ausgabe als Einzelsaetze'});
+      w:'G73 (DIN 76) und G79 (Freistich Form E) am 11.09.2026 aus der Zyklen-Maske der 1000er gelesen (P102-P105, nur Fotos): Buchstaben wie DV 610 S. 3-45, PH = V als RADIUS, PN1 (G73) bzw. PJ1 (G79) fuer innen, P227:90 = V absolut, beim Form E ist X0 der FREISTICHGRUND — Ausgabe an der 1000er weiter Einzelsaetze, bis die Dateien gezogen und die Formen gebaut sind; G77 unbelegt'});
   }
   // Der Wechselpunkt ist BEDIENERSACHE je Bauteil [Daniel, 31.08.]:
   // die Zeile zeigt das LIVE-Kopffeld, keine Maschinen-Annahme mehr.
