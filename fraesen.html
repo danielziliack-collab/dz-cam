@@ -2461,7 +2461,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <div class="mrow"><label data-ba="ba-fk05b-elemente">Startpunkt X / Y</label><input type="number" step="any" id="fkoX0" value="20" style="width:51px;"><input type="number" step="any" id="fkoY0" value="20" style="width:51px;"><span class="unit unit2"><i>X</i><i>Y</i></span></div>
           <div class="msec">Elemente in Laufrichtung (Endpunkt je Element; Bogen: Radius und Drehsinn, &gt;180° = der längere Bogen; Bogen tangential: nur Endpunkt; Vollkreis: X/Y = Mitte; Rundung/Fase wirken auf die Ecke zum nächsten Element)</div>
           <div class="pointlist" id="fkoListe" style="max-height:34vh;overflow-x:auto;"><table style="white-space:nowrap;"><thead><tr><th>#</th><th>Typ</th><th>X</th><th>Y</th><th>R / Fase</th><th>DR</th><th></th><th></th></tr></thead><tbody id="fkoBody"></tbody></table></div>
-          <div class="mrow" id="fkoP1"><button class="gcbtn" id="btnFkoGerade" style="flex:1 1 auto;padding:8px;">＋ Gerade</button> <button class="gcbtn" id="btnFkoBogen" style="flex:1 1 auto;padding:8px;">＋ Bogen</button> <button class="gcbtn" id="btnFkoEcke" style="flex:1 1 auto;padding:8px;" title="Rundung oder Fase an der Ecke zum nächsten Element">＋ Rundung / Fase</button></div>
+          <div class="mrow" id="fkoP1"><button class="gcbtn" id="btnFkoGerade" style="flex:1 1 auto;padding:8px;">＋ Gerade</button> <button class="gcbtn" id="btnFkoBogen" style="flex:1 1 auto;padding:8px;">＋ Bogen</button> <button class="gcbtn" id="btnFkoEcke" style="flex:1 1 auto;padding:8px;" title="Rundung oder Fase an der Ecke zum nächsten Element">＋ Rundung / Fase</button> <label class="gcbtn" style="flex:1 1 auto;padding:8px;text-align:center;cursor:pointer;" title="2D-DXF (LINE, ARC, CIRCLE, LWPOLYLINE, SPLINE) in der XY-Ebene — jede Kette wird eine Kontur">&#x2B06; DXF einlesen<input type="file" id="fkoDxfFile" accept=".dxf,.DXF" style="display:none;"></label></div>
           <div class="mrow" style="display:block;"><canvas id="fkoCv" style="width:100%;height:200px;display:block;background:#fff;border:1px solid var(--line);border-radius:4px;"></canvas></div>
           <div class="mrow small-hint" id="fkoInfo">—</div>
           <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnFkoOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnFkoCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
@@ -2706,6 +2706,14 @@ gilt sie f&uuml;r die Ecke am Startpunkt. Zu gro&szlig;e Rundungen oder Fasen un
 <dt>geschlossen / offen</dt><dd>Eine <b>geschlossene</b> Kontur (Tasche oder Insel) schlie&szlig;t die App mit einer Geraden zum Startpunkt, wenn das
 letzte Element nicht dort endet &mdash; wie die Steuerung im Kontur-Unterprogramm. Eine <b>offene</b> Kontur ist ein Konturzug von Anfang bis Ende;
 dort sagt der Schritt, ob das Werkzeug links oder rechts der Laufrichtung f&auml;hrt.</dd>
+<dt id="ba-fk05b-dxf">DXF einlesen</dt><dd>Der Knopf <b>DXF einlesen</b> im Kontureditor (oder eine DXF-Datei auf die Seite ziehen) liest eine 2D-Zeichnung in der
+XY-Ebene: <code>LINE</code>, <code>ARC</code>, <code>CIRCLE</code>, <code>LWPOLYLINE</code> (mit Bogen-Bulge) und <code>SPLINE</code> (&uuml;ber die Fit-Punkte als Polygonzug,
+mit Hinweis); Zoll-Zeichnungen werden umgerechnet. Zusammenh&auml;ngende Z&uuml;ge (Endpunkt an Endpunkt, 0,01&nbsp;mm) werden zu Ketten verbunden, jede Kette wird eine
+eigene Kontur im Arbeitsplan (die l&auml;ngste zuerst), ein Kreis eine Vollkreis-Kontur mit Start rechts; Reste unter 0,5&nbsp;mm (Bema&szlig;ungshilfen) fallen weg.
+<b>Nicht gelesen</b> werden Bema&szlig;ung, Texte, Bl&ouml;cke, Schraffuren, Ellipsen und die alte <code>POLYLINE</code> &mdash; die Meldung z&auml;hlt sie auf. Die Koordinaten bleiben
+die der Zeichnung: liegt die Kontur au&szlig;erhalb der BLK FORM, sagt es die Pr&uuml;fung (Nullpunkt der Zeichnung oder Rohteil anpassen). Nach dem Einlesen steht die
+erste Kontur im Editor zur Kontrolle &mdash; Laufrichtung und Start kann man dort noch drehen, Rundungen und Fasen kommen aus der DXF als B&ouml;gen und Geraden.
+Gepr&uuml;ft ist der Leser an handgeschriebenen DXF-Dateien; echte CAD-Exporte (FreeCAD, Fusion, SolidWorks) sind noch nicht durchgelaufen.</dd>
 <dt>Im Arbeitsplan</dt><dd>Konturen stehen wie die Bohrbilder oben im Arbeitsplan (&#x270E; &auml;ndern, &#x2715; l&ouml;schen; ein Schritt, der sie nutzt,
 verliert dann seine Kontur und meldet es rot). Der Schritt <b>Konturzug</b> (Softkey-Gruppe Kontur) w&auml;hlt die Kontur im Feld <b>Kontur (XY)</b>;
 die Draufsicht zeichnet die Kontur mit Startmarke S und zum angew&auml;hlten Konturschritt die Bahn der Werkzeugmitte gestrichelt.</dd>
@@ -2896,7 +2904,7 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 <li>SL-Zyklen 20&ndash;24 (Konturtasche mit Inseln, Vorbohren, R&auml;umen) &mdash; der Konturzug 14/25 und der XY-Kontureditor sind seit dem 13.09.2026 da (Kap.&nbsp;5b, 6c). Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
 <li>Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39, Abzeilen 230/231/233 &mdash; in dieser Reihenfolge danach.</li>
 <li>Eigene Bahnlogik: Bohrfamilie, Taschen, Nuten, Zapfen, Planfr&auml;sen und Konturzug schreiben seit dem 12./13.09.2026 Einzels&auml;tze (Kap.&nbsp;6c) &mdash; darauf der Siemens-Post.</li>
-<li>DXF-Import f&uuml;r Fr&auml;skonturen &mdash; der Editor kennt seit dem 13.09.2026 Geraden, Kreisb&ouml;gen, tangentiale B&ouml;gen, Vollkreise, Rundungen und Fasen (Kap.&nbsp;5b); der DXF-Leser des Drehteils ist die Basis, echte DXF-Dateien von Daniel die Fixtures.</li>
+<li>DXF-Import: gebaut (Kap.&nbsp;5b), aber nur an handgeschriebenen DXF-Dateien gepr&uuml;ft &mdash; echte CAD-Exporte von Daniel fehlen noch als Fixtures; Bema&szlig;ung, Bl&ouml;cke und Ellipsen liest er nicht.</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
 <li>Eigene Simulation auf den Bahnen aus Paket C &mdash; Paket D; bis dahin der Programm-Test der Steuerung.</li>
 <li>Sinumerik 840D powerline als zweites Profil &mdash; nach den MPF-Dateien vom Schwager.</li>
@@ -4823,6 +4831,143 @@ function fBahnKontur(s, tool, prog){
 }
 
 // ---------------------------------------------------------------------
+// DXF-IMPORT FUER FRAESKONTUREN (Paket C3c, 13.09.2026): 2D-DXF (ASCII) in
+// der XY-Ebene -> Konturen des Editors. Gelesen werden LINE, ARC, CIRCLE,
+// LWPOLYLINE (mit Bulge-Boegen, geschlossen ueber Flag 70) und SPLINE ueber
+// die Fit-Punkte (Polygonzug, mit Hinweis); Einheit aus $INSUNITS (1 = Zoll
+// -> mm). Bemassung, Texte, Bloecke und Schraffuren werden NICHT gelesen —
+// Reste davon (Zuege unter 0,5 mm) fallen weg, alles andere wird zu Ketten
+// verbunden (Toleranz 0,01 mm, Endpunkt an Endpunkt, Segmente werden bei
+// Bedarf umgedreht). Jede Kette wird eine Kontur: Start = erster Punkt,
+// Geraden als 'g', Boegen als 'b' mit Radius, Drehsinn und gross (ueber 180
+// Grad), ein CIRCLE als Vollkreis 'k' mit Start rechts auf dem Kreis.
+// Geschlossen ist eine Kette, deren Ende auf ihrem Anfang liegt. Koordinaten
+// bleiben, wie sie in der DXF stehen (Werkstueck-Nullpunkt der Zeichnung) —
+// wer sie verschieben will, aendert Start und Endpunkte im Editor.
+// Derselbe Leseweg wie im Drehteil (parseDxf/dxfKetten), hier DOM-frei im
+// Kern, damit der Pruefstand ihn an handgeschriebenen Fixtures rechnet.
+// ---------------------------------------------------------------------
+function fDxfLesen(text){
+  const lines = String(text || '').split(/\r?\n/);
+  const paare = [];
+  for(let i = 0; i + 1 < lines.length; i += 2) paare.push([lines[i].trim(), lines[i + 1].trim()]);
+  let unit = 1;
+  for(let i = 0; i < paare.length - 1; i++) if(paare[i][1] === '$INSUNITS' && paare[i + 1][0] === '70' && +paare[i + 1][1] === 1) unit = 25.4;
+  const segs = [], kreise = [], arten = {};
+  const num = (v) => parseFloat(v) * unit;
+  const zaehl = (k) => { arten[k] = (arten[k] || 0) + 1; };
+  const werte = (i) => { const w = {}; for(let j = i + 1; j < paare.length && paare[j][0] !== '0'; j++){ const c = paare[j][0]; if(!(c in w)) w[c] = paare[j][1]; } return w; };
+  for(let i = 0; i < paare.length; i++){
+    const [c, v] = paare[i]; if(c !== '0') continue;
+    if(v === 'LINE'){
+      const w = werte(i), x1 = num(w['10']), y1 = num(w['20']), x2 = num(w['11']), y2 = num(w['21']);
+      if([x1, y1, x2, y2].every(isFinite)){ segs.push({a:[x1, y1], b:[x2, y2], arc:null}); zaehl('LINE'); }
+    } else if(v === 'ARC'){
+      const w = werte(i), cx = num(w['10']), cy = num(w['20']), r = num(w['40']), a1 = parseFloat(w['50']) * Math.PI / 180, a2 = parseFloat(w['51']) * Math.PI / 180;
+      if([cx, cy, r, a1, a2].every(isFinite) && r > 0){ segs.push({a:[cx + r * Math.cos(a1), cy + r * Math.sin(a1)], b:[cx + r * Math.cos(a2), cy + r * Math.sin(a2)], arc:{cx:cx, cy:cy, r:r, ccw:true}}); zaehl('ARC'); }   // DXF-ARC laeuft gegen den Uhrzeigersinn
+    } else if(v === 'CIRCLE'){
+      const w = werte(i), cx = num(w['10']), cy = num(w['20']), r = num(w['40']);
+      if([cx, cy, r].every(isFinite) && r > 0){ kreise.push({cx:cx, cy:cy, r:r}); zaehl('CIRCLE'); }
+    } else if(v === 'LWPOLYLINE'){
+      const vx = [], vy = [], bulge = []; let closed = false;
+      for(let j = i + 1; j < paare.length && paare[j][0] !== '0'; j++){
+        const [cc, vv] = paare[j];
+        if(cc === '10'){ vx.push(num(vv)); bulge.push(0); } if(cc === '20') vy.push(num(vv));
+        if(cc === '42') bulge[bulge.length - 1] = parseFloat(vv);
+        if(cc === '70') closed = (+vv & 1) === 1;
+      }
+      const n = Math.min(vx.length, vy.length), lim = closed ? n : n - 1;
+      for(let k = 0; k < lim; k++){
+        const k2 = (k + 1) % n, A = [vx[k], vy[k]], B = [vx[k2], vy[k2]], bu = bulge[k] || 0;
+        if(Math.hypot(B[0] - A[0], B[1] - A[1]) < 1e-9) continue;
+        if(Math.abs(bu) < 1e-9){ segs.push({a:A, b:B, arc:null}); continue; }
+        // Bulge = tan(Winkel/4): eingeschlossener Winkel 4 atan(bulge), Mitte auf der Mittelsenkrechten
+        const th = 4 * Math.atan(bu), chord = Math.hypot(B[0] - A[0], B[1] - A[1]);
+        const r = chord / (2 * Math.sin(Math.abs(th) / 2));
+        const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, h = r * Math.cos(th / 2) * (bu > 0 ? 1 : -1);
+        const dx = (B[0] - A[0]) / chord, dy = (B[1] - A[1]) / chord;
+        segs.push({a:A, b:B, arc:{cx:mx - dy * h, cy:my + dx * h, r:r, ccw:bu > 0}});
+      }
+      if(n) zaehl('LWPOLYLINE');
+    } else if(v === 'SPLINE'){
+      const fx = [], fy = [];
+      for(let j = i + 1; j < paare.length && paare[j][0] !== '0'; j++){ const [cc, vv] = paare[j]; if(cc === '11') fx.push(num(vv)); if(cc === '21') fy.push(num(vv)); }
+      for(let k = 0; k + 1 < Math.min(fx.length, fy.length); k++) segs.push({a:[fx[k], fy[k]], b:[fx[k + 1], fy[k + 1]], arc:null, spline:true});
+      if(fx.length) zaehl('SPLINE');
+    } else if(/^(DIMENSION|TEXT|MTEXT|HATCH|INSERT|POINT|ELLIPSE|POLYLINE)$/.test(v)) zaehl(v);
+  }
+  return {segs:segs, kreise:kreise, unit:unit, arten:arten};
+}
+function fDxfSegUmkehren(s){ const f = {a:s.b, b:s.a, arc:null, spline:s.spline}; if(s.arc) f.arc = {cx:s.arc.cx, cy:s.arc.cy, r:s.arc.r, ccw:!s.arc.ccw}; return f; }
+// Segmente zu Ketten verbinden (Endpunkt an Endpunkt, 0,01 mm), laengste zuerst.
+function fDxfKetten(segs){
+  const tol = 0.01, same = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]) < tol;
+  const rest = segs.slice(), ketten = [];
+  while(rest.length){
+    const kette = [rest.shift()]; let weiter = true;
+    while(weiter){
+      weiter = false;
+      for(let k = 0; k < rest.length; k++){
+        const s2 = rest[k], kopf = kette[0].a, fuss = kette[kette.length - 1].b;
+        if(same(s2.a, fuss)){ kette.push(s2); rest.splice(k, 1); weiter = true; break; }
+        if(same(s2.b, fuss)){ kette.push(fDxfSegUmkehren(s2)); rest.splice(k, 1); weiter = true; break; }
+        if(same(s2.b, kopf)){ kette.unshift(s2); rest.splice(k, 1); weiter = true; break; }
+        if(same(s2.a, kopf)){ kette.unshift(fDxfSegUmkehren(s2)); rest.splice(k, 1); weiter = true; break; }
+      }
+    }
+    ketten.push(kette);
+  }
+  const laenge = (k) => k.reduce((s, q) => s + (q.arc ? Math.abs(fDxfBogenWinkel(q)) * q.arc.r : Math.hypot(q.b[0] - q.a[0], q.b[1] - q.a[1])), 0);
+  ketten.forEach(k => { k.laenge = laenge(k); });
+  ketten.sort((a, b) => b.laenge - a.laenge);
+  return ketten;
+}
+// Ueberstrichener Winkel eines DXF-Bogensegments (Vorzeichen = Drehsinn).
+function fDxfBogenWinkel(s){
+  const a0 = Math.atan2(s.a[1] - s.arc.cy, s.a[0] - s.arc.cx), a1 = Math.atan2(s.b[1] - s.arc.cy, s.b[0] - s.arc.cx);
+  let d = a1 - a0;
+  if(s.arc.ccw){ while(d <= 1e-12) d += 2 * Math.PI; } else { while(d >= -1e-12) d -= 2 * Math.PI; }
+  return d;
+}
+// DXF-Text -> {konturen:[...], hinweise:[...], zuege, ketten}. name = Dateiname fuer die Konturnamen.
+function fDxfKonturen(text, name){
+  const D = fDxfLesen(text), hinweise = [], konturen = [];
+  const basis = String(name || 'DXF').replace(/\.dxf$/i, '');
+  if(D.unit !== 1) hinweise.push('DXF in Zoll ($INSUNITS 1) — in mm umgerechnet.');
+  const ketten = fDxfKetten(D.segs);
+  let klein = 0, spline = false;
+  ketten.forEach(k0 => {
+    let k = k0;
+    if(k.laenge < 0.5){ klein++; return; }
+    const a0 = k[0].a, e = k[k.length - 1].b;
+    const geschlossen = k.length > 1 && Math.hypot(a0[0] - e[0], a0[1] - e[1]) < 0.01;
+    if(geschlossen){
+      // Start am untersten, dann linkesten Segmentanfang — die Kettenbildung haengt sonst an der Reihenfolge in der Datei
+      let best = 0; k.forEach((s, i) => { const p = s.a, q = k[best].a; if(p[1] < q[1] - 1e-9 || (Math.abs(p[1] - q[1]) <= 1e-9 && p[0] < q[0] - 1e-9)) best = i; });
+      k = k.slice(best).concat(k.slice(0, best));
+    }
+    const s0 = k[0].a;
+    const el = k.map(s => {
+      if(s.spline) spline = true;
+      if(!s.arc) return {typ:'g', x:fRund(s.b[0]), y:fRund(s.b[1])};
+      const sw = fDxfBogenWinkel(s);
+      const o = {typ:'b', x:fRund(s.b[0]), y:fRund(s.b[1]), r:fRund(s.arc.r), dr:s.arc.ccw ? 1 : -1};
+      if(Math.abs(sw) > Math.PI + 1e-9) o.gross = true;
+      return o;
+    });
+    konturen.push({name:basis, geschlossen:geschlossen, x0:fRund(s0[0]), y0:fRund(s0[1]), elemente:el, dxf:{segmente:k.length, laenge:fRund(k.laenge)}});
+  });
+  D.kreise.forEach(c => { konturen.push({name:basis + ' Kreis ⌀' + fRund(2 * c.r), geschlossen:true, x0:fRund(c.cx + c.r), y0:fRund(c.cy), elemente:[{typ:'k', x:fRund(c.cx), y:fRund(c.cy), dr:1}], dxf:{segmente:1, laenge:fRund(2 * Math.PI * c.r)}}); });
+  if(konturen.length > 1) konturen.forEach((kt, i) => { kt.name = basis + ' ' + (i + 1); });   // nummerieren nur, wenn mehrere uebrig bleiben
+  if(klein) hinweise.push(klein + ' Kette(n) unter 0,5 mm uebergangen (Bemassungsreste, Zeichenhilfen).');
+  if(spline) hinweise.push('SPLINE-Zuege als Polygonzug ueber die Fit-Punkte genaehert — Kontur pruefen.');
+  const ignoriert = Object.keys(D.arten).filter(k => /^(DIMENSION|TEXT|MTEXT|HATCH|INSERT|POINT|ELLIPSE|POLYLINE)$/.test(k));
+  if(ignoriert.length) hinweise.push('Nicht gelesen: ' + ignoriert.map(k => k + ' x' + D.arten[k]).join(', ') + ' (Bemassung, Text, Bloecke, Schraffur, Ellipsen, alte POLYLINE).');
+  konturen.forEach(kt => { const K = fKonturSegmente(kt); if(K.fehler.length) hinweise.push('Kontur "' + kt.name + '": ' + K.fehler.join('; ')); });
+  return {konturen:konturen, hinweise:hinweise, zuege:D.segs.length + D.kreise.length, ketten:ketten.length, einheit:D.unit};
+}
+
+// ---------------------------------------------------------------------
 // Programmname pruefen: Dateiname = Programmname (BEGIN/END PGM).
 // ---------------------------------------------------------------------
 function fName(prog){
@@ -4976,6 +5121,11 @@ function fPruefen(prog){
         if(K.fehler.length) rot.push(nr + 'Kontur "' + kt.name + '": ' + K.fehler.join('; '));
         else if(!K.seg.length) rot.push(nr + 'Kontur "' + kt.name + '" hat kein Element.');
         else if(tool && +tool.d > 0){ const b = fBahnKontur(s, tool, prog); if(!b.ok) gelb.push(nr + 'eigene Bahn: ' + b.grund + (s.ausgabe === 'einzel' ? ' — Einzelsaetze nicht moeglich, es wird der Zyklus 25 geschrieben.' : ' — der Zyklus 25 laesst dort Material stehen.')); }
+        if(!K.fehler.length && K.seg.length){
+          // DXF-Konturen bringen den Nullpunkt der Zeichnung mit: liegt die Kontur ausserhalb der BLK FORM, ist meist der Nullpunkt gemeint (gelb).
+          let drau = 0; K.seg.forEach(sg => fSegPunkte(sg).forEach(q => { if(q.x < +k.x0 - 1e-6 || q.x > +k.x1 + 1e-6 || q.y < +k.y0 - 1e-6 || q.y > +k.y1 + 1e-6) drau++; }));
+          if(drau) gelb.push(nr + 'Kontur "' + kt.name + '" ragt ueber die BLK FORM hinaus (' + drau + ' Stuetzpunkte) — Nullpunkt der Zeichnung pruefen (DXF) oder Rohteil anpassen.');
+        }
       }
       if(tool && tool.art !== 'fraeser') gelb.push(nr + 'T' + s.t + ' ist kein Fraeser (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
       if(!(+s.fTief > 0)) rot.push(nr + 'Vorschub Tiefenzustellung Q11 fehlt.');
@@ -5915,6 +6065,20 @@ function fKonturSync(){
   ctx.fillStyle = dunkel ? '#c8d3dc' : '#2a3a48'; ctx.font = '10px Arial';
   K.seg.forEach((sg, i) => { if(sg.schluss || sg.el == null || sg.el < 0) return; const n = K.seg[i + 1]; if(n && n.el === sg.el) return; ctx.fillText(String(sg.el + 1), X(sg.x1) + 4, Y(sg.y1) - 4); });
 }
+// DXF-Text uebernehmen: Konturen anhaengen, Hinweise melden, die erste im Editor oeffnen.
+function fDxfImport(text, name){
+  if(String(text || '').indexOf('ENTITIES') < 0){ melde('FEHLER: keine ENTITIES-Sektion — ist das eine DXF-Datei (ASCII)?'); return null; }
+  const r = fDxfKonturen(text, name);
+  if(!r.konturen.length){ melde('FEHLER: keine verwertbaren Zuege in der DXF (LINE, ARC, CIRCLE, LWPOLYLINE, SPLINE)' + (r.hinweise.length ? ' — ' + r.hinweise.join(' ') : '')); return r; }
+  if(!Array.isArray(fProg.konturen)) fProg.konturen = [];
+  const ab = fProg.konturen.length;
+  r.konturen.forEach(kt => fProg.konturen.push(kt));
+  fSel = {typ:'kontur', idx:ab};
+  maskZu('maskKontur'); fRender();
+  melde('DXF ' + (name || '') + ': ' + r.zuege + ' Zuege, ' + r.konturen.length + ' Kontur' + (r.konturen.length === 1 ? '' : 'en') + ' angelegt (' + r.konturen.map(k => k.name + ' ' + (k.geschlossen ? 'geschlossen' : 'offen') + ', ' + k.elemente.length + ' El.').join('; ') + ').' + (r.hinweise.length ? ' ' + r.hinweise.join(' ') : ''));
+  fKonturOeffnen(ab);
+  return r;
+}
 function fKonturOeffnen(idx){
   fEditKontur = (idx === undefined || idx === null) ? -1 : idx;
   const kt = fEditKontur >= 0 ? (fProg.konturen || [])[fEditKontur] : fKonturNeu('Kontur ' + ((fProg.konturen || []).length + 1));
@@ -5954,6 +6118,14 @@ function fKonturOeffnen(idx){
   on('btnFkoGerade', ()=>{ if(!fKonturTmp) return; const l = letzter(); fKonturTmp.elemente.push({typ:'g', x:fRund((+l.x || 0) + 20), y:+l.y || 0}); fKonturTabelle(); fKonturSync(); });
   on('btnFkoBogen', ()=>{ if(!fKonturTmp) return; const l = letzter(); fKonturTmp.elemente.push({typ:'b', x:fRund((+l.x || 0) + 10), y:fRund((+l.y || 0) + 10), r:10, dr:1}); fKonturTabelle(); fKonturSync(); });
   on('btnFkoEcke', ()=>{ if(!fKonturTmp) return; fKonturTmp.elemente.push({typ:'rnd', r:5}); fKonturTabelle(); fKonturSync(); });
+  // DXF (Paket C3c): Datei aus dem Kontureditor oder per Ziehen auf die Seite —
+  // jede Kette wird eine eigene Kontur im Programm, die erste steht danach im Editor.
+  const dxfIn = document.getElementById('fkoDxfFile');
+  if(dxfIn && dxfIn.addEventListener) dxfIn.addEventListener('change', ()=>{ const f = dxfIn.files && dxfIn.files[0]; if(!f) return; const rd = new FileReader(); rd.onload = ()=>{ fDxfImport(String(rd.result || ''), f.name); dxfIn.value = ''; }; rd.readAsText(f); });
+  try{
+    document.addEventListener('dragover', (e)=>{ if(e.dataTransfer && [...(e.dataTransfer.items || [])].some(i => /dxf/i.test(i.type) || i.kind === 'file')) e.preventDefault(); });
+    document.addEventListener('drop', (e)=>{ const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(f && /\.dxf$/i.test(f.name)){ e.preventDefault(); const rd = new FileReader(); rd.onload = ()=>fDxfImport(String(rd.result || ''), f.name); rd.readAsText(f); } });
+  }catch(e){}
   on('btnFkoOk', ()=>{
     const kt = fKonturLesen();
     const K = fKonturSegmente(kt);
