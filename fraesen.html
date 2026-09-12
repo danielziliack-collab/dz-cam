@@ -2282,6 +2282,14 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .arbeitsplan{order:1;}
   .mask.kachelpilot .mrow .radiobtns.fwrap{flex-wrap:wrap !important;}
+  /* Zeilenansicht am Laptop: die Desktop-Regel des Drehteils stellt jede
+     Knopfgruppe einreihig (02-stil, "Knopfgruppen einreihig") — die zwoelf
+     Bearbeitungen der Bohrmaske liefen damit rechts aus der Maske (Paket 3,
+     12.09.2026, Aufnahme b-10-zeilen: Ruecktw.-Senken angeschnitten, Einlippen
+     unsichtbar). fwrap-Gruppen duerfen auch dort umbrechen. */
+  @media(min-width:900px){
+    .mask:not(.kachelpilot) .mrow .radiobtns.fwrap:not(.kopfschalter):not(.selfeld){flex-wrap:wrap;}
+  }
   body.dunkel .fdrauf{background:#1a2027;}
   /* Werkzeug- und Positionstabellen: Eingaben in Zellen */
   .pointlist td input{width:64px;font-size:13px;padding:3px 4px;border:1px solid var(--line);border-radius:3px;}
@@ -2332,7 +2340,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     <button id="dunkelBtn" title="Dunkelmodus ein/aus" type="button">☾</button>
   </div>
 
-  <div id="splash"><div class="sname">Daniel Ziliack CAM</div><div class="ssub">Fräsen · Heidenhain iTNC 530 · Bohren, Muster, Taschen, Nuten, Zapfen (Programmierplatz-Test 12.09.2026)</div><noscript><div style="max-width:340px;margin-top:18px;padding:12px 16px;border:1px solid #c8a24a;background:#fff6e0;color:#6b5320;font-size:14px;line-height:1.5;border-radius:6px;">Das ist nur die VORSCHAU &mdash; sie kann die App nicht ausf&uuml;hren.<br><b>Am Computer:</b> Datei speichern und per Doppelklick im Browser &ouml;ffnen.</div></noscript></div>
+  <div id="splash"><div class="sname">Daniel Ziliack CAM</div><div class="ssub">Fräsen · Heidenhain iTNC 530 · Bohren, Muster, Taschen, Nuten, Zapfen, Planfräsen (Programmierplatz-Test 12.09.2026)</div><noscript><div style="max-width:340px;margin-top:18px;padding:12px 16px;border:1px solid #c8a24a;background:#fff6e0;color:#6b5320;font-size:14px;line-height:1.5;border-radius:6px;">Das ist nur die VORSCHAU &mdash; sie kann die App nicht ausf&uuml;hren.<br><b>Am Computer:</b> Datei speichern und per Doppelklick im Browser &ouml;ffnen.</div></noscript></div>
 
   <div class="main">
     <div class="stage">
@@ -2404,17 +2412,17 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
 
       <!-- ===== BOHREN (Zyklen 240 / 200 / 203 / 201 / 206 / 207) ===== -->
       <div class="mask" id="maskBohren">
-        <div class="mask-head"><span class="mtitel" title="Bohren — Heidenhain-Zyklen 240 / 200 / 203 / 201 / 206 / 207">Bohren (iTNC 530)</span><button class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="fbEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+        <div class="mask-head"><span class="mtitel" title="Bohren — Heidenhain-Zyklen 240 / 200 / 203 / 205 / 201 / 202 / 206 / 207 / 209 / 208 / 204 / 241">Bohren (iTNC 530)</span><button class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="fbEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
         <div class="mask-body">
           <div class="msec">Werkzeug &amp; Schnittwerte</div>
           <div class="mrow"><label data-ba="ba-fk04">T Werkzeug</label><select id="fbT" class="tool-select"></select></div>
-          <div class="mrow"><label data-ba="ba-fk06-art">Bearbeitung</label><div class="radiobtns fwrap" id="fbArtBtns"><button data-v="zentrieren">Zentrieren 240</button><button data-v="bohren" class="sel">Bohren 200</button><button data-v="tief">Tieflochbohren 203</button><button data-v="reiben">Reiben 201</button><button data-v="gewinde">Gewinde 206</button><button data-v="gewindeGS">Gewinde GS 207</button></div></div>
+          <div class="mrow"><label data-ba="ba-fk06-art">Bearbeitung</label><div class="radiobtns fwrap" id="fbArtBtns"><button data-v="zentrieren">Zentrieren 240</button><button data-v="bohren" class="sel">Bohren 200</button><button data-v="tief">Tieflochbohren 203</button><button data-v="tiefUni">Tiefbohren 205</button><button data-v="reiben">Reiben 201</button><button data-v="ausdrehen">Ausdrehen 202</button><button data-v="gewinde">Gewinde 206</button><button data-v="gewindeGS">Gewinde GS 207</button><button data-v="gewindeSpan">Gewinde Spanbr. 209</button><button data-v="bohrfraesen">Bohrfräsen 208</button><button data-v="senkenRueck">Rückw.-Senken 204</button><button data-v="einlippen">Einlippen 241</button></div></div>
           <div class="mrow"><label data-ba="ba-fk05">Bohrbild</label><select id="fbMuster" class="tool-select"></select></div>
           <div class="mrow"><label data-ba="ba-fk06-fs">F / S</label><input type="number" step="any" id="fbF" value="150" style="width:51px;"><input type="number" step="any" id="fbS" value="1500" style="width:51px;"><span class="unit unit2"><i>mm/min</i><i>U/min</i></span></div>
           <div class="mrow"><label data-ba="ba-fk06-fs">Kühlmittel</label><div class="radiobtns" id="fbKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
           <div class="msec">Zyklusparameter (wie im TNC-Dialog)</div>
           <div class="mrow"><label data-ba="ba-fk06-q">Q200 Sich.-Abstand</label><input type="number" step="any" id="fbQ200" value="2"><span class="unit">mm</span></div>
-          <div class="mrow"><label data-ba="ba-fk06-q">Q201 Tiefe (negativ)</label><input type="number" step="any" id="fbQ201" value="-10"><span class="unit">mm</span></div>
+          <div class="mrow" id="fbQ201Row"><label data-ba="ba-fk06-q">Q201 Tiefe (negativ)</label><input type="number" step="any" id="fbQ201" value="-10"><span class="unit">mm</span></div>
           <div class="mrow" id="fbQ202Row"><label data-ba="ba-fk06-q">Q202 Zustelltiefe</label><input type="number" step="any" id="fbQ202" value="0"><span class="unit">mm</span></div>
           <div class="mrow"><label data-ba="ba-fk06-q">Q203 Oberfläche</label><input type="number" step="any" id="fbQ203" value="0"><span class="unit">mm</span></div>
           <div class="mrow"><label data-ba="ba-fk06-q">Q204 2. Sich.-Abst.</label><input type="number" step="any" id="fbQ204" value="50"><span class="unit">mm</span></div>
@@ -2425,51 +2433,103 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <div class="mrow" id="fbQ344Row"><label data-ba="ba-fk06-240">Q344 Zentrier-⌀</label><input type="number" step="any" id="fbQ344" value="0"><span class="unit">mm</span></div>
             </div>
           </div>
+          <!-- Spanbruch-Gruppe fuer 203, 205 und 209: die Zeilen werden je Zyklus
+               ein- und ausgeblendet (fBohrenSync), die Gruppe bleibt EINE. -->
           <div class="mgroup" id="fbGrpTief">
-            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Tieflochbohren 203</span><span class="zus" id="fbZusTief">—</span></div>
+            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Spanbruch · 203 / 205 / 209</span><span class="zus" id="fbZusTief">—</span></div>
             <div class="mgroup-body">
-              <div class="mrow"><label data-ba="ba-fk06-203">Q212 Abnahmebetrag</label><input type="number" step="any" id="fbQ212" value="0"><span class="unit">mm</span></div>
-              <div class="mrow"><label data-ba="ba-fk06-203">Q213 Anz. Spanbrüche</label><input type="number" step="1" id="fbQ213" value="0"><span class="unit"></span></div>
-              <div class="mrow"><label data-ba="ba-fk06-203">Q205 Min. Zustellung</label><input type="number" step="any" id="fbQ205" value="0"><span class="unit">mm</span></div>
-              <div class="mrow"><label data-ba="ba-fk06-203">Q256 RZ Spanbruch</label><input type="number" step="any" id="fbQ256" value="0.2"><span class="unit">mm</span></div>
+              <div class="mrow" id="fbQ212Row"><label data-ba="ba-fk06-203">Q212 Abnahmebetrag</label><input type="number" step="any" id="fbQ212" value="0"><span class="unit">mm</span></div>
+              <div class="mrow" id="fbQ213Row"><label data-ba="ba-fk06-203">Q213 Anz. Spanbrüche</label><input type="number" step="1" id="fbQ213" value="0"><span class="unit"></span></div>
+              <div class="mrow" id="fbQ205Row"><label data-ba="ba-fk06-203">Q205 Min. Zustellung</label><input type="number" step="any" id="fbQ205" value="0"><span class="unit">mm</span></div>
+              <div class="mrow" id="fbQ257Row"><label data-ba="ba-fk06-205">Q257 Bohrtiefe Spanbr.</label><input type="number" step="any" id="fbQ257" value="5"><span class="unit">mm</span></div>
+              <div class="mrow" id="fbQ256Row"><label data-ba="ba-fk06-203">Q256 RZ Spanbruch</label><input type="number" step="any" id="fbQ256" value="0.2"><span class="unit">mm</span></div>
+              <div class="mrow" id="fbQ258Row"><label data-ba="ba-fk06-205">Q258 Vorhalte oben</label><input type="number" step="any" id="fbQ258" value="0.5"><span class="unit">mm</span></div>
+              <div class="mrow" id="fbQ259Row"><label data-ba="ba-fk06-205">Q259 Vorhalte unten</label><input type="number" step="any" id="fbQ259" value="1"><span class="unit">mm</span></div>
             </div>
           </div>
           <div class="mgroup" id="fbGrpGew">
-            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Gewinde 206 / 207</span><span class="zus" id="fbZusGew">—</span></div>
+            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Gewinde 206 / 207 / 209</span><span class="zus" id="fbZusGew">—</span></div>
             <div class="mgroup-body">
               <div class="mrow"><label data-ba="ba-fk06-gewinde">Steigung P (Q239)</label><input type="number" step="any" id="fbSteig" value="1.5"><span class="unit">mm</span></div>
-              <div class="mrow small-hint">206 mit Ausgleichsfutter: F = Steigung × S (die App rechnet F beim Wechsel der Drehzahl nach). 207 synchron: kein F, Q239 = Steigung, braucht die Maschinenoption.</div>
+              <div class="mrow" id="fbQ403Row"><label data-ba="ba-fk06-209">Q403 Faktor Drehzahl</label><input type="number" step="any" id="fbQ403" value="1.5"><span class="unit"></span></div>
+              <div class="mrow small-hint">206 mit Ausgleichsfutter: F = Steigung × S (die App rechnet F beim Wechsel der Drehzahl nach). 207 synchron: kein F, Q239 = Steigung, braucht die Maschinenoption. 209 wie 207, dazu Spanbruch (Q257/Q256 oben) und Q403 = Faktor für den schnelleren Rückzug.</div>
+            </div>
+          </div>
+          <div class="mgroup" id="fbGrpFrei">
+            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Freifahren &amp; Spindelwinkel · 202 / 204 / 209</span><span class="zus" id="fbZusFrei">—</span></div>
+            <div class="mgroup-body">
+              <div class="mrow" id="fbQ214Row"><label data-ba="ba-fk06-202">Q214 Freifahren</label><select id="fbQ214" class="tool-select" style="width:170px;"><option value="0">0 nicht freifahren</option><option value="1">1 −X (Hauptachse)</option><option value="2">2 −Y (Nebenachse)</option><option value="3">3 +X (Hauptachse)</option><option value="4">4 +Y (Nebenachse)</option></select></div>
+              <div class="mrow" id="fbQ336Row"><label data-ba="ba-fk06-202">Q336 Winkel Spindel</label><input type="number" step="any" id="fbQ336" value="0"><span class="unit">°</span></div>
+            </div>
+          </div>
+          <div class="mgroup" id="fbGrpSenk">
+            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Rückwärts-Senken 204</span><span class="zus" id="fbZusSenk">—</span></div>
+            <div class="mgroup-body">
+              <div class="mrow"><label data-ba="ba-fk06-204">Q249 Tiefe Senkung (+)</label><input type="number" step="any" id="fbQ249" value="5"><span class="unit">mm</span></div>
+              <div class="mrow"><label data-ba="ba-fk06-204">Q250 Materialstärke</label><input type="number" step="any" id="fbQ250" value="20"><span class="unit">mm</span></div>
+              <div class="mrow"><label data-ba="ba-fk06-204">Q251 Exzentermaß</label><input type="number" step="any" id="fbQ251" value="3.5"><span class="unit">mm</span></div>
+              <div class="mrow"><label data-ba="ba-fk06-204">Q252 Schneidenhöhe</label><input type="number" step="any" id="fbQ252" value="15"><span class="unit">mm</span></div>
+              <div class="mrow"><label data-ba="ba-fk06-204">Q254 F Senken</label><input type="number" step="any" id="fbQ254" value="200"><span class="unit unit2"><i>mm/</i><i>min</i></span></div>
+              <div class="mrow"><label data-ba="ba-fk06-204">Q255 Verweilzeit</label><input type="number" step="any" id="fbQ255" value="0"><span class="unit">s</span></div>
+            </div>
+          </div>
+          <div class="mgroup" id="fbGrpBF">
+            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Bohrfräsen 208</span><span class="zus" id="fbZusBF">—</span></div>
+            <div class="mgroup-body">
+              <div class="mrow"><label data-ba="ba-fk06-208">Q335 Soll-⌀</label><input type="number" step="any" id="fbQ335" value="20"><span class="unit">mm</span></div>
+              <div class="mrow"><label data-ba="ba-fk06-208">Q342 vorgebohrt ⌀</label><input type="number" step="any" id="fbQ342" value="0"><span class="unit">mm</span></div>
+              <div class="mrow"><label data-ba="ba-fk06-208">Q334 Zust. je Helix</label><input type="number" step="any" id="fbQ334" value="1.5"><span class="unit">mm</span></div>
+              <div class="mrow" id="fbQ351Row"><label data-ba="ba-fk06-208">Q351 Fräsart</label><div class="radiobtns" id="fbFraesartBtns"><button data-v="1" class="sel">Gleichlauf</button><button data-v="-1">Gegenlauf</button></div></div>
+            </div>
+          </div>
+          <div class="mgroup" id="fbGrpEin">
+            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Einlippenbohren 241</span><span class="zus" id="fbZusEin">—</span></div>
+            <div class="mgroup-body">
+              <div class="mrow"><label data-ba="ba-fk06-241">Q426 Drehrichtung</label><select id="fbQ426" class="tool-select" style="width:170px;"><option value="3">3 M3 (rechts)</option><option value="4">4 M4 (links)</option><option value="5">5 Spindel steht</option></select></div>
+              <div class="mrow"><label data-ba="ba-fk06-241">Q427 S Ein-/Ausfahren</label><input type="number" step="any" id="fbQ427" value="25"><span class="unit unit2"><i>U/</i><i>min</i></span></div>
+              <div class="mrow"><label data-ba="ba-fk06-241">Q428 S Bohren</label><input type="number" step="any" id="fbQ428" value="500"><span class="unit unit2"><i>U/</i><i>min</i></span></div>
+              <div class="mrow"><label data-ba="ba-fk06-241">Q429 / Q430 M Kühlung</label><input type="number" step="1" id="fbQ429" value="8" style="width:51px;"><input type="number" step="1" id="fbQ430" value="9" style="width:51px;"><span class="unit unit2"><i>ein</i><i>aus</i></span></div>
+              <div class="mrow"><label data-ba="ba-fk06-241">Q435 Verweiltiefe</label><input type="number" step="any" id="fbQ435" value="0"><span class="unit">mm</span></div>
             </div>
           </div>
           <div class="mgroup" id="fbGrpZeit">
-            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Verweilzeiten &amp; Rückzug</span><span class="zus" id="fbZusZeit">—</span></div>
+            <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Verweilzeiten, Rückzug &amp; Vorposition</span><span class="zus" id="fbZusZeit">—</span></div>
             <div class="mgroup-body">
               <div class="mrow" id="fbQ210Row"><label data-ba="ba-fk06-q">Q210 Verweilz. oben</label><input type="number" step="any" id="fbQ210" value="0"><span class="unit">s</span></div>
               <div class="mrow" id="fbQ211Row"><label data-ba="ba-fk06-q">Q211 Verweilz. unten</label><input type="number" step="any" id="fbQ211" value="0"><span class="unit">s</span></div>
-              <div class="mrow" id="fbQ208Row"><label data-ba="ba-fk06-q">Q208 F Rückzug (0=Q206)</label><input type="number" step="any" id="fbQ208" value="0"><span class="unit">mm/min</span></div>
+              <div class="mrow" id="fbQ208Row"><label data-ba="ba-fk06-q">Q208 F Rückzug (0=Q206)</label><input type="number" step="any" id="fbQ208" value="0"><span class="unit unit2"><i>mm/</i><i>min</i></span></div>
+              <div class="mrow" id="fbQ253Row"><label data-ba="ba-fk06-205">Q253 F Vorposition.</label><input type="number" step="any" id="fbQ253" value="750"><span class="unit unit2"><i>mm/</i><i>min</i></span></div>
+              <div class="mrow" id="fbQ379Row"><label data-ba="ba-fk06-205">Q379 Startpunkt vertieft</label><input type="number" step="any" id="fbQ379" value="0"><span class="unit">mm</span></div>
             </div>
           </div>
           <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnFbOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnFbCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
         </div>
       </div>
 
-      <!-- ===== FRAESEN: TASCHEN / NUTEN / ZAPFEN (Zyklen 251 / 252 / 253 / 254 / 256 / 257) ===== -->
+      <!-- ===== FRAESEN: TASCHEN / NUTEN / ZAPFEN / PLANFRAESEN (Zyklen 251 / 252 / 253 / 254 / 256 / 257 / 232) ===== -->
       <div class="mask" id="maskFraesen">
-        <div class="mask-head"><span class="mtitel" title="Taschen, Nuten, Zapfen — Heidenhain-Zyklen 251 / 252 / 253 / 254 / 256 / 257">Taschen · Nuten · Zapfen</span><button class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="fzEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
+        <div class="mask-head"><span class="mtitel" title="Taschen, Nuten, Zapfen, Planfräsen — Heidenhain-Zyklen 251 / 252 / 253 / 254 / 256 / 257 / 232">Taschen · Nuten · Zapfen · Plan</span><button class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button><span class="radiobtns kopfschalter" id="fzEingabeBtns"><button data-v="einfach" class="sel">einfach</button><button data-v="komplett">komplett</button></span></div>
         <div class="mask-body">
           <div class="msec">Werkzeug &amp; Schnittwerte</div>
           <div class="mrow"><label data-ba="ba-fk04">T Werkzeug</label><select id="fzT" class="tool-select"></select></div>
-          <div class="mrow"><label data-ba="ba-fk06b-art">Form</label><div class="radiobtns fwrap" id="fzArtBtns"><button data-v="tascheR" class="sel">Rechtecktasche 251</button><button data-v="tascheK">Kreistasche 252</button><button data-v="nut">Nut 253</button><button data-v="nutR">Runde Nut 254</button><button data-v="zapfenR">Rechteckzapfen 256</button><button data-v="zapfenK">Kreiszapfen 257</button></div></div>
-          <div class="mrow"><label data-ba="ba-fk05">Position(en)</label><select id="fzMuster" class="tool-select"></select></div>
+          <div class="mrow"><label data-ba="ba-fk06b-art">Form</label><div class="radiobtns fwrap" id="fzArtBtns"><button data-v="tascheR" class="sel">Rechtecktasche 251</button><button data-v="tascheK">Kreistasche 252</button><button data-v="nut">Nut 253</button><button data-v="nutR">Runde Nut 254</button><button data-v="zapfenR">Rechteckzapfen 256</button><button data-v="zapfenK">Kreiszapfen 257</button><button data-v="planfraesen">Planfräsen 232</button></div></div>
+          <div class="mrow" id="fzMusterRow"><label data-ba="ba-fk05">Position(en)</label><select id="fzMuster" class="tool-select"></select></div>
           <div class="mrow" id="fzUmfangRow"><label data-ba="ba-fk06b-umfang">Q215 Umfang</label><div class="radiobtns fwrap" id="fzUmfangBtns"><button data-v="0" class="sel">Schruppen + Schlichten</button><button data-v="1">nur Schruppen</button><button data-v="2">nur Schlichten</button></div></div>
           <div class="mrow"><label data-ba="ba-fk06b-fs">Q207 F / S</label><input type="number" step="any" id="fzF" value="600" style="width:51px;"><input type="number" step="any" id="fzS" value="3000" style="width:51px;"><span class="unit unit2"><i>mm/min</i><i>U/min</i></span></div>
           <!-- "mm/min" einzeilig ist breiter als die 26-px-Einheitenspalte (am 390er
                gemessen: Zeile 362 breit, 380 Inhalt) — zweizeilig wie die Paarzeilen. -->
-          <div class="mrow"><label data-ba="ba-fk06b-fs">Q206 F Tiefe</label><input type="number" step="any" id="fzQ206" value="200"><span class="unit unit2"><i>mm/</i><i>min</i></span></div>
+          <div class="mrow" id="fzQ206Row"><label data-ba="ba-fk06b-fs">Q206 F Tiefe</label><input type="number" step="any" id="fzQ206" value="200"><span class="unit unit2"><i>mm/</i><i>min</i></span></div>
           <div class="mrow" id="fzQ385Row"><label data-ba="ba-fk06b-fs">Q385 F Schlicht.</label><input type="number" step="any" id="fzQ385" value="600"><span class="unit unit2"><i>mm/</i><i>min</i></span></div>
-          <div class="mrow"><label data-ba="ba-fk06b-fs">Q351 Fräsart</label><div class="radiobtns" id="fzFraesartBtns"><button data-v="1" class="sel">Gleichlauf</button><button data-v="-1">Gegenlauf</button></div></div>
+          <div class="mrow" id="fzQ253Row"><label data-ba="ba-fk06b-232">Q253 F Vorposition.</label><input type="number" step="any" id="fzQ253" value="2000"><span class="unit unit2"><i>mm/</i><i>min</i></span></div>
+          <div class="mrow" id="fzFraesartRow"><label data-ba="ba-fk06b-fs">Q351 Fräsart</label><div class="radiobtns" id="fzFraesartBtns"><button data-v="1" class="sel">Gleichlauf</button><button data-v="-1">Gegenlauf</button></div></div>
           <div class="mrow"><label data-ba="ba-fk06-fs">Kühlmittel</label><div class="radiobtns" id="fzKuehlBtns"><button data-v="an" class="sel">an</button><button data-v="aus">aus</button></div></div>
           <div class="msec">Form (wie im TNC-Dialog)</div>
+          <!-- Planfraesen 232: die Flaeche steckt im Zyklus (Startpunkt Q225-Q227,
+               Endhoehe Q386, Laengen mit Vorzeichen als Richtung), kein Bohrbild. -->
+          <div class="mrow" id="fzStratRow"><label data-ba="ba-fk06b-232">Q389 Strategie</label><select id="fzStrategie" class="tool-select" style="width:170px;"><option value="0">0 Mäander, seitl. Zust. außen</option><option value="1">1 Mäander, seitl. Zust. am Rand</option><option value="2">2 zeilenweise, Rücklauf Eilgang</option></select></div>
+          <div class="mrow" id="fzStartRow"><label data-ba="ba-fk06b-232">Q225 / Q226 Startpunkt</label><input type="number" step="any" id="fzPx" value="0" style="width:51px;"><input type="number" step="any" id="fzPy" value="0" style="width:51px;"><span class="unit unit2"><i>X</i><i>Y</i></span></div>
+          <div class="mrow" id="fzPzRow"><label data-ba="ba-fk06b-232">Q227 Startpunkt Z</label><input type="number" step="any" id="fzPz" value="0"><span class="unit">mm</span></div>
+          <div class="mrow" id="fzZEndRow"><label data-ba="ba-fk06b-232">Q386 Endpunkt Z</label><input type="number" step="any" id="fzZEnd" value="-1"><span class="unit">mm</span></div>
           <div class="mrow" id="fzL1Row"><label data-ba="ba-fk06b-masse" id="fzL1Label">Q218 1. Seitenlänge</label><input type="number" step="any" id="fzL1" value="50"><span class="unit">mm</span></div>
           <div class="mrow" id="fzL2Row"><label data-ba="ba-fk06b-masse" id="fzL2Label">Q219 2. Seitenlänge</label><input type="number" step="any" id="fzL2" value="30"><span class="unit">mm</span></div>
           <div class="mrow" id="fzRRow"><label data-ba="ba-fk06b-masse">Q220 Eckenradius</label><input type="number" step="any" id="fzR" value="5"><span class="unit">mm</span></div>
@@ -2483,18 +2543,19 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <div class="mrow" id="fzWinkelRow"><label data-ba="ba-fk06b-rund">Q376 Start / Q248 Öffnung</label><input type="number" step="any" id="fzStart" value="0" style="width:51px;"><input type="number" step="any" id="fzOeffnung" value="90" style="width:51px;"><span class="unit unit2"><i>°</i><i>°</i></span></div>
           <div class="mrow" id="fzWiederRow"><label data-ba="ba-fk06b-rund">Q378 Schritt / Q377 Anzahl</label><input type="number" step="any" id="fzWSchritt" value="0" style="width:51px;"><input type="number" step="1" id="fzAnzahl" value="1" style="width:51px;"><span class="unit unit2"><i>°</i><i>n</i></span></div>
           <div class="msec">Tiefe &amp; Aufmaß</div>
-          <div class="mrow"><label data-ba="ba-fk06-q">Q201 Tiefe (negativ)</label><input type="number" step="any" id="fzQ201" value="-10"><span class="unit">mm</span></div>
-          <div class="mrow"><label data-ba="ba-fk06-q">Q202 Zustelltiefe</label><input type="number" step="any" id="fzQ202" value="5"><span class="unit">mm</span></div>
+          <div class="mrow" id="fzQ201Row"><label data-ba="ba-fk06-q">Q201 Tiefe (negativ)</label><input type="number" step="any" id="fzQ201" value="-10"><span class="unit">mm</span></div>
+          <div class="mrow"><label data-ba="ba-fk06-q" id="fzQ202Label">Q202 Zustelltiefe</label><input type="number" step="any" id="fzQ202" value="5"><span class="unit">mm</span></div>
           <div class="mrow" id="fzQ368Row"><label data-ba="ba-fk06b-aufmass">Q368 Aufmaß Seite</label><input type="number" step="any" id="fzQ368" value="0"><span class="unit">mm</span></div>
           <div class="mrow" id="fzQ369Row"><label data-ba="ba-fk06b-aufmass">Q369 Aufmaß Tiefe</label><input type="number" step="any" id="fzQ369" value="0"><span class="unit">mm</span></div>
           <div class="mrow" id="fzQ338Row"><label data-ba="ba-fk06b-aufmass">Q338 Zust. Schlichten</label><input type="number" step="any" id="fzQ338" value="0"><span class="unit">mm</span></div>
           <div class="mgroup" id="fzGrpBahn">
             <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Bahn, Eintauchen &amp; Sicherheit</span><span class="zus" id="fzZusBahn">—</span></div>
             <div class="mgroup-body">
-              <div class="mrow" id="fzQ370Row"><label data-ba="ba-fk06b-bahn">Q370 Bahn-Überlappung</label><input type="number" step="any" id="fzQ370" value="1"><span class="unit">×R</span></div>
+              <div class="mrow" id="fzQ370Row"><label data-ba="ba-fk06b-bahn" id="fzQ370Label">Q370 Bahn-Überlappung</label><input type="number" step="any" id="fzQ370" value="1"><span class="unit">×R</span></div>
               <div class="mrow" id="fzEintauchRow"><label data-ba="ba-fk06b-bahn">Q366 Eintauchen</label><div class="radiobtns fwrap" id="fzEintauchBtns"><button data-v="0" class="sel">senkrecht</button><button data-v="1">Helix</button><button data-v="2">pendelnd</button></div></div>
               <div class="mrow"><label data-ba="ba-fk06-q">Q200 Sich.-Abstand</label><input type="number" step="any" id="fzQ200" value="2"><span class="unit">mm</span></div>
-              <div class="mrow"><label data-ba="ba-fk06-q">Q203 Oberfläche</label><input type="number" step="any" id="fzQ203" value="0"><span class="unit">mm</span></div>
+              <div class="mrow" id="fzQ357Row"><label data-ba="ba-fk06b-232">Q357 Sich.-Abst. Seite</label><input type="number" step="any" id="fzQ357" value="2"><span class="unit">mm</span></div>
+              <div class="mrow" id="fzQ203Row"><label data-ba="ba-fk06-q">Q203 Oberfläche</label><input type="number" step="any" id="fzQ203" value="0"><span class="unit">mm</span></div>
               <div class="mrow"><label data-ba="ba-fk06-q">Q204 2. Sich.-Abst.</label><input type="number" step="any" id="fzQ204" value="50"><span class="unit">mm</span></div>
             </div>
           </div>
@@ -2574,6 +2635,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <div class="mrow"><button class="gcbtn" id="btnDemoLeiste" style="width:100%;padding:10px;">DZ2 Leiste: Reihe Tieflochbohren + Reiben H7</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoMuster" style="width:100%;padding:10px;">DZ3 Musterzyklen 220/221 + Gewinde GS</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoTaschen" style="width:100%;padding:10px;">DZ4 Taschen, Nuten, Zapfen (251&ndash;257)</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoBohren2" style="width:100%;padding:10px;">DZ5 Planfr&auml;sen 232 + Bohrzyklen 202/204/205/208/209/241</button></div>
             </div>
           </div>
           <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
@@ -2593,6 +2655,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
       <div class="sk" id="skTasche"><span class="ic">▭</span>Taschen</div>
       <div class="sk" id="skNut"><span class="ic">⌷</span>Nuten</div>
       <div class="sk" id="skZapfen"><span class="ic">▣</span>Zapfen</div>
+      <div class="sk" id="skPlan"><span class="ic">▤</span>Plan-<br>fräsen</div>
       <div class="sk-spacer"></div>
     </div>
   </div>
@@ -2624,7 +2687,9 @@ Listen. Am 12.09.2026 mittags sind die drei Testprogramme DZ1, DZ2 und DZ3 auf d
 (Demo 606&nbsp;424, NC-Software 606&nbsp;42x) im <b>Programm-Test ohne Meldung durchgelaufen</b>; was die TNC danach
 zur&uuml;ckschreibt, ist Satz f&uuml;r Satz die Ausgabe dieser App. Das belegt, wie die Steuerung die S&auml;tze liest
 &mdash; nicht das Verhalten an Deinen Maschinen (PLC f&uuml;r M13/M9, Option f&uuml;r 207, Software-Stand 340&nbsp;49x).
-Am Nachmittag kamen die Taschen, Nuten und Zapfen 251&ndash;257 dazu (Kap.&nbsp;6b, Vorlage DZ4) und liefen denselben Test.
+Am Nachmittag kamen die Taschen, Nuten und Zapfen 251&ndash;257 dazu (Kap.&nbsp;6b, Vorlage DZ4) und liefen denselben Test;
+am Abend Planfr&auml;sen 232 und die Bohrzyklen 202, 204, 205, 208, 209, 241 (Vorlage DZ5, 5:01 min &mdash; der erste Lauf brach
+beim 241 mit &bdquo;Falsche Drehzahl&ldquo; ab, weil Q427 = 25 unter der Mindestdrehzahl der Demo liegt; mit 100 lief er, Kap.&nbsp;6).
 Jedes erzeugte Programm tr&auml;gt deshalb weiter im Kopf den Hinweis auf den Programm-Test an der Steuerung. Erst wenn
 dort ein Teil gefahren ist, wandert ein Zyklus in den Merkmalen auf &bdquo;an der iTNC belegt&ldquo;.</div>
 <p>Drei Grunds&auml;tze gelten wie beim Drehteil: eine Datei, offline; die NC-Ausgabe ist heilig (eigener
@@ -2707,7 +2772,12 @@ laut Handbuch ohne Bedeutung).</dd>
 <h2 id="ba-fk06">6 &nbsp;Bohren &mdash; die Zyklen</h2>
 <dl>
 <dt id="ba-fk06-art">Bearbeitung</dt><dd>Zentrieren = Zyklus 240, Bohren = 200, Tieflochbohren = 203 (Universal-Bohren mit
-Spanbruch/Entspanen), Reiben = 201, Gewinde mit Ausgleichsfutter = 206, Gewinde synchron = 207.</dd>
+Spanbruch/Entspanen), Tiefbohren = 205 (Universal-Tiefbohren mit Vorhalteabst&auml;nden), Reiben = 201, Ausdrehen = 202,
+Gewinde mit Ausgleichsfutter = 206, Gewinde synchron = 207, Gewinde mit Spanbruch = 209, Bohrfr&auml;sen = 208,
+R&uuml;ckw&auml;rts-Senken = 204, Einlippenbohren = 241. Alle zw&ouml;lf laufen &uuml;ber dieselbe Maske; die Felder, die ein
+Zyklus nicht kennt, sind ausgeblendet. Q-Listen nach den Beispiels&auml;tzen des Zyklenhandbuchs 670&nbsp;388-12
+(S.&nbsp;86, 94, 98, 101, 104, 118); 241 gibt es erst ab Stand 340&nbsp;49x-06, 208 schreibt in der Ausgabe 02 kein Q351,
+209 dort kein Q403 (Programmkopf, Software-Stand).</dd>
 <dt id="ba-fk06-fs">F / S / K&uuml;hlmittel</dt><dd>F in mm/min (Heidenhain rechnet nicht in mm/U), S in U/min. K&uuml;hlmittel an
 schreibt <code>M13</code> (Spindel rechts + K&uuml;hlmittel), aus schreibt <code>M3</code>; nach dem Schritt <code>M9</code>.</dd>
 <dt id="ba-fk06-q">Q-Parameter</dt><dd>Die Felder tragen die Nummern und Namen des TNC-Dialogs: Q200 Sicherheits-Abstand,
@@ -2719,17 +2789,42 @@ Durchmesser wird im Satz negativ geschrieben (Vorzeichen = Arbeitsrichtung, Hand
 vollen R&uuml;ckzug (0 = kein Spanbruch), Q205 kleinste Zustellung, Q256 R&uuml;ckzug beim Spanbruch.</dd>
 <dt id="ba-fk06-gewinde">Gewinde</dt><dd>206 f&auml;hrt mit F = Steigung &times; S (Ausgleichsfutter f&auml;ngt nur wenig ab &mdash;
 die Pr&uuml;fung meldet Abweichungen). 207 schreibt die Steigung als Q239 und braucht die Synchron-Option der Maschine.</dd>
+<dt id="ba-fk06-202">Ausdrehen 202</dt><dd>Bohrstange mit stehender Spindel am Grund: Q214 Freifahr-Richtung (0 nicht, 1 &minus;X, 2 &minus;Y,
+3 +X, 4 +Y &mdash; Haupt-/Nebenachse der Bearbeitungsebene), Q336 Winkel, auf den die Spindel vor dem Freifahren orientiert
+wird (Spindelorientierung ist Maschinensache). Q211 Verweilzeit am Grund, Q208 Vorschub R&uuml;ckzug.</dd>
+<dt id="ba-fk06-204">R&uuml;ckw&auml;rts-Senken 204</dt><dd>Senkung von unten mit R&uuml;ckw&auml;rts-Senker: <b>keine Tiefe Q201</b> &mdash; Q249 Tiefe der Senkung ist
+POSITIV (nach oben), Q250 Materialst&auml;rke, Q251 Exzenterma&szlig; und Q252 Schneidenh&ouml;he vom Werkzeugblatt, Q253 Vorschub
+Vorpositionieren, Q254 Vorschub Senken, Q255 Verweilzeit; Q214 muss 1 bis 4 sein (das Werkzeug muss aus der Bohrung
+freifahren), Q336 Spindelwinkel. Das F-Feld der Maske ist hier ohne Wirkung.</dd>
+<dt id="ba-fk06-205">Universal-Tiefbohren 205</dt><dd>Wie 203, aber mit Vorhalteabst&auml;nden: Q258 oben / Q259 unten (Eilgang bis dahin,
+dann Vorschub), Q257 Bohrtiefe bis zum Spanbruch (0 = kein Spanbruch), Q256 R&uuml;ckzug beim Spanbruch, Q379 vertiefter
+Startpunkt (bei vorgebohrten L&ouml;chern), Q253 Vorschub Vorpositionieren. Q212 Abnahme, Q205 kleinste Zustellung wie 203.</dd>
+<dt id="ba-fk06-208">Bohrfr&auml;sen 208</dt><dd>Helix mit dem Fr&auml;ser: Q335 Soll-Durchmesser (gr&ouml;&szlig;er als der Fr&auml;ser, bis zum
+doppelten Fr&auml;ser-&empty; ohne Restkern), Q342 vorgebohrter Durchmesser (0 = ins Volle), Q334 Zustellung je Helixgang, Q351
+Gleich-/Gegenlauf (ab Stand -06). Die TNC begrenzt Q334 selbst &uuml;ber ANGLE der TOOL.T.</dd>
+<dt id="ba-fk06-209">Gewindebohren mit Spanbruch 209</dt><dd>Wie 207 (geregelte Spindel, Steigung Q239, kein F), dazu Q257 Bohrtiefe bis
+zum Spanbruch, Q256 R&uuml;ckzug beim Spanbruch (mit Vorzeichen), Q336 Spindelwinkel vor dem Gewinde, Q403 Faktor f&uuml;r die
+Drehzahl beim R&uuml;ckzug (ab Stand -06).</dd>
+<dt id="ba-fk06-241">Einlippenbohren 241</dt><dd>Tiefbohren mit Einlippenbohrer: Q379 vertiefter Startpunkt, Q253 Vorschub bis dahin,
+Q208 Vorschub R&uuml;ckzug, Q426 Spindeldrehrichtung beim Ein-/Ausfahren (3 = M3, 4 = M4, 5 = steht), Q427 Drehzahl
+Ein-/Ausfahren, Q428 Drehzahl Bohren, Q429/Q430 M-Funktion K&uuml;hlung ein/aus (Vorgabe M8/M9 &mdash; an Deiner PLC pr&uuml;fen),
+Q435 Verweiltiefe. Nur ab Stand 340&nbsp;49x-06. Drehzahl und K&uuml;hlung schaltet hier der Zyklus, nicht der TOOL CALL.
+<b>Programmierplatz 12.09.2026:</b> mit Q427 = 25 (Handbuchbeispiel) brach der Zyklus mit &bdquo;Falsche Drehzahl&ldquo; ab &mdash;
+die Demo hat 50&nbsp;U/min Mindestdrehzahl (MP3240.1); mit Q427 = 100 lief er (Vorgabe der App). Q426 = 5 (stehende Spindel) brach
+dort mit &bdquo;Undefinierter Programmstart&ldquo; ab. Die Pr&uuml;fung meldet beides gelb; was Deine Maschine zul&auml;sst,
+steht in ihren Maschinenparametern. Die 606&nbsp;42x zeigt den Zyklus als &bdquo;EINLIPPEN-TIEFBOHREN&ldquo; an, die App schreibt
+den Titel der 340&nbsp;49x (Anzeigetext, kein Unterschied im Satz).</dd>
 </dl>
 
-<h2 id="ba-fk06b">6b &nbsp;Fr&auml;sen &mdash; Taschen, Nuten, Zapfen (Zyklen 251&ndash;257)</h2>
-<p>Softkeys <b>Taschen</b>, <b>Nuten</b>, <b>Zapfen</b>. Eine Form wird wie ein Bohrschritt auf ein Bohrbild gesetzt: der Zyklus
+<h2 id="ba-fk06b">6b &nbsp;Fr&auml;sen &mdash; Taschen, Nuten, Zapfen, Planfr&auml;sen (Zyklen 251&ndash;257, 232)</h2>
+<p>Softkeys <b>Taschen</b>, <b>Nuten</b>, <b>Zapfen</b>, <b>Planfr&auml;sen</b>. Eine Form wird wie ein Bohrschritt auf ein Bohrbild gesetzt: der Zyklus
 ist CALL-aktiv, die App ruft ihn an jedem Punkt des Bohrbilds mit <code>M99</code> (eine Tasche = ein Bohrbild mit einer
 Position, ein Feld aus Taschen = Reihe/Gitter). Die Q-Listen sind die der Beispiels&auml;tze des Zyklenhandbuchs
 670&nbsp;388 Kap.&nbsp;5. Die Steuerung rechnet die Bahnen selbst &mdash; aus Werkzeugradius und ANGLE ihrer TOOL.T,
 nicht aus der Werkzeugtabelle dieser App; die App pr&uuml;ft nur die Plausibilit&auml;t gegen den eingetragenen Durchmesser.</p>
-<div class="ba-merk">Stand (12.09.2026 nachmittags): nach Handbuch gebaut und mit der Vorlage DZ4 im Programm-Test des iTNC-530-Programmierplatzes
-durchgelaufen (alle sechs Formen in der Grafik, R&uuml;ckexport der TNC Satz f&uuml;r Satz gleich der App-Ausgabe). An der Maschine noch nicht
-gefahren.</div>
+<div class="ba-merk">Stand (12.09.2026): nach Handbuch gebaut und mit der Vorlage DZ4 (251&ndash;257, nachmittags) und DZ5 (232 als erster Schritt,
+abends) im Programm-Test des iTNC-530-Programmierplatzes durchgelaufen (alle Formen in der Grafik, R&uuml;ckexport der TNC Satz f&uuml;r Satz
+gleich der App-Ausgabe). An der Maschine noch nicht gefahren.</div>
 <dl>
 <dt id="ba-fk06b-art">Form</dt><dd>251 Rechtecktasche (L&auml;nge, Breite, Eckenradius), 252 Kreistasche (&empty;), 253 Nut (L&auml;nge, Breite,
 Drehlage), 254 Runde Nut (Breite, Teilkreis-&empty;, Mitte, Start- und &Ouml;ffnungswinkel, Winkelschritt und Anzahl), 256 Rechteckzapfen
@@ -2754,6 +2849,14 @@ Q378 Winkelschritt und Q377 Anzahl f&uuml;r mehrere Nuten auf dem Teilkreis.</dd
 <dt id="ba-fk06b-bahn">Bahn und Eintauchen</dt><dd>Q370 Bahn-&Uuml;berlappung als Faktor des Werkzeugradius (0,1 bis 1,414). Q366 Eintauchen:
 0 senkrecht (l&auml;uft mit jedem Schaftfr&auml;ser), 1 helixf&ouml;rmig, 2 pendelnd (nur Nuten) &mdash; Helix und Pendeln brauchen den
 Eintauchwinkel ANGLE des Werkzeugs in der TOOL.T der Maschine; steht dort 0, meldet die TNC einen Fehler.</dd>
+<dt id="ba-fk06b-232">Planfr&auml;sen 232</dt><dd>Die einzige Form <b>ohne Bohrbild</b>: die Fl&auml;che steckt im Zyklus. Q225/Q226 Startpunkt
+(Ecke der Fl&auml;che), Q227 Startpunkt Z (Oberkante des Rohteils), Q386 Endpunkt Z (fertige H&ouml;he &mdash; muss unter Q227
+liegen; die Differenz teilt die TNC in Zustellungen bis Q202), Q218/Q219 Seitenl&auml;ngen <b>mit Vorzeichen als
+Richtung</b> vom Startpunkt aus, Q389 Strategie (0 M&auml;ander mit seitlicher Zustellung au&szlig;erhalb der Fl&auml;che, 1 M&auml;ander
+mit Zustellung am Rand, 2 zeilenweise mit R&uuml;cklauf im Eilgang), Q369 Aufma&szlig; Tiefe f&uuml;r den Schlichtschnitt (Q385),
+Q370 Max. &Uuml;berlappung, Q253 Vorschub Vorpositionieren, Q357 Sicherheits-Abstand zur Seite. Die App schreibt hinter die
+Definition ein <code>CYCL CALL</code>; die Vorgabe deckt die BLK FORM des Programmkopfs ab (Startpunkt = MIN-Ecke, L&auml;ngen =
+Rohteil, Endh&ouml;he 1 mm unter der Oberkante). Q201, Q203, Q206, Q351 und Q366 kennt der 232 nicht.</dd>
 </dl>
 
 <h2 id="ba-fk07">7 &nbsp;NC-Ausgabe und Weg zur Maschine</h2>
@@ -2772,8 +2875,8 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 
 <h2 id="ba-fk08">8 &nbsp;Was fehlt (ehrlich)</h2>
 <ul>
-<li>Konturfr&auml;sen mit RL/RR, Konturzug 25 und SL-Zyklen 20&ndash;24 &mdash; n&auml;chstes Paket, braucht den XY-Kontureditor. Taschen, Nuten und Zapfen (251&ndash;257) sind seit dem 12.09.2026 drin (Kap.&nbsp;6b).</li>
-<li>Planfr&auml;sen 232, die &uuml;brigen Bohrzyklen (202, 204, 205, 208, 209, 241), Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39 &mdash; in dieser Reihenfolge danach.</li>
+<li>Konturfr&auml;sen mit RL/RR, Konturzug 25 und SL-Zyklen 20&ndash;24 &mdash; n&auml;chstes Paket, braucht den XY-Kontureditor. Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
+<li>Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39, Abzeilen 230/231/233 &mdash; in dieser Reihenfolge danach.</li>
 <li>XY-Kontureditor und DXF-Import f&uuml;r Fr&auml;skonturen &mdash; Stufe 2.</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
 <li>Simulation &mdash; vorerst der Programm-Test der Steuerung.</li>
@@ -2954,9 +3057,16 @@ var F_PROFILE = {
       // Taschen / Zapfen / Nuten: 12.09.2026 nachmittags mit DZ4 im
       // Programm-Test des Programmierplatzes durchgelaufen (5:53 min, alle
       // sechs Formen in der Grafik), Rueckexport = App-Ausgabe (Pruefung 3c).
-      tascheR:'pgst', tascheK:'pgst', nut:'pgst', nutR:'pgst', zapfenR:'pgst', zapfenK:'pgst'
+      tascheR:'pgst', tascheK:'pgst', nut:'pgst', nutR:'pgst', zapfenR:'pgst', zapfenK:'pgst',
+      // Paket 3: 12.09.2026 abends mit DZ5 im Programm-Test durchgelaufen
+      // (5:01 min, alle acht Schritte in der Grafik). Der erste Lauf brach
+      // beim 241 mit "Falsche Drehzahl" ab: Q427 25 aus dem Handbuchbeispiel
+      // liegt unter der Mindestdrehzahl der Demo (50, MP3240.1) — mit 100
+      // durchgelaufen (T241A); Q426 5 brach mit "Undefinierter
+      // Programmstart" ab (T241B). Beides gelb in fPruefen.
+      ausdrehen:'pgst', senkenRueck:'pgst', tiefUni:'pgst', bohrfraesen:'pgst', gewindeSpan:'pgst', einlippen:'pgst', planfraesen:'pgst'
     },
-    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster) und DZ4 (Taschen, Nuten, Zapfen 251-257) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft',
+    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
     offen:'Lauf an einer der drei Maschinen (Stand 340 49x): Softwarestand je Maschine (MOD), M13/M9 an der PLC, Option Synchron-Gewindebohren (207); danach Daniels eigene .H-Programme als Fixtures'
   }
 };
@@ -2999,7 +3109,21 @@ var F_Q = {
   Q385:'VORSCHUB SCHLICHTEN', Q223:'KREISDURCHMESSER',    Q222:'ROHTEIL-DURCHM.',
   Q424:'ROHTEILMASS 1',      Q425:'ROHTEILMASS 2',        Q374:'DREHLAGE',
   Q375:'TEILKREIS-DURCHM.',  Q376:'STARTWINKEL',          Q248:'OEFFNUNGSWINKEL',
-  Q378:'WINKELSCHRITT',      Q377:'ANZAHL BEARBEITUNGEN'
+  Q378:'WINKELSCHRITT',      Q377:'ANZAHL BEARBEITUNGEN',
+  // Paket 3 (12.09.2026): Planfraesen 232 und die Bohrzyklen 202, 204, 205,
+  // 208, 209, 241 — Texte der Beispielsaetze 670 388-12 (S. 86, 94, 98, 101,
+  // 118, 104, 273). Das Handbuch druckt beim 205 in allen drei Staenden
+  // "ABNAHEBETRAG" — Druckfehler, der Dialog der TNC sagt ABNAHMEBETRAG
+  // (Q212 oben, beim 203 so gedruckt).
+  Q214:'FREIFAHR-RICHTUNG',  Q336:'WINKEL SPINDEL',       Q249:'TIEFE SENKUNG',
+  Q250:'MATERIALSTAERKE',    Q251:'EXZENTERMASS',         Q252:'SCHNEIDENHOEHE',
+  Q253:'VORSCHUB VORPOS.',   Q254:'VORSCHUB SENKEN',      Q255:'VERWEILZEIT',
+  Q258:'VORHALTEABSTAND OBEN', Q259:'VORHALTEABST. UNTEN', Q257:'BOHRTIEFE SPANBRUCH',
+  Q379:'STARTPUNKT',         Q334:'ZUSTELL-TIEFE',        Q335:'SOLL-DURCHMESSER',
+  Q342:'VORGEB. DURCHMESSER', Q403:'FAKTOR DREHZAHL',     Q426:'SP.-DREHRICHTUNG',
+  Q427:'DREHZAHL EIN-/AUSF.', Q428:'DREHZAHL BOHREN',     Q429:'KUEHLUNG EIN',
+  Q430:'KUEHLUNG AUS',       Q435:'VERWEILTIEFE',         Q389:'STRATEGIE',
+  Q227:'STARTPUNKT 3. ACHSE', Q386:'ENDPUNKT 3. ACHSE',   Q357:'SI.-ABSTAND SEITE'
 };
 
 // wort = Klartext fuer Meldungen, kurz = Arbeitsplanzeile (die lange Form
@@ -3046,10 +3170,36 @@ var F_ZYKLEN = {
     qText:{Q367:'ZAPFENLAGE'}},
   zapfenK:   {nr:257, titel:'KREISZAPFEN', wort:'Kreiszapfen', kurz:'Kreiszapfen', fraes:true, abStand:'06',
     q:['Q223','Q222','Q368','Q207','Q351','Q201','Q202','Q206','Q200','Q203','Q204','Q370'],
-    qText:{Q223:'FERTIGTEIL-DURCHM.'}}
+    qText:{Q223:'FERTIGTEIL-DURCHM.'}},
+  // ---- Paket 3 (12.09.2026): Planfraesen 232 und die uebrigen Bohrzyklen.
+  // Beispielsaetze 670 388-12 S. 86 (202), 94 (204), 98 (205), 101 (208),
+  // 118 (209), 104 (241), 273 (232); Staende -06 und -07 gleich, die Ausgabe
+  // 02 kennt beim 208 kein Q351 und beim 209 kein Q403 (qStand02 laesst sie
+  // dort weg) und den 241 gar nicht (abStand). qSigned: Woerter, die das
+  // Beispiel abweichend mit Vorzeichen druckt (209: Q256=+25).
+  ausdrehen:  {nr:202, titel:'AUSDREHEN', wort:'Ausdrehen', kurz:'Ausdrehen',
+    q:['Q200','Q201','Q206','Q211','Q208','Q203','Q204','Q214','Q336']},
+  // 204 hat KEINE Tiefe Q201: die Senkung Q249 zeigt nach oben (positiv).
+  senkenRueck:{nr:204, titel:'RUECKWAERTS-SENKEN', wort:'Rueckwaerts-Senken', kurz:'Rueckw.-Senken', ohneTiefe:true,
+    q:['Q200','Q249','Q250','Q251','Q252','Q253','Q254','Q255','Q203','Q204','Q214','Q336']},
+  tiefUni:    {nr:205, titel:'UNIVERSAL-TIEFBOHREN', wort:'Universal-Tiefbohren', kurz:'Tiefbohren 205',
+    q:['Q200','Q201','Q206','Q202','Q203','Q204','Q212','Q205','Q258','Q259','Q257','Q256','Q211','Q379','Q253']},
+  bohrfraesen:{nr:208, titel:'BOHRFRAESEN', wort:'Bohrfraesen', kurz:'Bohrfraesen',
+    q:['Q200','Q201','Q206','Q334','Q203','Q204','Q335','Q342','Q351'], qStand02:{Q351:1}},
+  gewindeSpan:{nr:209, titel:'GEW.-BOHREN SPANBR.', wort:'Gewindebohren mit Spanbruch', kurz:'Gewinde Spanbr.',
+    q:['Q200','Q201','Q239','Q203','Q204','Q257','Q256','Q336','Q403'], qStand02:{Q403:1}, qSigned:{Q256:1}},
+  einlippen:  {nr:241, titel:'EINLIPPEN-BOHREN', wort:'Einlippen-Bohren', kurz:'Einlippen 241', abStand:'06',
+    q:['Q200','Q201','Q206','Q211','Q203','Q204','Q379','Q253','Q208','Q426','Q427','Q428','Q429','Q430','Q435']},
+  // 232 traegt seinen Startpunkt selbst (Q225-Q227): kein Bohrbild, der
+  // Schreiber setzt CYCL CALL direkt hinter die Definition.
+  planfraesen:{nr:232, titel:'PLANFRAESEN', wort:'Planfraesen', kurz:'Planfraesen', fraes:true, eigenePosition:true,
+    q:['Q389','Q225','Q226','Q227','Q386','Q218','Q219','Q202','Q369','Q370','Q207','Q385','Q253','Q200','Q357','Q204'],
+    qText:{Q202:'MAX. ZUSTELL-TIEFE', Q370:'MAX. UEBERLAPPUNG'}}
 };
-var F_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','tascheR','tascheK','nut','nutR','zapfenR','zapfenK'];
-var F_FRAES_ARTEN = ['tascheR','tascheK','nut','nutR','zapfenR','zapfenK'];
+var F_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen',
+  'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen'];
+var F_FRAES_ARTEN = ['tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen'];
+var F_BOHR_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen'];
 // Software-Staende der iTNC 530, die die Ausgabe unterscheidet. '07' steht
 // fuer 340 49x-06/-07 und die 606 42x des Programmierplatzes (gleiche
 // Listen), '02' fuer die Ausgabe 02/03 von 2006 (Daniels SHW UniForce 6).
@@ -3078,9 +3228,11 @@ function klNum(v){
 // App gehalten wird.
 // Dazu aus den Beispielsaetzen der Fraeszyklen (Kap. 5): Q351=+1 (Fraesart),
 // Q374=+0 (Drehlage der Nut), Q376=+45 (Startwinkel der runden Nut).
-var F_Q_SIGNED = {Q201:1, Q203:1, Q216:1, Q217:1, Q225:1, Q226:1, Q237:1, Q238:1, Q224:1, Q245:1, Q246:1, Q247:1, Q239:1, Q351:1, Q374:1, Q376:1};
-function klQ(q, v){
-  if(F_Q_SIGNED[q]) return q + '=' + klNum(v);
+// Paket 3: Q249 (204, Senkung nach oben), Q227/Q386 (232, Hoehen absolut)
+// druckt das Handbuch mit Vorzeichen (Q249=+5, Q227=+2.5, Q386=-3).
+var F_Q_SIGNED = {Q201:1, Q203:1, Q216:1, Q217:1, Q225:1, Q226:1, Q237:1, Q238:1, Q224:1, Q245:1, Q246:1, Q247:1, Q239:1, Q351:1, Q374:1, Q376:1, Q249:1, Q227:1, Q386:1};
+function klQ(q, v, signiert){
+  if(F_Q_SIGNED[q] || signiert) return q + '=' + klNum(v);
   let n = Math.round((+v || 0) * 1000) / 1000;
   if(Math.abs(n) < 1e-9) n = 0;
   return q + '=' + n.toFixed(3).replace(/\.?0+$/, '');
@@ -3332,7 +3484,31 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
     });
     if(art === 'nut'){ s.l1 = 40; s.l2 = 12; }
     if(art === 'nutR'){ s.l2 = 10; }
+    if(art === 'planfraesen'){
+      // Planfraesen deckt als Vorgabe die ganze BLK FORM ab: Startpunkt an
+      // der MIN-Ecke auf der Oberflaeche, Endhoehe 1 mm tiefer, Laengen =
+      // Rohteil. Strategie 0 = Maeander mit seitlicher Zustellung ausserhalb.
+      Object.assign(s, {strategie:0, px:+k.x0 || 0, py:+k.y0 || 0, pz:+k.z1 || 0, zEnd:(+k.z1 || 0) - 1,
+        l1:(+k.x1 || 0) - (+k.x0 || 0), l2:(+k.y1 || 0) - (+k.y0 || 0), zust:2, aufTiefe:0, ueberl:1,
+        fVor:2000, scSeite:2, tiefe:-1});
+    }
   }
+  // Paket 3: Bohrzyklen 202/204/205/208/209/241 mit den Werten der
+  // Handbuchbeispiele als Vorgabe.
+  Object.assign(s, {
+    freifahr:(art === 'senkenRueck') ? 1 : 0, spWinkel:0,
+    q249:5, q250:20, q251:3.5, q252:15, fVor:750, fSenk:200, vSenk:0,
+    q258:0.5, q259:1, q257:5, q379:0,
+    q334:1.5, q335:Math.max(1, fRund((t.d || 10) * 2)), q342:0, fraesart:(s.fraesart == null ? 1 : s.fraesart), q403:1.5,
+    // Q427 100 statt der 25 des Handbuchbeispiels: am Programmierplatz (Demo
+    // 606 424, MP3240.1 = 50 U/min Mindestdrehzahl) brach der 241 mit
+    // "Falsche Drehzahl" ab, mit 100 lief er (12.09.2026 abends, T241A).
+    q426:3, q427:100, q428:t.s || 500, q429:8, q430:9, q435:0
+  });
+  if(art === 'planfraesen'){ s.fVor = 2000; }
+  if(art === 'tiefUni'){ s.zust = 15; s.abnahme = 0.5; s.minZust = 3; s.rzSpan = 0.2; s.vUnten = 0.25; }
+  if(art === 'ausdrehen'){ s.vUnten = 0.5; s.fRueck = 0; }
+  if(art === 'gewindeSpan'){ s.q257 = 5; s.rzSpan = 25; }
   return s;
 }
 
@@ -3373,6 +3549,24 @@ function fZyklusWerte(s, tool){
       Q248: +s.oeffnung || 0, Q378: +s.wschritt || 0, Q377: Math.max(1, Math.round(+s.anzahl || 1))
     });
   }
+  // Paket 3: Planfraesen 232 (Startpunkt und Endhoehe absolut, Seiten-
+  // laengen mit Vorzeichen als Richtung) und die Bohrzyklen 202/204/205/
+  // 208/209/241. Q253 ist der Vorschub Vorpositionieren (fVor), Q208 der
+  // Vorschub Rueckzug (fRueck, wie beim 201/203).
+  Object.assign(w, {
+    Q214: Math.round(+s.freifahr || 0), Q336: +s.spWinkel || 0,
+    Q249: +s.q249 || 0, Q250: +s.q250 || 0, Q251: +s.q251 || 0, Q252: +s.q252 || 0,
+    Q253: +s.fVor || 0, Q254: +s.fSenk || 0, Q255: +s.vSenk || 0,
+    Q258: +s.q258 || 0, Q259: +s.q259 || 0, Q257: +s.q257 || 0, Q379: +s.q379 || 0,
+    // Q351 Fraesart schreibt auch der 208 (Bohrfraesen) — ohne diese Zeile
+    // stand dort "+0" (die Fraes-Zuweisung oben gilt nur fuer fraes:true).
+    Q334: +s.q334 || 0, Q335: +s.q335 || 0, Q342: +s.q342 || 0, Q403: +s.q403 || 0, Q351: (+s.fraesart < 0) ? -1 : 1,
+    Q426: Math.round(+s.q426 || 3), Q427: +s.q427 || 0, Q428: +s.q428 || 0,
+    Q429: Math.round(+s.q429 || 0), Q430: Math.round(+s.q430 || 0), Q435: +s.q435 || 0,
+    Q389: Math.round(+s.strategie || 0), Q225: +s.px || 0, Q226: +s.py || 0, Q227: +s.pz || 0,
+    Q386: +s.zEnd || 0, Q357: +s.scSeite || 0
+  });
+  if(s.art === 'planfraesen'){ w.Q218 = +s.l1 || 0; w.Q219 = +s.l2 || 0; w.Q202 = +s.zust || 0; }
   return w;
 }
 // stand: Software-Stand der Zielsteuerung (F_STAENDE). Der 253 schreibt die
@@ -3382,11 +3576,14 @@ function fZyklusDef(s, tool, stand){
   const z = F_ZYKLEN[s.art]; if(!z) return null;
   const w = fZyklusWerte(s, tool);
   const zeilen = ['CYCL DEF ' + z.nr + ' ' + z.titel + ' ~'];
-  z.q.forEach((q0, i) => {
+  // Ausgabe 02: Woerter, die es dort noch nicht gab, fallen weg (208 Q351,
+  // 209 Q403) — die Liste endet dann ein Wort frueher.
+  const liste = z.q.filter(q => !(stand === '02' && z.qStand02 && z.qStand02[q]));
+  liste.forEach((q0, i) => {
     const q = (q0 === 'Q374' && stand === '02') ? 'Q224' : q0;
-    const letzte = (i === z.q.length - 1);
+    const letzte = (i === liste.length - 1);
     const text = (z.qText && z.qText[q]) || F_Q[q];
-    zeilen.push('    ' + klQ(q, w[q]).padEnd(11, ' ') + ';' + text + (letzte ? '' : ' ~'));
+    zeilen.push('    ' + klQ(q, w[q], !!(z.qSigned && z.qSigned[q])).padEnd(11, ' ') + ';' + text + (letzte ? '' : ' ~'));
   });
   return zeilen;
 }
@@ -3496,7 +3693,11 @@ function fProgrammSchreiben(prog, opt){
     satz('L Z' + klNum(rz) + ' R0 FMAX ' + (s.kuehl === 'aus' ? 'M3' : 'M13'));
     const def = fZyklusDef(s, tool, k.stand || '07');
     if(def){ satz(def[0]); for(let i = 1; i < def.length; i++) zeilen.push(def[i]); }
-    if(m && m.ausgabe === 'zyklus' && (m.typ === 'kreis' || m.typ === 'reihe')){
+    if(z && z.eigenePosition){
+      // Planfraesen 232: Startpunkt steckt im Zyklus, kein Bohrbild — ein
+      // CYCL CALL direkt hinter der Definition (CALL-aktiv).
+      satz('CYCL CALL');
+    } else if(m && m.ausgabe === 'zyklus' && (m.typ === 'kreis' || m.typ === 'reihe')){
       const md = fMusterZyklusDef(m, s);
       satz(md[0]); for(let i = 1; i < md.length; i++) zeilen.push(md[i]);
       warn.push('Schritt ' + (si + 1) + ': Musterzyklus ' + (m.typ === 'kreis' ? '220' : '221') + ' nach Handbuch (DEF-aktiv, ruft den Bohrzyklus selbst) — im Programm-Test die Punktfolge ansehen.');
@@ -3540,24 +3741,70 @@ function fPruefen(prog){
     if(!(+s.t > 0)) rot.push(nr + 'kein Werkzeug.');
     else if(!tool) gelb.push(nr + 'T' + s.t + ' steht nicht in der Werkzeugtabelle der App — TOOL CALL wird trotzdem geschrieben.');
     if(!F_ZYKLEN[s.art]) rot.push(nr + 'unbekannte Bearbeitungsart.');
+    const zyk = F_ZYKLEN[s.art] || {};
     const m = (prog.muster || [])[s.muster];
-    if(!m) rot.push(nr + 'kein Positionsmuster.');
+    if(zyk.eigenePosition){
+      // Planfraesen: die Flaeche steckt im Zyklus, kein Bohrbild noetig.
+    } else if(!m) rot.push(nr + 'kein Positionsmuster.');
     else if(!fMusterPunkte(m).length) rot.push(nr + 'Positionsmuster "' + (m.name || '') + '" hat keinen Punkt.');
     else {
       const p = fMusterPunkte(m);
       const drau = p.filter(q => q.x < +k.x0 - 1e-6 || q.x > +k.x1 + 1e-6 || q.y < +k.y0 - 1e-6 || q.y > +k.y1 + 1e-6);
       if(drau.length) gelb.push(nr + drau.length + ' Position(en) liegen ausserhalb der BLK FORM.');
     }
-    if(!(+s.tiefe < 0) && !(s.art === 'zentrieren' && s.zAuswahl === 'durchmesser')) rot.push(nr + 'Tiefe Q201 muss NEGATIV sein (nach unten), steht auf ' + s.tiefe + '.');
+    // 204 hat keine Tiefe Q201 (die Senkung Q249 zeigt nach oben), 232 hat
+    // Start- und Endhoehe statt Tiefe.
+    if(!zyk.ohneTiefe && !zyk.eigenePosition && !(+s.tiefe < 0) && !(s.art === 'zentrieren' && s.zAuswahl === 'durchmesser')) rot.push(nr + 'Tiefe Q201 muss NEGATIV sein (nach unten), steht auf ' + s.tiefe + '.');
     if(s.art === 'zentrieren' && s.zAuswahl === 'durchmesser' && !(+s.zDurchm > 0)) rot.push(nr + 'Zentrierdurchmesser Q344 fehlt.');
-    if(s.art !== 'gewindeGS' && !(+s.f > 0)) rot.push(nr + 'Vorschub F (mm/min) fehlt.');
+    // Ohne Vorschubwort: 207/209 fahren ueber die Steigung, 204 ueber Q253/Q254.
+    if(!/^(gewindeGS|gewindeSpan|senkenRueck)$/.test(s.art) && !(+s.f > 0)) rot.push(nr + 'Vorschub F (mm/min) fehlt.');
     if(!(+s.s > 0)) rot.push(nr + 'Drehzahl S fehlt.');
-    if((s.art === 'bohren' || s.art === 'tief') && +s.zust < 0) rot.push(nr + 'Zustell-Tiefe Q202 darf nicht negativ sein.');
+    if((s.art === 'bohren' || s.art === 'tief' || s.art === 'tiefUni') && +s.zust < 0) rot.push(nr + 'Zustell-Tiefe Q202 darf nicht negativ sein.');
     if(s.art === 'tief' && +s.spanbrueche > 0 && !(+s.rzSpan > 0)) gelb.push(nr + 'Spanbruch ohne Rueckzugsbetrag Q256.');
-    if((s.art === 'gewinde' || s.art === 'gewindeGS') && !(+s.steigung > 0)) rot.push(nr + 'Gewindesteigung fehlt.');
+    if((s.art === 'gewinde' || s.art === 'gewindeGS' || s.art === 'gewindeSpan') && !(+s.steigung > 0)) rot.push(nr + 'Gewindesteigung fehlt.');
     if(s.art === 'gewinde' && tool && +s.s > 0 && Math.abs(+s.f - (+s.steigung) * (+s.s)) > 0.05 * (+s.f || 1)) gelb.push(nr + 'F ' + s.f + ' passt nicht zu Steigung x Drehzahl = ' + fRund((+s.steigung) * (+s.s)) + ' (Ausgleichsfutter faengt nur wenig ab).');
     if(s.art === 'gewindeGS') gelb.push(nr + 'Zyklus 207 braucht die Synchron-Gewindebohren-Option der Maschine — sonst 206 mit Ausgleichsfutter.');
-    if(tool && tool.art === 'gewindebohrer' && s.art !== 'gewinde' && s.art !== 'gewindeGS') gelb.push(nr + 'Gewindebohrer T' + s.t + ' in einem Bohrzyklus.');
+    if(s.art === 'gewindeSpan') gelb.push(nr + 'Zyklus 209 (Gewindebohren mit Spanbruch) braucht wie 207 die geregelte Spindel (Synchron-Option).');
+    if(tool && tool.art === 'gewindebohrer' && !/^(gewinde|gewindeGS|gewindeSpan)$/.test(s.art)) gelb.push(nr + 'Gewindebohrer T' + s.t + ' in einem Bohrzyklus.');
+    // Paket 3: Grenzen aus den Handbuchseiten 86 (202), 94 (204), 101 (208),
+    // 118 (209), 104 (241), 273 (232) der 670 388-12.
+    if(zyk.abStand && String(k.stand || '07') < zyk.abStand && !zyk.fraes) rot.push(nr + 'Zyklus ' + zyk.nr + ' gibt es erst ab Software-Stand 340 49x-' + zyk.abStand + ' — der Programmkopf steht auf Stand ' + (k.stand || '07') + '.');
+    if(s.art === 'ausdrehen' && !(Math.round(+s.freifahr || 0) >= 0 && Math.round(+s.freifahr || 0) <= 4)) rot.push(nr + 'Freifahr-Richtung Q214 muss 0 bis 4 sein.');
+    if(s.art === 'senkenRueck'){
+      if(!(Math.round(+s.freifahr || 0) >= 1 && Math.round(+s.freifahr || 0) <= 4)) rot.push(nr + 'Rueckwaerts-Senken braucht eine Freifahr-Richtung Q214 von 1 bis 4 (0 = nicht freifahren geht hier nicht).');
+      if(!(+s.q249 > 0)) rot.push(nr + 'Tiefe Senkung Q249 muss POSITIV sein (die Senkung geht nach oben).');
+      if(!(+s.q250 > 0)) rot.push(nr + 'Materialstaerke Q250 fehlt.');
+      if(!(+s.fSenk > 0) || !(+s.fVor > 0)) rot.push(nr + 'Vorschub Vorpositionieren Q253 und Senken Q254 muessen groesser 0 sein.');
+    }
+    if(s.art === 'bohrfraesen'){
+      if(!(+s.q335 > 0)) rot.push(nr + 'Soll-Durchmesser Q335 fehlt.');
+      else if(tool && +tool.d > 0){
+        if(+tool.d >= +s.q335 - 1e-9) rot.push(nr + 'Fraeser ⌀' + tool.d + ' ist nicht kleiner als die Bohrung ⌀' + s.q335 + '.');
+        else if(+s.q335 > 2 * (+tool.d) + 1e-9) gelb.push(nr + 'Bohrung ⌀' + s.q335 + ' ueber dem doppelten Fraeser-⌀ ' + (2 * tool.d) + ' — bleibt ein Kern stehen?');
+      }
+      if(+s.q342 > 0 && +s.q342 >= +s.q335) rot.push(nr + 'Vorgebohrter Durchmesser Q342 muss kleiner als der Soll-Durchmesser sein.');
+      if(!(+s.q334 > 0)) rot.push(nr + 'Zustell-Tiefe je Helixgang Q334 fehlt.');
+    }
+    if(s.art === 'gewindeSpan' && !(+s.q257 > 0)) gelb.push(nr + 'Bohrtiefe Spanbruch Q257 = 0: kein Spanbruch, dann reicht 206/207.');
+    if(s.art === 'tiefUni' && !(+s.q257 > 0)) gelb.push(nr + 'Bohrtiefe Spanbruch Q257 = 0: der 205 bricht dann keinen Span.');
+    if(s.art === 'einlippen'){
+      if(!(+s.q428 > 0)) rot.push(nr + 'Drehzahl Bohren Q428 fehlt.');
+      // Programmierplatz 12.09.2026 abends (T241A/T241B): Q427 = 25 (Handbuch-
+      // beispiel) brach mit "Falsche Drehzahl" ab — die Demo hat 50 U/min
+      // Mindestdrehzahl (MP3240.1); Q426 = 5 (stehende Spindel) brach mit
+      // "Undefinierter Programmstart" am M99-Satz ab. Beides an der Maschine
+      // moeglich, aber ungeprueft — deshalb gelb.
+      if((+s.q427 > 0 && +s.q427 < 50) || (+s.q428 > 0 && +s.q428 < 50)) gelb.push(nr + 'Drehzahl Q427/Q428 unter 50 U/min: am Programmierplatz "Falsche Drehzahl" (Mindestdrehzahl der Demo 50) — die Mindestdrehzahl Deiner Maschine gilt.');
+      if(Math.round(+s.q426) === 5) gelb.push(nr + 'Q426 = 5 (stehende Spindel beim Ein-/Ausfahren) lief am Programmierplatz nicht (Undefinierter Programmstart) — an der Maschine pruefen, sonst 3 oder 4.');
+    }
+    if(s.art === 'planfraesen'){
+      if(!(Math.abs(+s.l1) > 0) || !(Math.abs(+s.l2) > 0)) rot.push(nr + 'Seitenlaengen Q218/Q219 muessen ungleich 0 sein (Vorzeichen = Richtung).');
+      if(!(+s.zEnd < +s.pz)) rot.push(nr + 'Endpunkt Q386 (' + s.zEnd + ') muss unter dem Startpunkt Q227 (' + s.pz + ') liegen.');
+      if(!(+s.zust > 0)) rot.push(nr + 'Max. Zustell-Tiefe Q202 fehlt.');
+      if(!(+s.fVor > 0)) rot.push(nr + 'Vorschub Vorpositionieren Q253 fehlt.');
+      // "kein Fraeser" meldet der Fraes-Block unten fuer alle fraes-Familien.
+      if(!(+s.ueberl >= 0.1 && +s.ueberl <= 1.414)) rot.push(nr + 'Max. Ueberlappung Q370 muss zwischen 0,1 und 1,414 liegen.');
+    }
     if(tool && s.art === 'reiben' && tool.art !== 'reibahle') gelb.push(nr + 'Reiben mit T' + s.t + ' (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
     if(+s.sc2 < +s.sc) gelb.push(nr + 'Q204 kleiner als Q200.');
     // LCUTS aus der TOOL.T: eine Tiefe ueber der Schneidenlaenge ist an der
@@ -3700,11 +3947,53 @@ function fDemoTaschen(){
   p.schritte = [a, b, c, d, e, f];
   return p;
 }
+// DZ5: Planfraesen 232 ueber die ganze Platte und die Bohrzyklen 202, 204,
+// 205, 208, 209, 241 — Werkzeugnummern wieder nach der TOOL.T des
+// Programmierplatzes (T32 Messerkopf D90, T5 D10, T40 VHM-Bohrer D8, T4 D8,
+// T7 D14 als Ausdrehstange, T2 D4 als Gewindebohrer M5, T3 D6 als Rueck-
+// waertssenker) — dort zaehlt nur R, die Art kennt die TNC nicht.
+function fDemoBohren2(){
+  const p = fProgrammNeu();
+  p.kopf.name = 'DZ5';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-30, x1:150, y1:100, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [
+    {nr:2,  name:'Gewindebohrer M5', art:'gewindebohrer', d:5,  steigung:0.8, s:500, f:400},
+    {nr:3,  name:'Rueckwaertssenker 6', art:'fraeser', d:6, s:800, f:200},
+    {nr:4,  name:'Schaftfraeser 8', art:'fraeser', d:8, s:3500, f:500},
+    {nr:5,  name:'Schaftfraeser 10', art:'fraeser', d:10, s:3000, f:600},
+    {nr:7,  name:'Ausdrehstange 14', art:'fraeser', d:14, s:1200, f:100},
+    {nr:32, name:'Messerkopf 90', art:'fraeser', d:90, s:1400, f:800},
+    {nr:40, name:'VHM-Bohrer 8', art:'bohrer', d:8, spitze:140, s:2500, f:150}
+  ];
+  p.muster = [
+    {name:'Reihe 2 Loecher M5', typ:'reihe', x0:30, y0:25, dx:40, dy:0, nx:2, ny:1, winkel:0, ausgabe:'punkte'},
+    {name:'Bohrung 25 (Bohrfraesen)', typ:'punkte', punkte:[{x:110, y:30}], ausgabe:'punkte'},
+    {name:'Tiefbohrung 8', typ:'punkte', punkte:[{x:30, y:70}], ausgabe:'punkte'},
+    {name:'Senkung von unten', typ:'punkte', punkte:[{x:75, y:70}], ausgabe:'punkte'},
+    {name:'Einlippenbohrung', typ:'punkte', punkte:[{x:120, y:75}], ausgabe:'punkte'}
+  ];
+  const pl = fSchrittNeu(p, 'planfraesen', 32, -1); Object.assign(pl, {strategie:0, px:0, py:0, pz:0, zEnd:-1, l1:150, l2:100, zust:1, aufTiefe:0, ueberl:0.8, f:800, fSchl:800, fVor:2000, sc:2, scSeite:2, sc2:50, s:1400});
+  const b1 = fSchrittNeu(p, 'bohren', 40, 0); Object.assign(b1, {tiefe:-12, zust:6, f:150, s:2500});
+  const g9 = fSchrittNeu(p, 'gewindeSpan', 2, 0); Object.assign(g9, {tiefe:-10, steigung:0.8, q257:3, rzSpan:2, spWinkel:0, q403:1.2, s:500});
+  const t5 = fSchrittNeu(p, 'tiefUni', 40, 2); Object.assign(t5, {tiefe:-28, zust:8, abnahme:0.5, minZust:3, q258:0.5, q259:1, q257:6, rzSpan:0.2, vUnten:0.25, q379:0, fVor:750, f:150, s:2500});
+  // Q335 18 mit dem 10er-Fraeser: unter dem doppelten Fraeser-⌀ (20), sonst
+  // meldet die Pruefung den moeglichen Restkern (gelb) — die Vorlage soll
+  // ohne Befund laufen.
+  const bf = fSchrittNeu(p, 'bohrfraesen', 5, 1); Object.assign(bf, {tiefe:-20, q334:1.5, q335:18, q342:0, fraesart:1, f:250, s:3000});
+  const au = fSchrittNeu(p, 'ausdrehen', 7, 1); Object.assign(au, {tiefe:-20, vUnten:0.5, fRueck:250, freifahr:1, spWinkel:0, f:100, s:1200});
+  const rs = fSchrittNeu(p, 'senkenRueck', 3, 3); Object.assign(rs, {q249:5, q250:30, q251:3.5, q252:15, fVor:750, fSenk:200, vSenk:0, freifahr:1, spWinkel:0, s:800});
+  // Q427 100: mit den 25 des Handbuchbeispiels meldete der Programmierplatz
+  // "Falsche Drehzahl" (Mindestdrehzahl der Demo 50 U/min), mit 100 lief er.
+  const el = fSchrittNeu(p, 'einlippen', 40, 4); Object.assign(el, {tiefe:-28, vUnten:0.25, q379:0, fVor:750, fRueck:1000, q426:3, q427:100, q428:2500, q429:8, q430:9, q435:0, f:150, s:2500});
+  p.schritte = [pl, b1, g9, t5, bf, au, rs, el];
+  return p;
+}
 var F_DEMOS = [
   {id:'flansch', name:'Flanschplatte (Lochkreis + M8-Ecken)', lade:fDemoFlansch},
   {id:'leiste',  name:'Leiste (Tieflochbohren + Reiben)',    lade:fDemoLeiste},
   {id:'muster',  name:'Musterzyklen 220/221 (Gewinde GS)',   lade:fDemoMusterzyklen},
-  {id:'taschen', name:'Taschen, Nuten, Zapfen (251-257)',    lade:fDemoTaschen}
+  {id:'taschen', name:'Taschen, Nuten, Zapfen (251-257)',    lade:fDemoTaschen},
+  {id:'bohren2', name:'Planfraesen 232 + Bohrzyklen 202/204/205/208/209/241', lade:fDemoBohren2}
 ];
 
 // Merkmale der Fraesausgabe fuer die NC-Ansicht: Status je Zyklusfamilie.
@@ -3724,6 +4013,13 @@ function fMerkmale(profilId){
     z('nutR',       'Runde Nut — Zyklus 254 (Q375 Teilkreis, Q216/Q217 Mitte, Q376 Start, Q248 Oeffnung, Q378/Q377 Wiederholung)'),
     z('zapfenR',    'Rechteckzapfen — Zyklus 256 (Q424/Q425 Rohteilmasse; erst ab Stand 340 49x-06)'),
     z('zapfenK',    'Kreiszapfen — Zyklus 257 (Q222 Rohteil-Durchmesser; erst ab Stand 340 49x-06)'),
+    z('planfraesen', 'Planfraesen — Zyklus 232 (Q389 Strategie, Startpunkt Q225-Q227, Endhoehe Q386, Q218/Q219 Laengen, Q357 SC Seite; CYCL CALL ohne Bohrbild)'),
+    z('ausdrehen',  'Ausdrehen — Zyklus 202 (Q214 Freifahr-Richtung 0-4, Q336 Spindelwinkel)'),
+    z('senkenRueck', 'Rueckwaerts-Senken — Zyklus 204 (Q249 Senktiefe nach oben, Q250 Materialstaerke, Q251/Q252 Exzenter/Schneidenhoehe, Q253/Q254 Vorschuebe, Q214 1-4)'),
+    z('tiefUni',    'Universal-Tiefbohren — Zyklus 205 (Q258/Q259 Vorhalteabstaende, Q257 Bohrtiefe Spanbruch, Q379 Startpunkt, Q253 Vorschub Vorpos.)'),
+    z('bohrfraesen', 'Bohrfraesen — Zyklus 208 (Q334 Zustellung je Helix, Q335 Soll-⌀, Q342 vorgebohrt, Q351 Fraesart — Stand 02 ohne Q351)'),
+    z('gewindeSpan', 'Gewindebohren mit Spanbruch — Zyklus 209 (Q257 Bohrtiefe Spanbruch, Q256 Rueckzug, Q336 Spindelwinkel, Q403 Drehzahlfaktor — Stand 02 ohne Q403)'),
+    z('einlippen',  'Einlippen-Bohren — Zyklus 241 (Q379 Startpunkt, Q426 Drehrichtung, Q427/Q428 Drehzahlen, Q429/Q430 Kuehlung, Q435 Verweiltiefe; erst ab Stand -06)'),
     z('lbl',        'Positionsmuster als Unterprogramm LBL n mit L X Y R0 FMAX M99 je Punkt (Vorgabe)'),
     z('muster220',  'Lochkreis als Zyklus 220 (Option je Muster; Q246 bei Q247 ungleich 0 ohne Bedeutung)'),
     z('muster221',  'Reihe/Gitter als Zyklus 221 (Option je Muster)'),
@@ -3946,9 +4242,11 @@ function fArbeitsplanRender(){
     const z = F_ZYKLEN[s.art] || {nr:'?', wort:s.art};
     const t = fWerkzeug(s.t);
     const m = fProg.muster[s.muster];
-    const detail = (m ? esc(m.name) : '<span style="color:#c0392b">kein Bohrbild</span>') +
+    // 232 traegt seine Flaeche selbst (kein Bohrbild), 204 hat statt der
+    // Tiefe die Senkung Q249 nach oben.
+    const detail = (z.eigenePosition ? 'Fläche im Zyklus' : (m ? esc(m.name) : '<span style="color:#c0392b">kein Bohrbild</span>')) +
       (z.fraes ? ' · ' + esc(fFormText(s)) : '') +
-      ' · Q201 ' + s.tiefe + (s.art === 'gewinde' || s.art === 'gewindeGS' ? ' · P' + s.steigung : '') +
+      (z.eigenePosition ? '' : (z.ohneTiefe ? ' · Q249 +' + (s.q249 || 0) : ' · Q201 ' + s.tiefe)) + (/^(gewinde|gewindeGS|gewindeSpan)$/.test(s.art) ? ' · P' + s.steigung : '') +
       ' · F' + s.f + ' S' + s.s + (s.kuehl === 'aus' ? ' · trocken' : '');
     h += '<div class="ap-row' + sel('schritt', i) + (s.aktiv === false ? ' ap-aus' : '') + '" data-sidx="' + i + '">' +
          '<div class="ap-icon zyklus" title="Zyklus ' + z.nr + '">' + z.nr + '</div>' +
@@ -3961,7 +4259,7 @@ function fArbeitsplanRender(){
          '<button class="ap-edit" data-es="' + i + '">✎</button><button class="ap-del" data-ds="' + i + '">✕</button></div>';
   });
   if(!fProg.schritte.length && !fProg.muster.length){
-    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen drei Testvorlagen.</div>';
+    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen f&uuml;nf Testvorlagen.</div>';
   }
   body.innerHTML = h;
 }
@@ -4043,7 +4341,7 @@ function fDraufsicht(){
   // Schritte als Kreise im Werkzeugdurchmesser
   fProg.schritte.forEach((s, si) => {
     if(s.aktiv === false) return;
-    const m = fProg.muster[s.muster]; if(!m) return;
+    const m = fProg.muster[s.muster]; if(!m && !(F_ZYKLEN[s.art] || {}).eigenePosition) return;
     const t = fWerkzeug(s.t); const d = (t && +t.d > 0) ? +t.d : 5;
     const aktiv = fSel && fSel.typ === 'schritt' && fSel.idx === si;
     if((F_ZYKLEN[s.art] || {}).fraes){ fDraufsichtForm(ctx, s, m, X, Y, sc, aktiv, dunkel); return; }
@@ -4056,7 +4354,7 @@ function fDraufsicht(){
   const info = document.getElementById('fdInfo');
   if(info){
     let txt = 'Rohteil ' + (k.x1 - k.x0) + ' × ' + (k.y1 - k.y0) + ' × ' + (k.z1 - k.z0) + ' mm · ' + fProg.muster.reduce((a, m) => a + fMusterPunkte(m).length, 0) + ' Bohrpositionen';
-    if(fSel && fSel.typ === 'schritt' && fProg.schritte[fSel.idx]){ const s = fProg.schritte[fSel.idx]; const t = fWerkzeug(s.t); txt = 'Schritt ' + (fSel.idx + 1) + ': ' + (F_ZYKLEN[s.art] || {}).wort + ' T' + s.t + (t ? ' ⌀' + t.d : '') + ' · Q201 ' + s.tiefe; }
+    if(fSel && fSel.typ === 'schritt' && fProg.schritte[fSel.idx]){ const s = fProg.schritte[fSel.idx]; const t = fWerkzeug(s.t); const zz = F_ZYKLEN[s.art] || {}; txt = 'Schritt ' + (fSel.idx + 1) + ': ' + zz.wort + ' T' + s.t + (t ? ' ⌀' + t.d : '') + (zz.eigenePosition ? ' · Z' + s.pz + ' → Z' + s.zEnd : (zz.ohneTiefe ? ' · Q249 +' + (s.q249 || 0) : ' · Q201 ' + s.tiefe)); }
     if(fSel && fSel.typ === 'muster' && fProg.muster[fSel.idx]) txt = fMusterText(fProg.muster[fSel.idx]) + ' — Punkte nummeriert in Abfahrfolge';
     info.textContent = txt;
   }
@@ -4070,6 +4368,7 @@ function fFormText(s){
     case 'nutR':    return 'Runde Nut B' + s.l2 + ' auf ⌀' + s.teilkreis + ' · ' + s.start + '°+' + s.oeffnung + '°' + (+s.anzahl > 1 ? ' ×' + s.anzahl : '');
     case 'zapfenR': return 'Zapfen ' + s.l1 + '×' + s.l2 + ' R' + s.r + ' (Roh ' + s.roh1 + '×' + s.roh2 + ')';
     case 'zapfenK': return 'Kreiszapfen ⌀' + s.dm + ' (Roh ⌀' + s.dmRoh + ')';
+    case 'planfraesen': return 'Fläche ' + s.l1 + '×' + s.l2 + ' ab X' + s.px + ' Y' + s.py + ' · Z' + s.pz + ' → Z' + s.zEnd + ' · Strategie ' + (s.strategie || 0);
   }
   return '';
 }
@@ -4082,9 +4381,19 @@ function fFormText(s){
 // gestrichelt. Das ist ein Schema der Lage, keine Bahn — die Bahnen
 // rechnet die Steuerung.
 function fDraufsichtForm(ctx, s, m, X, Y, sc, aktiv, dunkel){
-  const punkte = fMusterPunkte(m);
   ctx.strokeStyle = aktiv ? '#e07020' : (dunkel ? '#8fd0a0' : '#1d7a3a'); ctx.lineWidth = aktiv ? 2.2 : 1.2;
   ctx.fillStyle = aktiv ? 'rgba(224,112,32,.18)' : (dunkel ? 'rgba(143,208,160,.18)' : 'rgba(29,122,58,.13)');
+  if(s.art === 'planfraesen'){
+    // 232: Flaeche vom Startpunkt aus, Laengen mit Vorzeichen als Richtung —
+    // kein Bohrbild, gestrichelt (Flaeche, keine Kontur) mit Startmarke.
+    const l1 = +s.l1 || 0, l2 = +s.l2 || 0, x0 = Math.min(+s.px, +s.px + l1), x1 = Math.max(+s.px, +s.px + l1), y0 = Math.min(+s.py, +s.py + l2), y1 = Math.max(+s.py, +s.py + l2);
+    ctx.setLineDash([6, 3]);
+    ctx.fillRect(X(x0), Y(y1), (x1 - x0) * sc, (y1 - y0) * sc); ctx.strokeRect(X(x0), Y(y1), (x1 - x0) * sc, (y1 - y0) * sc);
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(X(+s.px), Y(+s.py), 3.5, 0, Math.PI * 2); ctx.stroke();
+    return;
+  }
+  const punkte = fMusterPunkte(m);
   const dreh = (+s.dreh || 0) * Math.PI / 180;
   // Welt-Drehung gegen den Uhrzeiger ist am Bildschirm (Y nach unten) rotate(-a).
   const rundRect = (cx, cy, w, h, r, fuellen, dash) => {
@@ -4236,24 +4545,48 @@ function fMusterOeffnen(idx){
 // =====================================================================
 // MASKE BOHREN
 // =====================================================================
+// Sichtbarkeit je Zyklus: die Zeilen folgen den Q-Listen in F_ZYKLEN — was
+// ein Zyklus nicht schreibt, zeigt die Maske nicht. Die Gruppen Spanbruch
+// (203/205/209), Gewinde (206/207/209), Freifahren (202/204/209) teilen
+// sich mehrere Zyklen; die Gruppen 204/208/241 gehoeren je einem.
 function fBohrenSync(){
   const art = selBtnVal('fbArtBtns') || 'bohren';
+  const hat = (q) => ((F_ZYKLEN[art] || {}).q || []).indexOf(q) >= 0;
   const zeig = (id, an) => { const e = document.getElementById(id); if(e) e.style.display = an ? '' : 'none'; };
   const grp = (id, an) => { const e = document.getElementById(id); if(e){ e.style.display = an ? '' : 'none'; if(an) e.classList.add('auf'); } };
-  zeig('fbQ202Row', art === 'bohren' || art === 'tief');
-  grp('fbGrpZent', art === 'zentrieren'); grp('fbGrpTief', art === 'tief'); grp('fbGrpGew', art === 'gewinde' || art === 'gewindeGS');
-  zeig('fbQ210Row', art === 'bohren' || art === 'tief');
-  zeig('fbQ211Row', art !== 'gewindeGS');
-  zeig('fbQ208Row', art === 'tief' || art === 'reiben');
+  const stand02 = (((fProg && fProg.kopf && fProg.kopf.stand) || '07') === '02');
+  zeig('fbQ201Row', hat('Q201')); zeig('fbQ202Row', hat('Q202'));
+  grp('fbGrpZent', art === 'zentrieren');
+  grp('fbGrpTief', hat('Q212') || hat('Q257'));
+  zeig('fbQ212Row', hat('Q212')); zeig('fbQ213Row', hat('Q213')); zeig('fbQ205Row', hat('Q205'));
+  zeig('fbQ257Row', hat('Q257')); zeig('fbQ256Row', hat('Q256')); zeig('fbQ258Row', hat('Q258')); zeig('fbQ259Row', hat('Q259'));
+  grp('fbGrpGew', hat('Q239') || art === 'gewinde');
+  zeig('fbQ403Row', hat('Q403') && !stand02);
+  grp('fbGrpFrei', hat('Q214') || hat('Q336'));
+  zeig('fbQ214Row', hat('Q214')); zeig('fbQ336Row', hat('Q336'));
+  grp('fbGrpSenk', art === 'senkenRueck'); grp('fbGrpBF', art === 'bohrfraesen'); grp('fbGrpEin', art === 'einlippen');
+  zeig('fbQ351Row', hat('Q351') && !stand02);
+  zeig('fbQ210Row', hat('Q210')); zeig('fbQ211Row', hat('Q211')); zeig('fbQ208Row', hat('Q208'));
+  zeig('fbQ253Row', hat('Q253')); zeig('fbQ379Row', hat('Q379'));
   zeig('fbQ344Row', selBtnVal('fbZAuswBtns') === 'durchmesser');
-  const fF = document.getElementById('fbF'); if(fF) fF.disabled = (art === 'gewindeGS');
+  // Ohne Vorschubwort: 207/209 fahren ueber die Steigung, 204 ueber Q253/Q254.
+  const fF = document.getElementById('fbF'); if(fF) fF.disabled = !hat('Q206');
   mgruppeZusammenfassen('fbGrpZent', 'fbZusZent', selBtnVal('fbZAuswBtns') === 'durchmesser' ? 'auf ⌀ ' + getNum('fbQ344') : 'auf Tiefe', selBtnVal('fbZAuswBtns') === 'durchmesser');
-  const sb = getNum('fbQ213'); mgruppeZusammenfassen('fbGrpTief', 'fbZusTief', sb > 0 ? 'Spanbruch alle ' + sb + ' · Abnahme ' + getNum('fbQ212') : 'Entspanen je Zustellung', sb > 0);
-  mgruppeZusammenfassen('fbGrpGew', 'fbZusGew', 'P ' + getNum('fbSteig'), false);
-  const vz = getNum('fbQ210') || getNum('fbQ211') || getNum('fbQ208');
-  mgruppeZusammenfassen('fbGrpZeit', 'fbZusZeit', vz ? ('oben ' + getNum('fbQ210') + ' s · unten ' + getNum('fbQ211') + ' s · Rückzug F' + getNum('fbQ208')) : 'keine', !!vz);
+  const sb = getNum('fbQ213');
+  if(art === 'tief') mgruppeZusammenfassen('fbGrpTief', 'fbZusTief', sb > 0 ? 'Spanbruch alle ' + sb + ' · Abnahme ' + getNum('fbQ212') : 'Entspanen je Zustellung', sb > 0);
+  else mgruppeZusammenfassen('fbGrpTief', 'fbZusTief', (getNum('fbQ257') > 0 ? 'Spanbruch alle ' + getNum('fbQ257') + ' mm · RZ ' + getNum('fbQ256') : 'kein Spanbruch'), !(getNum('fbQ257') > 0));
+  mgruppeZusammenfassen('fbGrpGew', 'fbZusGew', 'P ' + getNum('fbSteig') + (art === 'gewindeSpan' && !stand02 ? ' · Faktor ' + getNum('fbQ403') : ''), false);
+  const frei = Math.round(getNum('fbQ214')); const freiTxt = ({0:'nicht freifahren', 1:'−X', 2:'−Y', 3:'+X', 4:'+Y'})[frei] || '';
+  mgruppeZusammenfassen('fbGrpFrei', 'fbZusFrei', (hat('Q214') ? freiTxt + ' · ' : '') + 'Spindel ' + getNum('fbQ336') + '°', hat('Q214') && frei === 0 && art === 'senkenRueck');
+  mgruppeZusammenfassen('fbGrpSenk', 'fbZusSenk', 'Senkung ' + getNum('fbQ249') + ' · Material ' + getNum('fbQ250') + ' · F ' + getNum('fbQ254'), false);
+  mgruppeZusammenfassen('fbGrpBF', 'fbZusBF', '⌀ ' + getNum('fbQ335') + (getNum('fbQ342') > 0 ? ' (vorgebohrt ' + getNum('fbQ342') + ')' : '') + ' · Helix ' + getNum('fbQ334'), false);
+  mgruppeZusammenfassen('fbGrpEin', 'fbZusEin', 'S ' + getNum('fbQ428') + ' · M' + Math.round(getNum('fbQ429')) + '/M' + Math.round(getNum('fbQ430')), false);
+  const vz = getNum('fbQ210') || getNum('fbQ211') || getNum('fbQ208') || getNum('fbQ379');
+  mgruppeZusammenfassen('fbGrpZeit', 'fbZusZeit', vz ? ('oben ' + getNum('fbQ210') + ' s · unten ' + getNum('fbQ211') + ' s · Rückzug F' + getNum('fbQ208') + (hat('Q379') ? ' · Start ' + getNum('fbQ379') : '')) : 'keine', !!vz);
   const einfach = (selBtnVal('fbEingabeBtns') || 'einfach') === 'einfach';
-  ['fbGrpZeit'].forEach(id => { const e = document.getElementById(id); if(e && e.style.display !== 'none') e.style.display = einfach ? 'none' : ''; });
+  // 204/205/241 brauchen Q253 (rot ohne Wert) — ihre Gruppe bleibt auch im
+  // einfachen Modus offen, sonst steht ein Pflichtfeld unsichtbar da.
+  ['fbGrpZeit'].forEach(id => { const e = document.getElementById(id); if(e && e.style.display !== 'none') e.style.display = (einfach && !hat('Q253')) ? 'none' : ''; });
 }
 function fBohrenWerkzeugeFuellen(tNr){
   const sel = document.getElementById('fbT'); if(!sel) return;
@@ -4267,7 +4600,14 @@ function fBohrenOeffnen(art, idx){
   let s;
   if(fEditSchritt >= 0) s = fProg.schritte[fEditSchritt];
   else {
-    const tVor = fProg.werkzeuge.find(w => (art === 'zentrieren' && w.art === 'zentrierer') || (art === 'reiben' && w.art === 'reibahle') || ((art === 'gewinde' || art === 'gewindeGS') && w.art === 'gewindebohrer') || ((art === 'bohren' || art === 'tief') && w.art === 'bohrer')) || fProg.werkzeuge[0] || {nr:1};
+    // Werkzeugvorschlag je Zyklus. Die App kennt fuenf Arten (F_WERKZEUGARTEN);
+    // Bohrstange (TOOL.T-Typ BOR) und Rueckwaertssenker (BCKBOR) laufen als
+    // Fraeser — fuer 202/204 entscheidet deshalb zuerst der NAME, dann die Art.
+    const artWunsch = ({zentrieren:'zentrierer', reiben:'reibahle', gewinde:'gewindebohrer', gewindeGS:'gewindebohrer', gewindeSpan:'gewindebohrer',
+      ausdrehen:'fraeser', senkenRueck:'fraeser', bohrfraesen:'fraeser'})[art] || 'bohrer';
+    const nameWunsch = ({ausdrehen:/AUSDREH|BOHRSTANGE|\bBOR\b/i, senkenRueck:/SENK|BCKBOR|RUECKW/i})[art];
+    const tVor = (nameWunsch && fProg.werkzeuge.find(w => nameWunsch.test(String(w.name || '')))) ||
+      fProg.werkzeuge.find(w => w.art === artWunsch) || fProg.werkzeuge.find(w => w.art === 'bohrer') || fProg.werkzeuge[0] || {nr:1};
     const mIdx = (fSel && fSel.typ === 'muster') ? fSel.idx : (fProg.muster.length ? fProg.muster.length - 1 : -1);
     s = fSchrittNeu(fProg, art || 'bohren', tVor.nr, mIdx);
   }
@@ -4279,7 +4619,18 @@ function fBohrenOeffnen(art, idx){
   setVal('fbQ212', s.abnahme || 0); setVal('fbQ213', s.spanbrueche || 0); setVal('fbQ205', s.minZust || 0); setVal('fbQ256', s.rzSpan != null ? s.rzSpan : 0.2);
   setVal('fbSteig', s.steigung || 1.5);
   setVal('fbQ210', s.vOben || 0); setVal('fbQ211', s.vUnten || 0); setVal('fbQ208', s.fRueck || 0);
-  const abweich = (s.vOben || s.vUnten || s.fRueck);
+  // Paket 3 (202/204/205/208/209/241): Vorgaben aus fSchrittNeu, alte
+  // Schritte ohne diese Felder bekommen dieselben Vorgaben.
+  const v = (x, d) => (x == null ? d : x);
+  setVal('fbQ214', String(Math.round(v(s.freifahr, 0)))); setVal('fbQ336', v(s.spWinkel, 0));
+  setVal('fbQ249', v(s.q249, 5)); setVal('fbQ250', v(s.q250, 20)); setVal('fbQ251', v(s.q251, 3.5)); setVal('fbQ252', v(s.q252, 15));
+  setVal('fbQ253', v(s.fVor, 750)); setVal('fbQ254', v(s.fSenk, 200)); setVal('fbQ255', v(s.vSenk, 0));
+  setVal('fbQ257', v(s.q257, 5)); setVal('fbQ258', v(s.q258, 0.5)); setVal('fbQ259', v(s.q259, 1)); setVal('fbQ379', v(s.q379, 0));
+  setVal('fbQ334', v(s.q334, 1.5)); setVal('fbQ335', v(s.q335, 20)); setVal('fbQ342', v(s.q342, 0)); setRadio('fbFraesartBtns', (+s.fraesart < 0) ? '-1' : '1');
+  setVal('fbQ403', v(s.q403, 1.5));
+  setVal('fbQ426', String(Math.round(v(s.q426, 3)))); setVal('fbQ427', v(s.q427, 25)); setVal('fbQ428', v(s.q428, s.s || 500));
+  setVal('fbQ429', v(s.q429, 8)); setVal('fbQ430', v(s.q430, 9)); setVal('fbQ435', v(s.q435, 0));
+  const abweich = (s.vOben || s.vUnten || s.fRueck || s.q379);
   setRadio('fbEingabeBtns', abweich ? 'komplett' : 'einfach');
   fBohrenSync();
   maskZeigen('maskBohren');
@@ -4293,6 +4644,13 @@ function fBohrenLesen(basis){
   s.zAuswahl = selBtnVal('fbZAuswBtns') || 'tiefe'; s.zDurchm = getNum('fbQ344');
   s.abnahme = getNum('fbQ212'); s.spanbrueche = Math.round(getNum('fbQ213')); s.minZust = getNum('fbQ205'); s.rzSpan = getNum('fbQ256');
   s.steigung = getNum('fbSteig'); s.vOben = getNum('fbQ210'); s.vUnten = getNum('fbQ211'); s.fRueck = getNum('fbQ208');
+  s.freifahr = Math.round(getNum('fbQ214', 0)); s.spWinkel = getNum('fbQ336');
+  s.q249 = getNum('fbQ249'); s.q250 = getNum('fbQ250'); s.q251 = getNum('fbQ251'); s.q252 = getNum('fbQ252');
+  s.fVor = getNum('fbQ253'); s.fSenk = getNum('fbQ254'); s.vSenk = getNum('fbQ255');
+  s.q257 = getNum('fbQ257'); s.q258 = getNum('fbQ258'); s.q259 = getNum('fbQ259'); s.q379 = getNum('fbQ379');
+  s.q334 = getNum('fbQ334'); s.q335 = getNum('fbQ335'); s.q342 = getNum('fbQ342'); s.fraesart = (+(selBtnVal('fbFraesartBtns') || 1) < 0) ? -1 : 1;
+  s.q403 = getNum('fbQ403', 1.5);
+  s.q426 = Math.round(getNum('fbQ426', 3)); s.q427 = getNum('fbQ427'); s.q428 = getNum('fbQ428'); s.q429 = Math.round(getNum('fbQ429', 8)); s.q430 = Math.round(getNum('fbQ430', 9)); s.q435 = getNum('fbQ435');
   return s;
 }
 {
@@ -4304,7 +4662,7 @@ function fBohrenLesen(basis){
     if(v === 'zentrieren' && getNum('fbQ201') < -6) setVal('fbQ201', -3);
     fBohrenSync();
   });
-  wireRadioGroup('fbKuehlBtns'); wireRadioGroup('fbZAuswBtns', fBohrenSync); wireRadioGroup('fbEingabeBtns', fBohrenSync);
+  wireRadioGroup('fbKuehlBtns'); wireRadioGroup('fbZAuswBtns', fBohrenSync); wireRadioGroup('fbEingabeBtns', fBohrenSync); wireRadioGroup('fbFraesartBtns');
   const mb = document.getElementById('maskBohren');
   if(mb && mb.addEventListener) mb.addEventListener('input', (e)=>{
     const id = e.target && e.target.id;
@@ -4316,7 +4674,8 @@ function fBohrenLesen(basis){
   const ok = document.getElementById('btnFbOk'); if(ok) ok.onclick = ()=>{
     const s = fBohrenLesen(fEditSchritt >= 0 ? fProg.schritte[fEditSchritt] : null);
     if(s.muster < 0 || !fProg.muster[s.muster]){ melde('FEHLER: erst ein Bohrbild (Positionen) anlegen und im Schritt waehlen.'); return; }
-    if(!(s.tiefe < 0) && !(s.art === 'zentrieren' && s.zAuswahl === 'durchmesser')){ melde('FEHLER: Q201 Tiefe muss NEGATIV sein (nach unten).'); return; }
+    // 204 hat keine Tiefe Q201 (Senkung Q249 nach oben, fPruefen wacht dort).
+    if(!(F_ZYKLEN[s.art] || {}).ohneTiefe && !(s.tiefe < 0) && !(s.art === 'zentrieren' && s.zAuswahl === 'durchmesser')){ melde('FEHLER: Q201 Tiefe muss NEGATIV sein (nach unten).'); return; }
     if(fEditSchritt >= 0) fProg.schritte[fEditSchritt] = s; else { fProg.schritte.push(s); fSel = {typ:'schritt', idx:fProg.schritte.length - 1}; }
     maskZu('maskBohren'); fRender();
   };
@@ -4339,10 +4698,19 @@ function fFraesenSync(){
   const txt = (id, t) => { const e = document.getElementById(id); if(e) e.textContent = t; };
   const zapfen = (art === 'zapfenR' || art === 'zapfenK');
   const rechteck = (art === 'tascheR' || art === 'zapfenR');
-  zeig('fzUmfangRow', !zapfen);
-  zeig('fzL1Row', rechteck || art === 'nut'); zeig('fzL2Row', rechteck || art === 'nut' || art === 'nutR');
-  txt('fzL1Label', art === 'nut' ? 'Q218 Nutlänge' : 'Q218 1. Seitenlänge');
-  txt('fzL2Label', (art === 'nut' || art === 'nutR') ? 'Q219 Nutbreite' : 'Q219 2. Seitenlänge');
+  // Planfraesen 232: Flaeche im Zyklus (Q225-Q227, Q386, Q218/Q219 signiert),
+  // kein Bohrbild, kein Q201/Q203/Q206/Q351/Q366/Q368/Q338; Q202 und Q370
+  // heissen dort MAX. ZUSTELL-TIEFE / MAX. UEBERLAPPUNG.
+  const plan = (art === 'planfraesen');
+  zeig('fzMusterRow', !plan); zeig('fzStratRow', plan); zeig('fzStartRow', plan); zeig('fzPzRow', plan); zeig('fzZEndRow', plan);
+  zeig('fzQ253Row', plan); zeig('fzQ357Row', plan); zeig('fzQ206Row', !plan); zeig('fzFraesartRow', !plan);
+  zeig('fzQ201Row', !plan); zeig('fzQ203Row', !plan); zeig('fzQ368Row', !zapfen && !plan);
+  txt('fzQ202Label', plan ? 'Q202 Max. Zustelltiefe' : 'Q202 Zustelltiefe');
+  txt('fzQ370Label', plan ? 'Q370 Max. Überlappung' : 'Q370 Bahn-Überlappung');
+  zeig('fzUmfangRow', !zapfen && !plan);
+  zeig('fzL1Row', rechteck || art === 'nut' || plan); zeig('fzL2Row', rechteck || art === 'nut' || art === 'nutR' || plan);
+  txt('fzL1Label', art === 'nut' ? 'Q218 Nutlänge' : (plan ? 'Q218 1. Seitenlänge (±X)' : 'Q218 1. Seitenlänge'));
+  txt('fzL2Label', (art === 'nut' || art === 'nutR') ? 'Q219 Nutbreite' : (plan ? 'Q219 2. Seitenlänge (±Y)' : 'Q219 2. Seitenlänge'));
   zeig('fzRRow', rechteck);
   zeig('fzDmRow', art === 'tascheK' || art === 'zapfenK'); txt('fzDmLabel', art === 'zapfenK' ? 'Q223 Fertig-⌀' : 'Q223 Kreis-⌀');
   zeig('fzRohRow', art === 'zapfenR'); zeig('fzDmRohRow', art === 'zapfenK');
@@ -4359,9 +4727,9 @@ function fFraesenSync(){
   const rund = (art === 'nutR');
   zeig('fzTeilkreisRow', rund); zeig('fzWinkelRow', rund); zeig('fzWiederRow', rund);
   zeig('fzMitteRow', rund && String(getStr('fzLage') || '0') === '0');
-  zeig('fzQ369Row', !zapfen); zeig('fzQ338Row', !zapfen); zeig('fzQ385Row', !zapfen);
+  zeig('fzQ369Row', !zapfen); zeig('fzQ338Row', !zapfen && !plan); zeig('fzQ385Row', !zapfen);
   zeig('fzQ370Row', art !== 'nut' && art !== 'nutR');
-  zeig('fzEintauchRow', !zapfen);
+  zeig('fzEintauchRow', !zapfen && !plan);
   const einfach = (selBtnVal('fzEingabeBtns') || 'einfach') === 'einfach';
   const g = document.getElementById('fzGrpBahn'); if(g){ g.style.display = einfach ? 'none' : ''; if(!einfach) g.classList.add('auf'); }
   const ev = selBtnVal('fzEintauchBtns') || '0';
@@ -4380,7 +4748,11 @@ function fFraesenOeffnen(art, idx){
   let s;
   if(fEditSchritt >= 0) s = fProg.schritte[fEditSchritt];
   else {
-    const tVor = fProg.werkzeuge.find(w => w.art === 'fraeser') || fProg.werkzeuge[0] || {nr:1};
+    // Planfraesen nimmt den GROESSTEN Fraeser der Tabelle (Messerkopf), die
+    // Formen den ersten — in DZ5 waere der erste Fraeser der 6er
+    // Rueckwaertssenker gewesen (Aufnahme b-14, 12.09.2026).
+    const fr = fProg.werkzeuge.filter(w => w.art === 'fraeser');
+    const tVor = (art === 'planfraesen' && fr.length ? fr.slice().sort((a, b) => (+b.d || 0) - (+a.d || 0))[0] : fr[0]) || fProg.werkzeuge[0] || {nr:1};
     const mIdx = (fSel && fSel.typ === 'muster') ? fSel.idx : (fProg.muster.length ? fProg.muster.length - 1 : -1);
     s = fSchrittNeu(fProg, art || 'tascheR', tVor.nr, mIdx);
   }
@@ -4395,7 +4767,11 @@ function fFraesenOeffnen(art, idx){
   setVal('fzQ201', s.tiefe); setVal('fzQ202', s.zust || 0); setVal('fzQ368', s.aufSeite || 0); setVal('fzQ369', s.aufTiefe || 0); setVal('fzQ338', s.zustSchl || 0);
   setVal('fzQ370', s.ueberl != null ? s.ueberl : 1); setRadio('fzEintauchBtns', String(s.eintauch || 0));
   setVal('fzQ200', s.sc); setVal('fzQ203', s.q203); setVal('fzQ204', s.sc2);
-  const abweich = (+s.eintauch) || (+s.ueberl && +s.ueberl !== 1) || (+s.sc !== +fProg.kopf.sc) || (+s.sc2 !== +fProg.kopf.sc2);
+  // Planfraesen 232 (Vorgaben aus fSchrittNeu: Flaeche = BLK FORM).
+  const v = (x, d) => (x == null ? d : x);
+  setVal('fzStrategie', String(Math.round(v(s.strategie, 0)))); setVal('fzPx', v(s.px, 0)); setVal('fzPy', v(s.py, 0));
+  setVal('fzPz', v(s.pz, 0)); setVal('fzZEnd', v(s.zEnd, -1)); setVal('fzQ253', v(s.fVor, 2000)); setVal('fzQ357', v(s.scSeite, 2));
+  const abweich = (+s.eintauch) || (+s.ueberl && +s.ueberl !== 1) || (+s.sc !== +fProg.kopf.sc) || (+s.sc2 !== +fProg.kopf.sc2) || (s.art === 'planfraesen' && +v(s.scSeite, 2) !== 2);
   setRadio('fzEingabeBtns', abweich ? 'komplett' : 'einfach');
   fFraesenSync();
   maskZeigen('maskFraesen');
@@ -4413,6 +4789,8 @@ function fFraesenLesen(basis){
   s.tiefe = getNum('fzQ201', -10); s.zust = getNum('fzQ202'); s.aufSeite = getNum('fzQ368'); s.aufTiefe = getNum('fzQ369'); s.zustSchl = getNum('fzQ338');
   s.ueberl = getNum('fzQ370', 1); s.eintauch = Math.round(+(selBtnVal('fzEintauchBtns') || 0));
   s.sc = getNum('fzQ200', 2); s.q203 = getNum('fzQ203'); s.sc2 = getNum('fzQ204', 50);
+  s.strategie = Math.round(getNum('fzStrategie', 0)); s.px = getNum('fzPx'); s.py = getNum('fzPy'); s.pz = getNum('fzPz'); s.zEnd = getNum('fzZEnd', -1);
+  s.fVor = getNum('fzQ253', 2000); s.scSeite = getNum('fzQ357', 2);
   return s;
 }
 {
@@ -4431,8 +4809,10 @@ function fFraesenLesen(basis){
   const tsel = document.getElementById('fzT'); if(tsel && tsel.addEventListener) tsel.addEventListener('change', ()=>{ const t = fWerkzeug(Math.round(getNum('fzT', 0))); if(t){ setVal('fzS', t.s); setVal('fzF', t.f); setVal('fzQ206', fRund(t.f * 0.3)); setVal('fzQ385', t.f); } });
   const ok = document.getElementById('btnFzOk'); if(ok) ok.onclick = ()=>{
     const s = fFraesenLesen(fEditSchritt >= 0 ? fProg.schritte[fEditSchritt] : null);
-    if(s.muster < 0 || !fProg.muster[s.muster]){ melde('FEHLER: erst Positionen (Bohrbild) anlegen und im Schritt waehlen.'); return; }
-    if(!(s.tiefe < 0)){ melde('FEHLER: Q201 Tiefe muss NEGATIV sein (nach unten).'); return; }
+    const eigen = !!(F_ZYKLEN[s.art] || {}).eigenePosition;   // 232: Flaeche im Zyklus, kein Bohrbild
+    if(!eigen && (s.muster < 0 || !fProg.muster[s.muster])){ melde('FEHLER: erst Positionen (Bohrbild) anlegen und im Schritt waehlen.'); return; }
+    if(!eigen && !(s.tiefe < 0)){ melde('FEHLER: Q201 Tiefe muss NEGATIV sein (nach unten).'); return; }
+    if(eigen && !(s.zEnd < s.pz)){ melde('FEHLER: Q386 Endpunkt Z muss unter dem Startpunkt Q227 liegen.'); return; }
     if(fEditSchritt >= 0) fProg.schritte[fEditSchritt] = s; else { fProg.schritte.push(s); fSel = {typ:'schritt', idx:fProg.schritte.length - 1}; }
     maskZu('maskFraesen'); fRender();
   };
@@ -4454,6 +4834,7 @@ function fFraesenLesen(basis){
   on('skTasche', ()=>fFraesenOeffnen('tascheR'));
   on('skNut', ()=>fFraesenOeffnen('nut'));
   on('skZapfen', ()=>fFraesenOeffnen('zapfenR'));
+  on('skPlan', ()=>fFraesenOeffnen('planfraesen'));
   on('hskTools', ()=>{ fWzListe(); maskZeigen('maskWerkzeuge'); });
   on('hskProgs', ()=>{ fProgListe(); setVal('pmSaveName', fProg.kopf.name); maskZeigen('maskProgramme'); });
   on('hskGcode', ()=>{ maskZeigen('maskGcode'); fNcErzeugen(); });
@@ -4651,6 +5032,7 @@ function fProgListe(){
   on('btnDemoLeiste', ()=>{ fProgrammSetzen(fDemoLeiste(), 'DZ2 Leiste geladen: Reihe 5x Tieflochbohren mit Spanbruch, Mitte 11.8 vorbohren und 12 H7 reiben.'); maskZu('maskProgramme'); });
   on('btnDemoMuster', ()=>{ fProgrammSetzen(fDemoMusterzyklen(), 'DZ3 geladen: Gitter als Zyklus 221, Lochkreis als Zyklus 220, Gewinde GS 207.'); maskZu('maskProgramme'); });
   on('btnDemoTaschen', ()=>{ fProgrammSetzen(fDemoTaschen(), 'DZ4 geladen: Rechteck- und Kreistasche, Nut, runde Nut, Rechteck- und Kreiszapfen (Zyklen 251-257).'); maskZu('maskProgramme'); });
+  on('btnDemoBohren2', ()=>{ fProgrammSetzen(fDemoBohren2(), 'DZ5 geladen: Planfraesen 232, Bohren 200, Gewinde Spanbruch 209, Tiefbohren 205, Bohrfraesen 208, Ausdrehen 202, Rueckwaerts-Senken 204, Einlippen 241.'); maskZu('maskProgramme'); });
   on('btnCloseProgs', ()=>maskZu('maskProgramme'));
 }
 
