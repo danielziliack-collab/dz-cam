@@ -5,7 +5,7 @@ const CACHE='dzcam-v1';
 // Verzeichnis-Index, und EIN Fehlschlag laesst addAll die GANZE
 // Installation verwerfen (lokal genau so passiert). Navigationen
 // fallen unten auf index.html zurueck.
-const DATEIEN=['./index.html','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png'];
+const DATEIEN=['./index.html','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png','./fraesen.html','./manifest-fraesen.webmanifest'];
 self.addEventListener('install', e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(DATEIEN)).then(()=>self.skipWaiting()));
 });
