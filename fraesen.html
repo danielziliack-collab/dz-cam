@@ -2364,6 +2364,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     body.mode-arbeitsplan .sk.sk-grp .ic svg{width:18px;height:13px;}
     body.mode-arbeitsplan .sk.sk-zyk{min-height:40px;padding:1px 3px;gap:1px;}
     #maskKopf, #maskMuster, #maskKontur{width:min(860px,94vw) !important;}
+    #maskSim{width:min(1180px,94vw) !important;height:88vh !important;}
     #maskWerkzeuge, #maskProgramme{width:min(900px,94vw) !important;}
   }
 </style>
@@ -2480,6 +2481,25 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
         <div class="mask-body" id="zyBody"></div>
       </div>
 
+      <!-- ===== SIMULATION (Paket D, 13.09.2026): Draufsicht des Hoehenfelds,
+           Zeitachse aus den Vorschueben, Werkzeug orange, Eilgang rot gestrichelt,
+           Kollisionen als rotes Kreuz. Kern in F10 (fSim*), Uhr und Zeichnen in F20. ===== -->
+      <div class="mask" id="maskSim" style="position:fixed;z-index:30;">
+        <div class="mask-head"><span class="mtitel">SIMULATION (eigene Bahn)</span><span id="simInfo" style="font-size:10.5px;color:var(--text-dim);font-weight:400;margin-left:8px;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span><button class="gcbtn" id="btnSimZu" style="margin-left:auto;min-width:40px;">✕</button></div>
+        <div class="gcode-head" style="gap:6px;flex-wrap:wrap;">
+          <button class="gcbtn primary" id="btnSimPlay" title="Abspielen / Pause">▶ Start</button>
+          <button class="gcbtn" id="btnSimEnde" title="Sofort bis zum Ende rechnen">⏭ Ende</button>
+          <button class="gcbtn" id="btnSimNeu" title="Rohteil neu, von vorn">↺ Neu</button>
+          <label style="font-size:11.5px;display:flex;align-items:center;gap:4px;">Tempo <select id="simTempo" class="tool-select" style="width:auto;min-width:0;"><option value="1">1×</option><option value="5" selected>5×</option><option value="25">25×</option><option value="max">max</option></select></label>
+          <input type="range" id="simPos" min="0" max="1000" value="0" style="flex:1 1 120px;min-width:80px;" title="Zeitachse">
+        </div>
+        <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
+          <canvas id="simCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;"></canvas>
+          <div class="small-hint" id="simHinweise" style="flex:0 0 auto;max-height:18vh;overflow-y:auto;"></div>
+          <div class="small-hint" style="flex:0 0 auto;">Draufsicht: unberührt blaugrau, Abtrag je tiefer je dunkler. Werkzeug orange, Vorschub grün, Eilgang rot gestrichelt, Kollision = rotes Kreuz (Eilgang durch stehendes Material). Bohrer als Zylinder ohne Spitze. Zeit aus Vorschubweg / F, Eilgang mit 6 m/min.</div>
+        </div>
+      </div>
+
       <!-- ===== NC-AUSGABE ===== -->
       <div class="mask" id="maskGcode" style="position:fixed;z-index:30;">
         <div class="mask-head"><span class="mtitel">NC-AUSGABE (KLARTEXT .H)</span><span id="gcodeStat" style="font-size:10.5px;color:var(--text-dim);font-weight:400;margin-left:8px;"></span><button class="gcbtn" id="btnCloseGcode" style="margin-left:auto;min-width:40px;">✕</button></div>
@@ -2581,6 +2601,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
   <div class="hsoftkeys view-arbeitsplan">
     <div class="hsk" id="hskTools" title="Werkzeugtabelle"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8 L17 4 L20 8 L15 12 Z"/><line x1="2" y1="8" x2="12" y2="8"/></svg><span>Werkzeuge</span></div>
     <div class="hsk" id="hskProgs"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2.5" width="16" height="11" rx="1.5"/><line x1="6" y1="6" x2="16" y2="6"/><line x1="6" y1="9.5" x2="13" y2="9.5"/></svg><span>Programme</span></div>
+    <div class="hsk" id="hskSim" title="Eigene Simulation der Bahnen"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3 L4 13 L14 8 Z"/><circle cx="17.5" cy="8" r="2.5"/></svg><span>Simulation</span></div>
     <div class="hsk primary" id="hskGcode" title="Klartext-Ausgabe"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3 L2.5 8 L7 13"/><path d="M15 3 L19.5 8 L15 13"/></svg><span>NC-Ausgabe</span></div>
   </div>
 
@@ -2885,6 +2906,17 @@ Kreisb&ouml;gen: die Steuerung verlangt Start und Ende eines <code>C</code>-Satz
 Mitte deshalb auf die Mittelsenkrechte der gerundeten S&auml;tze, mit vier Nachkommastellen, wo n&ouml;tig. Die Vorlage DZ6 (die Leiste als Einzels&auml;tze, eine Bohrung je
 Schritt &mdash; der Wandler des Programmierplatzes nimmt nur 100 S&auml;tze) ist das Testprogramm f&uuml;r den Programmierplatz.</div>
 
+<h2 id="ba-fk06d">6d &nbsp;Simulation &mdash; die eigene Bahn im Bild</h2>
+<p>Der Knopf <b>Simulation</b> in der Fu&szlig;leiste f&auml;hrt die Bahnen der App &uuml;ber ein <b>H&ouml;henfeld</b> des Rohteils (Raster nach Rohteilgr&ouml;&szlig;e, 0,2 bis 1&nbsp;mm):
+jede Zelle tr&auml;gt ihre Materialh&ouml;he, das Werkzeug ist ein Zylinder mit dem Radius aus der Tabelle und stempelt entlang jeder Bewegung (Gerade, Kreisbogen, Helix)
+die Zellen unter sich herunter. <b>Eilg&auml;nge</b> werden nicht gestempelt, sondern gegen den Stand zu ihrem Zeitpunkt gepr&uuml;ft &mdash; steht Material &uuml;ber der
+Fahrh&ouml;he, ist das eine Kollision (rotes Kreuz, Z&auml;hler in der Kopfzeile). Draufsicht: unber&uuml;hrt blaugrau, Abtrag je tiefer je dunkler; Vorschub gr&uuml;n,
+Eilgang rot gestrichelt, Werkzeug orange. Start/Pause, Tempo 1&times; bis max, Ende (alles rechnen), Neu, und der Regler auf der Zeitachse (Vorschubweg / F,
+Eilgang mit 6&nbsp;m/min, Verweilzeiten in Sekunden).</p>
+<p><b>Was sie zeigt und was nicht:</b> Sie f&auml;hrt die <b>eigene Bahnlogik</b> der App (Kap.&nbsp;6c) &mdash; bei Zyklus-Ausgabe also den Ablauf, den die App aus
+denselben Werten nach dem Handbuch nachbaut, nicht die Steuerung selbst. Zyklen ohne eigene Bahn (Gewinde GS 207/209, R&uuml;ckw&auml;rts-Senken, Bohrfr&auml;sen,
+Einlippen, Ausdrehen mit Freifahren) erscheinen als einfache Bohrung bis zur Tiefe und werden im Hinweis benannt; Helix und Pendeln ohne ANGLE laufen senkrecht.
+Bohrer werden als Zylinder gestempelt, die Spitze fehlt im Bild. Der Programm-Test der Steuerung bleibt die Referenz vor dem ersten Lauf.</p>
 <h2 id="ba-fk07">7 &nbsp;NC-Ausgabe und Weg zur Maschine</h2>
 <p>Aufbau: <code>BEGIN PGM</code>, zwei <code>BLK FORM</code>-S&auml;tze, Kommentar, je Schritt <code>TOOL CALL</code>,
 <code>L Z+.. R0 FMAX M13</code>, <code>CYCL DEF</code> mit den Q-Zeilen, <code>CALL LBL n</code> (oder Musterzyklus),
@@ -2906,7 +2938,7 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 <li>Eigene Bahnlogik: Bohrfamilie, Taschen, Nuten, Zapfen, Planfr&auml;sen und Konturzug schreiben seit dem 12./13.09.2026 Einzels&auml;tze (Kap.&nbsp;6c) &mdash; darauf der Siemens-Post.</li>
 <li>DXF-Import: gebaut (Kap.&nbsp;5b), aber nur an handgeschriebenen DXF-Dateien gepr&uuml;ft &mdash; echte CAD-Exporte von Daniel fehlen noch als Fixtures; Bema&szlig;ung, Bl&ouml;cke und Ellipsen liest er nicht.</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
-<li>Eigene Simulation auf den Bahnen aus Paket C &mdash; Paket D; bis dahin der Programm-Test der Steuerung.</li>
+<li>Simulation (Kap.&nbsp;6d): Draufsicht mit Tiefenschattierung &mdash; keine 3D-Ansicht, keine Bohrerspitze, keine Halter/Spannmittel; Zyklen ohne eigene Bahn nur als Bohrung.</li>
 <li>Sinumerik 840D powerline als zweites Profil &mdash; nach den MPF-Dateien vom Schwager.</li>
 </ul>
     </div></div>
@@ -4965,6 +4997,155 @@ function fDxfKonturen(text, name){
   if(ignoriert.length) hinweise.push('Nicht gelesen: ' + ignoriert.map(k => k + ' x' + D.arten[k]).join(', ') + ' (Bemassung, Text, Bloecke, Schraffur, Ellipsen, alte POLYLINE).');
   konturen.forEach(kt => { const K = fKonturSegmente(kt); if(K.fehler.length) hinweise.push('Kontur "' + kt.name + '": ' + K.fehler.join('; ')); });
   return {konturen:konturen, hinweise:hinweise, zuege:D.segs.length + D.kreise.length, ketten:ketten.length, einheit:D.unit};
+}
+
+// ---------------------------------------------------------------------
+// EIGENE SIMULATION (Paket D, 13.09.2026, Daniels "eine eigene Simulation
+// waere super"): faehrt die Bahnen der App (eil/vor/kreis/helix/verweil aus
+// fBahnSchritt) ueber ein HOEHENFELD des Rohteils — ein Raster in XY mit der
+// Materialhoehe je Zelle, wie das Hoehenfeld des Drehteils, nur eben statt
+// rotationssymmetrisch. Das Werkzeug ist ein Zylinder mit dem Radius aus der
+// Tabelle; jede Bewegung wird in Schritten von hoechstens einer halben
+// Rasterweite abgetastet und stempelt die Zellen unter dem Werkzeug auf ihre
+// Z-Hoehe herunter (Abtrag ist monoton: zweimal dasselbe wegnehmen aendert
+// nichts, deshalb darf grob abgetastet und angebrochen weitergerechnet werden).
+// EILGAENGE werden nicht gestempelt, sondern gegen den Stand ZU IHREM
+// ZEITPUNKT geprueft: steht unter dem Werkzeug Material ueber der Fahrhoehe,
+// ist das eine Kollision (rot). Bohrer gelten als Zylinder (die Spitze fehlt
+// — das Bild zeigt eine flache Bohrung, der Kegel steht als Hinweis).
+// Zyklen ohne eigene Bahn (207/209/204/208/241, 202 mit Freifahren) werden
+// als einfache Bohrung nachgebildet und im Hinweis benannt; die
+// Steuerungszyklen selbst rechnet die App NICHT nach — sie zeigt, was ihre
+// eigene Bahnlogik daraus macht (bei Zyklus-Ausgabe also den Ablauf, den die
+// Steuerung mit denselben Werten faehrt, nach dem Handbuch nachgebaut).
+// Zeitachse: Vorschubweg / F, Eilgang mit F_SIM_EILGANG (die TNC-Demo kennt
+// kein Eilgangwort), Verweilzeit in Sekunden.
+// ---------------------------------------------------------------------
+var F_SIM_EILGANG = 6000;   // mm/min fuer FMAX in der Zeitachse (kein NC-Wort, nur Anzeige)
+// Bahnen aller aktiven Schritte, mit Rueckfall fuer Familien ohne eigene Bahn.
+function fSimBahnen(prog){
+  const k = prog.kopf || {}, rz = +k.rz || 100, hinweise = [], bahnen = [];
+  const schritte = (prog.schritte || []).filter(s => s && s.aktiv !== false);
+  schritte.forEach((s, si) => {
+    const tool = (prog.werkzeuge || []).find(w => w.nr === s.t) || {};
+    const z = F_ZYKLEN[s.art] || {};
+    const rt = (+tool.d > 0) ? +tool.d / 2 : 2.5;
+    if(!(+tool.d > 0)) hinweise.push('Schritt ' + (si + 1) + ': T' + s.t + ' ohne Durchmesser in der Tabelle — mit ⌀5 simuliert.');
+    let punkte = [];
+    if(!z.eigenePosition && !z.kontur){ const m = (prog.muster || [])[s.muster]; punkte = fMusterPunkte(m); if(!punkte.length){ hinweise.push('Schritt ' + (si + 1) + ': keine Position — uebersprungen.'); return; } }
+    let b = null;
+    try{ b = fBahnSchritt(Object.assign({}, s, {ausgabe:'einzel'}), Object.assign({d:2 * rt}, tool), prog, punkte); }catch(e){ b = {ok:false, grund:e.message, bahn:[]}; }
+    if(!b.ok && z.fraes && Math.round(+s.eintauch || 0) > 0){
+      // Helix/Pendeln ohne ANGLE: senkrecht eintauchen und benennen
+      try{ b = fBahnSchritt(Object.assign({}, s, {ausgabe:'einzel', eintauch:0}), Object.assign({d:2 * rt}, tool), prog, punkte); }catch(e){ b = {ok:false, grund:e.message, bahn:[]}; }
+      if(b.ok) hinweise.push('Schritt ' + (si + 1) + ': Eintauchen als senkrecht simuliert (' + (F_ZYKLEN[s.art] || {}).wort + ' ohne ANGLE).');
+    }
+    if(!b.ok){
+      if(z.fraes || z.kontur){ hinweise.push('Schritt ' + (si + 1) + ' (' + (z.wort || s.art) + '): keine Bahn — ' + b.grund + ' — uebersprungen.'); return; }
+      // Bohrfamilie ohne eigene Bahn: einfache Bohrung auf Tiefe
+      const z0 = +s.q203 || 0, sc = +s.sc || 2, sc2 = Math.max(+s.sc2 || 0, sc);
+      const tiefe = z.ohneTiefe ? -Math.max(+s.q250 || 0, 1) : (+s.tiefe || -1);
+      const f = (+s.f > 0) ? +s.f : ((+s.fSenk > 0) ? +s.fSenk : ((+s.steigung > 0 && +s.s > 0) ? fRund(+s.steigung * +s.s) : 100));
+      const bahn = [];
+      punkte.forEach(p => { bahn.push({a:'eil', x:p.x, y:p.y}); bahn.push({a:'eil', z:fRund(z0 + sc)}); bahn.push({a:'vor', z:fRund(z0 + tiefe), f:f}); bahn.push({a:'eil', z:fRund(z0 + sc2)}); });
+      b = {ok:true, bahn:bahn, warn:[], zT:fRund(z0 + tiefe)};
+      hinweise.push('Schritt ' + (si + 1) + ' (' + (z.wort || s.art) + '): ohne eigene Bahn — als einfache Bohrung bis Z' + b.zT + ' simuliert.');
+    }
+    if(tool.art && tool.art !== 'fraeser' && (z.fraes || z.kontur)) hinweise.push('Schritt ' + (si + 1) + ': T' + s.t + ' ist kein Fraeser.');
+    if(!tool.art || tool.art !== 'fraeser') { /* Bohrer: Zylinder, Spitze fehlt */ }
+    const moves = [{a:'eil', z:rz, m:null}].concat(b.bahn).concat([{a:'eil', z:rz}]);
+    bahnen.push({schritt:si, art:s.art, t:s.t, rt:rt, bohrer:(tool.art && tool.art !== 'fraeser'), moves:moves});
+  });
+  if(bahnen.some(bh => bh.bohrer)) hinweise.push('Bohrwerkzeuge werden als Zylinder gestempelt — die Bohrspitze zeigt das Bild nicht.');
+  return {bahnen:bahnen, hinweise:hinweise};
+}
+// Absolute Positionen und Zeiten je Bewegung (Start bei X0 Y0 auf der sicheren Hoehe).
+function fSimZeitachse(bahnen, prog){
+  const k = prog.kopf || {}; let x = +k.x0 || 0, y = +k.y0 || 0, z = +k.rz || 100, t = 0;
+  const liste = [];
+  bahnen.forEach(bh => bh.moves.forEach((m, mi) => {
+    const p0 = {x:x, y:y, z:z};
+    let x1 = (m.x != null) ? m.x : x, y1 = (m.y != null) ? m.y : y, z1 = (m.z != null) ? m.z : z, weg = 0, dauer = 0;
+    if(m.a === 'eil' || m.a === 'vor'){ weg = Math.hypot(x1 - x, y1 - y, z1 - z); dauer = weg / ((m.a === 'eil') ? F_SIM_EILGANG : Math.max(1, +m.f || 1)) * 60; }
+    else if(m.a === 'kreis'){ const sg = {x0:x, y0:y, x1:m.x, y1:m.y, cx:m.cx, cy:m.cy, dr:m.dr}; const r = Math.hypot(x - m.cx, y - m.cy); weg = Math.abs(fBogenWinkel(sg)) * r; if(m.z != null) weg = Math.hypot(weg, m.z - z); dauer = weg / Math.max(1, +m.f || 1) * 60; }
+    else if(m.a === 'helix'){ const r = Math.hypot(x - m.cx, y - m.cy); weg = Math.hypot(2 * Math.PI * r * (+m.turns || 0), +m.dz || 0); z1 = (m.z != null) ? m.z : z + (+m.dz || 0); dauer = weg / Math.max(1, +m.f || 1) * 60; }
+    else if(m.a === 'verweil'){ dauer = +m.t || 0; }
+    liste.push({schritt:bh.schritt, rt:bh.rt, m:m, p0:p0, p1:{x:x1, y:y1, z:z1}, weg:weg, t0:t, t1:t + dauer});
+    x = x1; y = y1; z = z1; t += dauer;
+  }));
+  return {liste:liste, gesamt:t};
+}
+// Hoehenfeld: Raster ueber die BLK FORM, Zellhoehe = Oberkante.
+function fSimFeld(prog, raster){
+  const k = prog.kopf || {};
+  const x0 = Math.min(+k.x0, +k.x1), x1 = Math.max(+k.x0, +k.x1), y0 = Math.min(+k.y0, +k.y1), y1 = Math.max(+k.y0, +k.y1);
+  const bw = Math.max(1, x1 - x0), bh = Math.max(1, y1 - y0);
+  const r = raster || Math.max(0.2, Math.min(1, Math.max(bw, bh) / 400));
+  const nx = Math.max(1, Math.ceil(bw / r)), ny = Math.max(1, Math.ceil(bh / r));
+  const h = new Float32Array(nx * ny); h.fill(+k.z1 || 0);
+  return {x0:x0, y0:y0, nx:nx, ny:ny, raster:r, h:h, oben:+k.z1 || 0, unten:+k.z0 || 0, gen:0};
+}
+// Zylinderstempel: Zellen im Radius r um (x,y) auf hoechstens z. Liefert true,
+// wenn unter dem Werkzeug Material UEBER z stand (fuer die Eilgangpruefung).
+function fSimStempel(F, x, y, z, r, nurPruefen){
+  const i0 = Math.max(0, Math.floor((x - r - F.x0) / F.raster)), i1 = Math.min(F.nx - 1, Math.ceil((x + r - F.x0) / F.raster));
+  const j0 = Math.max(0, Math.floor((y - r - F.y0) / F.raster)), j1 = Math.min(F.ny - 1, Math.ceil((y + r - F.y0) / F.raster));
+  const r2 = r * r; let traf = false;
+  for(let j = j0; j <= j1; j++){
+    const cy = F.y0 + (j + 0.5) * F.raster;
+    for(let i = i0; i <= i1; i++){
+      const cx = F.x0 + (i + 0.5) * F.raster;
+      if((cx - x) * (cx - x) + (cy - y) * (cy - y) > r2) continue;
+      const idx = j * F.nx + i;
+      if(F.h[idx] > z + 1e-6){ traf = true; if(nurPruefen) return true; F.h[idx] = z; }
+    }
+  }
+  if(traf && !nurPruefen) F.gen++;
+  return traf;
+}
+// Punkt auf einer Bewegung bei Anteil u (0..1); Bogen und Helix ueber den Winkel.
+function fSimPunkt(e, u){
+  const m = e.m, p0 = e.p0, p1 = e.p1;
+  if(m.a === 'kreis' || m.a === 'helix'){
+    const r0 = Math.hypot(p0.x - m.cx, p0.y - m.cy);
+    let sw;
+    if(m.a === 'kreis') sw = fBogenWinkel({x0:p0.x, y0:p0.y, x1:p1.x, y1:p1.y, cx:m.cx, cy:m.cy, dr:m.dr});
+    else sw = 2 * Math.PI * (+m.turns || 0) * (m.dr > 0 ? 1 : -1);
+    const a0 = Math.atan2(p0.y - m.cy, p0.x - m.cx), a = a0 + sw * u;
+    return {x:m.cx + r0 * Math.cos(a), y:m.cy + r0 * Math.sin(a), z:p0.z + (p1.z - p0.z) * u};
+  }
+  return {x:p0.x + (p1.x - p0.x) * u, y:p0.y + (p1.y - p0.y) * u, z:p0.z + (p1.z - p0.z) * u};
+}
+// Eine Bewegung von Anteil uA bis uB ins Feld stempeln (vor/kreis/helix) bzw.
+// pruefen (eil). Liefert bei Eilgang die erste Kollision oder null.
+function fSimFahren(F, e, uA, uB){
+  const m = e.m; if(m.a === 'verweil' || m.a === 'kom') return null;
+  if(e.p1.z >= F.oben - 1e-9 && e.p0.z >= F.oben - 1e-9 && m.a !== 'eil') return null;   // ueber dem Rohteil
+  if(m.a === 'eil' && Math.min(e.p0.z, e.p1.z) >= F.oben - 1e-9) return null;
+  // Abtastung auf einem FESTEN Raster u = k/N je Bewegung: ein Stueck [uA,uB] stempelt
+  // genau die Rasterpunkte darin — so ergibt die schrittweise Uhr (fSimBis) dasselbe Feld
+  // wie der komplette Lauf (mit freier Teilung wichen 38 Randzellen ab).
+  const schritt = Math.max(F.raster * 0.5, Math.min(e.rt * 0.5, 1)) / Math.max(e.weg, 1e-9);
+  const N = Math.max(1, Math.ceil(1 / Math.max(schritt, 1e-6)));
+  const kA = (uA <= 0) ? 0 : Math.floor(uA * N + 1e-9) + 1, kB = Math.min(N, Math.floor(uB * N + 1e-9));
+  for(let k = kA; k <= kB; k++){
+    const u = k / N, p = fSimPunkt(e, u);
+    if(m.a === 'eil'){ if(p.z < F.oben - 1e-9 && fSimStempel(F, p.x, p.y, p.z, e.rt, true)) return {x:fRund(p.x), y:fRund(p.y), z:fRund(p.z), schritt:e.schritt}; }
+    else if(p.z < F.oben - 1e-9) fSimStempel(F, p.x, p.y, p.z, e.rt, false);
+  }
+  return null;
+}
+// Kompletter Lauf (Pruefstand, "Ende"): Feld, Kollisionen, Zeit.
+function fSimLauf(prog, raster){
+  const B = fSimBahnen(prog), Z = fSimZeitachse(B.bahnen, prog), F = fSimFeld(prog, raster), koll = [];
+  Z.liste.forEach((e, i) => { const c = fSimFahren(F, e, 0, 1); if(c){ c.bewegung = i; koll.push(c); } });
+  return {feld:F, kollisionen:koll, zeit:Z.gesamt, liste:Z.liste, hinweise:B.hinweise, bahnen:B.bahnen};
+}
+// Hoehe des Feldes an einer Weltkoordinate (Pruefstand).
+function fSimHoehe(F, x, y){
+  const i = Math.floor((x - F.x0) / F.raster), j = Math.floor((y - F.y0) / F.raster);
+  if(i < 0 || j < 0 || i >= F.nx || j >= F.ny) return null;
+  return F.h[j * F.nx + i];
 }
 
 // ---------------------------------------------------------------------
@@ -7228,6 +7409,143 @@ function fHilfebild(fokus){
     mk.addEventListener('focusout', ()=>{ setTimeout(()=>{ const a = document.activeElement; if(!a || !/^zf_/.test(a.id || '')) fHilfebild(null); }, 60); });
   }
   try{ window.addEventListener('resize', ()=>{ const m = document.getElementById('maskZyklus'); if(m && m.classList.contains('show')) fHilfebild(HB_FOKUS); }); }catch(e){}
+}
+
+// =====================================================================
+// SIMULATION (Paket D): Maske maskSim mit Draufsicht des Hoehenfelds,
+// Abspielen auf einer Zeitachse aus den Vorschueben, Werkzeugkreis, Bahnspur,
+// Kollisionen rot. Der Kern (fSimBahnen/fSimZeitachse/fSimFeld/fSimFahren)
+// liegt DOM-frei in F10; hier nur Uhr, Zeichnen und Knoepfe.
+// =====================================================================
+const SIM = {liste:null, feld:null, gesamt:0, t:0, idx:0, u:0, koll:[], laeuft:false, tempo:5, spur:[], letzte:null, hinweise:[], bahnen:[], raf:0, uhr:0, bild:null};
+function fSimAufbauen(){
+  const B = fSimBahnen(fProg), Z = fSimZeitachse(B.bahnen, fProg);
+  SIM.liste = Z.liste; SIM.gesamt = Z.gesamt; SIM.feld = fSimFeld(fProg); SIM.t = 0; SIM.idx = 0; SIM.u = 0; SIM.koll = []; SIM.spur = []; SIM.letzte = null;
+  SIM.hinweise = B.hinweise; SIM.bahnen = B.bahnen; SIM.bild = null; SIM.laeuft = false;
+  const hb = document.getElementById('simHinweise'); if(hb) hb.innerHTML = B.hinweise.length ? B.hinweise.map(h => '• ' + esc(h)).join('<br>') : '';
+  fSimInfo(); fSimZeichnen();
+}
+// Bis zur Zielzeit vorruecken: die laufende Bewegung anteilig stempeln.
+function fSimBis(tZiel){
+  const L = SIM.liste; if(!L) return;
+  tZiel = Math.max(0, Math.min(SIM.gesamt, tZiel));
+  while(SIM.idx < L.length){
+    const e = L[SIM.idx];
+    const dauer = e.t1 - e.t0;
+    const uZiel = (tZiel >= e.t1) ? 1 : (dauer > 0 ? (tZiel - e.t0) / dauer : 1);
+    if(uZiel > SIM.u){
+      const c = fSimFahren(SIM.feld, e, SIM.u, uZiel);
+      if(c && !SIM.koll.some(q => q.bewegung === SIM.idx)){ c.bewegung = SIM.idx; SIM.koll.push(c); }
+      SIM.u = uZiel;
+    }
+    if(uZiel >= 1){ if(e.m.a !== 'verweil' && e.m.a !== 'kom') SIM.spur.push({x:e.p1.x, y:e.p1.y, eil:e.m.a === 'eil', e:e}); SIM.idx++; SIM.u = 0; }
+    else break;
+  }
+  SIM.t = tZiel;
+}
+function fSimPosition(){
+  const L = SIM.liste; if(!L || !L.length) return null;
+  if(SIM.idx >= L.length){ const e = L[L.length - 1]; return {x:e.p1.x, y:e.p1.y, z:e.p1.z, e:e}; }
+  const e = L[SIM.idx]; const p = fSimPunkt(e, SIM.u); p.e = e; return p;
+}
+function fSimZeichnen(){
+  const cv = document.getElementById('simCv'); if(!cv || !cv.getContext || !SIM.feld) return;
+  const F = SIM.feld;
+  const rect = cv.getBoundingClientRect ? cv.getBoundingClientRect() : {width:800, height:500};
+  const dpr = window.devicePixelRatio || 1, W = Math.max(50, Math.round(rect.width || 800)), H = Math.max(50, Math.round(rect.height || 500));
+  if(cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const ctx = cv.getContext('2d'); if(!ctx) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const dunkel = document.body.classList.contains('dunkel');
+  ctx.fillStyle = dunkel ? '#1a2027' : '#e9edf1'; ctx.fillRect(0, 0, W, H);
+  const rand = 22, bw = F.nx * F.raster, bh = F.ny * F.raster;
+  const sc = Math.min((W - 2 * rand) / bw, (H - 2 * rand) / bh);
+  const ox = (W - bw * sc) / 2, oy = (H + bh * sc) / 2;
+  const X = (x) => ox + (x - F.x0) * sc, Y = (y) => oy - (y - F.y0) * sc;
+  // Feld als Bild: Hoehe -> Grauwert (Oberkante hell, Grund dunkel), unberuehrt blaugrau
+  if(!SIM.bild || SIM.bild.gen !== F.gen || SIM.bild.nx !== F.nx){
+    const off = document.createElement('canvas'); off.width = F.nx; off.height = F.ny;
+    const oc = off.getContext('2d');
+    const img = (oc && oc.createImageData) ? oc.createImageData(F.nx, F.ny) : null;   // domstub liefert kein ImageData
+    if(img && img.data){
+      const d = img.data, tief = Math.max(0.01, F.oben - F.unten);
+      for(let j = 0; j < F.ny; j++) for(let i = 0; i < F.nx; i++){
+        const h = F.h[j * F.nx + i], o = ((F.ny - 1 - j) * F.nx + i) * 4;   // Y nach oben
+        if(h >= F.oben - 1e-6){ d[o] = 176; d[o + 1] = 186; d[o + 2] = 196; }
+        else { const q = Math.max(0, Math.min(1, (F.oben - h) / tief)); const g = Math.round(150 - 110 * q); d[o] = g + 20; d[o + 1] = g + 30; d[o + 2] = g + 45; }
+        d[o + 3] = 255;
+      }
+      oc.putImageData(img, 0, 0);
+    }
+    SIM.bild = {cv:off, gen:F.gen, nx:F.nx};
+  }
+  try{ ctx.imageSmoothingEnabled = false; ctx.drawImage(SIM.bild.cv, X(F.x0), Y(F.y0 + bh), bw * sc, bh * sc); }catch(e){}
+  ctx.strokeStyle = dunkel ? '#9fb3c4' : '#3d5a73'; ctx.lineWidth = 1; ctx.strokeRect(X(F.x0), Y(F.y0 + bh), bw * sc, bh * sc);
+  // Bahnspur: Eilgang rot gestrichelt, Vorschub gruen
+  const spurZeichnen = () => {
+    let prev = null;
+    SIM.spur.forEach(s => {
+      if(prev){ ctx.beginPath(); ctx.strokeStyle = s.eil ? 'rgba(220,60,40,.55)' : 'rgba(30,140,60,.8)'; ctx.setLineDash(s.eil ? [4, 3] : []); ctx.lineWidth = 1;
+        const e = s.e, m = e.m;
+        if(m.a === 'kreis' || m.a === 'helix'){ const n = 12; ctx.moveTo(X(e.p0.x), Y(e.p0.y)); for(let i = 1; i <= n; i++){ const p = fSimPunkt(e, i / n); ctx.lineTo(X(p.x), Y(p.y)); } }
+        else { ctx.moveTo(X(prev.x), Y(prev.y)); ctx.lineTo(X(s.x), Y(s.y)); }
+        ctx.stroke(); }
+      prev = s;
+    });
+    ctx.setLineDash([]);
+  };
+  spurZeichnen();
+  // Kollisionen
+  SIM.koll.forEach(c => { ctx.strokeStyle = '#d22'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X(c.x) - 6, Y(c.y) - 6); ctx.lineTo(X(c.x) + 6, Y(c.y) + 6); ctx.moveTo(X(c.x) + 6, Y(c.y) - 6); ctx.lineTo(X(c.x) - 6, Y(c.y) + 6); ctx.stroke(); });
+  // Werkzeug
+  const p = fSimPosition();
+  if(p){ const rt = p.e.rt; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), Math.max(2, rt * sc), 0, Math.PI * 2); ctx.fillStyle = p.z < F.oben - 1e-6 ? 'rgba(224,112,32,.45)' : 'rgba(224,112,32,.18)'; ctx.fill(); ctx.strokeStyle = '#e07020'; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(p.x) - 5, Y(p.y)); ctx.lineTo(X(p.x) + 5, Y(p.y)); ctx.moveTo(X(p.x), Y(p.y) - 5); ctx.lineTo(X(p.x), Y(p.y) + 5); ctx.stroke(); }
+  // Nullpunkt
+  ctx.strokeStyle = dunkel ? '#7fc0ff' : '#1858a0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(0) - 10, Y(0)); ctx.lineTo(X(0) + 20, Y(0)); ctx.moveTo(X(0), Y(0) + 10); ctx.lineTo(X(0), Y(0) - 20); ctx.stroke();
+}
+function fSimInfo(){
+  const el = document.getElementById('simInfo'); if(!el) return;
+  const p = fSimPosition();
+  const mmss = (t) => { t = Math.max(0, Math.round(t)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+  const e = p && p.e;
+  el.textContent = (e ? 'Schritt ' + (e.schritt + 1) + ' · ' + (e.m.a === 'eil' ? 'Eilgang' : (e.m.a === 'verweil' ? 'Verweilen' : 'Vorschub F' + (e.m.f || ''))) + ' · X' + fRund(p.x) + ' Y' + fRund(p.y) + ' Z' + fRund(p.z) : '—') +
+    ' · ' + mmss(SIM.t) + ' / ' + mmss(SIM.gesamt) + ' min' + (SIM.koll.length ? ' · KOLLISION ' + SIM.koll.length + 'x (Eilgang im Material)' : '') + ' · Raster ' + SIM.feld.raster + ' mm';
+  const sl = document.getElementById('simPos'); if(sl && SIM.gesamt > 0) sl.value = Math.round(SIM.t / SIM.gesamt * 1000);
+}
+function fSimTakt(){
+  if(!SIM.laeuft) return;
+  const jetzt = performance.now(), dt = (jetzt - SIM.uhr) / 1000; SIM.uhr = jetzt;
+  if(SIM.tempo === 'max'){ const bis = performance.now() + 60; while(SIM.idx < SIM.liste.length && performance.now() < bis) fSimBis(Math.min(SIM.gesamt, SIM.liste[SIM.idx].t1)); }
+  else fSimBis(SIM.t + dt * SIM.tempo);
+  fSimZeichnen(); fSimInfo();
+  if(SIM.idx >= SIM.liste.length){ SIM.laeuft = false; const b = document.getElementById('btnSimPlay'); if(b) b.textContent = '▶ Von vorn'; return; }
+  SIM.raf = requestAnimationFrame(fSimTakt);
+}
+function fSimStart(){
+  if(!SIM.liste) fSimAufbauen();
+  if(SIM.idx >= SIM.liste.length) fSimAufbauen();
+  SIM.laeuft = true; SIM.uhr = performance.now();
+  const b = document.getElementById('btnSimPlay'); if(b) b.textContent = '⏸ Pause';
+  SIM.raf = requestAnimationFrame(fSimTakt);
+}
+function fSimPause(){ SIM.laeuft = false; if(SIM.raf) cancelAnimationFrame(SIM.raf); const b = document.getElementById('btnSimPlay'); if(b) b.textContent = '▶ Weiter'; }
+function fSimOeffnen(){
+  fSimAufbauen();
+  maskZeigen('maskSim');
+  setTimeout(()=>{ try{ fSimZeichnen(); }catch(e){} }, 0);
+}
+{
+  const on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+  on('hskSim', fSimOeffnen);
+  on('btnSimPlay', ()=>{ if(SIM.laeuft) fSimPause(); else fSimStart(); });
+  on('btnSimEnde', ()=>{ fSimPause(); if(!SIM.liste) fSimAufbauen(); fSimBis(SIM.gesamt); fSimZeichnen(); fSimInfo(); const b = document.getElementById('btnSimPlay'); if(b) b.textContent = '▶ Von vorn'; });
+  on('btnSimNeu', ()=>{ fSimPause(); fSimAufbauen(); const b = document.getElementById('btnSimPlay'); if(b) b.textContent = '▶ Start'; });
+  on('btnSimZu', ()=>{ fSimPause(); maskZu('maskSim'); });
+  const tempo = document.getElementById('simTempo'); if(tempo && tempo.addEventListener) tempo.addEventListener('change', ()=>{ const v = tempo.value; SIM.tempo = (v === 'max') ? 'max' : (+v || 1); });
+  const sl = document.getElementById('simPos');
+  if(sl && sl.addEventListener) sl.addEventListener('input', ()=>{ fSimPause(); const tZiel = (+sl.value / 1000) * SIM.gesamt; if(!SIM.liste) fSimAufbauen(); if(tZiel < SIM.t) fSimAufbauen(); fSimBis(tZiel); fSimZeichnen(); fSimInfo(); });
+  try{ window.addEventListener('resize', ()=>{ const m = document.getElementById('maskSim'); if(m && m.classList.contains('show')) fSimZeichnen(); }); }catch(e){}
 }
 
 // =====================================================================
