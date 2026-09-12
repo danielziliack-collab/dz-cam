@@ -2315,6 +2315,12 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
      Maske bleibt und das Q nur die Bruecke zum TNC-Dialog ist. */
   .mrow label .qz{font-size:9.5px;font-weight:600;color:hsl(var(--ton), 12%, 58%);letter-spacing:.03em;margin-left:3px;}
   .mask.kachelpilot .mrow label .qz{display:block;margin-left:0;}
+  /* Kontureditor (Paket C3): die Elementtabelle (acht Spalten), die Knopfzeile und die
+     Vorschau nehmen im Kachelraster die volle Breite — als halbe Kachel war die Tabelle
+     bei 860 px auf 540 px beschnitten (R, DR und der Loeschknopf lagen im Scrollbereich). */
+  #maskKontur.kachelpilot .pointlist, #maskKontur.kachelpilot #fkoP1, #maskKontur.kachelpilot #fkoInfo, #maskKontur.kachelpilot .mrow:has(> #fkoCv){grid-column:1/-1;}
+  #maskKontur .pointlist td{padding:2px 3px;}
+  #maskKontur .pointlist td input{width:58px;}
   #zyNr{font-size:9.5px;font-weight:600;color:hsl(var(--ton), 12%, 58%);border:1px solid hsl(var(--ton), 18.7%, 82.2%);border-radius:3px;padding:1px 5px;white-space:nowrap;}
   /* Softkey-Gruppen: der Behaelter verhaelt sich wie seine Kinder (Spalte
      am Laptop, Streifen am Handy); offene Gruppe farbig, ihre Zyklen folgen. */
@@ -2357,7 +2363,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
       font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;}
     body.mode-arbeitsplan .sk.sk-grp .ic svg{width:18px;height:13px;}
     body.mode-arbeitsplan .sk.sk-zyk{min-height:40px;padding:1px 3px;gap:1px;}
-    #maskKopf, #maskMuster{width:min(860px,94vw) !important;}
+    #maskKopf, #maskMuster, #maskKontur{width:min(860px,94vw) !important;}
     #maskWerkzeuge, #maskProgramme{width:min(900px,94vw) !important;}
   }
 </style>
@@ -2441,6 +2447,24 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <div class="mrow" id="fmP1"><button class="gcbtn" id="btnFmPunktPlus" style="width:100%;padding:8px;">＋ Position anhängen</button></div>
           <div class="mrow small-hint" id="fmVorschau">—</div>
           <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnFmOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnFmCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
+        </div>
+      </div>
+
+      <!-- ===== KONTUR (Paket C3, 13.09.2026): XY-Kontur aus Geraden und
+           Kreisboegen, Startpunkt + Elementtabelle, Vorschau mit Rohteil.
+           Modell und Geometrie in F10 (fKonturSegmente), Editor in F20. ===== -->
+      <div class="mask" id="maskKontur">
+        <div class="mask-head"><span class="mtitel" title="XY-Kontur (Geraden und Kreisbögen)">Kontur</span><button class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button></div>
+        <div class="mask-body">
+          <div class="mrow"><label data-ba="ba-fk05b">Name</label><input type="text" id="fkoName" value="Kontur 1" style="width:150px;"></div>
+          <div class="mrow"><label data-ba="ba-fk05b">Kontur</label><div class="radiobtns fwrap" id="fkoGeschlBtns"><button data-v="geschlossen" class="sel">geschlossen (Tasche / Insel)</button><button data-v="offen">offen (Konturzug)</button></div></div>
+          <div class="mrow"><label data-ba="ba-fk05b-elemente">Startpunkt X / Y</label><input type="number" step="any" id="fkoX0" value="20" style="width:51px;"><input type="number" step="any" id="fkoY0" value="20" style="width:51px;"><span class="unit unit2"><i>X</i><i>Y</i></span></div>
+          <div class="msec">Elemente in Laufrichtung (Endpunkt je Element; Bogen: Radius und Drehsinn, &gt;180° = der längere Bogen)</div>
+          <div class="pointlist" id="fkoListe" style="max-height:34vh;overflow-x:auto;"><table style="white-space:nowrap;"><thead><tr><th>#</th><th>Typ</th><th>X</th><th>Y</th><th>R</th><th>DR</th><th></th><th></th></tr></thead><tbody id="fkoBody"></tbody></table></div>
+          <div class="mrow" id="fkoP1"><button class="gcbtn" id="btnFkoGerade" style="flex:1 1 auto;padding:8px;">＋ Gerade</button> <button class="gcbtn" id="btnFkoBogen" style="flex:1 1 auto;padding:8px;">＋ Bogen</button></div>
+          <div class="mrow" style="display:block;"><canvas id="fkoCv" style="width:100%;height:200px;display:block;background:#fff;border:1px solid var(--line);border-radius:4px;"></canvas></div>
+          <div class="mrow small-hint" id="fkoInfo">—</div>
+          <div class="mrow"><button class="gcbtn primary ok-gruen" id="btnFkoOk" style="flex:1 1 auto;min-width:0;padding:9px;">✓ Übernehmen</button> <button class="gcbtn ab-rot" id="btnFkoCancel" style="padding:10px 16px;">✕ Abbrechen</button></div>
         </div>
       </div>
 
@@ -2532,6 +2556,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <div class="mrow"><button class="gcbtn" id="btnDemoEinzel" style="width:100%;padding:10px;">DZ6 Einzels&auml;tze: eigene Bahn ohne Zyklen (eine Bohrung je Schritt)</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoFormen" style="width:100%;padding:10px;">DZ7 Einzels&auml;tze: Kreistasche, Nut, Kreiszapfen als eigene Bahn</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoPlan" style="width:100%;padding:10px;">DZ8 Einzels&auml;tze: Planfr&auml;sen + Rechtecktasche mit Helix</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoKontur" style="width:100%;padding:10px;">DZ9 Konturzug: Insel als Zyklus 14/25 und als eigene Bahn</button></div>
             </div>
           </div>
           <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
@@ -2543,6 +2568,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     <div class="softkeys" id="softkeyCol">
       <div class="sk" id="skKopf"><span class="ic">P</span>Programm-<br>kopf</div>
       <div class="sk" id="skMuster"><span class="ic">⁘</span>Positionen</div>
+      <div class="sk" id="skKontur" title="XY-Kontur aus Geraden und Kreisbögen (Paket C3)"><span class="ic">⌒</span>Kontur</div>
       <!-- Zyklusgruppen wie an der TNC (Bohren, Gewinde, Taschen/Zapfen,
            Flaechen): F20 fSoftkeysBauen fuellt den Behaelter, ein Knopf je
            Zyklus, die offene Gruppe zeigt ihre Zyklen (Paket A, 12.09.2026). -->
@@ -2660,6 +2686,29 @@ f&uuml;r Punkt sichtbar. <b>Zyklus 220/221:</b> Lochkreis bzw. Reihe als Musterz
 Programmierplatz durchgelaufen (DZ3: Gitter 3&times;2 mit 221, Lochkreis 4&times; mit 220 und Startwinkel 45&deg;),
 an der Maschine zu pr&uuml;fen (beim 220 wird der Winkelschritt Q247 immer geschrieben, der Endwinkel Q246 ist dann
 laut Handbuch ohne Bedeutung).</dd>
+
+<h2 id="ba-fk05b">5b &nbsp;Konturen (XY-Kontureditor)</h2>
+<p>Der Softkey <b>Kontur</b> legt eine Kontur in der Ebene an: <b>Startpunkt X/Y</b> und danach je Element den <b>Endpunkt</b>, als
+<b>Gerade</b> oder als <b>Bogen</b> mit Radius und Drehsinn. Die Kontur wird in <b>Laufrichtung</b> gezeichnet &mdash; so, wie das Werkzeug
+sie sp&auml;ter abf&auml;hrt &mdash; und ist die <b>Fertigkontur</b> (Werkst&uuml;ckkante), nicht die Werkzeugbahn. Die Vorschau zeigt Rohteil,
+Kontur, Startmarke und die Laufrichtung; die Zeile darunter nennt Elementzahl, Umlaufsinn und Geometriefehler.</p>
+<dl>
+<dt id="ba-fk05b-elemente">Elemente</dt><dd><b>Gerade:</b> Endpunkt X/Y. <b>Bogen:</b> Endpunkt X/Y, Radius R und Drehsinn DR+ (gegen den Uhrzeigersinn) oder
+DR&minus; &mdash; die Regel des <code>CR</code>-Satzes der Steuerung: mit dem Radius ist der k&uuml;rzere Bogen bis 180&deg; gemeint, das H&auml;kchen
+<b>&gt;180&deg;</b> w&auml;hlt den l&auml;ngeren (im Klartext steht der Radius dann negativ). Ein Radius unter der halben Sehne ist kein Bogen &mdash; die
+Zeile meldet es. Ein <b>Vollkreis</b> braucht zwei Halbb&ouml;gen. Fasen und Rundungen an Ecken (RND/CHF) und tangentiale B&ouml;gen (CT) gibt
+es im Editor noch nicht &mdash; ein Radius wird als Bogen mit seinen beiden Tangentenpunkten gezeichnet (Kap.&nbsp;8).</dd>
+<dt>geschlossen / offen</dt><dd>Eine <b>geschlossene</b> Kontur (Tasche oder Insel) schlie&szlig;t die App mit einer Geraden zum Startpunkt, wenn das
+letzte Element nicht dort endet &mdash; wie die Steuerung im Kontur-Unterprogramm. Eine <b>offene</b> Kontur ist ein Konturzug von Anfang bis Ende;
+dort sagt der Schritt, ob das Werkzeug links oder rechts der Laufrichtung f&auml;hrt.</dd>
+<dt>Im Arbeitsplan</dt><dd>Konturen stehen wie die Bohrbilder oben im Arbeitsplan (&#x270E; &auml;ndern, &#x2715; l&ouml;schen; ein Schritt, der sie nutzt,
+verliert dann seine Kontur und meldet es rot). Der Schritt <b>Konturzug</b> (Softkey-Gruppe Kontur) w&auml;hlt die Kontur im Feld <b>Kontur (XY)</b>;
+die Draufsicht zeichnet die Kontur mit Startmarke S und zum angew&auml;hlten Konturschritt die Bahn der Werkzeugmitte gestrichelt.</dd>
+</dl>
+<div class="ba-merk">Warum Fertigkontur und nicht Werkzeugbahn: den Werkzeugradius kennt die App aus der Tabelle, und ein Programm mit
+anderem Fr&auml;ser braucht dann keine neue Kontur. Beim Steuerungszyklus &uuml;bernimmt die Steuerung den Versatz (RL/RR), bei Einzels&auml;tzen die
+App (Kap.&nbsp;6c) &mdash; beide fahren dieselbe Kante.</div>
+
 
 <h2 id="ba-fk06">6 &nbsp;Bohren und Gewinde &mdash; die Zyklen</h2>
 <div class="ba-merk"><b>Die Masken sind neutral (12.09.2026 abends, Daniels Ansage):</b> kein Q-Parameter und kein Steuerungsname
@@ -2798,15 +2847,27 @@ Radius h&ouml;chstens Werkzeugradius) oder pendelnd auf der L&auml;ngsachse; ohn
 Planfr&auml;sen: M&auml;ander in Zeilen entlang LX, Zeilenabstand h&ouml;chstens &Uuml;berlappung &times; Werkzeugradius, das Werkzeug f&auml;hrt an beiden
 Enden ganz von der Fl&auml;che (Strategie 0 zus&auml;tzlich um SC seitlich), Strategie 2 zeilenweise mit R&uuml;cklauf im Eilgang auf SC; Tiefen in
 Schritten DZ, bei UZ &gt; 0 der letzte Schnitt mit FS. Kreisb&ouml;gen stehen als <code>CC</code> + <code>C X Y DR&plusmn; R0 F</code>.</dd>
+<dt id="ba-fk06c-kontur">Konturzug als eigene Bahn</dt><dd>Der Schritt <b>Konturzug</b> (Softkey-Gruppe Kontur) f&auml;hrt eine Kontur aus Kap.&nbsp;5b: als
+<b>Steuerungszyklus</b> schreibt die App <code>CYCL DEF 14.0 KONTUR</code>, <code>14.1 KONTURLABEL n</code>, <code>CYCL DEF 25 KONTUR-ZUG</code>
+(Q1 Tiefe, Q3 Aufma&szlig; Seite, Q5 Z0, Q7 sichere H&ouml;he = Z0 + SC2, Q10 Zustellung, Q11 FZ, Q12 F, Q15 Fr&auml;sart) und <code>CYCL CALL</code>; die Kontur
+steht als <code>LBL n</code> hinter dem Programmende, erster Satz mit <code>RL</code> oder <code>RR</code> (Werkzeugseite), Geraden als <code>L</code>, B&ouml;gen als
+<code>CR X Y R&plusmn; DR&plusmn;</code>. Als <b>Einzels&auml;tze</b> rechnet die App die Werkzeugmitte selbst: jede Gerade und jeder Bogen um Werkzeugradius + UXY zur
+Werkzeugseite versetzt, Ecken, die zum Werkzeug zeigen, mit einem Bogen um den Eckpunkt verbunden (<code>CC</code> + <code>C</code>), Ecken, die vom Werkzeug
+weg zeigen, auf den Schnittpunkt zur&uuml;ckgeschnitten. <b>Werkzeugseite:</b> bei geschlossener Kontur innen (Tasche) oder au&szlig;en (Insel), bei offener
+links oder rechts der gezeichneten Laufrichtung (RL/RR). <b>Gleichlauf</b> hei&szlig;t bei M3 Werkzeug links der Kontur &mdash; liegt es rechts, l&auml;uft
+die App die Kontur r&uuml;ckw&auml;rts (der Zyklus 25 tut dasselbe &uuml;ber Q15). Eintauchen senkrecht am Bahnanfang mit FZ wie beim Zyklus 25; Zustellungen D
+bis Z1, bei geschlossener Kontur ohne Abheben, bei offener mit R&uuml;ckzug auf SC und Eilgang zum Anfang; UXY &gt; 0 oder &bdquo;nur Schlichten&ldquo; h&auml;ngt den
+Schlichtlauf im Werkzeugradius mit FS in Schritten DS an. <b>Was das Werkzeug nicht erreicht</b> &mdash; ein Innenradius kleiner als Werkzeugradius + UXY, eine Nut
+schmaler als das Werkzeug &mdash; lehnt die App als Engstelle ab (Meldung mit X/Y); der Zyklus 25 der Steuerung l&auml;sst dort Material stehen.</dd>
 <dt id="ba-fk06c-ausgabe">NC-Ausgabe</dt><dd>Steuerungszyklus oder Einzels&auml;tze &mdash; je Schritt. Was keine eigene Bahn hat
 (Gewinde GS 207 und 209 brauchen die Synchronspindel, R&uuml;ckw&auml;rts-Senken und Ausdrehen mit Freifahren die
 Spindel-Orientierung, Bohrfr&auml;sen die Helix, Einlippen seine Spindel-/K&uuml;hlmittelfolge), bleibt beim Zyklus; w&auml;hlst Du
 dort Einzels&auml;tze, schreibt die App den Zyklus und sagt es in der Warnung. Die Positionen kommen wie beim Zyklus aus dem
 Bohrbild; zwischen den Positionen f&auml;hrt das Werkzeug auf SC2, wie der Zyklusaufruf mit M99.</dd>
 </dl>
-<div class="ba-merk">Stand (12.09.2026 abends): nach dem Zyklusablauf des Handbuchs gebaut und im Programm-Test des Programmierplatzes
-durchgelaufen (DZ6 Bohren 3:06 min, DZ7 Kreistasche/Nut/Kreiszapfen 1:55 min, DZ8 Planfr&auml;sen/Rechtecktasche mit Helix 2:32 min, alle ohne Meldung,
-R&uuml;ckexport Satz f&uuml;r Satz gleich); an der Maschine noch nicht gefahren. Die Vorlage DZ6 (die Leiste als Einzels&auml;tze, eine Bohrung je
+<div class="ba-merk">Stand (13.09.2026): nach dem Zyklusablauf des Handbuchs gebaut und im Programm-Test des Programmierplatzes
+durchgelaufen (DZ6 Bohren 3:06 min, DZ7 Kreistasche/Nut/Kreiszapfen 1:55 min, DZ8 Planfr&auml;sen/Rechtecktasche mit Helix 2:32 min, DZ9 Konturzug
+als Zyklus 14/25 und als eigene Bahn 0:53 min, alle ohne Meldung, R&uuml;ckexport Satz f&uuml;r Satz gleich); an der Maschine noch nicht gefahren. Die Vorlage DZ6 (die Leiste als Einzels&auml;tze, eine Bohrung je
 Schritt &mdash; der Wandler des Programmierplatzes nimmt nur 100 S&auml;tze) ist das Testprogramm f&uuml;r den Programmierplatz.</div>
 
 <h2 id="ba-fk07">7 &nbsp;NC-Ausgabe und Weg zur Maschine</h2>
@@ -2825,10 +2886,10 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 
 <h2 id="ba-fk08">8 &nbsp;Was fehlt (ehrlich)</h2>
 <ul>
-<li>Konturfr&auml;sen mit RL/RR, Konturzug 25 und SL-Zyklen 20&ndash;24 &mdash; n&auml;chstes Paket, braucht den XY-Kontureditor. Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
+<li>SL-Zyklen 20&ndash;24 (Konturtasche mit Inseln, Vorbohren, R&auml;umen) &mdash; der Konturzug 14/25 und der XY-Kontureditor sind seit dem 13.09.2026 da (Kap.&nbsp;5b, 6c). Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
 <li>Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39, Abzeilen 230/231/233 &mdash; in dieser Reihenfolge danach.</li>
-<li>Eigene Bahnlogik: Bohrfamilie, Taschen, Nuten, Zapfen und Planfr&auml;sen schreiben seit dem 12./13.09.2026 Einzels&auml;tze (Kap.&nbsp;6c); der XY-Kontureditor und die Konturbahnen folgen &mdash; darauf der Siemens-Post.</li>
-<li>XY-Kontureditor und DXF-Import f&uuml;r Fr&auml;skonturen &mdash; nach der Bahnlogik f&uuml;r Bohren und Taschen, vor den Konturbahnen.</li>
+<li>Eigene Bahnlogik: Bohrfamilie, Taschen, Nuten, Zapfen, Planfr&auml;sen und Konturzug schreiben seit dem 12./13.09.2026 Einzels&auml;tze (Kap.&nbsp;6c) &mdash; darauf der Siemens-Post.</li>
+<li>Kontureditor: Fasen und Rundungen an Ecken (RND/CHF), tangentiale B&ouml;gen (CT) und DXF-Import f&uuml;r Fr&auml;skonturen &mdash; bisher Geraden und Kreisb&ouml;gen mit Radius und Drehsinn (Kap.&nbsp;5b).</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
 <li>Eigene Simulation auf den Bahnen aus Paket C &mdash; Paket D; bis dahin der Programm-Test der Steuerung.</li>
 <li>Sinumerik 840D powerline als zweites Profil &mdash; nach den MPF-Dateien vom Schwager.</li>
@@ -3009,6 +3070,11 @@ var F_PROFILE = {
       // Programm-Test des Programmierplatzes durchgelaufen (5:53 min, alle
       // sechs Formen in der Grafik), Rueckexport = App-Ausgabe (Pruefung 3c).
       tascheR:'pgst', tascheK:'pgst', nut:'pgst', nutR:'pgst', zapfenR:'pgst', zapfenK:'pgst',
+      // Paket C3: Konturzug 14/25 auf der XY-Kontur der App — DZ9 (Insel mit Nut,
+      // Schritt 1 als Zyklus, Schritt 2 als eigene Bahn) am Programmierplatz
+      // durchgelaufen (13.09.2026, 0:53 min, 0 ERROR im Wandler, Rueckexport =
+      // App-Ausgabe).
+      konturzug:'pgst',
       // Paket 3: 12.09.2026 abends mit DZ5 im Programm-Test durchgelaufen
       // (5:01 min, alle acht Schritte in der Grafik). Der erste Lauf brach
       // beim 241 mit "Falsche Drehzahl" ab: Q427 25 aus dem Handbuchbeispiel
@@ -3017,7 +3083,7 @@ var F_PROFILE = {
       // Programmstart" ab (T241B). Beides gelb in fPruefen.
       ausdrehen:'pgst', senkenRueck:'pgst', tiefUni:'pgst', bohrfraesen:'pgst', gewindeSpan:'pgst', einlippen:'pgst', planfraesen:'pgst'
     },
-    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; abends DZ6 (Einzelsaetze der eigenen Bahn, Paket C: 240/203/200/201 ohne Zyklus, 3:06 min) ebenso, nachts DZ7 (Kreistasche, Nut, Kreiszapfen als Ringbahnen mit CC/C, 1:55 min) und DZ8 (Planfraesen-Maeander, Rechtecktasche mit Helix CP IPA/IZ, 2:32 min); alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
+    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; abends DZ6 (Einzelsaetze der eigenen Bahn, Paket C: 240/203/200/201 ohne Zyklus, 3:06 min) ebenso, nachts DZ7 (Kreistasche, Nut, Kreiszapfen als Ringbahnen mit CC/C, 1:55 min) und DZ8 (Planfraesen-Maeander, Rechtecktasche mit Helix CP IPA/IZ, 2:32 min), am 13.09.2026 DZ9 (Insel mit Nut als XY-Kontur: Zyklus 14/25 und dieselbe Kontur als eigene Bahn mit CC/C-Eckenboegen, 0:53 min); alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
     offen:'Lauf an einer der drei Maschinen (Stand 340 49x): Softwarestand je Maschine (MOD), M13/M9 an der PLC, Option Synchron-Gewindebohren (207); danach Daniels eigene .H-Programme als Fixtures'
   }
 };
@@ -3074,7 +3140,11 @@ var F_Q = {
   Q342:'VORGEB. DURCHMESSER', Q403:'FAKTOR DREHZAHL',     Q426:'SP.-DREHRICHTUNG',
   Q427:'DREHZAHL EIN-/AUSF.', Q428:'DREHZAHL BOHREN',     Q429:'KUEHLUNG EIN',
   Q430:'KUEHLUNG AUS',       Q435:'VERWEILTIEFE',         Q389:'STRATEGIE',
-  Q227:'STARTPUNKT 3. ACHSE', Q386:'ENDPUNKT 3. ACHSE',   Q357:'SI.-ABSTAND SEITE'
+  Q227:'STARTPUNKT 3. ACHSE', Q386:'ENDPUNKT 3. ACHSE',   Q357:'SI.-ABSTAND SEITE',
+  // Paket C3 (13.09.2026): Konturzug 25 (Beispielsaetze 670 388-12 S. 208 und 223)
+  Q1:'FRAESTIEFE',           Q3:'AUFMASS SEITE',          Q5:'KOOR. OBERFLAECHE',
+  Q7:'SICHERE HOEHE',        Q10:'ZUSTELL-TIEFE',         Q11:'VORSCHUB TIEFENZ.',
+  Q12:'VORSCHUB FRAESEN',    Q15:'FRAESART'
 };
 
 // wort = Klartext fuer Meldungen, kurz = Arbeitsplanzeile (die lange Form
@@ -3147,10 +3217,14 @@ var F_ZYKLEN = {
   // Schreiber setzt CYCL CALL direkt hinter die Definition.
   planfraesen:{nr:232, titel:'PLANFRAESEN', wort:'Planfraesen', kurz:'Planfraesen', fraes:true, eigenePosition:true,
     q:['Q389','Q225','Q226','Q227','Q386','Q218','Q219','Q202','Q369','Q370','Q207','Q385','Q253','Q200','Q357','Q204'],
-    qText:{Q202:'MAX. ZUSTELL-TIEFE', Q370:'MAX. UEBERLAPPUNG'}}
+    qText:{Q202:'MAX. ZUSTELL-TIEFE', Q370:'MAX. UEBERLAPPUNG'}},
+  // Paket C3: Konturzug 25 auf einer XY-Kontur der App (Zyklus 14 KONTUR +
+  // 25 KONTUR-ZUG + CYCL CALL, Kontur als LBL mit RL/RR). Q-Liste S. 208.
+  konturzug: {nr:25, titel:'KONTUR-ZUG', wort:'Konturzug (Kontur fraesen)', kurz:'Konturzug', kontur:true,
+    q:['Q1','Q3','Q5','Q7','Q10','Q11','Q12','Q15'], qSigned:{Q1:1, Q3:1, Q5:1, Q7:1, Q15:1}}
 };
 var F_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen',
-  'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen'];
+  'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen','konturzug'];
 var F_FRAES_ARTEN = ['tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen'];
 var F_BOHR_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen'];
 
@@ -3175,6 +3249,12 @@ var F_BOHR_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS',
 var F_FELDER = {
   t:          {name:'T Werkzeug', typ:'werkzeug', ba:'ba-fk04'},
   muster:     {name:'Positionen (Bohrbild)', typ:'muster', ba:'ba-fk05'},
+  // Paket C3: XY-Kontur statt Bohrbild; die Werkzeugseite haengt an der Kontur —
+  // geschlossen: innen (Tasche) / aussen (Insel), offen: links / rechts der
+  // gezeichneten Laufrichtung (RL / RR). nurWenn blendet das jeweils andere aus.
+  kontur:     {name:'Kontur (XY)', typ:'kontur', ba:'ba-fk05b'},
+  seiteZu:    {name:'Werkzeug zur Kontur', typ:'wahl', wahl:[['innen','innen (Tasche)'],['aussen','außen (Insel)']], nurWenn:(s, p)=>{ const kt = ((p && p.konturen) || [])[s.kontur]; return !kt || !!kt.geschlossen; }, ba:'ba-fk06c-kontur'},
+  seiteAuf:   {name:'Werkzeug zur Kontur', typ:'wahl', wahl:[['links','links (RL)'],['rechts','rechts (RR)']], nurWenn:(s, p)=>{ const kt = ((p && p.konturen) || [])[s.kontur]; return !!kt && !kt.geschlossen; }, ba:'ba-fk06c-kontur'},
   s:          {name:'S Drehzahl', einheit:'U/min', ba:'ba-fk06-fs'},
   f:          {name:'F Vorschub', einheit:'mm/min', ba:'ba-fk06-fs'},
   kuehl:      {name:'Kühlmittel', typ:'wahl', wahl:[['an','an'],['aus','aus']], ba:'ba-fk06-fs'},
@@ -3257,15 +3337,15 @@ var F_FELDER = {
 // Q207 — dort ist Q206 der Tiefenvorschub fTief; dreh: Nut Q374, sonst
 // Q224). Felder ohne Eintrag (t, muster, s, kuehl) haben kein Q-Wort.
 var F_FELD_Q = {
-  f:['Q207','Q206'], fTief:['Q206'], fSchl:['Q385'], fVor:['Q253'], fRueck:['Q208'], fSenk:['Q254'],
-  umfang:['Q215'], fraesart:['Q351'], sc:['Q200'], sc2:['Q204'], q203:['Q203'], tiefe:['Q201'], zust:['Q202'],
+  f:['Q207','Q206','Q12'], fTief:['Q206','Q11'], fSchl:['Q385'], fVor:['Q253'], fRueck:['Q208'], fSenk:['Q254'],
+  umfang:['Q215'], fraesart:['Q351','Q15'], sc:['Q200'], sc2:['Q204','Q7'], q203:['Q203','Q5'], tiefe:['Q201','Q1'], zust:['Q202','Q10'],
   vOben:['Q210'], vUnten:['Q211'], abnahme:['Q212'], spanbrueche:['Q213'], minZust:['Q205'], rzSpan:['Q256'],
   q257:['Q257'], q258:['Q258'], q259:['Q259'], q379:['Q379'], zAuswahl:['Q343'], zDurchm:['Q344'], steigung:['Q239'],
   q403:['Q403'], freifahr:['Q214'], spWinkel:['Q336'], q249:['Q249'], q250:['Q250'], q251:['Q251'], q252:['Q252'],
   vSenk:['Q255'], q334:['Q334'], q335:['Q335'], q342:['Q342'], q426:['Q426'], q427:['Q427'], q428:['Q428'],
   q429:['Q429'], q430:['Q430'], q435:['Q435'], l1:['Q218'], l2:['Q219'], r:['Q220'], dm:['Q223'], dmRoh:['Q222'],
   roh1:['Q424'], roh2:['Q425'], dreh:['Q374','Q224'], lage:['Q367'], teilkreis:['Q375'], xm:['Q216'], ym:['Q217'],
-  start:['Q376'], oeffnung:['Q248'], wschritt:['Q378'], anzahl:['Q377'], aufSeite:['Q368'], aufTiefe:['Q369'],
+  start:['Q376'], oeffnung:['Q248'], wschritt:['Q378'], anzahl:['Q377'], aufSeite:['Q368','Q3'], aufTiefe:['Q369'],
   zustSchl:['Q338'], ueberl:['Q370'], eintauch:['Q366'], strategie:['Q389'], px:['Q225'], py:['Q226'], pz:['Q227'],
   zEnd:['Q386'], scSeite:['Q357']
 };
@@ -3309,6 +3389,12 @@ var F_MASKE = {
                feldWahl:{lage:[['0','Mitte'],['1','links unten'],['2','rechts unten'],['3','rechts oben'],['4','links oben']]}},
   zapfenK:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','ausgabe','#Form','dm','dmRoh','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', dm:'⌀ Zapfen (Fertigmaß)'}},
+  // Paket C3: Konturzug. Der Zyklus 25 kennt kein Q fuer Bearbeitungsumfang,
+  // Schlichtvorschub, DS, SC und Werkzeugseite (die steckt im RL/RR des
+  // Unterprogramms) — diese Felder gehoeren der eigenen Bahn (ohneQ).
+  konturzug:  {felder:['#Werkzeug & Schnittwerte','t','kontur','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Kontur','seiteZu','seiteAuf','#Tiefe & Aufmaß','tiefe','zust','aufSeite','zustSchl','#!Sicherheit','sc','q203','sc2'],
+               feldText:{f:'F Vorschub Fräsen', sc2:'SC2 Sichere Höhe über Z0', zust:'D Zustellung', aufSeite:'UXY Aufmaß Seite (Schlichten holt es)'},
+               ohneQ:['umfang','fSchl','zustSchl','sc','seiteZu','seiteAuf']},
   planfraesen:{felder:['#Werkzeug & Schnittwerte','t','s','f','fSchl','fVor','kuehl','ausgabe','#Fläche','strategie','px','pz','zEnd','l1','l2','#Zustellung & Aufmaß','zust','aufTiefe','ueberl','#!Sicherheit','sc','scSeite','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'LX Länge in X (± = Richtung)', l2:'LY Länge in Y (± = Richtung)', zust:'DZ max. Zustellung', ueberl:'max. Überlappung'}}
 };
@@ -3318,7 +3404,8 @@ var F_ZYKLUS_GRUPPEN = [
   {id:'bohren',  name:'Bohren',            arten:['zentrieren','bohren','tief','tiefUni','reiben','ausdrehen','senkenRueck','bohrfraesen','einlippen']},
   {id:'gewinde', name:'Gewinde',           arten:['gewinde','gewindeGS','gewindeSpan']},
   {id:'taschen', name:'Taschen · Zapfen',  arten:['tascheR','tascheK','nut','nutR','zapfenR','zapfenK']},
-  {id:'flaechen', name:'Flächen',          arten:['planfraesen']}
+  {id:'flaechen', name:'Flächen',          arten:['planfraesen']},
+  {id:'kontur',  name:'Kontur',            arten:['konturzug']}
 ];
 // Feldliste eines Zyklus ohne Abschnittsmarken.
 function fZyklusFelder(art){ return ((F_MASKE[art] || {}).felder || []).filter(x => x[0] !== '#'); }
@@ -3581,6 +3668,7 @@ function fProgrammNeu(){
     },
     werkzeuge: fWerkzeugeVorgabe(),
     muster: [],
+    konturen: [],   // Paket C3: XY-Konturen (fKonturNeu)
     schritte: []
   };
 }
@@ -3627,6 +3715,14 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
         l1:(+k.x1 || 0) - (+k.x0 || 0), l2:(+k.y1 || 0) - (+k.y0 || 0), zust:2, aufTiefe:0, ueberl:1,
         fVor:2000, scSeite:2, tiefe:-1});
     }
+  }
+  if(F_ZYKLEN[art] && F_ZYKLEN[art].kontur){
+    // Paket C3: Konturzug. Der vierte Parameter ist hier der KONTUR-Index
+    // (kein Bohrbild). Vorgaben wie bei den Formen: F aus der Tabelle, FZ
+    // 30 % davon, FS = F, Gleichlauf, Werkzeug aussen (Insel) bzw. links (RL).
+    s.typ = 'kontur'; s.muster = -1; s.kontur = (musterIdx == null) ? 0 : musterIdx;
+    s.s = t.s || 3000; s.f = t.f || 600;
+    Object.assign(s, {umfang:0, fraesart:1, tiefe:-10, zust:5, aufSeite:0, zustSchl:0, fTief:fRund(s.f * 0.3), fSchl:s.f, seiteZu:'aussen', seiteAuf:'links'});
   }
   // Paket 3: Bohrzyklen 202/204/205/208/209/241 mit den Werten der
   // Handbuchbeispiele als Vorgabe.
@@ -3701,6 +3797,13 @@ function fZyklusWerte(s, tool){
     Q389: Math.round(+s.strategie || 0), Q225: +s.px || 0, Q226: +s.py || 0, Q227: +s.pz || 0,
     Q386: +s.zEnd || 0, Q357: +s.scSeite || 0
   });
+  // Paket C3: Zyklus 25. Q7 = sichere Hoehe ABSOLUT = Z0 + SC2 (Rueckzug am
+  // Zyklusende, wie das Ende SC2 der eigenen Bahn); Q10 = Zustellung, 0 = in
+  // einem Zug (wie Q202); Q11 = FZ, Q12 = F, Q15 = Fraesart +1/-1.
+  if(s.art === 'konturzug'){
+    Object.assign(w, {Q1: tiefe, Q3: +s.aufSeite || 0, Q5: +s.q203 || 0, Q7: fRund((+s.q203 || 0) + Math.max(+s.sc2 || 0, +s.sc || 0)),
+      Q10: (+s.zust > 0) ? +s.zust : Math.abs(tiefe), Q11: (+s.fTief > 0) ? +s.fTief : (+s.f || 0), Q12: +s.f || 0, Q15: (+s.fraesart < 0) ? -1 : 1});
+  }
   if(s.art === 'planfraesen'){ w.Q218 = +s.l1 || 0; w.Q219 = +s.l2 || 0; w.Q202 = +s.zust || 0; }
   return w;
 }
@@ -3791,10 +3894,12 @@ function fMusterZyklusDef(m, s){
 // Folge des Einlippenbohrens).
 // ---------------------------------------------------------------------
 var F_BAHN_ARTEN = ['zentrieren', 'bohren', 'tief', 'tiefUni', 'reiben', 'gewinde', 'ausdrehen',
-  'tascheR', 'tascheK', 'nut', 'nutR', 'zapfenR', 'zapfenK', 'planfraesen'];   // Paket C2: Formen (fBahnFormen)
+  'tascheR', 'tascheK', 'nut', 'nutR', 'zapfenR', 'zapfenK', 'planfraesen',   // Paket C2: Formen (fBahnFormen)
+  'konturzug'];                                                              // Paket C3: Konturbahn (fBahnKontur)
 function fBahnSchritt(s, tool, prog, punkte){
   const art = s.art, warn = [], B = [];
   const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  if(F_ZYKLEN[art] && F_ZYKLEN[art].kontur) return fBahnKontur(s, tool, prog);           // Paket C3
   if(F_ZYKLEN[art] && F_ZYKLEN[art].fraes) return fBahnFormen(s, tool, prog, punkte);   // Paket C2
   if(F_BAHN_ARTEN.indexOf(art) < 0) return nein('fuer ' + ((F_ZYKLEN[art] || {}).wort || art) + ' gibt es noch keine eigene Bahn');
   if(!punkte || !punkte.length) return nein('keine Position');
@@ -4271,6 +4376,292 @@ function fBahnPlan(s, tool, prog, rt, f, fS, k, warn, B){
 }
 
 // ---------------------------------------------------------------------
+// KONTUREN UND KONTURBAHNEN (Paket C3, 13.09.2026): XY-Konturen aus
+// Geraden und Kreisboegen, im Programm unter prog.konturen:
+//   {name, geschlossen:true|false, x0, y0, elemente:[
+//      {typ:'g', x, y}                            Gerade zum Endpunkt
+//      {typ:'b', x, y, r, dr:+1|-1, gross:false}  Kreisbogen zum Endpunkt mit
+//                                                 Radius r; dr +1 = gegen den
+//                                                 Uhrzeigersinn (DR+), gross =
+//                                                 der laengere Bogen ueber 180
+//                                                 Grad (im Klartext R negativ,
+//                                                 CR-Regel 670 387-12 S. 235)
+//   ]}
+// Die Kontur ist die FERTIGKONTUR (Werkstueckkante), gezeichnet in der Lauf-
+// richtung. Die Bahn der App ist die WERKZEUGMITTE: fKonturVersatz rueckt
+// jede Gerade und jeden Bogen um den Bahnversatz (Werkzeugradius + UXY) auf
+// die Werkzeugseite, verbindet Ecken, die zur Werkzeugseite zeigen, mit einem
+// Bogen um den Eckpunkt (so faehrt auch die Steuerung bei RL/RR um eine
+// Aussenecke) und schneidet Ecken, die vom Werkzeug weg zeigen, auf den
+// Schnittpunkt der beiden versetzten Bahnen zurueck. Was das Werkzeug nicht
+// erreicht — ein Innenradius kleiner als der Versatz, eine Nut schmaler als
+// das Werkzeug — lehnt die App ab, statt eine Bahn zu schreiben, die die
+// Kontur verletzt: jeder Punkt der Bahn muss mindestens den Versatz von der
+// Kontur entfernt liegen (fAbstandKontur), sonst gilt die Stelle als
+// Engstelle. Der Zyklus 25 der Steuerung laesst dort Material stehen
+// ("an Innenecken eventuell nachbearbeiten", 670 388-12 S. 207) — die App
+// sagt es vorher.
+// WERKZEUGSEITE: geschlossene Kontur innen (Tasche) oder aussen (Insel),
+// offene Kontur links oder rechts der Laufrichtung (RL/RR). GLEICHLAUF bei
+// M3 heisst Werkzeug LINKS der Kontur (RL, Material rechts der Fahrt-
+// richtung); liegt das Werkzeug rechts, laeuft die App die Kontur
+// rueckwaerts — der Zyklus 25 tut dasselbe ueber Q15.
+// ---------------------------------------------------------------------
+function fKonturNeu(name){
+  return {name:name || 'Kontur', geschlossen:true, x0:20, y0:20, elemente:[{typ:'g', x:60, y:20}, {typ:'g', x:60, y:50}, {typ:'g', x:20, y:50}]};
+}
+// Bogenmitte nach der CR-Regel: Radius > 0 = kuerzerer Bogen (bis 180 Grad),
+// gross = laengerer Bogen; dr +1 gegen den Uhrzeigersinn. Beim kurzen Bogen
+// gegen den Uhrzeigersinn liegt die Mitte links der Sehne. null = Radius
+// kleiner als die halbe Sehne (kein Bogen moeglich).
+function fBogenMitte(x0, y0, x1, y1, r, dr, gross){
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+  if(!(r > 0) || L < 1e-9) return null;
+  const h = L / 2; if(r < h - 1e-6) return null;
+  const d = Math.sqrt(Math.max(0, r * r - h * h));
+  const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, nx = -dy / L, ny = dx / L;   // linke Normale der Sehne
+  const sgn = (dr < 0 ? -1 : 1) * (gross ? -1 : 1);
+  return {cx:mx + sgn * d * nx, cy:my + sgn * d * ny};
+}
+// Kontur -> Segmentliste [{typ:'g', x0,y0,x1,y1} | {typ:'b', ..., cx,cy,r,dr}].
+// Eine geschlossene Kontur, die nicht am Start endet, wird mit einer Geraden
+// geschlossen (wie die TNC im Kontur-Unterprogramm). fehler[] nennt Elemente,
+// die keine Geometrie ergeben.
+function fKonturSegmente(kt){
+  const seg = [], fehler = [];
+  if(!kt) return {seg:seg, fehler:['keine Kontur']};
+  let x = +kt.x0 || 0, y = +kt.y0 || 0;
+  (kt.elemente || []).forEach((e, i) => {
+    const x1 = +e.x || 0, y1 = +e.y || 0;
+    if(Math.hypot(x1 - x, y1 - y) < 1e-9){ fehler.push('Element ' + (i + 1) + ': Endpunkt gleich Startpunkt'); return; }
+    if(e.typ === 'b'){
+      const r = Math.abs(+e.r || 0), m = fBogenMitte(x, y, x1, y1, r, (+e.dr < 0) ? -1 : 1, !!e.gross);
+      if(!m){ fehler.push('Element ' + (i + 1) + ': Radius ' + fRund(r) + ' ist kleiner als die halbe Sehne ' + fRund(Math.hypot(x1 - x, y1 - y) / 2)); return; }
+      seg.push({typ:'b', x0:x, y0:y, x1:x1, y1:y1, cx:m.cx, cy:m.cy, r:r, dr:(+e.dr < 0) ? -1 : 1, el:i});
+    } else seg.push({typ:'g', x0:x, y0:y, x1:x1, y1:y1, el:i});
+    x = x1; y = y1;
+  });
+  if(kt.geschlossen && seg.length && (Math.abs(x - (+kt.x0 || 0)) > 1e-9 || Math.abs(y - (+kt.y0 || 0)) > 1e-9)) seg.push({typ:'g', x0:x, y0:y, x1:+kt.x0 || 0, y1:+kt.y0 || 0, el:-1, schluss:true});
+  return {seg:seg, fehler:fehler};
+}
+// Ueberstrichener Winkel eines Bogens mit Vorzeichen (+ gegen den Uhrzeigersinn).
+function fBogenWinkel(s){
+  const a0 = Math.atan2(s.y0 - s.cy, s.x0 - s.cx), a1 = Math.atan2(s.y1 - s.cy, s.x1 - s.cx);
+  let d = a1 - a0;
+  if(s.dr > 0){ while(d <= 1e-12) d += 2 * Math.PI; } else { while(d >= -1e-12) d -= 2 * Math.PI; }
+  return d;
+}
+// Einheits-Tangente am Anfang (amEnde false) oder Ende eines Segments.
+function fSegTangente(s, amEnde){
+  if(s.typ === 'g'){ const L = Math.hypot(s.x1 - s.x0, s.y1 - s.y0) || 1; return {x:(s.x1 - s.x0) / L, y:(s.y1 - s.y0) / L}; }
+  const px = amEnde ? s.x1 : s.x0, py = amEnde ? s.y1 : s.y0;
+  const rx = px - s.cx, ry = py - s.cy, L = Math.hypot(rx, ry) || 1;
+  return s.dr > 0 ? {x:-ry / L, y:rx / L} : {x:ry / L, y:-rx / L};
+}
+// Stuetzpunkte eines Segments (Gerade: Start und Ende; Bogen: alle 5 Grad).
+function fSegPunkte(s){
+  if(s.typ === 'g') return [{x:s.x0, y:s.y0}, {x:s.x1, y:s.y1}];
+  const a0 = Math.atan2(s.y0 - s.cy, s.x0 - s.cx), sw = fBogenWinkel(s), n = Math.max(2, Math.ceil(Math.abs(sw) / (Math.PI / 36)));
+  const out = []; for(let i = 0; i <= n; i++){ const a = a0 + sw * i / n; out.push({x:s.cx + s.r * Math.cos(a), y:s.cy + s.r * Math.sin(a)}); }
+  return out;
+}
+// Umlaufsinn einer geschlossenen Kontur: +1 gegen den Uhrzeigersinn, -1 im.
+function fKonturUmlauf(seg){
+  let a = 0;
+  seg.forEach(s => { const p = fSegPunkte(s); for(let i = 1; i < p.length; i++) a += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y; });
+  return a >= 0 ? 1 : -1;
+}
+// Kontur rueckwaerts: Segmente umgedreht, Boegen kippen den Drehsinn.
+function fSegUmkehren(seg){
+  return seg.slice().reverse().map(s => { const o = Object.assign({}, s, {x0:s.x1, y0:s.y1, x1:s.x0, y1:s.y0}); if(s.typ === 'b') o.dr = -s.dr; return o; });
+}
+// Kleinster Abstand eines Punkts zur Kontur (Segmentliste).
+function fAbstandKontur(p, seg){
+  let best = Infinity;
+  for(const s of seg){
+    let d;
+    if(s.typ === 'g'){
+      const dx = s.x1 - s.x0, dy = s.y1 - s.y0, L2 = dx * dx + dy * dy;
+      let t = L2 > 0 ? ((p.x - s.x0) * dx + (p.y - s.y0) * dy) / L2 : 0; t = Math.max(0, Math.min(1, t));
+      d = Math.hypot(p.x - (s.x0 + dx * t), p.y - (s.y0 + dy * t));
+    } else {
+      const a0 = Math.atan2(s.y0 - s.cy, s.x0 - s.cx), sw = fBogenWinkel(s);
+      let rel = Math.atan2(p.y - s.cy, p.x - s.cx) - a0;
+      if(sw > 0){ while(rel < 0) rel += 2 * Math.PI; while(rel >= 2 * Math.PI) rel -= 2 * Math.PI; }
+      else { while(rel > 0) rel -= 2 * Math.PI; while(rel <= -2 * Math.PI) rel += 2 * Math.PI; }
+      if(Math.abs(rel) <= Math.abs(sw)) d = Math.abs(Math.hypot(p.x - s.cx, p.y - s.cy) - s.r);
+      else d = Math.min(Math.hypot(p.x - s.x0, p.y - s.y0), Math.hypot(p.x - s.x1, p.y - s.y1));
+    }
+    if(d < best) best = d;
+  }
+  return best;
+}
+// Schnittpunkt zweier versetzter Segmente (als Gerade/Kreis verlaengert),
+// der dem Eckpunkt P am naechsten liegt; null = kein Schnittpunkt.
+function fSegSchnitt(a, b, P){
+  const kand = [];
+  const lin = (s) => ({px:s.x0, py:s.y0, dx:s.x1 - s.x0, dy:s.y1 - s.y0});
+  if(a.typ === 'g' && b.typ === 'g'){
+    const A = lin(a), Bl = lin(b); const den = A.dx * Bl.dy - A.dy * Bl.dx; if(Math.abs(den) < 1e-12) return null;
+    const t = ((Bl.px - A.px) * Bl.dy - (Bl.py - A.py) * Bl.dx) / den; kand.push({x:A.px + A.dx * t, y:A.py + A.dy * t});
+  } else if(a.typ === 'g' || b.typ === 'g'){
+    const L = lin(a.typ === 'g' ? a : b), C = (a.typ === 'g' ? b : a);
+    const fx = L.px - C.cx, fy = L.py - C.cy, A2 = L.dx * L.dx + L.dy * L.dy, B2 = 2 * (fx * L.dx + fy * L.dy), C2 = fx * fx + fy * fy - C.r * C.r;
+    const disc = B2 * B2 - 4 * A2 * C2; if(disc < 0 || A2 < 1e-12) return null; const sq = Math.sqrt(disc);
+    [(-B2 - sq) / (2 * A2), (-B2 + sq) / (2 * A2)].forEach(t => kand.push({x:L.px + L.dx * t, y:L.py + L.dy * t}));
+  } else {
+    const dx = b.cx - a.cx, dy = b.cy - a.cy, D = Math.hypot(dx, dy);
+    if(D < 1e-12 || D > a.r + b.r + 1e-9 || D < Math.abs(a.r - b.r) - 1e-9) return null;
+    const aa = (a.r * a.r - b.r * b.r + D * D) / (2 * D), h = Math.sqrt(Math.max(0, a.r * a.r - aa * aa));
+    const mx = a.cx + aa * dx / D, my = a.cy + aa * dy / D;
+    kand.push({x:mx - h * dy / D, y:my + h * dx / D}); kand.push({x:mx + h * dy / D, y:my - h * dx / D});
+  }
+  kand.sort((p, q) => Math.hypot(p.x - P.x, p.y - P.y) - Math.hypot(q.x - P.x, q.y - P.y));
+  return kand[0] || null;
+}
+// Werkzeugmittenbahn: Kontur um d zur Werkzeugseite versetzt. seite +1 =
+// Werkzeug links der Laufrichtung (RL), -1 = rechts (RR). Liefert
+// {ok, seg} oder {ok:false, grund}.
+function fKonturVersatz(seg, d, seite, geschlossen){
+  const n = seg.length; if(!n) return {ok:false, grund:'Kontur ohne Elemente'};
+  if(!(d > 0)) return {ok:false, grund:'Bahnversatz fehlt'};
+  const off = [];
+  for(const s of seg){
+    if(s.typ === 'g'){
+      const t = fSegTangente(s), nx = -t.y * seite, ny = t.x * seite;
+      off.push({typ:'g', x0:s.x0 + nx * d, y0:s.y0 + ny * d, x1:s.x1 + nx * d, y1:s.y1 + ny * d});
+    } else {
+      // links eines Bogens gegen den Uhrzeigersinn liegt die Mitte: Radius schrumpft
+      const r2 = s.r - seite * s.dr * d;
+      if(r2 <= 1e-6) return {ok:false, grund:'Innenradius ' + fRund(s.r) + ' bei X' + fRund(s.x1) + ' Y' + fRund(s.y1) + ' ist kleiner als der Bahnversatz ' + fRund(d) + ' (Werkzeugradius + Aufmass)'};
+      const k = r2 / s.r;
+      off.push({typ:'b', x0:s.cx + (s.x0 - s.cx) * k, y0:s.cy + (s.y0 - s.cy) * k, x1:s.cx + (s.x1 - s.cx) * k, y1:s.cy + (s.y1 - s.cy) * k, cx:s.cx, cy:s.cy, r:r2, dr:s.dr});
+    }
+  }
+  const out = [], m = geschlossen ? n : n - 1;
+  for(let i = 0; i < n; i++){
+    const a = off[i]; out.push(a);
+    if(i >= m) break;
+    const j = (i + 1) % n, b = off[j], P = {x:seg[i].x1, y:seg[i].y1};
+    const t1 = fSegTangente(seg[i], true), t2 = fSegTangente(seg[j], false);
+    const cross = t1.x * t2.y - t1.y * t2.x, dot = t1.x * t2.x + t1.y * t2.y;
+    if(Math.abs(cross) < 1e-9 && dot > 0){ b.x0 = a.x1; b.y0 = a.y1; continue; }          // tangentialer Uebergang
+    if(cross * seite < 0 || (Math.abs(cross) < 1e-9 && dot < 0)){
+      // Ecke zeigt zur Werkzeugseite: Bogen um den Eckpunkt im Bahnversatz,
+      // Drehsinn gegen die Werkzeugseite (links -> im Uhrzeigersinn)
+      out.push({typ:'b', x0:a.x1, y0:a.y1, x1:b.x0, y1:b.y0, cx:P.x, cy:P.y, r:d, dr:-seite, eck:true});
+    } else {
+      const S = fSegSchnitt(a, b, P);
+      if(!S) return {ok:false, grund:'Innenecke bei X' + fRund(P.x) + ' Y' + fRund(P.y) + ': die versetzten Bahnen schneiden sich nicht (Werkzeug zu gross)'};
+      a.x1 = S.x; a.y1 = S.y; b.x0 = S.x; b.y0 = S.y;
+    }
+  }
+  // Engstellen: eine Gerade, die durch das Zurueckschneiden ihre Richtung
+  // verliert, und jeder Bahnpunkt naeher als d an der Kontur — dort passt
+  // das Werkzeug nicht in die Kontur.
+  for(let i = 0, si = 0; i < out.length; i++){
+    const o = out[i]; if(o.eck) continue;
+    const s = seg[si++];
+    if(o.typ === 'g' && s && s.typ === 'g'){
+      const dot = (o.x1 - o.x0) * (s.x1 - s.x0) + (o.y1 - o.y0) * (s.y1 - s.y0);
+      if(dot < -1e-9) return {ok:false, grund:'Engstelle bei X' + fRund(s.x1) + ' Y' + fRund(s.y1) + ': das Werkzeug (Versatz ' + fRund(d) + ') passt dort nicht in die Kontur'};
+    }
+    if(o.typ === 'b' && s && s.typ === 'b'){
+      const sw0 = Math.abs(fBogenWinkel(s)), sw1 = Math.abs(fBogenWinkel(o));
+      if(sw1 > sw0 + Math.PI / 2 + 1e-9) return {ok:false, grund:'Engstelle am Bogen bei X' + fRund(s.x1) + ' Y' + fRund(s.y1) + ': das Werkzeug (Versatz ' + fRund(d) + ') passt dort nicht in die Kontur'};
+    }
+  }
+  for(const o of out){
+    const pts = o.typ === 'g' ? [0.25, 0.5, 0.75].map(t => ({x:o.x0 + (o.x1 - o.x0) * t, y:o.y0 + (o.y1 - o.y0) * t})) : fSegPunkte(o);
+    for(const p of pts){
+      if(fAbstandKontur(p, seg) < d - 1e-6) return {ok:false, grund:'Engstelle bei X' + fRund(p.x) + ' Y' + fRund(p.y) + ': das Werkzeug (Versatz ' + fRund(d) + ') passt dort nicht in die Kontur'};
+    }
+  }
+  return {ok:true, seg:out};
+}
+// Werkzeugseite eines Konturschritts relativ zur GEZEICHNETEN Laufrichtung:
+// +1 links (RL), -1 rechts (RR). Geschlossen: innen = links bei Umlauf gegen
+// den Uhrzeigersinn; offen: die Wahl des Schritts.
+function fKonturSeite(s, kt, seg){
+  if(kt && kt.geschlossen){ const o = fKonturUmlauf(seg || fKonturSegmente(kt).seg); return (s.seiteZu === 'aussen') ? -o : o; }
+  return (s.seiteAuf === 'rechts') ? -1 : 1;
+}
+// Kontur-Unterprogramm fuer Zyklus 14/25: erster Satz mit RL/RR, Geraden als
+// L, Boegen als CR mit R (negativ ueber 180 Grad) und DR (670 388-12 S. 223).
+function fKonturLbl(kt, seite){
+  const K = fKonturSegmente(kt), out = [];
+  if(!K.seg.length) return out;
+  out.push('L X' + klNum(K.seg[0].x0) + ' Y' + klNum(K.seg[0].y0) + ' ' + (seite > 0 ? 'RL' : 'RR'));
+  K.seg.forEach(s => {
+    if(s.typ === 'g') out.push('L X' + klNum(s.x1) + ' Y' + klNum(s.y1));
+    else { const gross = Math.abs(fBogenWinkel(s)) > Math.PI + 1e-9; out.push('CR X' + klNum(s.x1) + ' Y' + klNum(s.y1) + ' R' + klNum(gross ? -s.r : s.r) + ' DR' + (s.dr > 0 ? '+' : '-')); }
+  });
+  return out;
+}
+// Die Konturbahn eines Schritts: Schruppen mit Versatz Werkzeugradius + UXY
+// in Zustellungen bis zur Tiefe, Schlichten mit Versatz Werkzeugradius in
+// Schritten DS mit FS (wenn UXY > 0 oder nur Schlichten). Eintauchen
+// senkrecht am Bahnanfang mit FZ (wie Zyklus 25). Geschlossene Kontur: die
+// naechste Zustellung beginnt am selben Punkt ohne Abheben; offene Kontur:
+// Abheben auf SC, Eilgang zurueck zum Anfang.
+function fBahnKontur(s, tool, prog){
+  const warn = [], B = [];
+  const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  const kt = (prog.konturen || [])[s.kontur]; if(!kt) return nein('keine Kontur gewaehlt');
+  const K = fKonturSegmente(kt);
+  if(K.fehler.length) return nein('Kontur "' + kt.name + '": ' + K.fehler[0]);
+  if(!K.seg.length) return nein('Kontur "' + kt.name + '" hat kein Element');
+  const rt = (tool && +tool.d > 0) ? +tool.d / 2 : 0;
+  if(!(rt > 0)) return nein('Werkzeug-Durchmesser fehlt (Werkzeugtabelle)');
+  const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
+  if(!(sc > 0)) return nein('Sicherheitsabstand fehlt');
+  const zSC = fRund(z0 + sc), zSC2 = fRund(z0 + sc2);
+  const f = +s.f || 0, fZ = (+s.fTief > 0) ? +s.fTief : f, fS = (+s.fSchl > 0) ? +s.fSchl : f;
+  if(!(f > 0)) return nein('Vorschub fehlt');
+  const tiefe = +s.tiefe || 0; if(!(tiefe < 0)) return nein('Tiefe fehlt');
+  const zT = fRund(z0 + tiefe);
+  const uxy = Math.max(0, +s.aufSeite || 0), umfang = Math.round(+s.umfang || 0);
+  let seg = K.seg, seite = fKonturSeite(s, kt, seg);
+  // Gleichlauf bei M3 = Werkzeug links (RL); sonst rueckwaerts laufen
+  const gleich = !(+s.fraesart < 0);
+  if((seite > 0) !== gleich){ seg = fSegUmkehren(seg); seite = -seite; }
+  const pos = {x:null, y:null, z:null};
+  const gleichLage = (o) => ['x', 'y', 'z'].every(k => o[k] == null || (pos[k] != null && Math.abs(pos[k] - o[k]) < 1e-9));
+  const merk = (o) => { ['x', 'y', 'z'].forEach(k => { if(o[k] != null) pos[k] = o[k]; }); };
+  const eil = (o) => { if(gleichLage(o)) return; B.push(Object.assign({a:'eil'}, o)); merk(o); };
+  const vor = (o) => { if(gleichLage(o)) return; B.push(Object.assign({a:'vor'}, o)); merk(o); };
+  const kreis = (o) => { B.push(Object.assign({a:'kreis'}, o)); merk(o); };
+  const ebenen = (schritt) => { const e = []; let z = z0; const st = (schritt > 0) ? schritt : (z0 - zT); while(z > zT + 1e-9){ z = Math.max(zT, fRund(z - st)); e.push(z); } if(!e.length) e.push(zT); return e; };
+  const lauf = (d, fXY, zListe) => {
+    const V = fKonturVersatz(seg, d, seite, !!kt.geschlossen); if(!V.ok) return V.grund;
+    const a0 = V.seg[0], start = {x:fRund(a0.x0), y:fRund(a0.y0)};
+    zListe.forEach((z, i) => {
+      const anfang = (i === 0) || !kt.geschlossen;
+      if(anfang){
+        if(pos.z != null && pos.z < zSC - 1e-9) eil({z:zSC});
+        eil({x:start.x, y:start.y});
+        eil({z:zSC});
+      }
+      vor({z:z, f:fZ});
+      V.seg.forEach(o => {
+        if(o.typ === 'g') vor({x:fRund(o.x1), y:fRund(o.y1), z:z, f:fXY});
+        else kreis({x:fRund(o.x1), y:fRund(o.y1), z:z, cx:fRund(o.cx), cy:fRund(o.cy), dr:o.dr, f:fXY});
+      });
+    });
+    return null;
+  };
+  if(umfang !== 2){ const g = lauf(rt + uxy, f, ebenen(+s.zust)); if(g) return nein(g); }
+  if(umfang !== 1 && (uxy > 0 || umfang === 2)){
+    if(umfang === 2) warn.push('Nur Schlichten: die Kontur muss vorgeschruppt sein — die Bahn faehrt gleich auf Tiefe.');
+    const g = lauf(rt, fS, ebenen(+s.zustSchl)); if(g) return nein(g);
+  }
+  if(umfang === 1 && uxy > 0) warn.push('Nur Schruppen: Aufmass ' + uxy + ' bleibt an der Kontur stehen.');
+  warn.push('Konturzug: Eintauchen senkrecht am Bahnanfang mit FZ ' + fZ + ' — wie Zyklus 25; Fraeser muss ueber Mitte schneiden.');
+  eil({z:zSC}); eil({z:zSC2});
+  return {ok:true, bahn:B, warn:warn, zT:zT};
+}
+
+// ---------------------------------------------------------------------
 // Programmname pruefen: Dateiname = Programmname (BEGIN/END PGM).
 // ---------------------------------------------------------------------
 function fName(prog){
@@ -4336,8 +4727,8 @@ function fProgrammSchreiben(prog, opt){
     // jeder Position. Sonst der Zyklus — mit Ansage, wenn der Wunsch nicht
     // erfuellbar war (stumm zurueckfallen waere eine Falle).
     let einzel = null;
-    if(s.ausgabe === 'einzel' && z && (z.eigenePosition || m)){
-      const bh = fBahnSchritt(s, tool, prog, z.eigenePosition ? [] : fMusterPunkte(m));
+    if(s.ausgabe === 'einzel' && z && (z.eigenePosition || z.kontur || m)){
+      const bh = fBahnSchritt(s, tool, prog, (z.eigenePosition || z.kontur) ? [] : fMusterPunkte(m));
       if(bh.ok) einzel = bh; else warn.push('Schritt ' + (si + 1) + ': Einzelsaetze nicht moeglich — ' + bh.grund + '. Steuerungszyklus geschrieben.');
     }
     if(einzel){
@@ -4345,9 +4736,20 @@ function fProgrammSchreiben(prog, opt){
       einzel.warn.forEach(w => warn.push('Schritt ' + (si + 1) + ': ' + w));
       fBahnKlartext(einzel.bahn).forEach(l => satz(l));
     } else {
+      if(z && z.kontur){
+        // Paket C3: Zyklus 14 nennt das Kontur-Unterprogramm (DEF-aktiv), der
+        // Zyklus 25 folgt, CYCL CALL ruft ihn (670 388-12 S. 223). Das LBL
+        // steht mit den Bohrbild-LBLs hinter dem M2-Satz, RL/RR = Werkzeugseite.
+        const kt = (prog.konturen || [])[s.kontur];
+        let nr = lblNr.get('k' + s.kontur);
+        if(!nr){ nr = lblNr.size + 1; lblNr.set('k' + s.kontur, nr); lblListe.push({nr:nr, kontur:kt, seite:fKonturSeite(s, kt)}); }
+        satz('CYCL DEF 14.0 KONTUR'); satz('CYCL DEF 14.1 KONTURLABEL ' + nr);
+      }
       const def = fZyklusDef(s, tool, k.stand || '07');
       if(def){ satz(def[0]); for(let i = 1; i < def.length; i++) zeilen.push(def[i]); }
-      if(z && z.eigenePosition){
+      if(z && z.kontur){
+        satz('CYCL CALL');
+      } else if(z && z.eigenePosition){
         // Planfraesen 232: Startpunkt steckt im Zyklus, kein Bohrbild — ein
         // CYCL CALL direkt hinter der Definition (CALL-aktiv).
         satz('CYCL CALL');
@@ -4368,7 +4770,8 @@ function fProgrammSchreiben(prog, opt){
   // jedem Punkt den zuletzt definierten Zyklus (satzweise Zyklusaufruf).
   lblListe.forEach(l => {
     satz('LBL ' + l.nr);
-    fMusterPunkte(l.m).forEach(p => satz('L X' + klNum(p.x) + ' Y' + klNum(p.y) + ' R0 FMAX M99'));
+    if(l.kontur) fKonturLbl(l.kontur, l.seite).forEach(t => satz(t));
+    else fMusterPunkte(l.m).forEach(p => satz('L X' + klNum(p.x) + ' Y' + klNum(p.y) + ' R0 FMAX M99'));
     satz('LBL 0');
   });
   satz('END PGM ' + name + ' MM');
@@ -4400,6 +4803,22 @@ function fPruefen(prog){
     const m = (prog.muster || [])[s.muster];
     if(zyk.eigenePosition){
       // Planfraesen: die Flaeche steckt im Zyklus, kein Bohrbild noetig.
+    } else if(zyk.kontur){
+      // Paket C3: Konturzug auf einer XY-Kontur. Geometriefehler sind rot;
+      // was das Werkzeug nicht erreicht (Engstelle, Innenradius), meldet die
+      // eigene Bahn — gelb, denn der Zyklus 25 laesst dort Material stehen
+      // und bei Einzelsaetzen schreibt der Schreiber den Zyklus mit Ansage.
+      const kt = (prog.konturen || [])[s.kontur];
+      if(!kt) rot.push(nr + 'keine Kontur gewaehlt.');
+      else {
+        const K = fKonturSegmente(kt);
+        if(K.fehler.length) rot.push(nr + 'Kontur "' + kt.name + '": ' + K.fehler.join('; '));
+        else if(!K.seg.length) rot.push(nr + 'Kontur "' + kt.name + '" hat kein Element.');
+        else if(tool && +tool.d > 0){ const b = fBahnKontur(s, tool, prog); if(!b.ok) gelb.push(nr + 'eigene Bahn: ' + b.grund + (s.ausgabe === 'einzel' ? ' — Einzelsaetze nicht moeglich, es wird der Zyklus 25 geschrieben.' : ' — der Zyklus 25 laesst dort Material stehen.')); }
+      }
+      if(tool && tool.art !== 'fraeser') gelb.push(nr + 'T' + s.t + ' ist kein Fraeser (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
+      if(!(+s.fTief > 0)) rot.push(nr + 'Vorschub Tiefenzustellung Q11 fehlt.');
+      if(+s.zust < 0) rot.push(nr + 'Zustell-Tiefe Q10 darf nicht negativ sein.');
     } else if(!m) rot.push(nr + 'kein Positionsmuster.');
     else if(!fMusterPunkte(m).length) rot.push(nr + 'Positionsmuster "' + (m.name || '') + '" hat keinen Punkt.');
     else {
@@ -4683,6 +5102,22 @@ function fDemoPlanEinzel(){
   p.schritte = [pl, t];
   return p;
 }
+// DZ9 (Paket C3): eine Insel mit zwei Boegen und einer Nut 12 x 14 als XY-Kontur,
+// Schritt 1 als Zyklus 14/25 der Steuerung, Schritt 2 dieselbe Kontur als eigene
+// Bahn (Einzelsaetze mit Eckenboegen und zurueckgeschnittenen Innenecken) — im
+// Programm-Test muessen beide dasselbe Bild ergeben. Unter 100 Saetzen.
+function fDemoKonturEinzel(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ9';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-20, x1:100, y1:80, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [{nr:5, name:'Schaftfraeser 10', art:'fraeser', d:10, angle:6, s:3000, f:600}];
+  p.konturen = [{name:'Insel mit Nut', geschlossen:true, x0:20, y0:20, elemente:[
+    {typ:'g', x:60, y:20}, {typ:'b', x:70, y:30, r:10, dr:1}, {typ:'g', x:70, y:38}, {typ:'g', x:58, y:38}, {typ:'g', x:58, y:52}, {typ:'g', x:70, y:52},
+    {typ:'b', x:60, y:62, r:10, dr:1}, {typ:'g', x:30, y:62}, {typ:'g', x:20, y:52}]}];
+  const z = fSchrittNeu(p, 'konturzug', 5, 0); Object.assign(z, {seiteZu:'aussen', umfang:0, fraesart:1, tiefe:-6, zust:6, aufSeite:0, zustSchl:0, f:600, fTief:200, fSchl:600, s:3000, ausgabe:'zyklus'});
+  const e = fSchrittNeu(p, 'konturzug', 5, 0); Object.assign(e, {seiteZu:'aussen', umfang:0, fraesart:1, tiefe:-6, zust:6, aufSeite:0, zustSchl:0, f:600, fTief:200, fSchl:600, s:3000, ausgabe:'einzel'});
+  p.schritte = [z, e];
+  return p;
+}
 var F_DEMOS = [
   {id:'flansch', name:'Flanschplatte (Lochkreis + M8-Ecken)', lade:fDemoFlansch},
   {id:'leiste',  name:'Leiste (Tieflochbohren + Reiben)',    lade:fDemoLeiste},
@@ -4691,7 +5126,8 @@ var F_DEMOS = [
   {id:'bohren2', name:'Planfraesen 232 + Bohrzyklen 202/204/205/208/209/241', lade:fDemoBohren2},
   {id:'einzel',  name:'Einzelsaetze: Leiste als eigene Bahn ohne Zyklen (eine Bohrung je Schritt)', lade:fDemoEinzel},
   {id:'formen',  name:'Einzelsaetze: Kreistasche, Nut, Kreiszapfen als eigene Bahn', lade:fDemoFormenEinzel},
-  {id:'plan',    name:'Einzelsaetze: Planfraesen + Rechtecktasche mit Helix', lade:fDemoPlanEinzel}
+  {id:'plan',    name:'Einzelsaetze: Planfraesen + Rechtecktasche mit Helix', lade:fDemoPlanEinzel},
+  {id:'kontur',  name:'Konturzug: Insel als Zyklus 14/25 und als eigene Bahn', lade:fDemoKonturEinzel}
 ];
 
 // Merkmale der Fraesausgabe fuer die NC-Ansicht: Status je Zyklusfamilie.
@@ -4711,6 +5147,7 @@ function fMerkmale(profilId){
     z('nutR',       'Runde Nut — Zyklus 254 (Q375 Teilkreis, Q216/Q217 Mitte, Q376 Start, Q248 Oeffnung, Q378/Q377 Wiederholung)'),
     z('zapfenR',    'Rechteckzapfen — Zyklus 256 (Q424/Q425 Rohteilmasse; erst ab Stand 340 49x-06)'),
     z('zapfenK',    'Kreiszapfen — Zyklus 257 (Q222 Rohteil-Durchmesser; erst ab Stand 340 49x-06)'),
+    z('konturzug',  'Konturzug — Zyklus 14 KONTUR + 25 KONTUR-ZUG auf einer XY-Kontur der App (Geraden und Kreisboegen, LBL mit RL/RR, Q1 Q3 Q5 Q7 Q10 Q11 Q12 Q15; CYCL CALL)'),
     z('planfraesen', 'Planfraesen — Zyklus 232 (Q389 Strategie, Startpunkt Q225-Q227, Endhoehe Q386, Q218/Q219 Laengen, Q357 SC Seite; CYCL CALL ohne Bohrbild)'),
     z('ausdrehen',  'Ausdrehen — Zyklus 202 (Q214 Freifahr-Richtung 0-4, Q336 Spindelwinkel)'),
     z('senkenRueck', 'Rueckwaerts-Senken — Zyklus 204 (Q249 Senktiefe nach oben, Q250 Materialstaerke, Q251/Q252 Exzenter/Schneidenhoehe, Q253/Q254 Vorschuebe, Q214 1-4)'),
@@ -4723,6 +5160,7 @@ function fMerkmale(profilId){
     z('muster221',  'Reihe/Gitter als Zyklus 221 (Option je Muster)'),
     {t:'Einzelsaetze statt Zyklus (Paket C, je Schritt waehlbar): Zentrieren, Bohren, Tieflochbohren 203/205, Reiben, Gewinde mit Ausgleichsfutter, Ausdrehen ohne Freifahren als eigene Bahn nach dem Zyklusablauf des Handbuchs — L-Saetze mit FMAX/F, Verweilzeit als Zyklus 9, Drehrichtung M4/M3; DZ6 am Programmierplatz durchgelaufen (12.09.2026, 91 Saetze — der Demo-Wandler nimmt hoechstens 100)', s:'pgst'},
     {t:'Formen als eigene Bahn (Paket C2): Rechteck-/Kreistasche, Nut, runde Nut von innen nach aussen (Ringe, Stepover hoechstens Q370 x Werkzeugradius), Zapfen von aussen nach innen, Eintauchen senkrecht/Helix (CP IPA IZ)/pendelnd, Schlichten Boden und Seite, Planfraesen als Maeander; Kreisbogen als CC + C mit DR; DZ7 (Kreistasche, Nut, Kreiszapfen) und DZ8 (Planfraesen, Rechtecktasche mit Helix) am Programmierplatz durchgelaufen (13.09.2026)', s:'pgst'},
+    {t:'Konturbahn als eigene Bahn (Paket C3): XY-Kontur aus Geraden und Kreisboegen (CR-Regel), Werkzeugmitte = Kontur um Werkzeugradius + UXY versetzt, Ecken zur Werkzeugseite als Bogen um den Eckpunkt (CC + C), Innenecken auf den Schnittpunkt zurueckgeschnitten, Engstellen abgelehnt, Gleichlauf = RL (sonst rueckwaerts), Zustellungen ohne Abheben bei geschlossener Kontur, Schlichten mit FS/DS; DZ9 (dieselbe Insel als Zyklus 14/25 und als eigene Bahn) am Programmierplatz durchgelaufen (13.09.2026)', s:'pgst'},
     {t:'Programmrahmen: BEGIN/END PGM, BLK FORM 0.1/0.2, TOOL CALL n Z S, M13/M3, M9, M2, Kommentarsaetze, ~-Fortsetzung, CR LF, Name = Dateiname', s:'pgst'},
     {t:'Werkzeugtabelle im TOOL.T-Stil: Import der ASCII-TOOL.T (Spaltenstarts aus der Kopfzeile, T0 und leere Plaetze uebersprungen; gelesen: die Tabelle des Programmierplatzes mit 49 Spalten) und Export als TOOL.T im Layout 606 42x — der Export lief am Programmierplatz durch ascbin/binasc und kam mit R, NAME, TYP zurueck', s:'pgst'},
     {t:'Weg in die TNC: .H-Dateien nur ueber die TNC-Dateiverwaltung (USB) oder TNCremo einlesen — die Steuerung wandelt sie dabei ins Binaerformat; eine per Explorer in ein TNC-Laufwerk kopierte Datei quittiert sie mit "Dateiformat geaendert"', s:'pgst'},
@@ -4812,7 +5250,7 @@ function maskZu(id){ const m = document.getElementById(id); if(m) m.classList.re
 function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
 // ---- Kachelansicht (Muster des Drehteils, gemeinsamer Speicher) -------
-const KACHEL_MASKEN = ['maskKopf', 'maskMuster', 'maskZyklus'];
+const KACHEL_MASKEN = ['maskKopf', 'maskMuster', 'maskZyklus', 'maskKontur'];
 function kachelPilotAnwenden(){
   let an = true;
   try{ an = localStorage.getItem('et_kachelpilot') !== 'aus'; }catch(e){}
@@ -4900,7 +5338,8 @@ function fLadeAkt(){
   return null;
 }
 function fProgrammSetzen(p, quelle){
-  fProg = p; fSel = null; fEditSchritt = -1; fEditMuster = -1;
+  fProg = p; fSel = null; fEditSchritt = -1; fEditMuster = -1; fEditKontur = -1;
+  if(!Array.isArray(p.konturen)) p.konturen = [];   // Programme von vor Paket C3
   setVal('pmSaveName', p.kopf.name);
   fRender();
   if(quelle) melde(quelle);
@@ -4911,6 +5350,7 @@ function fProgrammSetzen(p, quelle){
 // =====================================================================
 function fWerkzeug(nr){ return (fProg.werkzeuge || []).find(w => w.nr === nr); }
 function fRender(){
+  if(!Array.isArray(fProg.konturen)) fProg.konturen = [];
   const k = fProg.kopf;
   const name = fName(fProg);
   const hn = document.getElementById('hdrName'); if(hn) hn.textContent = k.name || name;
@@ -4938,14 +5378,21 @@ function fArbeitsplanRender(){
          '<div class="ap-detail">' + esc(fMusterText(m)) + ' · ' + n + ' Punkt' + (n === 1 ? '' : 'e') + (m.ausgabe === 'zyklus' ? ' · Zyklus ' + (m.typ === 'kreis' ? '220' : '221') : ' · LBL') + '</div>' +
          '<div class="ap-zeit"></div><button class="ap-edit" data-em="' + i + '">✎</button><button class="ap-del" data-dm="' + i + '">✕</button></div>';
   });
+  (fProg.konturen || []).forEach((kt, i) => {
+    h += '<div class="ap-row' + sel('kontur', i) + '" data-kt="' + i + '"><div class="ap-icon start">' + fIcon('grp_kontur') + '</div>' +
+         '<div class="ap-name" title="' + esc(kt.name) + '">' + esc(kt.name || ('Kontur ' + (i + 1))) + '</div>' +
+         '<div class="ap-detail">' + esc(fKonturText(kt)) + '</div>' +
+         '<div class="ap-zeit"></div><button class="ap-edit" data-ekt="' + i + '">✎</button><button class="ap-del" data-dkt="' + i + '">✕</button></div>';
+  });
   fProg.schritte.forEach((s, i) => {
     const z = F_ZYKLEN[s.art] || {nr:'?', wort:s.art};
     const t = fWerkzeug(s.t);
     const m = fProg.muster[s.muster];
+    const kt = z.kontur ? (fProg.konturen || [])[s.kontur] : null;
     // 232 traegt seine Flaeche selbst (kein Bohrbild), 204 hat statt der
     // Tiefe die Senkung nach oben. Neutrale Kurzzeichen wie in der Maske
     // (Z1, SC ...); die Zyklusnummer der Steuerung steht nur im Titel.
-    const detail = (z.eigenePosition ? 'Fläche im Zyklus' : (m ? esc(m.name) : '<span style="color:#c0392b">kein Bohrbild</span>')) +
+    const detail = (z.eigenePosition ? 'Fläche im Zyklus' : (z.kontur ? (kt ? 'Kontur ' + esc(kt.name) + ' · ' + (kt.geschlossen ? (s.seiteZu === 'aussen' ? 'außen' : 'innen') : (s.seiteAuf === 'rechts' ? 'rechts (RR)' : 'links (RL)')) : '<span style="color:#c0392b">keine Kontur</span>') : (m ? esc(m.name) : '<span style="color:#c0392b">kein Bohrbild</span>'))) +
       (z.fraes ? ' · ' + esc(fFormText(s)) : '') +
       (z.eigenePosition ? '' : (z.ohneTiefe ? ' · Senkung +' + (s.q249 || 0) : ' · Z1 ' + s.tiefe)) + (/^(gewinde|gewindeGS|gewindeSpan)$/.test(s.art) ? ' · P' + s.steigung : '') +
       ' · F' + s.f + ' S' + s.s + (s.kuehl === 'aus' ? ' · trocken' : '') + (s.ausgabe === 'einzel' ? ' · Einzelsätze' : '');
@@ -4960,7 +5407,7 @@ function fArbeitsplanRender(){
          '<button class="ap-edit" data-es="' + i + '">✎</button><button class="ap-del" data-ds="' + i + '">✕</button></div>';
   });
   if(!fProg.schritte.length && !fProg.muster.length){
-    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen acht Testvorlagen.</div>';
+    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen neun Testvorlagen.</div>';
   }
   body.innerHTML = h;
 }
@@ -4972,6 +5419,17 @@ function fArbeitsplanRender(){
       const d = b.dataset;
       if(d.ek){ fKopfOeffnen(); return; }
       if(d.em !== undefined){ fMusterOeffnen(+d.em); return; }
+      if(d.ekt !== undefined){ fKonturOeffnen(+d.ekt); return; }
+      if(d.dkt !== undefined){
+        const i = +d.dkt;
+        const genutzt = fProg.schritte.filter(s => (F_ZYKLEN[s.art] || {}).kontur && s.kontur === i).length;
+        zweiklickBestaetigen(b, genutzt ? 'Wirklich? ' + genutzt + ' Schritt(e) nutzen sie' : 'Wirklich löschen?', ()=>{
+          fProg.konturen.splice(i, 1);
+          fProg.schritte.forEach(s => { if(!(F_ZYKLEN[s.art] || {}).kontur) return; if(s.kontur === i) s.kontur = -1; else if(s.kontur > i) s.kontur--; });
+          fSel = null; fRender();
+        });
+        return;
+      }
       if(d.es !== undefined){ fZyklusOeffnen(null, +d.es); return; }
       if(d.dm !== undefined){
         const i = +d.dm;
@@ -4993,6 +5451,7 @@ function fArbeitsplanRender(){
     if(!row) return;
     if(row.dataset.k === 'kopf') fSel = {typ:'kopf', idx:0};
     else if(row.dataset.m !== undefined) fSel = {typ:'muster', idx:+row.dataset.m};
+    else if(row.dataset.kt !== undefined) fSel = {typ:'kontur', idx:+row.dataset.kt};
     else if(row.dataset.sidx !== undefined) fSel = {typ:'schritt', idx:+row.dataset.sidx};
     fArbeitsplanRender(); fDraufsicht();
   });
@@ -5013,6 +5472,7 @@ function fDraufsicht(){
   const k = fProg.kopf;
   let x0 = Math.min(k.x0, k.x1), x1 = Math.max(k.x0, k.x1), y0 = Math.min(k.y0, k.y1), y1 = Math.max(k.y0, k.y1);
   fProg.muster.forEach(m => fMusterPunkte(m).forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }));
+  (fProg.konturen || []).forEach(kt => fKonturSegmente(kt).seg.forEach(sg => fSegPunkte(sg).forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); })));
   const bw = Math.max(1, x1 - x0), bh = Math.max(1, y1 - y0);
   const rand = 26;
   const sc = Math.min((W - 2 * rand) / bw, (H - 2 * rand) / bh);
@@ -5039,9 +5499,22 @@ function fDraufsicht(){
       if(aktiv){ ctx.fillStyle = '#e07020'; ctx.fillText(String(i + 1), X(q.x) + 5, Y(q.y) - 5); }
     });
   });
+  // Konturen (Paket C3): Linie in Laufrichtung, geschlossene leicht gefuellt,
+  // die angewaehlte orange mit Startmarke
+  (fProg.konturen || []).forEach((kt, ki) => {
+    const seg = fKonturSegmente(kt).seg; if(!seg.length) return;
+    const aktiv = fSel && fSel.typ === 'kontur' && fSel.idx === ki;
+    ctx.save(); ctx.strokeStyle = aktiv ? '#e07020' : (dunkel ? '#c8d3dc' : '#2a3a48'); ctx.lineWidth = aktiv ? 2.2 : 1.4;
+    ctx.fillStyle = aktiv ? 'rgba(224,112,32,.14)' : (dunkel ? 'rgba(200,211,220,.12)' : 'rgba(42,58,72,.08)');
+    ctx.beginPath(); fKonturPfad(ctx, seg, X, Y, sc); if(kt.geschlossen){ ctx.closePath(); ctx.fill(); } ctx.stroke();
+    ctx.beginPath(); ctx.arc(X(+kt.x0 || 0), Y(+kt.y0 || 0), 3.2, 0, Math.PI * 2); ctx.stroke();
+    if(aktiv){ ctx.fillStyle = '#e07020'; ctx.font = '10px Arial'; ctx.fillText('S', X(+kt.x0 || 0) + 5, Y(+kt.y0 || 0) - 5); }
+    ctx.restore();
+  });
   // Schritte als Kreise im Werkzeugdurchmesser
   fProg.schritte.forEach((s, si) => {
     if(s.aktiv === false) return;
+    if((F_ZYKLEN[s.art] || {}).kontur){ fDraufsichtKontur(ctx, s, X, Y, sc, fSel && fSel.typ === 'schritt' && fSel.idx === si, dunkel); return; }
     const m = fProg.muster[s.muster]; if(!m && !(F_ZYKLEN[s.art] || {}).eigenePosition) return;
     const t = fWerkzeug(s.t); const d = (t && +t.d > 0) ? +t.d : 5;
     const aktiv = fSel && fSel.typ === 'schritt' && fSel.idx === si;
@@ -5057,6 +5530,8 @@ function fDraufsicht(){
     let txt = 'Rohteil ' + (k.x1 - k.x0) + ' × ' + (k.y1 - k.y0) + ' × ' + (k.z1 - k.z0) + ' mm · ' + fProg.muster.reduce((a, m) => a + fMusterPunkte(m).length, 0) + ' Bohrpositionen';
     if(fSel && fSel.typ === 'schritt' && fProg.schritte[fSel.idx]){ const s = fProg.schritte[fSel.idx]; const t = fWerkzeug(s.t); const zz = F_ZYKLEN[s.art] || {}; txt = 'Schritt ' + (fSel.idx + 1) + ': ' + zz.wort + ' T' + s.t + (t ? ' ⌀' + t.d : '') + (zz.eigenePosition ? ' · Z' + s.pz + ' → Z' + s.zEnd : (zz.ohneTiefe ? ' · Senkung +' + (s.q249 || 0) : ' · Z1 ' + s.tiefe)); }
     if(fSel && fSel.typ === 'muster' && fProg.muster[fSel.idx]) txt = fMusterText(fProg.muster[fSel.idx]) + ' — Punkte nummeriert in Abfahrfolge';
+    if(fSel && fSel.typ === 'kontur' && (fProg.konturen || [])[fSel.idx]){ const kt = fProg.konturen[fSel.idx]; txt = 'Kontur ' + kt.name + ': ' + fKonturText(kt) + ' — S = Start, Laufrichtung wie gezeichnet'; }
+    if(fSel && fSel.typ === 'schritt' && fProg.schritte[fSel.idx] && (F_ZYKLEN[fProg.schritte[fSel.idx].art] || {}).kontur){ const s = fProg.schritte[fSel.idx]; const t = fWerkzeug(s.t); const b = t ? fBahnSchritt(s, t, fProg, []) : null; txt = 'Schritt ' + (fSel.idx + 1) + ': Konturzug T' + s.t + (t ? ' ⌀' + t.d : '') + ' · Z1 ' + s.tiefe + (b ? (b.ok ? ' · Bahn der Werkzeugmitte gestrichelt (' + b.bahn.filter(m => m.a === 'vor' || m.a === 'kreis').length + ' Sätze)' : ' · ' + b.grund) : ''); }
     info.textContent = txt;
   }
 }
@@ -5147,6 +5622,214 @@ function fDraufsichtForm(ctx, s, m, X, Y, sc, aktiv, dunkel){
   });
 }
 try{ window.addEventListener('resize', ()=>{ try{ fDraufsicht(); }catch(e){} }); }catch(e){}
+
+// =====================================================================
+// XY-KONTUREN (Paket C3, 13.09.2026): Zeichnen, Draufsicht der Konturbahn,
+// Kontureditor (maskKontur) und das Hilfebild des Konturzugs. Das Modell
+// und die Geometrie liegen DOM-frei in F10 (fKonturSegmente, fKonturVersatz,
+// fBahnKontur); hier steht nur die Oberflaeche.
+// =====================================================================
+// Pfad einer Segmentliste in einen Canvas-Kontext (ohne beginPath/stroke):
+// Weltwinkel a wird am Bildschirm zu -a (Y nach unten), ein Bogen gegen den
+// Uhrzeigersinn laeuft dort mit anticlockwise = true.
+function fKonturPfad(ctx, seg, X, Y, sc){
+  if(!seg.length) return;
+  ctx.moveTo(X(seg[0].x0), Y(seg[0].y0));
+  seg.forEach(sg => {
+    if(sg.typ === 'g') ctx.lineTo(X(sg.x1), Y(sg.y1));
+    else { const a0 = Math.atan2(sg.y0 - sg.cy, sg.x0 - sg.cx), a1 = a0 + fBogenWinkel(sg); ctx.arc(X(sg.cx), Y(sg.cy), Math.max(0.1, sg.r * sc), -a0, -a1, sg.dr > 0); }
+  });
+}
+// Kurztext einer Kontur fuer Arbeitsplan, Auswahl und Draufsicht-Info.
+function fKonturText(kt){
+  const n = (kt.elemente || []).length, b = (kt.elemente || []).filter(e => e.typ === 'b').length;
+  return (kt.geschlossen ? 'geschlossen' : 'offen') + ' · ' + n + ' Element' + (n === 1 ? '' : 'e') + (b ? ' (' + b + ' Bogen' + (b === 1 ? '' : ')') + (b === 1 ? ')' : '') : '') + ' · Start X' + (+kt.x0 || 0) + ' Y' + (+kt.y0 || 0);
+}
+// Draufsicht eines Konturschritts: die Bahn der Werkzeugmitte gestrichelt
+// (aus fBahnSchritt, also dieselbe Rechnung wie die Einzelsaetze), dazu der
+// Werkzeugkreis am Bahnanfang. Ohne Werkzeug oder bei Ablehnung nur die Marke.
+function fDraufsichtKontur(ctx, s, X, Y, sc, aktiv, dunkel){
+  const t = fWerkzeug(s.t); if(!t) return;
+  const b = fBahnSchritt(s, t, fProg, []); if(!b.ok) return;
+  ctx.save(); ctx.strokeStyle = aktiv ? '#e07020' : (dunkel ? '#8fd0a0' : '#1d7a3a'); ctx.lineWidth = aktiv ? 1.8 : 1; ctx.setLineDash([5, 3]);
+  let px = null, py = null, erster = null;
+  ctx.beginPath();
+  b.bahn.forEach(m => {
+    if(m.a === 'eil'){ if(m.x != null){ px = m.x; py = m.y; ctx.moveTo(X(px), Y(py)); if(!erster) erster = {x:px, y:py}; } return; }
+    if(m.a === 'vor'){ if(m.x != null){ px = m.x; py = m.y; ctx.lineTo(X(px), Y(py)); } return; }
+    if(m.a === 'kreis'){ const a0 = Math.atan2(py - m.cy, px - m.cx); const sg = {x0:px, y0:py, x1:m.x, y1:m.y, cx:m.cx, cy:m.cy, dr:m.dr}; const a1 = a0 + fBogenWinkel(sg); const r = Math.hypot(px - m.cx, py - m.cy); ctx.arc(X(m.cx), Y(m.cy), Math.max(0.1, r * sc), -a0, -a1, m.dr > 0); px = m.x; py = m.y; }
+  });
+  ctx.stroke(); ctx.setLineDash([]);
+  if(erster){ ctx.beginPath(); ctx.arc(X(erster.x), Y(erster.y), Math.max(2, (+t.d || 5) / 2 * sc), 0, Math.PI * 2); ctx.stroke(); }
+  ctx.restore();
+}
+
+// ---- Kontureditor: Name, geschlossen/offen, Startpunkt, Elementtabelle ----
+// (Typ, X, Y, R, Drehsinn, Bogen ueber 180 Grad), Vorschau mit Rohteil.
+let fKonturTmp = null;   // {name, geschlossen, x0, y0, elemente} waehrend der Bearbeitung
+function fKonturTabelle(){
+  const body = document.getElementById('fkoBody'); if(!body || !fKonturTmp) return;
+  body.innerHTML = fKonturTmp.elemente.map((e, i) => {
+    const bogen = e.typ === 'b';
+    return '<tr' + (bogen ? ' class="fko-bogen"' : '') + '><td>' + (i + 1) + '</td>' +
+      '<td><select data-ktyp="' + i + '" class="tool-select" style="width:auto;min-width:0;padding:2px 4px;font-size:12px;"><option value="g"' + (bogen ? '' : ' selected') + '>Gerade</option><option value="b"' + (bogen ? ' selected' : '') + '>Bogen</option></select></td>' +
+      '<td><input type="number" step="any" data-kx="' + i + '" value="' + esc(e.x) + '"></td>' +
+      '<td><input type="number" step="any" data-ky="' + i + '" value="' + esc(e.y) + '"></td>' +
+      '<td>' + (bogen ? '<input type="number" step="any" data-kr="' + i + '" value="' + esc(e.r == null ? 10 : e.r) + '">' : '') + '</td>' +
+      '<td>' + (bogen ? '<select data-kdr="' + i + '" class="tool-select" style="width:auto;min-width:0;padding:2px 4px;font-size:12px;"><option value="1"' + (+e.dr < 0 ? '' : ' selected') + '>DR+ (gegen Uhr)</option><option value="-1"' + (+e.dr < 0 ? ' selected' : '') + '>DR− (im Uhr)</option></select>' : '') + '</td>' +
+      '<td>' + (bogen ? '<label style="font-size:11px;white-space:nowrap;"><input type="checkbox" data-kgross="' + i + '"' + (e.gross ? ' checked' : '') + '> &gt;180°</label>' : '') + '</td>' +
+      '<td><button data-khoch="' + i + '" class="gcbtn" title="nach oben"' + (i === 0 ? ' disabled' : '') + '>▲</button><button data-kdel="' + i + '" class="gcbtn">✕</button></td></tr>';
+  }).join('');
+}
+function fKonturLesen(){
+  const kt = {name:getStr('fkoName').trim() || 'Kontur', geschlossen:(selBtnVal('fkoGeschlBtns') || 'geschlossen') === 'geschlossen', x0:getNum('fkoX0', 0), y0:getNum('fkoY0', 0),
+    elemente:(fKonturTmp ? fKonturTmp.elemente : []).map(e => { const o = {typ:e.typ === 'b' ? 'b' : 'g', x:+e.x || 0, y:+e.y || 0}; if(o.typ === 'b'){ o.r = Math.abs(+e.r || 0); o.dr = (+e.dr < 0) ? -1 : 1; if(e.gross) o.gross = true; } return o; })};
+  return kt;
+}
+// Vorschau: Rohteil gestrichelt, Kontur mit Startmarke und Laufrichtungspfeil,
+// Fehler der Geometrie als Text (Radius kleiner als die halbe Sehne usw.).
+function fKonturSync(){
+  const kt = fKonturLesen();
+  const K = fKonturSegmente(kt);
+  const info = document.getElementById('fkoInfo');
+  if(info) info.textContent = K.fehler.length ? 'FEHLER: ' + K.fehler.join(' · ') : (K.seg.length ? fKonturText(kt) + (kt.geschlossen && K.seg.length && K.seg[K.seg.length - 1].schluss ? ' · wird mit einer Geraden zum Start geschlossen' : '') + ' · Umlauf ' + (kt.geschlossen ? (fKonturUmlauf(K.seg) > 0 ? 'gegen den Uhrzeigersinn' : 'im Uhrzeigersinn') : 'offen') : 'Noch kein Element.');
+  const cv = document.getElementById('fkoCv'); if(!cv || !cv.getContext) return;
+  const rect = cv.getBoundingClientRect ? cv.getBoundingClientRect() : {width:600, height:220};
+  const dpr = window.devicePixelRatio || 1, W = Math.max(50, Math.round(rect.width || 600)), H = Math.max(50, Math.round(rect.height || 220));
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const ctx = cv.getContext('2d'); if(!ctx) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const k = fProg.kopf;
+  let x0 = Math.min(k.x0, k.x1), x1 = Math.max(k.x0, k.x1), y0 = Math.min(k.y0, k.y1), y1 = Math.max(k.y0, k.y1);
+  K.seg.forEach(sg => fSegPunkte(sg).forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }));
+  const bw = Math.max(1, x1 - x0), bh = Math.max(1, y1 - y0), rand = 18;
+  const sc = Math.min((W - 2 * rand) / bw, (H - 2 * rand) / bh);
+  const ox = (W - bw * sc) / 2 - x0 * sc, oy = (H + bh * sc) / 2 + y0 * sc;
+  const X = (x) => ox + x * sc, Y = (y) => oy - y * sc;
+  const dunkel = document.body.classList.contains('dunkel');
+  ctx.strokeStyle = dunkel ? '#9fb3c4' : '#3d5a73'; ctx.lineWidth = 1; ctx.setLineDash([5, 3]);
+  ctx.strokeRect(X(k.x0), Y(k.y1), (k.x1 - k.x0) * sc, (k.y1 - k.y0) * sc); ctx.setLineDash([]);
+  if(!K.seg.length) return;
+  ctx.strokeStyle = '#e07020'; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(224,112,32,.14)';
+  ctx.beginPath(); fKonturPfad(ctx, K.seg, X, Y, sc); if(kt.geschlossen){ ctx.closePath(); ctx.fill(); } ctx.stroke();
+  // Startmarke und Pfeil in Laufrichtung am ersten Element
+  ctx.beginPath(); ctx.arc(X(+kt.x0 || 0), Y(+kt.y0 || 0), 3.5, 0, Math.PI * 2); ctx.stroke();
+  const t0 = fSegTangente(K.seg[0], false), p0 = K.seg[0];
+  const mx = X(p0.x0) + t0.x * 14, my = Y(p0.y0) - t0.y * 14, ang = Math.atan2(-t0.y, t0.x);
+  ctx.fillStyle = '#e07020'; ctx.beginPath(); ctx.moveTo(mx + Math.cos(ang) * 6, my + Math.sin(ang) * 6); ctx.lineTo(mx + Math.cos(ang + 2.5) * 6, my + Math.sin(ang + 2.5) * 6); ctx.lineTo(mx + Math.cos(ang - 2.5) * 6, my + Math.sin(ang - 2.5) * 6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = dunkel ? '#c8d3dc' : '#2a3a48'; ctx.font = '10px Arial';
+  K.seg.forEach((sg, i) => { if(sg.schluss) return; ctx.fillText(String(i + 1), X(sg.x1) + 4, Y(sg.y1) - 4); });
+}
+function fKonturOeffnen(idx){
+  fEditKontur = (idx === undefined || idx === null) ? -1 : idx;
+  const kt = fEditKontur >= 0 ? (fProg.konturen || [])[fEditKontur] : fKonturNeu('Kontur ' + ((fProg.konturen || []).length + 1));
+  fKonturTmp = JSON.parse(JSON.stringify(kt));
+  if(!Array.isArray(fKonturTmp.elemente)) fKonturTmp.elemente = [];
+  setVal('fkoName', fKonturTmp.name); setRadio('fkoGeschlBtns', fKonturTmp.geschlossen === false ? 'offen' : 'geschlossen');
+  setVal('fkoX0', fKonturTmp.x0 != null ? fKonturTmp.x0 : 0); setVal('fkoY0', fKonturTmp.y0 != null ? fKonturTmp.y0 : 0);
+  fKonturTabelle();
+  maskZeigen('maskKontur');
+  setTimeout(()=>{ try{ fKonturSync(); }catch(e){} }, 0);
+}
+{
+  wireRadioGroup('fkoGeschlBtns', fKonturSync);
+  const mk = document.getElementById('maskKontur');
+  if(mk && mk.addEventListener){
+    const lies = (e) => {
+      const t = e.target; if(!t || !t.dataset || !fKonturTmp) return;
+      const d = t.dataset, num = (v) => parseFloat(String(v).replace(',', '.')) || 0;
+      if(d.kx !== undefined) fKonturTmp.elemente[+d.kx].x = num(t.value);
+      else if(d.ky !== undefined) fKonturTmp.elemente[+d.ky].y = num(t.value);
+      else if(d.kr !== undefined) fKonturTmp.elemente[+d.kr].r = num(t.value);
+      else if(d.kdr !== undefined) fKonturTmp.elemente[+d.kdr].dr = +t.value < 0 ? -1 : 1;
+      else if(d.kgross !== undefined) fKonturTmp.elemente[+d.kgross].gross = !!t.checked;
+      else if(d.ktyp !== undefined){ const el = fKonturTmp.elemente[+d.ktyp]; el.typ = t.value === 'b' ? 'b' : 'g'; if(el.typ === 'b'){ if(el.r == null) el.r = 10; if(el.dr == null) el.dr = 1; } fKonturTabelle(); }
+      fKonturSync();
+    };
+    mk.addEventListener('input', lies); mk.addEventListener('change', lies);
+  }
+  const body = document.getElementById('fkoBody');
+  if(body && body.addEventListener) body.addEventListener('click', (e)=>{
+    const b = e.target.closest ? e.target.closest('button') : null; if(!b || !fKonturTmp) return;
+    if(b.dataset.kdel !== undefined){ fKonturTmp.elemente.splice(+b.dataset.kdel, 1); fKonturTabelle(); fKonturSync(); }
+    else if(b.dataset.khoch !== undefined){ const i = +b.dataset.khoch; if(i > 0){ const t = fKonturTmp.elemente[i - 1]; fKonturTmp.elemente[i - 1] = fKonturTmp.elemente[i]; fKonturTmp.elemente[i] = t; fKonturTabelle(); fKonturSync(); } }
+  });
+  const letzter = () => { const e = fKonturTmp.elemente; return e.length ? e[e.length - 1] : {x:fKonturTmp.x0 || 0, y:fKonturTmp.y0 || 0}; };
+  const on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+  on('btnFkoGerade', ()=>{ if(!fKonturTmp) return; const l = letzter(); fKonturTmp.elemente.push({typ:'g', x:fRund((+l.x || 0) + 20), y:+l.y || 0}); fKonturTabelle(); fKonturSync(); });
+  on('btnFkoBogen', ()=>{ if(!fKonturTmp) return; const l = letzter(); fKonturTmp.elemente.push({typ:'b', x:fRund((+l.x || 0) + 10), y:fRund((+l.y || 0) + 10), r:10, dr:1}); fKonturTabelle(); fKonturSync(); });
+  on('btnFkoOk', ()=>{
+    const kt = fKonturLesen();
+    const K = fKonturSegmente(kt);
+    if(K.fehler.length){ melde('FEHLER: ' + K.fehler[0]); return; }
+    if(!K.seg.length){ melde('FEHLER: die Kontur hat kein Element.'); return; }
+    if(!Array.isArray(fProg.konturen)) fProg.konturen = [];
+    if(fEditKontur >= 0) fProg.konturen[fEditKontur] = kt; else { fProg.konturen.push(kt); fSel = {typ:'kontur', idx:fProg.konturen.length - 1}; }
+    maskZu('maskKontur'); fRender();
+  });
+  on('btnFkoCancel', ()=>maskZu('maskKontur'));
+  try{ window.addEventListener('resize', ()=>{ const m = document.getElementById('maskKontur'); if(m && m.classList.contains('show')) fKonturSync(); }); }catch(e){}
+}
+
+// ---- Hilfebild des Konturzugs: Draufsicht mit der gewaehlten Kontur (sonst
+// ein Muster), Bearbeitung blau an der Werkzeugseite, Bahn der Werkzeug-
+// mitte gestrichelt, Werkzeugkreis am Anfang; rechts der Schnitt mit Tiefe,
+// Zustellung und Aufmass wie bei den Formen. Reiner Zeichencode. ----
+function hbBildKontur(H, art, s){
+  const c = H.c, w = H.w, h = H.h, k = HB_SKAL;
+  const ax = 8 * k, aw = w * 0.58 - 12 * k, ay = 10 * k, ah = h - 20 * k;
+  c.save(); c.fillStyle = HB_GRAU; c.strokeStyle = HB_EDGE; c.lineWidth = 1.6; c.beginPath(); c.rect(ax, ay, aw, ah); c.fill(); c.stroke(); c.restore();
+  let kt = (fProg.konturen || [])[s.kontur];
+  if(!kt || !(kt.elemente || []).length) kt = {geschlossen:true, x0:0, y0:0, elemente:[{typ:'g', x:40, y:0}, {typ:'b', x:50, y:10, r:10, dr:1}, {typ:'g', x:50, y:30}, {typ:'g', x:0, y:30}]};
+  const seg = fKonturSegmente(kt).seg;
+  if(seg.length){
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    seg.forEach(sg => fSegPunkte(sg).forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }));
+    const rand = 24 * k, sc = Math.min((aw - 2 * rand) / Math.max(1, x1 - x0), (ah - 2 * rand) / Math.max(1, y1 - y0));
+    const X = (x) => ax + aw / 2 + (x - (x0 + x1) / 2) * sc, Y = (y) => ay + ah / 2 - (y - (y0 + y1) / 2) * sc;
+    const seite = fKonturSeite(s, kt, seg), innen = kt.geschlossen && s.seiteZu !== 'aussen';
+    const rtPx = Math.max(7 * k, Math.min(aw, ah) * 0.075), dW = rtPx / sc;   // Werkzeugradius im Bild als Weltmass
+    const V = fKonturVersatz(seg, dW, seite, !!kt.geschlossen), V2 = fKonturVersatz(seg, 2 * dW, seite, !!kt.geschlossen);
+    // Bearbeitung blau: Tasche ganz, Insel/offen ein Band zur Werkzeugseite
+    if(innen) hbBlau(c, cc => { fKonturPfad(cc, seg, X, Y, sc); cc.closePath(); }, ay, ay + ah);
+    else if(V2.ok){
+      if(kt.geschlossen){ hbBlau(c, cc => { fKonturPfad(cc, V2.seg, X, Y, sc); cc.closePath(); }, ay, ay + ah); c.save(); c.fillStyle = HB_GRAU; c.beginPath(); fKonturPfad(c, seg, X, Y, sc); c.closePath(); c.fill(); c.restore(); }
+      else hbBlau(c, cc => { fKonturPfad(cc, seg, X, Y, sc); const r = fSegUmkehren(V2.seg); cc.lineTo(X(r[0].x0), Y(r[0].y0)); r.forEach(sg => { if(sg.typ === 'g') cc.lineTo(X(sg.x1), Y(sg.y1)); else { const a0 = Math.atan2(sg.y0 - sg.cy, sg.x0 - sg.cx), a1 = a0 + fBogenWinkel(sg); cc.arc(X(sg.cx), Y(sg.cy), Math.max(0.1, sg.r * sc), -a0, -a1, sg.dr > 0); } }); cc.closePath(); }, ay, ay + ah);
+    }
+    // Kontur schwarz, Bahn gestrichelt, Werkzeugkreis am Bahnanfang
+    c.save(); c.strokeStyle = HB_EDGE; c.lineWidth = 1.8; c.beginPath(); fKonturPfad(c, seg, X, Y, sc); if(kt.geschlossen) c.closePath(); c.stroke(); c.restore();
+    if(V.ok){
+      const on = HB_FOKUS === 'seiteZu' || HB_FOKUS === 'seiteAuf' || HB_FOKUS === 'fraesart';
+      c.save(); c.strokeStyle = on ? HB_ON : '#245c2f'; c.lineWidth = on ? 1.8 : 1.1; c.setLineDash([4, 3]); c.beginPath(); fKonturPfad(c, V.seg, X, Y, sc); if(kt.geschlossen) c.closePath(); c.stroke(); c.restore();
+      const p0 = V.seg[0];
+      c.save(); c.fillStyle = '#c9cdd2'; c.strokeStyle = on ? HB_ON : HB_EDGE; c.lineWidth = on ? 2 : 1.3; c.beginPath(); c.arc(X(p0.x0), Y(p0.y0), rtPx, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(X(p0.x0) - 3, Y(p0.y0)); c.lineTo(X(p0.x0) + 3, Y(p0.y0)); c.moveTo(X(p0.x0), Y(p0.y0) - 3); c.lineTo(X(p0.x0), Y(p0.y0) + 3); c.stroke(); c.restore();
+      const txt = kt.geschlossen ? (innen ? 'innen' : 'außen') : (seite > 0 ? 'links RL' : 'rechts RR');
+      hbLabel(c, txt, X(p0.x0), Y(p0.y0) - rtPx - 5 * k, on);
+    }
+    hbLabel(c, (kt.name ? String(kt.name) : 'Kontur') + (kt.geschlossen ? '' : ' (offen)'), ax + aw / 2, ay + ah - 6 * k, HB_FOKUS === 'kontur');
+  }
+  // Schnitt rechts: Stufe — links bleibt Material (Kontur), rechts abgetragen
+  const sx = w * 0.62 + 6 * k, sw = w - sx - 24 * k, sy0 = ay + ah * 0.42, syB = ay + ah, sTief = ah * 0.42;
+  const nx = sx + sw * 0.42, yGrund = sy0 + sTief;
+  hbBlock(c, cc => { cc.moveTo(sx, sy0); cc.lineTo(nx, sy0); cc.lineTo(nx, yGrund); cc.lineTo(sx + sw, yGrund); cc.lineTo(sx + sw, syB); cc.lineTo(sx, syB); cc.closePath(); });
+  hbBlau(c, cc => { cc.rect(nx, sy0, sx + sw - nx, sTief); }, sy0, yGrund);
+  hbKoordXY(c, ax, ay + ah, k);
+  hbDim(c, sx + sw + 3, sy0, sx + sw + 3, yGrund, 6 * k, hbTxt(art, s, 'tiefe'), 'tiefe');
+  const nZ = +s.zust > 0 ? Math.max(2, Math.min(4, Math.ceil(Math.abs(+s.tiefe || 10) / (+s.zust || 1)))) : 1, dZ = sTief / nZ;
+  if(+s.zust > 0 || HB_FOKUS === 'zust'){ for(let i = 1; i < nZ; i++) hbLine(c, nx - 3, sy0 + dZ * i, sx + sw - 4, sy0 + dZ * i, HB_ON, 1, [2, 2]); hbLabel(c, hbTxt(art, s, 'zust'), (nx + sx + sw) / 2, sy0 + dZ + 4, HB_FOKUS === 'zust'); }
+  hbLine(c, nx + 4 * k, sy0, nx + 4 * k, yGrund, HB_FOKUS === 'aufSeite' ? HB_ON : HB_AXIS, 1, [3, 2]);
+  hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + 6 * k, yGrund - 5, HB_FOKUS === 'aufSeite', 'left');
+  hbLabel(c, hbTxt(art, s, 'zustSchl'), nx + 6 * k, sy0 + sTief * 0.3, HB_FOKUS === 'zustSchl', 'left');   // oben an der Stufe: auf halber Hoehe lag die Pille am Handy auf der Z1-Pille des Tiefenmasses
+  hbLine(c, sx - 4, sy0 - 20 * k, sx + sw + 4, sy0 - 20 * k, HB_AXIS, 1, [5, 3]);
+  hbLabel(c, hbTxt(art, s, 'sc'), sx + 4, sy0 - 23 * k, HB_FOKUS === 'sc', 'left');
+  hbLabel(c, hbTxt(art, s, 'q203'), sx + 4, sy0 - 3, HB_FOKUS === 'q203', 'left');
+  const tx = nx + (sx + sw - nx) * 0.5, ySCf = sy0 - 20 * k, Lw = ySCf - ay - 4 * k;
+  const tip = hbSpitze(HB_FOKUS, ySCf, yGrund, sy0 + dZ, ySCf, sy0);
+  const tb = Math.max(10, (sx + sw - nx) * 0.42);
+  hbBohrer(c, tx, tip - Lw, tip, tb, 'fraeser');
+  hbFokusSymbol(c, art, tx, tip, tb, k);
+}
 
 // =====================================================================
 // MASKE PROGRAMMKOPF
@@ -5284,7 +5967,10 @@ const F_ICONS = {
   grp_bohren: '<line x1="2" y1="6" x2="20" y2="6"/><path d="M9 1h4v8l-2 4-2-4z"/>',
   grp_gewinde:'<line x1="2" y1="6" x2="20" y2="6"/><path d="M9 1h4v10l-2 3-2-3z"/><path d="M9 4.5h4M9 7h4M9 9.5h4"/>',
   grp_taschen:'<rect x="2" y="2.5" width="11" height="8" rx="2"/><circle cx="16.5" cy="10.5" r="3.5"/>',
-  grp_flaechen:'<path d="M3 3h16l-16 4h16l-16 4h16"/>'
+  grp_flaechen:'<path d="M3 3h16l-16 4h16l-16 4h16"/>',
+  // Paket C3: Konturzug — Kontur mit Bogen, Werkzeugkreis aussen daran
+  konturzug:  '<path d="M3 13V5h8a4 4 0 0 1 4 4v4"/><path d="M3 13h12" stroke-dasharray="1.6 1.4"/><circle cx="17.5" cy="4.5" r="2.5"/>',
+  grp_kontur: '<path d="M3 13V5h8a4 4 0 0 1 4 4v4"/><circle cx="17.5" cy="4.5" r="2.5"/>'
 };
 function fIcon(key){ return F_ICON_KOPF + (F_ICONS[key] || '') + '</svg>'; }
 
@@ -5311,6 +5997,7 @@ function fZyklusMaskeHtml(art, prog){
     const d = F_FELDER[feld] || {};
     if(d.typ === 'werkzeug') return '<select id="zf_' + feld + '" class="tool-select"></select>';
     if(d.typ === 'muster') return '<select id="zf_' + feld + '" class="tool-select"></select>';
+    if(d.typ === 'kontur') return '<select id="zf_' + feld + '" class="tool-select"></select>';
     if(d.typ === 'wahl'){
       const w = fFeldWahl(art, feld);
       if(d.select) return '<select id="zf_' + feld + '" class="tool-select" style="width:170px;">' + w.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join('') + '</select>';
@@ -5373,6 +6060,8 @@ function fZyklusWerkzeugeFuellen(tNr, art){
   const sel = document.getElementById('zf_t'); if(!sel) return;
   sel.innerHTML = (fProg.werkzeuge || []).map(w => '<option value="' + w.nr + '"' + (w.nr === tNr ? ' selected' : '') + '>T' + w.nr + ' — ' + esc(w.name) + ' ⌀' + w.d + '</option>').join('');
   if(!(fProg.werkzeuge || []).some(w => w.nr === tNr) && tNr) sel.innerHTML += '<option value="' + tNr + '" selected>T' + tNr + ' (nicht in der Tabelle)</option>';
+  const ks = document.getElementById('zf_kontur');
+  if(ks) ks.innerHTML = (fProg.konturen || []).map((kt, i) => '<option value="' + i + '">' + esc(kt.name) + ' — ' + esc(fKonturText(kt)) + '</option>').join('') || '<option value="-1">— erst eine Kontur anlegen —</option>';
   const ms = document.getElementById('zf_muster'); if(!ms) return;
   ms.innerHTML = fProg.muster.map((m, i) => '<option value="' + i + '">' + esc(m.name) + ' — ' + esc(fMusterText(m)) + '</option>').join('') || '<option value="-1">— erst Positionen anlegen —</option>';
 }
@@ -5399,6 +6088,7 @@ function fZyklusSetzen(s){
     const d = F_FELDER[f] || {};
     if(d.typ === 'werkzeug'){ setVal('zf_t', s.t); return; }
     if(d.typ === 'muster'){ setVal('zf_muster', s.muster); return; }
+    if(d.typ === 'kontur'){ setVal('zf_kontur', s.kontur); return; }
     if(d.typ === 'wahl'){ const v = String(wert(f) == null ? '' : wert(f)); if(d.select) setVal('zf_' + f, v); else setRadio('zg_' + f, v); return; }
     setVal('zf_' + f, wert(f) == null ? '' : wert(f));
     if(d.mit) setVal('zf_' + d.mit, wert(d.mit) == null ? '' : wert(d.mit));
@@ -5414,6 +6104,7 @@ function fZyklusLesen(basis){
     const d = F_FELDER[f] || {};
     if(d.typ === 'werkzeug'){ s.t = Math.round(getNum('zf_t', 0)); return; }
     if(d.typ === 'muster'){ s.muster = Math.round(getNum('zf_muster', -1)); return; }
+    if(d.typ === 'kontur'){ s.kontur = Math.round(getNum('zf_kontur', -1)); return; }
     if(d.typ === 'wahl'){
       let v = d.select ? getStr('zf_' + f) : selBtnVal('zg_' + f);
       if(v == null || v === '') v = String(ref[f]);
@@ -5423,7 +6114,8 @@ function fZyklusLesen(basis){
     s[f] = lesen('zf_' + f, ref[f]);
     if(d.mit) s[d.mit] = lesen('zf_' + d.mit, ref[d.mit]);
   });
-  if(z.eigenePosition && (s.muster == null)) s.muster = -1;
+  if((z.eigenePosition || z.kontur) && (s.muster == null)) s.muster = -1;
+  if(z.kontur) s.muster = -1;
   return s;
 }
 // Sichtbarkeit, Zusammenfassungen, Kopplungen — nach jeder Eingabe.
@@ -5480,7 +6172,9 @@ function fZyklusOeffnen(art, idx){
   if(fEditSchritt >= 0){ s = fProg.schritte[fEditSchritt]; art = s.art; }
   else {
     const tVor = fZyklusWerkzeugVorschlag(art);
-    const mIdx = (fSel && fSel.typ === 'muster') ? fSel.idx : (fProg.muster.length ? fProg.muster.length - 1 : -1);
+    const kontur = !!((F_ZYKLEN[art] || {}).kontur);
+    const mIdx = kontur ? ((fSel && fSel.typ === 'kontur') ? fSel.idx : ((fProg.konturen || []).length ? fProg.konturen.length - 1 : -1))
+      : ((fSel && fSel.typ === 'muster') ? fSel.idx : (fProg.muster.length ? fProg.muster.length - 1 : -1));
     s = fSchrittNeu(fProg, art, tVor.nr, mIdx);
   }
   fZyklusMaskeBauen(art);
@@ -5499,7 +6193,8 @@ function fZyklusOeffnen(art, idx){
 function fZyklusUebernehmen(){
   const z = F_ZYKLEN[ZY.art] || {};
   const s = fZyklusLesen(fEditSchritt >= 0 ? fProg.schritte[fEditSchritt] : null);
-  if(!z.eigenePosition && (s.muster < 0 || !fProg.muster[s.muster])){ melde('FEHLER: erst Positionen (Bohrbild) anlegen und im Schritt waehlen.'); return; }
+  if(z.kontur && (s.kontur < 0 || !(fProg.konturen || [])[s.kontur])){ melde('FEHLER: erst eine Kontur (Softkey Kontur) anlegen und im Schritt waehlen.'); return; }
+  if(!z.eigenePosition && !z.kontur && (s.muster < 0 || !fProg.muster[s.muster])){ melde('FEHLER: erst Positionen (Bohrbild) anlegen und im Schritt waehlen.'); return; }
   if(!z.ohneTiefe && !z.eigenePosition && !(s.tiefe < 0) && !(s.art === 'zentrieren' && s.zAuswahl === 'durchmesser')){ melde('FEHLER: Tiefe Z1 muss NEGATIV sein (nach unten).'); return; }
   if(z.eigenePosition && !(s.zEnd < s.pz)){ melde('FEHLER: Endpunkt Z1 muss unter dem Startpunkt Z0 liegen.'); return; }
   if(fEditSchritt >= 0) fProg.schritte[fEditSchritt] = s; else { fProg.schritte.push(s); fSel = {typ:'schritt', idx:fProg.schritte.length - 1}; }
@@ -5529,6 +6224,7 @@ function fSoftkeysBauen(){
   const on = (id, fn) => { const e = document.getElementById(id); if(e) e.onclick = fn; };
   on('skKopf', fKopfOeffnen);
   on('skMuster', ()=>fMusterOeffnen(null));
+  on('skKontur', ()=>fKonturOeffnen(null));
   on('hskTools', ()=>{ fWzListe(); maskZeigen('maskWerkzeuge'); });
   on('hskProgs', ()=>{ fProgListe(); setVal('pmSaveName', fProg.kopf.name); maskZeigen('maskProgramme'); });
   on('hskGcode', ()=>{ maskZeigen('maskGcode'); fNcErzeugen(); });
@@ -5625,6 +6321,7 @@ function fWzImport(text, dateiname){
 // NC-AUSGABE
 // =====================================================================
 let fLetztes = null;
+let fEditKontur = -1;
 function fNcFaerben(text){
   return text.split('\n').map(z => {
     const e = esc(z);
@@ -5741,6 +6438,7 @@ function fProgListe(){
   on('btnDemoBohren2', ()=>{ fProgrammSetzen(fDemoBohren2(), 'DZ5 geladen: Planfraesen 232, Bohren 200, Gewinde Spanbruch 209, Tiefbohren 205, Bohrfraesen 208, Ausdrehen 202, Rueckwaerts-Senken 204, Einlippen 241.'); maskZu('maskProgramme'); });
   on('btnDemoFormen', ()=>{ fProgrammSetzen(fDemoFormenEinzel(), 'DZ7 geladen: Kreistasche, Nut und Kreiszapfen als eigene Bahn (Einzelsaetze mit Kreisboegen).'); maskZu('maskProgramme'); });
   on('btnDemoPlan', ()=>{ fProgrammSetzen(fDemoPlanEinzel(), 'DZ8 geladen: Planfraesen als Maeander und Rechtecktasche mit Helix-Eintauchen als Einzelsaetze.'); maskZu('maskProgramme'); });
+  on('btnDemoKontur', ()=>{ fProgrammSetzen(fDemoKonturEinzel(), 'DZ9 geladen: Insel mit Nut als XY-Kontur — Schritt 1 Zyklus 14/25 der Steuerung, Schritt 2 dieselbe Kontur als eigene Bahn.'); maskZu('maskProgramme'); });
   on('btnDemoEinzel', ()=>{ fProgrammSetzen(fDemoEinzel(), 'DZ6 geladen: die Leiste als Einzelsaetze — Zentrieren, Tieflochbohren mit Spanbruch, Bohren, Reiben als eigene Bahn ohne Zyklus, eine Bohrung je Schritt.'); maskZu('maskProgramme'); });
   on('btnCloseProgs', ()=>maskZu('maskProgramme'));
 }
@@ -6146,6 +6844,7 @@ function fHilfebild(fokus){
   HB_SPAET = [];
   try{
     if(ZY.art === 'planfraesen') hbBildPlan(H, ZY.art, s);
+    else if((F_ZYKLEN[ZY.art] || {}).kontur) hbBildKontur(H, ZY.art, s);
     else if((F_ZYKLEN[ZY.art] || {}).fraes) hbBildForm(H, ZY.art, s);
     else hbBildBohren(H, ZY.art, s);
   }catch(e){ try{ (window.__hbFehler = window.__hbFehler || []).push(ZY.art + ': ' + (e && e.message)); console.error('Hilfebild ' + ZY.art + ':', e && (e.stack || e.message)); }catch(_){} }
