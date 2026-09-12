@@ -2293,6 +2293,14 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
   .fmerk .st.ann{background:#fff3c4;color:#7a5b00;}
   /* pgst = im Programm-Test des Programmierplatzes durchgelaufen (12.09.2026): weder gruen (Maschine) noch gelb (nur Handbuch). */
   .fmerk .st.pgst{background:#dbe9f6;color:#1d4f7a;}
+  /* Werkzeugtabelle im TOOL.T-Stil: 16 Spalten passen in keine Handybreite — die
+     Liste scrollt seitlich wie das Tabellenfenster der TNC (die .pointlist des
+     Drehteils klemmt overflow-x auf hidden). */
+  .pointlist.wz-tab{overflow-x:auto !important;}
+  .pointlist.wz-tab table{min-width:900px;font-size:11.5px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .pointlist.wz-tab th{position:sticky;top:0;background:var(--white,#fff);font-size:10.5px;letter-spacing:.3px;}
+  .pointlist.wz-tab td,.pointlist.wz-tab th{padding:4px 6px;text-align:right;}
+  .pointlist.wz-tab td:nth-child(2),.pointlist.wz-tab th:nth-child(2),.pointlist.wz-tab td:nth-child(11),.pointlist.wz-tab th:nth-child(11),.pointlist.wz-tab td:nth-child(14),.pointlist.wz-tab th:nth-child(14){text-align:left;}
   .fmerk .st.sperr{background:#f1f1f1;color:#666;}
   .fmerk .ppoffen{color:#b35c00;}
   #fdKlein{font-size:10.5px;color:var(--text-dim);padding:0 13px 6px;line-height:1.4;}
@@ -2517,17 +2525,29 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
 
       <!-- ===== WERKZEUGE ===== -->
       <div class="mask" id="maskWerkzeuge" style="position:fixed;">
-        <div class="mask-head"><span class="mtitel">Werkzeuge (TOOL-CALL-Nummern der Maschine)</span><button class="gcbtn" id="btnCloseWz" style="margin-left:auto;min-width:40px;">✕</button></div>
+        <div class="mask-head"><span class="mtitel" title="Werkzeugtabelle im Stil der Heidenhain TOOL.T">Werkzeuge (TOOL.T)</span><button class="gcbtn" id="btnCloseWz" style="margin-left:auto;min-width:40px;">✕</button></div>
         <div class="mask-body">
-          <div class="pointlist" id="wzListe" style="max-height:40vh;"><table><thead><tr><th>T</th><th>Name</th><th>Art</th><th>⌀</th><th>S</th><th>F</th><th></th></tr></thead><tbody id="wzBody"></tbody></table></div>
-          <div class="msec">Werkzeug anlegen / ändern</div>
-          <div class="mrow"><label>T Nummer</label><input type="number" step="1" id="fwNr" value="11"><span class="unit"></span></div>
-          <div class="mrow"><label>Name</label><input type="text" id="fwName" value="" style="width:150px;"></div>
-          <div class="mrow"><label>Art</label><select id="fwArt" style="width:150px;"><option value="zentrierer">NC-Anbohrer / Zentrierer</option><option value="bohrer" selected>Bohrer</option><option value="gewindebohrer">Gewindebohrer</option><option value="reibahle">Reibahle</option><option value="fraeser">Fräser</option></select></div>
-          <div class="mrow"><label>⌀ Durchmesser</label><input type="number" step="any" id="fwD" value="8"><span class="unit">mm</span></div>
-          <div class="mrow"><label>Spitzenwinkel (Bohrer)</label><input type="number" step="any" id="fwSpitze" value="118"><span class="unit">°</span></div>
-          <div class="mrow"><label>Steigung (Gewindebohrer)</label><input type="number" step="any" id="fwSteig" value="0"><span class="unit">mm</span></div>
-          <div class="mrow"><label>S / F Vorgabe</label><input type="number" step="any" id="fwS" value="1500" style="width:51px;"><input type="number" step="any" id="fwF" value="150" style="width:51px;"><span class="unit unit2"><i>U/min</i><i>mm/min</i></span></div>
+          <!-- Spalten wie in der TOOL.T der Steuerung (T NAME L R R2 DL DR LCUTS ANGLE TYP PITCH DOC), dazu die
+               App-Vorgaben S/F. Die Liste scrollt seitlich (wz-tab), am Handy wie an der TNC. -->
+          <div class="pointlist wz-tab" id="wzListe" style="max-height:40vh;"><table><thead><tr><th>T</th><th>NAME</th><th>R</th><th>⌀</th><th>L</th><th>R2</th><th>DL</th><th>DR</th><th>LCUTS</th><th>ANGLE</th><th>TYP</th><th>PITCH</th><th>T-ANGLE</th><th>DOC</th><th>S</th><th>F</th><th></th></tr></thead><tbody id="wzBody"></tbody></table></div>
+          <div class="mrow" style="flex-wrap:wrap;gap:6px;">
+            <label class="gcbtn" style="flex:1 1 46%;padding:9px;text-align:center;cursor:pointer;" title="ASCII-Export der TOOL.T der Maschine (TNCremo oder Programmierplatz) einlesen — ersetzt die Tabelle der App">&#x2B06; TOOL.T einlesen<input type="file" id="wzImportFile" accept=".T,.t,.txt,.TXT" style="display:none;"></label>
+            <button class="gcbtn" id="btnWzExport" style="flex:1 1 46%;padding:9px;" title="Tabelle der App als TOOL.T (ASCII, Layout 606 42x) sichern">&#x2B07; Als TOOL.T sichern</button>
+          </div>
+          <div class="msec">Werkzeug anlegen / ändern (Spalten der TOOL.T)</div>
+          <div class="mrow"><label data-ba="ba-fk04">T Nummer</label><input type="number" step="1" id="fwNr" value="11"><span class="unit"></span></div>
+          <div class="mrow"><label data-ba="ba-fk04">NAME</label><input type="text" id="fwName" value="" style="width:150px;" autocapitalize="characters"></div>
+          <div class="mrow"><label data-ba="ba-fk04-typ">Art (TYP)</label><select id="fwArt" style="width:150px;"><option value="zentrierer">NC-Anbohrer / Zentrierer (CENT)</option><option value="bohrer" selected>Bohrer (DRILL)</option><option value="gewindebohrer">Gewindebohrer (TAP)</option><option value="reibahle">Reibahle (REAM)</option><option value="fraeser">Fräser (MILL)</option></select></div>
+          <div class="mrow"><label data-ba="ba-fk04-masse">⌀ (R = ⌀/2)</label><input type="number" step="any" id="fwD" value="8"><span class="unit">mm</span></div>
+          <div class="mrow"><label data-ba="ba-fk04-masse">L Länge</label><input type="number" step="any" id="fwL" value="0"><span class="unit">mm</span></div>
+          <div class="mrow"><label data-ba="ba-fk04-masse">R2 Eckenradius</label><input type="number" step="any" id="fwR2" value="0"><span class="unit">mm</span></div>
+          <div class="mrow"><label data-ba="ba-fk04-masse">DL / DR Delta</label><input type="number" step="any" id="fwDL" value="0" style="width:51px;"><input type="number" step="any" id="fwDR" value="0" style="width:51px;"><span class="unit unit2"><i>DL</i><i>DR</i></span></div>
+          <div class="mrow"><label data-ba="ba-fk04-schneide">LCUTS Schneidenlänge</label><input type="number" step="any" id="fwLcuts" value="0"><span class="unit">mm</span></div>
+          <div class="mrow"><label data-ba="ba-fk04-schneide">ANGLE Eintauchwinkel</label><input type="number" step="any" id="fwAngle" value="0"><span class="unit">°</span></div>
+          <div class="mrow"><label data-ba="ba-fk04-schneide">T-ANGLE Spitzenwinkel</label><input type="number" step="any" id="fwSpitze" value="118"><span class="unit">°</span></div>
+          <div class="mrow"><label data-ba="ba-fk04-schneide">PITCH Steigung</label><input type="number" step="any" id="fwSteig" value="0"><span class="unit">mm</span></div>
+          <div class="mrow"><label data-ba="ba-fk04">DOC Kommentar</label><input type="text" id="fwDoc" value="" style="width:150px;"></div>
+          <div class="mrow"><label data-ba="ba-fk04-sf">S / F Vorgabe</label><input type="number" step="any" id="fwS" value="1500" style="width:51px;"><input type="number" step="any" id="fwF" value="150" style="width:51px;"><span class="unit unit2"><i>U/min</i><i>mm/min</i></span></div>
           <div class="mrow"><button class="gcbtn primary" id="btnWzSave" style="flex:1;padding:9px;">Speichern</button> <button class="gcbtn" id="btnWzNeu" style="padding:9px 12px;">Neu</button> <button class="gcbtn" id="btnWzVorgabe" style="padding:9px 12px;" title="Vorgabetabelle der App wiederherstellen">Vorgabe</button></div>
           <div class="mrow"><button class="gcbtn" id="btnWzFertig" style="width:100%;padding:10px;">✓ Fertig</button></div>
         </div>
@@ -2643,11 +2663,32 @@ neuen Bohrschritt; im Schritt selbst bleiben sie &auml;nderbar.</dd>
 Werkzeugwechsel. Muss &uuml;ber der Rohteil-Oberkante liegen &mdash; sonst sperrt die Pr&uuml;fung.</dd>
 </dl>
 
-<h2 id="ba-fk04">4 &nbsp;Werkzeuge</h2>
-<p>Die Tabelle f&uuml;hrt die <b>TOOL-CALL-Nummern der Maschine</b>, einen Namen, die Art (Anbohrer, Bohrer,
-Gewindebohrer, Reibahle, Fr&auml;ser), Durchmesser, Spitzenwinkel, Steigung und Vorgaben f&uuml;r S und F.
-Die App schreibt <code>TOOL CALL n Z S..</code> mit der Nummer; L&auml;nge und Radius kommen wie immer aus der
-Werkzeugtabelle der Steuerung. Die Vorgabetabelle ist ein Platzhalter &mdash; Daniels echte Tabelle ersetzt sie.</p>
+<h2 id="ba-fk04">4 &nbsp;Werkzeuge &mdash; Tabelle im Stil der TOOL.T</h2>
+<p>Die Tabelle f&uuml;hrt die <b>TOOL-CALL-Nummern der Maschine</b> mit den Spalten der Heidenhain-TOOL.T:
+T, NAME, L, R (die App zeigt dazu den &empty;), R2, DL/DR, LCUTS, ANGLE, TYP, PITCH, T-ANGLE, DOC &mdash; und als
+App-Zusatz die Vorgaben S/F, die es in der TOOL.T nicht gibt. Die App schreibt <code>TOOL CALL n Z S..</code> nur mit
+der Nummer; L&auml;nge und Radius nimmt die Steuerung aus IHRER Tabelle. Was die App aus den Spalten macht: R f&uuml;r die
+Plausibilit&auml;t der Taschen und Nuten (Kap.&nbsp;6b), LCUTS f&uuml;r den Hinweis &bdquo;Tiefe &uuml;ber der Schneidenl&auml;nge&ldquo;,
+ANGLE f&uuml;r Helix/Pendeln, PITCH als Steigung der Gewindebohrer, T-ANGLE als Spitzenwinkel. Die Vorgabetabelle ist ein
+Platzhalter &mdash; Deine echte Tabelle ersetzt sie.</p>
+<dl>
+<dt id="ba-fk04-typ">Art (TYP)</dt><dd>Die Einteilung der App (Anbohrer, Bohrer, Gewindebohrer, Reibahle, Fr&auml;ser) entspricht dem
+TYP der TNC: CENT, DRILL, TAP, REAM, MILL. Beim Einlesen einer TOOL.T z&auml;hlen alle Fr&auml;sertypen (MILL, MILL_R, BALL,
+TORUS &hellip;) als Fr&auml;ser; f&uuml;hrt die Tabelle keinen TYP-Text (die Demo-Tabelle des Programmierplatzes hat dort nur 0),
+r&auml;t die App aus dem Namen (BOHRER, GEWINDE, REIB, ZENTR &hellip;, sonst Fr&auml;ser).</dd>
+<dt id="ba-fk04-masse">Ma&szlig;e</dt><dd>&empty; bzw. R, L, R2 (Eckenradius eines Torusfr&auml;sers), DL/DR (Delta-Werte). Die App rechnet mit dem
+&empty; (Nutbreite, Taschenma&szlig;e), die TNC mit R.</dd>
+<dt id="ba-fk04-schneide">Schneide</dt><dd>LCUTS Schneidenl&auml;nge (0 = keine Pr&uuml;fung, so auch an der TNC), ANGLE Eintauchwinkel f&uuml;r
+Helix und Pendeln (0 = nur senkrecht), T-ANGLE Spitzenwinkel des Bohrers, PITCH Gewindesteigung.</dd>
+<dt id="ba-fk04-import">TOOL.T einlesen / sichern</dt><dd><b>Einlesen:</b> die TOOL.T der Maschine als ASCII-Datei (aus TNCremo, oder am
+Programmierplatz &uuml;ber <code>tnc-wandeln.ps1 -Rueck</code>; die bin&auml;re Datei des TNC-Laufwerks kann die App nicht lesen). Die App
+nimmt die Spaltenstarts aus der Kopfzeile, &uuml;berspringt T0 und leere Pl&auml;tze und ERSETZT ihre Tabelle; S/F bekommen
+Vorgaben je Art. Belegt an der Tabelle des Programmierplatzes (49 Spalten, 46 Werkzeuge). <b>Sichern:</b> die Tabelle der
+App als TOOL.T im Spaltenlayout der 606&nbsp;42x &mdash; am Programmierplatz durch den Wandler gelaufen und mit R, NAME und TYP
+zur&uuml;ckgekommen; ob eine Maschine mit Stand 340&nbsp;49x die Datei annimmt, ist nicht gepr&uuml;ft. Unbekannte Spalten schreibt
+die App so, wie die TNC-Musterzeile sie hat.</dd>
+<dt id="ba-fk04-sf">S / F Vorgabe</dt><dd>Nur f&uuml;r die App: Drehzahl und Vorschub, mit denen ein neuer Schritt vorbelegt wird.</dd>
+</dl>
 
 <h2 id="ba-fk05">5 &nbsp;Positionen (Bohrbilder)</h2>
 <p>Ein Bohrbild ist eine Liste von XY-Punkten. Drei Formen: <b>Einzelpositionen</b> (Tabelle),
@@ -3122,6 +3163,120 @@ function fWerkzeugeVorgabe(){
 }
 var F_WERKZEUGARTEN = {zentrierer:'NC-Anbohrer / Zentrierer', bohrer:'Bohrer', gewindebohrer:'Gewindebohrer', reibahle:'Reibahle', fraeser:'Fraeser'};
 
+// ---------------------------------------------------------------------
+// WERKZEUGTABELLE IM STIL DER TOOL.T (Daniels Wunsch 12.09.2026). Die
+// Felder eines Werkzeugs tragen die Spaltennamen der Heidenhain-Tabelle:
+//   nr = T, name = NAME, l = L, d = 2·R (die App rechnet im Durchmesser,
+//   die Tabelle fuehrt den Radius), r2 = R2, dl/dr = DL/DR, lcuts = LCUTS,
+//   angle = ANGLE, doc = DOC, spitze = T-ANGLE, steigung = PITCH.
+// art ist die Einteilung der App (Bohrer, Fraeser, ...), typ der TYP-Text
+// der TNC, wenn die Tabelle einen traegt. s/f sind Vorgaben der App, in
+// der TOOL.T gibt es sie nicht.
+//
+// IMPORT: Die TNC speichert ihre TOOL.T binaer; lesbar wird sie als
+// ASCII-Export (TNCremo, oder binasc.exe des Programmierplatzes —
+// maschinentermin/heidenhain/tnc-wandeln.ps1 -Rueck). Das Format ist eine
+// Tabelle mit fester Spaltenbreite: Zeile 1 "BEGIN TOOL   .T MM", Zeile 2
+// die Spaltennamen (jeder Name beginnt an der Startspalte seiner Spalte),
+// danach je Werkzeug eine Zeile, zuletzt "[END]". Der Leser nimmt die
+// Spaltenstarts aus der Kopfzeile — so liest er auch Tabellen anderer
+// Software-Staende mit mehr oder weniger Spalten. Fixture: die TOOL.T des
+// Programmierplatzes (606 42x), maschinentermin/heidenhain/
+// TOOL-demo.tnc-export.txt.
+// ---------------------------------------------------------------------
+var F_TYP_ART = {MILL:'fraeser', MILL_R:'fraeser', MILL_F:'fraeser', MILL_L:'fraeser', BALL:'fraeser', TORUS:'fraeser', BOR:'fraeser', BCKBOR:'fraeser',
+  DRILL:'bohrer', TAP:'gewindebohrer', GF:'gewindebohrer', GSF:'gewindebohrer', EP:'gewindebohrer', WSP:'gewindebohrer', BGF:'gewindebohrer', ZBGF:'gewindebohrer',
+  REAM:'reibahle', CENT:'zentrierer', CSINK:'zentrierer', TSINK:'zentrierer'};
+var F_ART_TYP = {fraeser:'MILL', bohrer:'DRILL', gewindebohrer:'TAP', reibahle:'REAM', zentrierer:'CENT'};
+// Ohne TYP-Text (die Demo-Tabelle fuehrt dort nur 0) hilft der Name.
+function fArtAusName(name){
+  const n = String(name || '').toUpperCase();
+  if(/BOHRER|DRILL|VHM_B/.test(n) && !/GEWINDE|TAP/.test(n)) return 'bohrer';
+  if(/GEWINDE|TAP\b|_TAP|M\d+X/.test(n)) return 'gewindebohrer';
+  if(/REIB|REAM/.test(n)) return 'reibahle';
+  if(/ZENTR|CENT|NC-AN|ANBOHR|SENK/.test(n)) return 'zentrierer';
+  return 'fraeser';
+}
+// Vorgaben S/F der App je Art (die TOOL.T kennt keine Schnittwerte).
+function fVorgabeSF(art, d, steigung){
+  const s = ({zentrierer:2500, bohrer:1500, gewindebohrer:400, reibahle:300, fraeser:3000})[art] || 1500;
+  let f = ({zentrierer:150, bohrer:150, gewindebohrer:500, reibahle:90, fraeser:600})[art] || 150;
+  if(art === 'gewindebohrer' && +steigung > 0) f = fRund(+steigung * s);
+  return {s:s, f:f};
+}
+function fToolTyp(w){ return (w && w.typ) ? w.typ : (F_ART_TYP[(w || {}).art] || 'MILL'); }
+function fToolTLesen(text){
+  const zeilen = String(text || '').replace(/\r/g, '').split('\n');
+  const kopfIdx = zeilen.findIndex(z => /^T\s+NAME\s/.test(z));
+  if(kopfIdx < 0) return {werkzeuge:[], spalten:[], uebersprungen:0, fehler:'Keine TOOL.T-Kopfzeile (T NAME L R ...) gefunden — die Tabelle muss als ASCII-Export vorliegen (TNCremo oder binasc), nicht als TNC-Binaerdatei.'};
+  const kopf = zeilen[kopfIdx];
+  const spalten = []; const re = /\S+/g; let m;
+  while((m = re.exec(kopf)) !== null) spalten.push({name:m[0], start:m.index});
+  spalten.forEach((s, i) => { s.ende = (i + 1 < spalten.length) ? spalten[i + 1].start : 100000; });
+  const wert = (zeile, name) => { const s = spalten.find(x => x.name === name); return s ? zeile.slice(s.start, s.ende).trim() : ''; };
+  const zahl = (v) => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : 0; };
+  const werkzeuge = []; let uebersprungen = 0;
+  for(let i = kopfIdx + 1; i < zeilen.length; i++){
+    const z = zeilen[i];
+    if(/^\[END\]/.test(z)) break;
+    if(!z.trim()) continue;
+    const nr = parseInt(wert(z, 'T'), 10); if(!isFinite(nr)) continue;
+    const nameRoh = wert(z, 'NAME'), r = zahl(wert(z, 'R'));
+    const leer = (!nameRoh || /^[+-]?0$/.test(nameRoh));
+    // T0 ist das Nullwerkzeug der TNC, Zeilen ohne Namen und Radius sind
+    // unbelegte Plaetze — beides ist kein Werkzeug der App.
+    if(nr === 0 || (leer && r === 0)){ uebersprungen++; continue; }
+    const typ = wert(z, 'TYP');
+    const art = F_TYP_ART[typ] || fArtAusName(nameRoh);
+    const steig = zahl(wert(z, 'PITCH'));
+    const sf = fVorgabeSF(art, fRund(2 * r), steig);
+    const w = {nr:nr, name:(leer ? 'T' + nr : nameRoh), art:art, typ:(F_TYP_ART[typ] ? typ : ''), d:fRund(2 * r),
+      l:zahl(wert(z, 'L')), r2:zahl(wert(z, 'R2')), dl:zahl(wert(z, 'DL')), dr:zahl(wert(z, 'DR')),
+      lcuts:zahl(wert(z, 'LCUTS')), angle:zahl(wert(z, 'ANGLE')), doc:wert(z, 'DOC'),
+      spitze:zahl(wert(z, 'T-ANGLE')) || 118, s:sf.s, f:sf.f};
+    if(steig > 0) w.steigung = steig;
+    werkzeuge.push(w);
+  }
+  return {werkzeuge:werkzeuge, spalten:spalten.map(s => s.name), uebersprungen:uebersprungen, fehler:null};
+}
+// EXPORT als ASCII-TOOL.T im Spaltenlayout des Programmierplatzes (606 42x):
+// Kopf und Musterzeile stammen aus dessen Tabelle (binasc-Export); die App
+// schreibt nur die Spalten, die sie kennt, alles andere bleibt Wort fuer
+// Wort die Musterzeile — so bleibt jede unbekannte Spalte so, wie die TNC
+// sie selbst schreibt. Ob eine Maschine mit Stand 340 49x die Tabelle
+// annimmt, ist am Programmierplatz geprueft (ascbin/binasc-Rundlauf),
+// nicht an der Maschine.
+var F_TOOLT_KOPF = 'T       NAME                             L           R           R2          DL        DR        DR2       TL RT    TIME1 TIME2 CUR.TIME DOC                              CUT. LTOL    RTOL    DIRECT. PLC       TT:L-OFFS   TT:R-OFFS   LBREAK  RBREAK  LCUTS      ANGLE   TYP        TMAT             CDT              PLC-VAL     CAL-OF1     CAL-OF2     CAL-ANG  PTYP NMAX   LIFTOFF P1          P2          P3          KINEMATIC        T-ANGLE   PITCH       AFC        R2TOL   LAST_USE         ACC OVRTIME CL          CR          P4';
+var F_TOOLT_MUSTER = '1       D2                               +30         +1          +0          +0        +0        +0                 0     0     0        Tool 1                           4    0       0       -       %00000000 +0          R           0       0       15         15                                                   +0          +0          +0          0        0    -      N       +0          +0          +0                           +0        +0          Standard   0       1970.01.01 01:00 0   0       +0          +0          +0          ';
+function fToolTSchreiben(werkzeuge, opt){
+  opt = opt || {};
+  const spalten = []; const re = /\S+/g; let m;
+  while((m = re.exec(F_TOOLT_KOPF)) !== null) spalten.push({name:m[0], start:m.index});
+  spalten.forEach((s, i) => { s.ende = (i + 1 < spalten.length) ? spalten[i + 1].start : F_TOOLT_KOPF.length; });
+  const setz = (zeile, name, wert) => {
+    const s = spalten.find(x => x.name === name); if(!s) return zeile;
+    const breite = s.ende - s.start;
+    let v = String(wert == null ? '' : wert); if(v.length > breite - 1) v = v.slice(0, breite - 1);
+    return zeile.slice(0, s.start) + v.padEnd(breite, ' ') + zeile.slice(s.ende);
+  };
+  const vz = (n) => klNum(n);
+  const glatt = (n) => { const r = Math.round((+n || 0) * 1000) / 1000; return String(Math.abs(r) < 1e-9 ? 0 : r); };
+  const zeilen = ['BEGIN TOOL   .T MM ', F_TOOLT_KOPF];
+  werkzeuge.slice().sort((a, b) => a.nr - b.nr).forEach(w => {
+    let z = F_TOOLT_MUSTER;
+    z = setz(z, 'T', w.nr); z = setz(z, 'NAME', String(w.name || '').toUpperCase().replace(/[^A-Z0-9_\-.]/g, '_').slice(0, 32));
+    z = setz(z, 'L', vz(w.l || 0)); z = setz(z, 'R', vz((+w.d || 0) / 2)); z = setz(z, 'R2', vz(w.r2 || 0));
+    z = setz(z, 'DL', vz(w.dl || 0)); z = setz(z, 'DR', vz(w.dr || 0)); z = setz(z, 'DR2', vz(0));
+    z = setz(z, 'DOC', String(w.doc || '').replace(/[^\x20-\x7E]/g, '_').slice(0, 32));
+    z = setz(z, 'LCUTS', glatt(w.lcuts || 0)); z = setz(z, 'ANGLE', glatt(w.angle || 0));
+    z = setz(z, 'TYP', w.typ || F_ART_TYP[w.art] || 'MILL');
+    z = setz(z, 'T-ANGLE', vz(w.spitze || 0)); z = setz(z, 'PITCH', vz(w.steigung || 0));
+    zeilen.push(z);
+  });
+  zeilen.push('[END]');
+  return zeilen.join(opt.zeilenende || '\r\n') + (opt.zeilenende || '\r\n');
+}
+
 // Leeres Programm mit sicheren Kopfwerten.
 function fProgrammNeu(){
   return {
@@ -3405,6 +3560,9 @@ function fPruefen(prog){
     if(tool && tool.art === 'gewindebohrer' && s.art !== 'gewinde' && s.art !== 'gewindeGS') gelb.push(nr + 'Gewindebohrer T' + s.t + ' in einem Bohrzyklus.');
     if(tool && s.art === 'reiben' && tool.art !== 'reibahle') gelb.push(nr + 'Reiben mit T' + s.t + ' (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
     if(+s.sc2 < +s.sc) gelb.push(nr + 'Q204 kleiner als Q200.');
+    // LCUTS aus der TOOL.T: eine Tiefe ueber der Schneidenlaenge ist an der
+    // Maschine kein Fehler (LCUTS 0 = keine Pruefung), aber ein Befund.
+    if(tool && +tool.lcuts > 0 && Math.abs(+s.tiefe) > +tool.lcuts + 1e-9) gelb.push(nr + 'Tiefe ' + s.tiefe + ' liegt ueber der Schneidenlaenge LCUTS ' + tool.lcuts + ' von T' + s.t + '.');
     // ---- Taschen / Zapfen / Nuten (251-257). Die Grenzen stammen aus dem
     // Zyklenhandbuch 670 388-12 Kap. 5: Eckenradius unter dem Werkzeug-
     // radius setzt die TNC STILL auf den Werkzeugradius (S. 150) — deshalb
@@ -3448,7 +3606,8 @@ function fPruefen(prog){
       if(s.art === 'zapfenK' && (!(+s.dm > 0) || !(+s.dmRoh >= +s.dm - 1e-9))) rot.push(nr + 'Rohteil-⌀ Q222 muss mindestens dem Fertig-⌀ Q223 entsprechen.');
       if(!(+s.ueberl >= 0.1 && +s.ueberl <= 1.414)) rot.push(nr + 'Bahn-Ueberlappung Q370 muss zwischen 0,1 und 1,414 liegen (steht auf ' + s.ueberl + ').');
       if(!(+s.fTief > 0)) rot.push(nr + 'Vorschub Tiefenzustellung Q206 fehlt.');
-      if(+s.eintauch === 1 || +s.eintauch === 2) gelb.push(nr + (+s.eintauch === 1 ? 'Helix' : 'Pendelnd') + ' eintauchen (Q366) braucht den Eintauchwinkel ANGLE des Werkzeugs in der TOOL.T der Maschine — bei ANGLE 0 meldet die TNC einen Fehler.');
+      // Der Hinweis entfaellt, wenn die (importierte) Tabelle einen ANGLE traegt.
+      if((+s.eintauch === 1 || +s.eintauch === 2) && !(tool && +tool.angle > 0)) gelb.push(nr + (+s.eintauch === 1 ? 'Helix' : 'Pendelnd') + ' eintauchen (Q366) braucht den Eintauchwinkel ANGLE des Werkzeugs in der TOOL.T der Maschine — bei ANGLE 0 meldet die TNC einen Fehler' + (tool ? ' (T' + s.t + ' hat in der App-Tabelle keinen ANGLE)' : '') + '.');
       if(+s.umfang === 2) gelb.push(nr + 'Nur Schlichten (Q215=2): die TNC faehrt im Eilgang auf die erste Zustelltiefe — die Form muss vorgeschruppt sein' + (!(+s.aufSeite > 0) && !(+s.aufTiefe > 0) ? '; beide Aufmasse stehen auf 0, dann schlichtet sie nichts' : '') + '.');
     }
   });
@@ -3510,8 +3669,10 @@ function fDemoMusterzyklen(){
 // fraeser 8 und 10, weil die TOOL.T des Programmierplatzes T4 = D8 und
 // T5 = D10 fuehrt: der Programm-Test rechnet mit IHREN Radien, nicht mit
 // unseren (eine 12er-Nut mit dem D20 der Demo-Tabelle waere ein Fehler).
-// Eintauchen 0 (senkrecht), weil in der Demo-Tabelle kein Werkzeug einen
-// Eintauchwinkel ANGLE traegt.
+// Eintauchen 0 (senkrecht) laeuft mit jedem Werkzeug; die Demo-Tabelle
+// traegt an T4/T5 ANGLE 6 (TOOL-demo.tnc-export.txt), Helix ginge dort
+// also auch — meine erste Lesung "kein Demo-Werkzeug hat ANGLE" war falsch
+// (Spalte von Hand abgezaehlt, der Leser fToolTLesen zeigte es).
 function fDemoTaschen(){
   const p = fProgrammNeu();
   p.kopf.name = 'DZ4';
@@ -3567,6 +3728,7 @@ function fMerkmale(profilId){
     z('muster220',  'Lochkreis als Zyklus 220 (Option je Muster; Q246 bei Q247 ungleich 0 ohne Bedeutung)'),
     z('muster221',  'Reihe/Gitter als Zyklus 221 (Option je Muster)'),
     {t:'Programmrahmen: BEGIN/END PGM, BLK FORM 0.1/0.2, TOOL CALL n Z S, M13/M3, M9, M2, Kommentarsaetze, ~-Fortsetzung, CR LF, Name = Dateiname', s:'pgst'},
+    {t:'Werkzeugtabelle im TOOL.T-Stil: Import der ASCII-TOOL.T (Spaltenstarts aus der Kopfzeile, T0 und leere Plaetze uebersprungen; gelesen: die Tabelle des Programmierplatzes mit 49 Spalten) und Export als TOOL.T im Layout 606 42x — der Export lief am Programmierplatz durch ascbin/binasc und kam mit R, NAME, TYP zurueck', s:'pgst'},
     {t:'Weg in die TNC: .H-Dateien nur ueber die TNC-Dateiverwaltung (USB) oder TNCremo einlesen — die Steuerung wandelt sie dabei ins Binaerformat; eine per Explorer in ein TNC-Laufwerk kopierte Datei quittiert sie mit "Dateiformat geaendert"', s:'pgst'},
     {t:'Maschinentermine: ' + P.termine, s:'pgst', offen:P.offen}
   ];
@@ -4300,15 +4462,35 @@ function fFraesenLesen(basis){
 // =====================================================================
 // WERKZEUGE
 // =====================================================================
+// Tabelle im Stil der TOOL.T: Spalten wie an der TNC (T NAME R L R2 DL DR
+// LCUTS ANGLE TYP PITCH T-ANGLE DOC), dazu der ⌀ (die App rechnet damit)
+// und die App-Vorgaben S/F. Zahlen wie die TNC sie zeigt: Radius mit
+// Vorzeichen, Rest glatt; leere Felder als 0 wie in der TOOL.T.
 function fWzListe(){
   const body = document.getElementById('wzBody'); if(!body) return;
+  const z = (v) => { const n = +v || 0; return String(Math.round(n * 1000) / 1000); };
   body.innerHTML = (fProg.werkzeuge || []).slice().sort((a, b) => a.nr - b.nr).map(w =>
-    '<tr data-wz="' + w.nr + '"><td><b>T' + w.nr + '</b></td><td>' + esc(w.name) + '</td><td>' + esc(F_WERKZEUGARTEN[w.art] || w.art) + '</td><td>' + w.d + '</td><td>' + w.s + '</td><td>' + w.f + '</td>' +
+    '<tr data-wz="' + w.nr + '"><td><b>' + w.nr + '</b></td><td title="' + esc(F_WERKZEUGARTEN[w.art] || w.art) + '">' + esc(w.name) + '</td>' +
+    '<td>' + klNum((+w.d || 0) / 2) + '</td><td>' + z(w.d) + '</td><td>' + klNum(w.l || 0) + '</td><td>' + klNum(w.r2 || 0) + '</td><td>' + klNum(w.dl || 0) + '</td><td>' + klNum(w.dr || 0) + '</td>' +
+    '<td>' + z(w.lcuts) + '</td><td>' + z(w.angle) + '</td><td>' + esc(fToolTyp(w)) + '</td><td>' + z(w.steigung) + '</td><td>' + z(w.spitze) + '</td><td>' + esc(w.doc || '') + '</td>' +
+    '<td>' + z(w.s) + '</td><td>' + z(w.f) + '</td>' +
     '<td><button class="gcbtn" data-wzedit="' + w.nr + '">✎</button> <button class="gcbtn" data-wzdel="' + w.nr + '">✕</button></td></tr>').join('');
 }
 function fWzForm(w){
   setVal('fwNr', w.nr); setVal('fwName', w.name || ''); setVal('fwArt', w.art || 'bohrer'); setVal('fwD', w.d || 0);
-  setVal('fwSpitze', w.spitze || 118); setVal('fwSteig', w.steigung || 0); setVal('fwS', w.s || 1000); setVal('fwF', w.f || 100);
+  setVal('fwL', w.l || 0); setVal('fwR2', w.r2 || 0); setVal('fwDL', w.dl || 0); setVal('fwDR', w.dr || 0);
+  setVal('fwLcuts', w.lcuts || 0); setVal('fwAngle', w.angle || 0);
+  setVal('fwSpitze', w.spitze || 118); setVal('fwSteig', w.steigung || 0); setVal('fwDoc', w.doc || ''); setVal('fwS', w.s || 1000); setVal('fwF', w.f || 100);
+}
+// TOOL.T einlesen (ASCII-Export der Maschine) — ersetzt die Tabelle der App.
+function fWzImport(text, dateiname){
+  const r = fToolTLesen(text);
+  if(r.fehler){ melde('FEHLER: ' + r.fehler); return false; }
+  if(!r.werkzeuge.length){ melde('FEHLER: ' + (dateiname || 'Datei') + ' enthaelt kein Werkzeug (nur T0 oder leere Plaetze).'); return false; }
+  fProg.werkzeuge = r.werkzeuge;
+  fWzListe(); fRender();
+  melde((dateiname || 'TOOL.T') + ': ' + r.werkzeuge.length + ' Werkzeuge uebernommen, ' + r.uebersprungen + ' leere Plaetze/T0 uebersprungen, ' + r.spalten.length + ' Spalten erkannt. S/F sind Vorgaben der App je Art.');
+  return true;
 }
 {
   const body = document.getElementById('wzBody');
@@ -4323,13 +4505,30 @@ function fWzForm(w){
   });
   const sv = document.getElementById('btnWzSave'); if(sv) sv.onclick = ()=>{
     const nr = Math.round(getNum('fwNr', 0)); if(!(nr > 0)){ melde('FEHLER: Werkzeugnummer fehlt.'); return; }
-    const w = {nr:nr, name:getStr('fwName').trim() || ('Werkzeug ' + nr), art:getStr('fwArt') || 'bohrer', d:getNum('fwD'), spitze:getNum('fwSpitze', 118), s:getNum('fwS', 1000), f:getNum('fwF', 100)};
+    const alt = fWerkzeug(nr) || {};
+    const w = {nr:nr, name:getStr('fwName').trim() || ('Werkzeug ' + nr), art:getStr('fwArt') || 'bohrer', d:getNum('fwD'),
+      l:getNum('fwL'), r2:getNum('fwR2'), dl:getNum('fwDL'), dr:getNum('fwDR'), lcuts:getNum('fwLcuts'), angle:getNum('fwAngle'),
+      spitze:getNum('fwSpitze', 118), doc:getStr('fwDoc').trim(), s:getNum('fwS', 1000), f:getNum('fwF', 100)};
+    // Der TYP-Text einer importierten Tabelle bleibt, solange die Art dieselbe ist.
+    if(alt.typ && alt.art === w.art) w.typ = alt.typ;
     const st = getNum('fwSteig'); if(st > 0) w.steigung = st;
     const i = fProg.werkzeuge.findIndex(x => x.nr === nr);
     if(i >= 0) fProg.werkzeuge[i] = w; else fProg.werkzeuge.push(w);
     fWzListe(); fRender(); melde('T' + nr + ' gespeichert.');
   };
   const neu = document.getElementById('btnWzNeu'); if(neu) neu.onclick = ()=>{ const max = fProg.werkzeuge.reduce((a, w) => Math.max(a, w.nr), 0); fWzForm({nr:max + 1, name:'', art:'bohrer', d:8, spitze:118, s:1500, f:150}); };
+  // TOOL.T einlesen (ASCII) / als TOOL.T sichern
+  const imp = document.getElementById('wzImportFile');
+  if(imp && imp.addEventListener) imp.addEventListener('change', ()=>{
+    const f = imp.files && imp.files[0]; if(!f) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{ fWzImport(String(rd.result || ''), f.name); imp.value = ''; };
+    rd.readAsText(f, 'ISO-8859-1');
+  });
+  const ex = document.getElementById('btnWzExport'); if(ex) ex.onclick = ()=>{
+    const text = fToolTSchreiben(fProg.werkzeuge || []);
+    exportiereDatei('TOOL-' + fName(fProg) + '.T', text, 'TOOL.T-Text');
+  };
   const vg = document.getElementById('btnWzVorgabe'); if(vg) vg.onclick = ()=>zweiklickBestaetigen(vg, 'Tabelle ersetzen?', ()=>{ fProg.werkzeuge = fWerkzeugeVorgabe(); fWzListe(); fRender(); });
   const f = document.getElementById('btnWzFertig'); if(f) f.onclick = ()=>maskZu('maskWerkzeuge');
   const x = document.getElementById('btnCloseWz'); if(x) x.onclick = ()=>maskZu('maskWerkzeuge');
