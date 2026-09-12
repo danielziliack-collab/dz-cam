@@ -2291,6 +2291,8 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
   .fmerk .ppz .st{flex:0 0 auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;white-space:nowrap;}
   .fmerk .st.ok{background:#dcefdc;color:#1d6b2a;}
   .fmerk .st.ann{background:#fff3c4;color:#7a5b00;}
+  /* pgst = im Programm-Test des Programmierplatzes durchgelaufen (12.09.2026): weder gruen (Maschine) noch gelb (nur Handbuch). */
+  .fmerk .st.pgst{background:#dbe9f6;color:#1d4f7a;}
   .fmerk .st.sperr{background:#f1f1f1;color:#666;}
   .fmerk .ppoffen{color:#b35c00;}
   #fdKlein{font-size:10.5px;color:var(--text-dim);padding:0 13px 6px;line-height:1.4;}
@@ -2322,7 +2324,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     <button id="dunkelBtn" title="Dunkelmodus ein/aus" type="button">☾</button>
   </div>
 
-  <div id="splash"><div class="sname">Daniel Ziliack CAM</div><div class="ssub">Fräsen · Heidenhain iTNC 530 · Stufe 1 (nach Handbuch)</div><noscript><div style="max-width:340px;margin-top:18px;padding:12px 16px;border:1px solid #c8a24a;background:#fff6e0;color:#6b5320;font-size:14px;line-height:1.5;border-radius:6px;">Das ist nur die VORSCHAU &mdash; sie kann die App nicht ausf&uuml;hren.<br><b>Am Computer:</b> Datei speichern und per Doppelklick im Browser &ouml;ffnen.</div></noscript></div>
+  <div id="splash"><div class="sname">Daniel Ziliack CAM</div><div class="ssub">Fräsen · Heidenhain iTNC 530 · Stufe 1 (Programmierplatz-Test 12.09.2026)</div><noscript><div style="max-width:340px;margin-top:18px;padding:12px 16px;border:1px solid #c8a24a;background:#fff6e0;color:#6b5320;font-size:14px;line-height:1.5;border-radius:6px;">Das ist nur die VORSCHAU &mdash; sie kann die App nicht ausf&uuml;hren.<br><b>Am Computer:</b> Datei speichern und per Doppelklick im Browser &ouml;ffnen.</div></noscript></div>
 
   <div class="main">
     <div class="stage">
@@ -2540,14 +2542,16 @@ sp&auml;ter Taschen und Konturen, geschrieben als <b>Heidenhain-Klartext</b> f&u
 Er ist kein CAM f&uuml;r Freiformfl&auml;chen &mdash; daf&uuml;r bleibt hyperMILL zust&auml;ndig. Der Gewinn liegt
 beim einfachen Teil: Programm am Handy oder Laptop anlegen, als .H-Datei auf den Stick, an der
 Steuerung Programm-Test, fertig.</p>
-<div class="ba-merk"><b>Stand Stufe 1 (12.09.2026): NACH HANDBUCH gebaut, an der Maschine noch NICHT gepr&uuml;ft.</b>
-Kein einziger Satz dieser App ist bisher durch die iTNC gelaufen. Die Q-Listen, Zyklustitel und die Schreibweise
-der Werte sind an den Beispiels&auml;tzen der Heidenhain-Handb&uuml;cher (Klartext-Dialog 670&nbsp;387 und
-Zyklenprogrammierung 670&nbsp;388, Software-St&auml;nde 340&nbsp;49x-02, -06 und -07) gepr&uuml;ft &mdash; f&uuml;r die
-Zyklen 240, 200, 201, 203, 206, 207, 220 und 221 schreiben alle drei St&auml;nde dieselben Listen. Jedes erzeugte
-Programm tr&auml;gt trotzdem im Kopf den Hinweis auf den Programm-Test. Erst wenn der Test an der Steuerung ohne
-Meldung durchl&auml;uft und ein Teil gefahren ist, wandert ein Zyklus in den Merkmalen von &bdquo;am Handbuch
-belegt&ldquo; auf &bdquo;belegt&ldquo;.</div>
+<div class="ba-merk"><b>Stand Stufe 1 (12.09.2026): nach Handbuch gebaut, am iTNC-530-Programmierplatz im Programm-Test durchgelaufen, an der Maschine noch NICHT gefahren.</b>
+Die Q-Listen, Zyklustitel und die Schreibweise der Werte sind an den Beispiels&auml;tzen der Heidenhain-Handb&uuml;cher
+(Klartext-Dialog 670&nbsp;387 und Zyklenprogrammierung 670&nbsp;388, Software-St&auml;nde 340&nbsp;49x-02, -06 und -07)
+gepr&uuml;ft &mdash; f&uuml;r die Zyklen 240, 200, 201, 203, 206, 207, 220 und 221 schreiben alle drei St&auml;nde dieselben
+Listen. Am 12.09.2026 mittags sind die drei Testprogramme DZ1, DZ2 und DZ3 auf dem Programmierplatz iTNC&nbsp;530
+(Demo 606&nbsp;424, NC-Software 606&nbsp;42x) im <b>Programm-Test ohne Meldung durchgelaufen</b>; was die TNC danach
+zur&uuml;ckschreibt, ist Satz f&uuml;r Satz die Ausgabe dieser App. Das belegt, wie die Steuerung die S&auml;tze liest
+&mdash; nicht das Verhalten an Deinen Maschinen (PLC f&uuml;r M13/M9, Option f&uuml;r 207, Software-Stand 340&nbsp;49x).
+Jedes erzeugte Programm tr&auml;gt deshalb weiter im Kopf den Hinweis auf den Programm-Test an der Steuerung. Erst wenn
+dort ein Teil gefahren ist, wandert ein Zyklus in den Merkmalen auf &bdquo;an der iTNC belegt&ldquo;.</div>
 <p>Drei Grunds&auml;tze gelten wie beim Drehteil: eine Datei, offline; die NC-Ausgabe ist heilig (eigener
 Pr&uuml;fstand gegen eingefrorene Programme); gemessen, nicht versprochen.</p>
 
@@ -2594,9 +2598,10 @@ gleichm&auml;&szlig;ig &uuml;ber 360&deg;).</p>
 <dd><b>Punkte (Vorgabe):</b> das Bohrbild wird ein Unterprogramm <code>LBL n</code> mit einem Satz
 <code>L X+.. Y+.. R0 FMAX M99</code> je Punkt; jeder Bohrschritt ruft es mit <code>CALL LBL n</code>. M99 ruft an
 jedem Punkt den zuletzt definierten Zyklus. Das l&auml;uft auf jedem TNC-Stand und ist im Programm-Test Punkt
-f&uuml;r Punkt sichtbar. <b>Zyklus 220/221:</b> Lochkreis bzw. Reihe als Musterzyklus &mdash; k&uuml;rzer, aber nach
-Handbuch gebaut und am Termin zu pr&uuml;fen (beim 220 wird der Winkelschritt Q247 immer geschrieben, der
-Endwinkel Q246 ist dann laut Handbuch ohne Bedeutung).</dd>
+f&uuml;r Punkt sichtbar. <b>Zyklus 220/221:</b> Lochkreis bzw. Reihe als Musterzyklus &mdash; k&uuml;rzer; am
+Programmierplatz durchgelaufen (DZ3: Gitter 3&times;2 mit 221, Lochkreis 4&times; mit 220 und Startwinkel 45&deg;),
+an der Maschine zu pr&uuml;fen (beim 220 wird der Winkelschritt Q247 immer geschrieben, der Endwinkel Q246 ist dann
+laut Handbuch ohne Bedeutung).</dd>
 
 <h2 id="ba-fk06">6 &nbsp;Bohren &mdash; die Zyklen</h2>
 <dl>
@@ -2620,15 +2625,18 @@ die Pr&uuml;fung meldet Abweichungen). 207 schreibt die Steigung als Q239 und br
 <code>L Z+.. R0 FMAX M13</code>, <code>CYCL DEF</code> mit den Q-Zeilen, <code>CALL LBL n</code> (oder Musterzyklus),
 <code>L Z+.. R0 FMAX M9</code>; der letzte Schritt endet mit <code>M2</code>, danach die LBL-Unterprogramme,
 zuletzt <code>END PGM</code>. Zeilenende CR LF, Datei <code>NAME.H</code>.</p>
-<p><b>Zur Maschine:</b> USB-Stick oder TNCremo. An der Steuerung das Programm anw&auml;hlen und in der Betriebsart
-<b>Programm-Test</b> laufen lassen &mdash; erst danach Einzelsatz am Teil. Fehlermeldungen fotografieren; sie sind
-das Material, mit dem die App nachgezogen wird.</p>
+<p><b>Zur Maschine:</b> USB-Stick oder TNCremo &mdash; und zwar <b>&uuml;ber die Dateiverwaltung der TNC</b> (PGM MGT,
+vom USB-Laufwerk auf TNC:\ kopieren) oder TNCremo, nie per Windows-Explorer direkt in ein TNC-Laufwerk. Die Steuerung
+wandelt .H-Dateien beim Einlesen in ihr Bin&auml;rformat; eine unverwandelte Datei quittiert sie mit &bdquo;Dateiformat
+ge&auml;ndert&ldquo; und &ouml;ffnet sie nicht (so am Programmierplatz gesehen). An der Steuerung das Programm anw&auml;hlen
+und in der Betriebsart <b>Programm-Test</b> laufen lassen &mdash; erst danach Einzelsatz am Teil. Fehlermeldungen
+fotografieren; sie sind das Material, mit dem die App nachgezogen wird.</p>
 <div class="ba-merk">Was der Programm-Test NICHT sieht: falsche Vorsch&uuml;be, Verweilzeiten und ob die
 Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 
 <h2 id="ba-fk08">8 &nbsp;Was fehlt (ehrlich)</h2>
 <ul>
-<li>Taschen, Zapfen, Nuten (Zyklen 251&ndash;257), Konturfr&auml;sen mit RL/RR und SL-Zyklen &mdash; Stufe 2, nach dem ersten Programm-Test.</li>
+<li>Taschen, Zapfen, Nuten (Zyklen 251&ndash;257), Konturfr&auml;sen mit RL/RR und SL-Zyklen &mdash; Stufe 2.</li>
 <li>XY-Kontureditor und DXF-Import f&uuml;r Fr&auml;skonturen &mdash; Stufe 2.</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
 <li>Simulation &mdash; vorerst der Programm-Test der Steuerung.</li>
@@ -2740,11 +2748,16 @@ window.__fehlerMelden = function(quelle, e){
 // hyperMILL zustaendig — das baut die App bewusst NICHT nach.
 //
 // STATUS, EHRLICH: Dieser Stand ist NACH DEM HANDBUCH gebaut, ohne ein
-// einziges Referenzprogramm von Daniels Maschine. Jeder Satz traegt
-// deshalb den Status "handbuch" (F_STATUS). Die Lehre der Monforts vom
-// 11.09.2026 gilt hier genauso: ein bestandener Programm-Test an der
-// Steuerung belegt die SYNTAX, nie die Bedeutung. Daniels echte
-// .H-Programme ersetzen spaeter die Fixtures im Pruefstand.
+// einziges Referenzprogramm von Daniels Maschine. Seit dem 12.09.2026
+// mittags sind DZ1-DZ3 am iTNC-530-PROGRAMMIERPLATZ (Demo 606 424 auf
+// Daniels Laptop, NC-Software 606 42x) im Programm-Test ohne Meldung
+// durchgelaufen, und der Rueckexport der TNC (binasc.exe) ist Satz fuer
+// Satz die App-Ausgabe (Pruefung 3c) — Status "pgst" (F_STATUS). Die
+// Lehre der Monforts vom 11.09.2026 gilt hier genauso: ein bestandener
+// Programm-Test belegt die SYNTAX und wie die Steuerung die Saetze
+// liest, nie das Verhalten an der Maschine (PLC, Optionen, Stand
+// 340 49x der drei Maschinen). Daniels echte .H-Programme ersetzen
+// spaeter die Fixtures im Pruefstand.
 //
 // BAUWEISE wie beim Drehteil: der Kern ist DOM-frei (laeuft im
 // Pruefstand ohne Browser), die Oberflaeche (F20) haengt nur Felder an
@@ -2757,12 +2770,20 @@ window.__fehlerMelden = function(quelle, e){
 var F_VERSION = 'Stufe 1 · 12.09.2026';
 
 // Belegstufen der Fraesausgabe — dieselbe Dreiteilung wie die Merkmale
-// des Drehteils (bestaetigt / Satz belegt / offen). Heute steht alles
-// auf "handbuch": Wortlaut nach dem Klartext-Handbuch, an der
-// Steuerung zu pruefen. Nach dem ersten Termin an der Heidenhain
-// wandern die Zyklen einzeln nach "maschine".
+// des Drehteils (bestaetigt / Satz belegt / offen). Nach dem ersten
+// Termin an einer der drei Maschinen wandern die Zyklen einzeln nach
+// "maschine".
 var F_STATUS = {
   maschine : {txt:'an der iTNC 530 im Programm-Test belegt', cls:'ok',  grp:'belegt'},
+  // 12.09.2026 mittags: Programmierplatz iTNC 530 (Demo 606 424, NC-SW
+  // 606 42x) auf Daniels Laptop. DZ1/DZ2/DZ3 mit dem Wandler der TNC
+  // (sys\bin\ascbin.exe, 0 ERROR-Saetze) ins Binaerformat gebracht, im
+  // Programm-Test ohne Meldung durchgelaufen (3:47 / 9:15 / 2:27 min
+  // Simulationszeit, Grafik zeigt alle Bohrungen), Rueckexport der TNC
+  // (binasc.exe) Satz fuer Satz gleich der App-Ausgabe. Das ist der
+  // Parser der Steuerung, nicht die Maschine: M13/M9 an der PLC, die
+  // Option 207 und der Stand 340 49x der drei Maschinen bleiben offen.
+  pgst     : {txt:'im Programm-Test des iTNC-530-Programmierplatzes durchgelaufen (NC-SW 606 42x, 12.09.2026), an der Maschine zu pruefen', cls:'pgst', grp:'belegt'},
   // Seit dem 12.09.2026 liegen die Handbuecher der Staende 340 49x-02, -06
   // und -07 im Ordner heidenhain/ (Daniels Freigabe) — die Q-Listen und
   // Titel sind an den Beispielsaetzen des Zyklenhandbuchs 670 388-12
@@ -2787,13 +2808,15 @@ var F_PROFILE = {
     // Die App bleibt bei Grossbuchstaben, Ziffern, _ und - (Punkt trennt
     // die Endung).
     nameMax:25, nameMuster:/^[A-Z0-9_\-]{1,25}$/,
+    // Alle Familien "pgst": am Programmierplatz durchgelaufen (DZ1: 240,
+    // 200, 206, LBL/M99; DZ2: 240, 203, 200, 201; DZ3: 200, 207, 221, 220).
     zyklen:{
-      zentrieren:'handbuch', bohren:'handbuch', tief:'handbuch',
-      reiben:'handbuch', gewinde:'handbuch', gewindeGS:'handbuch',
-      muster220:'handbuch', muster221:'handbuch', lbl:'handbuch'
+      zentrieren:'pgst', bohren:'pgst', tief:'pgst',
+      reiben:'pgst', gewinde:'pgst', gewindeGS:'pgst',
+      muster220:'pgst', muster221:'pgst', lbl:'pgst'
     },
-    termine:'noch kein Termin — Stufe 1 am 12.09.2026 gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft (Q-Listen und Beispielsaetze wortgleich)',
-    offen:'Programm-Test an der Steuerung mit DZ1.H, DZ2.H, DZ3.H; danach Daniels eigene .H-Programme als Fixtures; Softwarestand je Maschine (MOD) notieren'
+    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; Stufe 1 am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft',
+    offen:'Lauf an einer der drei Maschinen (Stand 340 49x): Softwarestand je Maschine (MOD), M13/M9 an der PLC, Option Synchron-Gewindebohren (207); danach Daniels eigene .H-Programme als Fixtures'
   }
 };
 
@@ -3265,8 +3288,9 @@ function fMerkmale(profilId){
     z('lbl',        'Positionsmuster als Unterprogramm LBL n mit L X Y R0 FMAX M99 je Punkt (Vorgabe)'),
     z('muster220',  'Lochkreis als Zyklus 220 (Option je Muster; Q246 bei Q247 ungleich 0 ohne Bedeutung)'),
     z('muster221',  'Reihe/Gitter als Zyklus 221 (Option je Muster)'),
-    {t:'Programmrahmen: BEGIN/END PGM, BLK FORM 0.1/0.2, TOOL CALL n Z S, M13/M3, M9, M2, CR LF, Name = Dateiname', s:'handbuch'},
-    {t:'Maschinentermine: ' + P.termine, s:'handbuch', offen:P.offen}
+    {t:'Programmrahmen: BEGIN/END PGM, BLK FORM 0.1/0.2, TOOL CALL n Z S, M13/M3, M9, M2, Kommentarsaetze, ~-Fortsetzung, CR LF, Name = Dateiname', s:'pgst'},
+    {t:'Weg in die TNC: .H-Dateien nur ueber die TNC-Dateiverwaltung (USB) oder TNCremo einlesen — die Steuerung wandelt sie dabei ins Binaerformat; eine per Explorer in ein TNC-Laufwerk kopierte Datei quittiert sie mit "Dateiformat geaendert"', s:'pgst'},
+    {t:'Maschinentermine: ' + P.termine, s:'pgst', offen:P.offen}
   ];
 }
 // =====================================================================
