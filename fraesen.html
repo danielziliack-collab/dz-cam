@@ -2530,6 +2530,8 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <div class="mrow"><button class="gcbtn" id="btnDemoTaschen" style="width:100%;padding:10px;">DZ4 Taschen, Nuten, Zapfen (251&ndash;257)</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoBohren2" style="width:100%;padding:10px;">DZ5 Planfr&auml;sen 232 + Bohrzyklen 202/204/205/208/209/241</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoEinzel" style="width:100%;padding:10px;">DZ6 Einzels&auml;tze: eigene Bahn ohne Zyklen (eine Bohrung je Schritt)</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoFormen" style="width:100%;padding:10px;">DZ7 Einzels&auml;tze: Kreistasche, Nut, Kreiszapfen als eigene Bahn</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoPlan" style="width:100%;padding:10px;">DZ8 Einzels&auml;tze: Planfr&auml;sen + Rechtecktasche mit Helix</button></div>
             </div>
           </div>
           <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
@@ -2785,6 +2787,17 @@ SC &uuml;ber die letzte Tiefe, beim 203 der Spanbruch um V1 und die Abnahme DF, 
 abst&auml;nde und vertiefter Startpunkt. <b>Warum:</b> so l&auml;uft der Schritt an jeder Steuerung, die L-S&auml;tze kennt,
 Du siehst im Einzelsatz jede Bewegung, und dieselbe Bahn f&auml;hrt sp&auml;ter die eigene Simulation und der Siemens-Post.</p>
 <dl>
+<dt id="ba-fk06c-formen">Formen als eigene Bahn</dt><dd>Rechteck- und Kreistasche, Nut und runde Nut werden von innen nach au&szlig;en ger&auml;umt:
+Ringkonturen der Form, gleichm&auml;&szlig;ig verteilt, seitliche Zustellung h&ouml;chstens Bahn&uuml;berlappung &times; Werkzeugradius, die innerste
+Kontur durch die Mitte; Zapfen von au&szlig;en nach innen, die erste Kontur au&szlig;erhalb des Rohteils (Eintauchen in der Luft). Die Bahn ist
+die Werkzeugmitte (<code>R0</code>): den Werkzeugradius nimmt die App aus der Tabelle, UXY bleibt an der Wand, UZ am Boden, bis das Schlichten sie
+holt (Boden mit dem Ringmuster, Seite als Kontur im Werkzeugradius, in Schritten DS, mit FS). Gleichlauf hei&szlig;t bei M3: Material rechts
+der Fahrtrichtung &mdash; in der Tasche gegen den Uhrzeigersinn (<code>DR+</code>), am Zapfen im Uhrzeigersinn (<code>DR-</code>). Eintauchen:
+senkrecht mit FZ in der Mitte, als Helix um die Mitte (<code>CC</code> + <code>CP IPA IZ</code>, Steigung aus dem ANGLE der Werkzeugtabelle,
+Radius h&ouml;chstens Werkzeugradius) oder pendelnd auf der L&auml;ngsachse; ohne ANGLE in der Tabelle lehnt die App Helix und Pendeln ab.
+Planfr&auml;sen: M&auml;ander in Zeilen entlang LX, Zeilenabstand h&ouml;chstens &Uuml;berlappung &times; Werkzeugradius, das Werkzeug f&auml;hrt an beiden
+Enden ganz von der Fl&auml;che (Strategie 0 zus&auml;tzlich um SC seitlich), Strategie 2 zeilenweise mit R&uuml;cklauf im Eilgang auf SC; Tiefen in
+Schritten DZ, bei UZ &gt; 0 der letzte Schnitt mit FS. Kreisb&ouml;gen stehen als <code>CC</code> + <code>C X Y DR&plusmn; R0 F</code>.</dd>
 <dt id="ba-fk06c-ausgabe">NC-Ausgabe</dt><dd>Steuerungszyklus oder Einzels&auml;tze &mdash; je Schritt. Was keine eigene Bahn hat
 (Gewinde GS 207 und 209 brauchen die Synchronspindel, R&uuml;ckw&auml;rts-Senken und Ausdrehen mit Freifahren die
 Spindel-Orientierung, Bohrfr&auml;sen die Helix, Einlippen seine Spindel-/K&uuml;hlmittelfolge), bleibt beim Zyklus; w&auml;hlst Du
@@ -2792,7 +2805,8 @@ dort Einzels&auml;tze, schreibt die App den Zyklus und sagt es in der Warnung. D
 Bohrbild; zwischen den Positionen f&auml;hrt das Werkzeug auf SC2, wie der Zyklusaufruf mit M99.</dd>
 </dl>
 <div class="ba-merk">Stand (12.09.2026 abends): nach dem Zyklusablauf des Handbuchs gebaut und im Programm-Test des Programmierplatzes
-durchgelaufen (DZ6, 3:06 min, ohne Meldung, R&uuml;ckexport Satz f&uuml;r Satz gleich); an der Maschine noch nicht gefahren. Die Vorlage DZ6 (die Leiste als Einzels&auml;tze, eine Bohrung je
+durchgelaufen (DZ6 Bohren 3:06 min, DZ7 Kreistasche/Nut/Kreiszapfen 1:55 min, DZ8 Planfr&auml;sen/Rechtecktasche mit Helix 2:32 min, alle ohne Meldung,
+R&uuml;ckexport Satz f&uuml;r Satz gleich); an der Maschine noch nicht gefahren. Die Vorlage DZ6 (die Leiste als Einzels&auml;tze, eine Bohrung je
 Schritt &mdash; der Wandler des Programmierplatzes nimmt nur 100 S&auml;tze) ist das Testprogramm f&uuml;r den Programmierplatz.</div>
 
 <h2 id="ba-fk07">7 &nbsp;NC-Ausgabe und Weg zur Maschine</h2>
@@ -2813,7 +2827,7 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 <ul>
 <li>Konturfr&auml;sen mit RL/RR, Konturzug 25 und SL-Zyklen 20&ndash;24 &mdash; n&auml;chstes Paket, braucht den XY-Kontureditor. Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
 <li>Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39, Abzeilen 230/231/233 &mdash; in dieser Reihenfolge danach.</li>
-<li>Eigene Bahnlogik: die Bohrfamilie schreibt seit dem 12.09.2026 Einzels&auml;tze (Kap.&nbsp;6c); Taschen, Nuten und Zapfen als eigene Bahn, der XY-Kontureditor und die Konturbahnen folgen &mdash; darauf der Siemens-Post.</li>
+<li>Eigene Bahnlogik: Bohrfamilie, Taschen, Nuten, Zapfen und Planfr&auml;sen schreiben seit dem 12./13.09.2026 Einzels&auml;tze (Kap.&nbsp;6c); der XY-Kontureditor und die Konturbahnen folgen &mdash; darauf der Siemens-Post.</li>
 <li>XY-Kontureditor und DXF-Import f&uuml;r Fr&auml;skonturen &mdash; nach der Bahnlogik f&uuml;r Bohren und Taschen, vor den Konturbahnen.</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
 <li>Eigene Simulation auf den Bahnen aus Paket C &mdash; Paket D; bis dahin der Programm-Test der Steuerung.</li>
@@ -3003,7 +3017,7 @@ var F_PROFILE = {
       // Programmstart" ab (T241B). Beides gelb in fPruefen.
       ausdrehen:'pgst', senkenRueck:'pgst', tiefUni:'pgst', bohrfraesen:'pgst', gewindeSpan:'pgst', einlippen:'pgst', planfraesen:'pgst'
     },
-    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; abends DZ6 (Einzelsaetze der eigenen Bahn, Paket C: 240/203/200/201 ohne Zyklus, 3:06 min) ebenso; alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
+    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; abends DZ6 (Einzelsaetze der eigenen Bahn, Paket C: 240/203/200/201 ohne Zyklus, 3:06 min) ebenso, nachts DZ7 (Kreistasche, Nut, Kreiszapfen als Ringbahnen mit CC/C, 1:55 min) und DZ8 (Planfraesen-Maeander, Rechtecktasche mit Helix CP IPA/IZ, 2:32 min); alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
     offen:'Lauf an einer der drei Maschinen (Stand 340 49x): Softwarestand je Maschine (MOD), M13/M9 an der PLC, Option Synchron-Gewindebohren (207); danach Daniels eigene .H-Programme als Fixtures'
   }
 };
@@ -3278,24 +3292,24 @@ var F_MASKE = {
   tiefUni:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','minZust','q257','rzSpan','q258','q259','#!Verweilzeit & Vorposition','vUnten','q379','fVor']},
   bohrfraesen:{felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fraesart','kuehl','#Bohrung','sc','tiefe','q335','q342','q334','q203','sc2']},
   einlippen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','q203','sc2','#Spindel & Kühlung','q426','q427','q428','q429','q430','#!Vorposition, Rückzug & Verweilen','q379','fVor','fRueck','vUnten','q435']},
-  tascheR:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','#Form','l1','l2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
+  tascheR:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','l1','l2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'L 1. Seitenlänge', l2:'W 2. Seitenlänge', lage:'Bezugspunkt der Tasche'},
                feldWahl:{lage:[['0','Mitte'],['1','links unten'],['2','rechts unten'],['3','rechts oben'],['4','links oben']]}},
-  tascheK:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','#Form','dm','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
+  tascheK:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','dm','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', dm:'⌀ Kreistasche'}},
-  nut:        {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','#Form','l1','l2','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
+  nut:        {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','l1','l2','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'L Nutlänge', l2:'W Nutbreite', lage:'Bezugspunkt der Nut'},
                feldWahl:{lage:[['0','Mitte'],['1','linkes Nutende'],['2','rechtes Nutende']]}},
-  nutR:       {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','#Form','l2','teilkreis','lage','xm','start','oeffnung','wschritt','anzahl','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
+  nutR:       {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','l2','teilkreis','lage','xm','start','oeffnung','wschritt','anzahl','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l2:'W Nutbreite', lage:'Bezugspunkt der runden Nut', anzahl:'N Anzahl Nuten'},
                feldWahl:{lage:[['0','Teilkreis-Mitte (XM/YM)'],['1','linker Nutkreis'],['2','Mittelachse'],['3','rechter Nutkreis']]},
                nurWenn:{xm:(s)=>Math.round(+s.lage || 0) === 0}},
-  zapfenR:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','#Form','l1','roh1','l2','roh2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
+  zapfenR:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','ausgabe','#Form','l1','roh1','l2','roh2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'L 1. Seitenlänge', l2:'W 2. Seitenlänge', lage:'Bezugspunkt des Zapfens'},
                feldWahl:{lage:[['0','Mitte'],['1','links unten'],['2','rechts unten'],['3','rechts oben'],['4','links oben']]}},
-  zapfenK:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','#Form','dm','dmRoh','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
+  zapfenK:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','ausgabe','#Form','dm','dmRoh','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', dm:'⌀ Zapfen (Fertigmaß)'}},
-  planfraesen:{felder:['#Werkzeug & Schnittwerte','t','s','f','fSchl','fVor','kuehl','#Fläche','strategie','px','pz','zEnd','l1','l2','#Zustellung & Aufmaß','zust','aufTiefe','ueberl','#!Sicherheit','sc','scSeite','sc2'],
+  planfraesen:{felder:['#Werkzeug & Schnittwerte','t','s','f','fSchl','fVor','kuehl','ausgabe','#Fläche','strategie','px','pz','zEnd','l1','l2','#Zustellung & Aufmaß','zust','aufTiefe','ueberl','#!Sicherheit','sc','scSeite','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'LX Länge in X (± = Richtung)', l2:'LY Länge in Y (± = Richtung)', zust:'DZ max. Zustellung', ueberl:'max. Überlappung'}}
 };
 // Softkey-Gruppen wie an der TNC (CYCL DEF -> Bohren/Gewinde, Taschen/
@@ -3776,10 +3790,12 @@ function fMusterZyklusDef(m, s){
 // 208 (Helix, kommt mit den Taschenbahnen), 241 (Spindel-/Kuehlmittel-
 // Folge des Einlippenbohrens).
 // ---------------------------------------------------------------------
-var F_BAHN_ARTEN = ['zentrieren', 'bohren', 'tief', 'tiefUni', 'reiben', 'gewinde', 'ausdrehen'];
+var F_BAHN_ARTEN = ['zentrieren', 'bohren', 'tief', 'tiefUni', 'reiben', 'gewinde', 'ausdrehen',
+  'tascheR', 'tascheK', 'nut', 'nutR', 'zapfenR', 'zapfenK', 'planfraesen'];   // Paket C2: Formen (fBahnFormen)
 function fBahnSchritt(s, tool, prog, punkte){
   const art = s.art, warn = [], B = [];
   const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  if(F_ZYKLEN[art] && F_ZYKLEN[art].fraes) return fBahnFormen(s, tool, prog, punkte);   // Paket C2
   if(F_BAHN_ARTEN.indexOf(art) < 0) return nein('fuer ' + ((F_ZYKLEN[art] || {}).wort || art) + ' gibt es noch keine eigene Bahn');
   if(!punkte || !punkte.length) return nein('keine Position');
   const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
@@ -3897,15 +3913,24 @@ function fBahnLeiter(B, s, art, z0, zT, zSC, sc, f, fR){
   verweil(s.vUnten);
   if(art === 'tief') vor({z:zSC, f:fR}); else eil({z:zSC});
 }
-// Klartext aus einer Bahn: L-Saetze mit R0, FMAX bzw. F, M-Wort am Satz;
-// Verweilzeit als Zyklus 9 (zwei Saetze, Handbuch 670 388-12 S. 309).
+// Klartext aus einer Bahn: L-Saetze mit R0 und NUR den Achsen, die sich
+// aendern (die TNC fuehrt die anderen modal), FMAX bzw. F, M-Wort am Satz;
+// Kreisbogen als CC (nur bei neuem Mittelpunkt) + C mit DR+/DR-, Schrauben-
+// linie als CC + CP IPA/IZ (inkrementaler Polarwinkel und Z-Weg), Verweilzeit
+// als Zyklus 9 (zwei Saetze, Handbuch 670 388-12 S. 309).
 function fBahnKlartext(B){
-  const out = [];
-  const ach = (m) => (m.x != null ? ' X' + klNum(m.x) : '') + (m.y != null ? ' Y' + klNum(m.y) : '') + (m.z != null ? ' Z' + klNum(m.z) : '');
+  const out = []; const pos = {x:null, y:null, z:null}; let cc = null;
+  const ach = (m) => ['x', 'y', 'z'].map(k => (m[k] != null && (pos[k] == null || Math.abs(pos[k] - m[k]) > 1e-9)) ? ' ' + k.toUpperCase() + klNum(m[k]) : '').join('');
+  const merk = (m) => ['x', 'y', 'z'].forEach(k => { if(m[k] != null) pos[k] = m[k]; });
   const mw = (m) => m.m ? ' M' + m.m : '';
+  const ccSatz = (m) => { if(!cc || Math.abs(cc.x - m.cx) > 1e-9 || Math.abs(cc.y - m.cy) > 1e-9){ out.push('CC X' + klNum(m.cx) + ' Y' + klNum(m.cy)); cc = {x:m.cx, y:m.cy}; } };
   B.forEach(m => {
-    if(m.a === 'eil') out.push('L' + ach(m) + ' R0 FMAX' + mw(m));
-    else if(m.a === 'vor') out.push('L' + ach(m) + ' R0 F' + fRund(m.f) + mw(m));
+    if(m.a === 'eil' || m.a === 'vor'){
+      let a = ach(m);
+      if(!a){ if(!m.m) return; a = ' Z' + klNum(pos.z == null ? (m.z || 0) : pos.z); }   // nur ein M-Wort: Satz auf der Stelle
+      out.push('L' + a + ' R0 ' + (m.a === 'eil' ? 'FMAX' : 'F' + fRund(m.f)) + mw(m)); merk(m);
+    } else if(m.a === 'kreis'){ ccSatz(m); out.push('C X' + klNum(m.x) + ' Y' + klNum(m.y) + ' DR' + (m.dr > 0 ? '+' : '-') + ' R0 F' + fRund(m.f)); merk(m); }
+    else if(m.a === 'helix'){ ccSatz(m); out.push('CP IPA' + klNum(360 * m.turns * (m.dr > 0 ? 1 : -1)) + ' IZ' + klNum(m.dz) + ' DR' + (m.dr > 0 ? '+' : '-') + ' R0 F' + fRund(m.f)); if(m.z != null) pos.z = m.z; }
     else if(m.a === 'verweil'){ out.push('CYCL DEF 9.0 VERWEILZEIT'); out.push('CYCL DEF 9.1 V.ZEIT ' + fRund(m.t)); }
     else if(m.a === 'kom') out.push('; ' + String(m.text).toUpperCase().replace(/[^A-Z0-9 .,\-:=+]/g, ''));
   });
@@ -3916,9 +3941,333 @@ function fBahnKurz(B){
   return B.map(m => {
     if(m.a === 'verweil') return 'verweil ' + m.t;
     if(m.a === 'kom') return 'kom';
-    const t = [m.a, m.x != null ? 'X' + m.x : '', m.y != null ? 'Y' + m.y : '', m.z != null ? 'Z' + m.z : '', m.a === 'vor' ? 'F' + m.f : '', m.m ? 'M' + m.m : ''].filter(Boolean);
+    const t = [m.a, m.x != null ? 'X' + m.x : '', m.y != null ? 'Y' + m.y : '', m.z != null ? 'Z' + m.z : '', (m.a === 'vor' || m.a === 'kreis') ? 'F' + m.f : '', m.m ? 'M' + m.m : ''].filter(Boolean);
     return t.join(' ');
   }).join('|');
+}
+
+// ---------------------------------------------------------------------
+// BAHNLOGIK DER FORMEN (Paket C2, 13.09.2026 frueh): Rechtecktasche 251,
+// Kreistasche 252, Nut 253, runde Nut 254, Rechteckzapfen 256, Kreiszapfen
+// 257 und Planfraesen 232 als eigene Bahn. Zusaetzliche Bahnsaetze:
+//   {a:'kreis', x,y, cx,cy, dr:+1|-1, f}   Kreisbogen zum Punkt x,y um cx,cy
+//                                           (dr +1 = Gegenuhrzeigersinn = DR+)
+//   {a:'helix', cx,cy, r, dr, dz, turns, f} Schraubenlinie um cx,cy, beginnt
+//                                           am aktuellen Punkt, endet turns
+//                                           Umlaeufe spaeter um dz tiefer
+// GLEICHLAUF (Q351 = +1) heisst bei M3: Material RECHTS der Fahrtrichtung
+// (RL-Regel des Klartext-Handbuchs) — in der Tasche also gegen den
+// Uhrzeigersinn (DR+), am Zapfen im Uhrzeigersinn (DR-). Die Bahn ist die
+// WERKZEUGMITTE (R0): die App rechnet den Werkzeugradius selbst aus der
+// Tabelle, Seitenaufmass UXY bleibt an der Wand stehen, Tiefenaufmass UZ am
+// Boden, bis das Schlichten sie holt.
+// TASCHEN werden von innen nach aussen geraeumt: Ringkonturen der Form,
+// gleichmaessig verteilt, seitliche Zustellung hoechstens Q370 x Werkzeug-
+// radius (Handbuch 670 388-12 S. 147: "Bahn-Ueberlappung Faktor"), die
+// innerste Kontur laeuft durch die Mitte (bei der Rechtecktasche und Nut eine
+// Linie auf der Laengsachse). ZAPFEN von aussen nach innen: die aeusserste
+// Kontur liegt ausserhalb des Rohteils, das Eintauchen findet in der Luft
+// statt. EINTAUCHEN in Taschen: senkrecht mit FZ in der Mitte (Q366 = 0),
+// als Helix um die Mitte (1, Steigung aus dem Eintauchwinkel ANGLE der
+// Werkzeugtabelle, Helixradius hoechstens Werkzeugradius und innerhalb der
+// Form) oder pendelnd auf der Laengsachse (2, Rampe mit ANGLE). SCHLICHTEN:
+// Boden mit dem Ringmuster auf Endtiefe (nur bei UZ > 0), dann die Seite als
+// Kontur im Abstand Werkzeugradius, in Schritten DS (0 = ein Schnitt auf
+// Endtiefe), alles mit FS. PLANFRAESEN: Maeander in Zeilen entlang LX,
+// Zeilenabstand hoechstens Q370 x Werkzeugradius, das Werkzeug faehrt an
+// beiden Enden ganz von der Flaeche (Strategie 0 mit SC seitlich, 1 ohne),
+// Strategie 2 zeilenweise mit Ruecklauf im Eilgang auf SC; Tiefen in
+// Schritten DZ von Z0 auf Z1 (+UZ), bei UZ > 0 der letzte Schnitt mit FS.
+// ---------------------------------------------------------------------
+function fBahnFormen(s, tool, prog, punkte){
+  const art = s.art, warn = [], B = [];
+  const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  const zapfen = /^zapfen/.test(art);
+  const rt = (tool && +tool.d > 0) ? +tool.d / 2 : 0;
+  if(!(rt > 0)) return nein('Werkzeug-Durchmesser fehlt (Werkzeugtabelle)');
+  const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
+  if(!(sc > 0)) return nein('Sicherheitsabstand fehlt');
+  const zSC = fRund(z0 + sc), zSC2 = fRund(z0 + sc2);
+  const f = +s.f || 0, fZ = (+s.fTief > 0) ? +s.fTief : f, fS = (+s.fSchl > 0) ? +s.fSchl : f;
+  if(!(f > 0)) return nein('Vorschub fehlt');
+  const k = (+s.ueberl > 0) ? Math.min(+s.ueberl, 1.414) : 1;
+  const sMax = k * rt;                                   // groesste seitliche Zustellung
+  const uxy = Math.max(0, +s.aufSeite || 0), uz = zapfen ? 0 : Math.max(0, +s.aufTiefe || 0);
+  const umfang = Math.round(+s.umfang || 0);              // 0 beide, 1 Schruppen, 2 Schlichten
+  const ccw = (+s.fraesart < 0) ? zapfen : !zapfen;       // Gleichlauf: Tasche DR+, Zapfen DR-
+  // Lage des Werkzeugs mitfuehren: ein Satz, der nichts bewegt (Ringstart =
+  // Standpunkt), wird gar nicht erst erzeugt.
+  const pos = {x:null, y:null, z:null};
+  const gleichLage = (o) => ['x', 'y', 'z'].every(k => o[k] == null || (pos[k] != null && Math.abs(pos[k] - o[k]) < 1e-9));
+  const merk = (o) => { ['x', 'y', 'z'].forEach(k => { if(o[k] != null) pos[k] = o[k]; }); };
+  const eil = (o) => { if(gleichLage(o)) return; B.push(Object.assign({a:'eil'}, o)); merk(o); };
+  const vor = (o) => { if(gleichLage(o)) return; B.push(Object.assign({a:'vor'}, o)); merk(o); };
+  const kreis = (o) => { B.push(Object.assign({a:'kreis'}, o)); merk(o); };
+  const dreh = ((+s.dreh || 0) * Math.PI / 180), cD = Math.cos(dreh), sD = Math.sin(dreh);
+
+  // ---- Planfraesen: eigener Weg (keine Position aus dem Bohrbild) ----
+  if(art === 'planfraesen') return fBahnPlan(s, tool, prog, rt, f, fS, k, warn, B);
+
+  if(!punkte || !punkte.length) return nein('keine Position');
+  const tiefe = +s.tiefe || 0; if(!(tiefe < 0)) return nein('Tiefe fehlt');
+  const zT = fRund(z0 + tiefe), zRoh = fRund(zT + uz);
+  const zust = (+s.zust > 0) ? +s.zust : (z0 - zRoh);
+  const eint = Math.round(+s.eintauch || 0);
+  const angle = (tool && +tool.angle > 0) ? +tool.angle : 0;
+  if(!zapfen && eint > 0 && !(angle > 0)) return nein((eint === 1 ? 'Helix' : 'Pendelnd') + ' eintauchen braucht den Eintauchwinkel ANGLE des Werkzeugs in der Tabelle');
+
+  // ---- Formmasse und Ringkonturen (relativ zur Formmitte, ungedreht) ----
+  // ring(d) = Kontur der Form, um d nach innen (Tasche) bzw. aussen (Zapfen)
+  // versetzt, als Segmentliste [{x,y}|{x,y,cx,cy,dr}] gegen den Uhrzeigersinn,
+  // Start = erstes Element (Lauf schliesst dort). null = Kontur existiert nicht.
+  let ring, innenMax, aussenMax, mitte;   // innenMax: groesster Innenversatz, bei dem noch eine Kontur bleibt
+  if(art === 'tascheR' || art === 'nut' || art === 'zapfenR'){
+    const a = (+s.l1 || 0) / 2, b = (+s.l2 || 0) / 2;
+    const r0 = (art === 'nut') ? b : Math.max(0, +s.r || 0);
+    if(!(a > 0) || !(b > 0)) return nein('Laenge/Breite fehlt');
+    if(zapfen){
+      const ra = (+s.roh1 || 0) / 2, rb = (+s.roh2 || 0) / 2;
+      if(!(ra >= a) || !(rb >= b)) return nein('Rohteilmass kleiner als das Fertigmass');
+      aussenMax = Math.max(ra - a, rb - b);
+      ring = (d) => fRundRechteck(a + d, b + d, r0 + d);
+    } else {
+      innenMax = Math.min(a, b);
+      ring = (d) => (d > Math.min(a, b) + 1e-9) ? null : fRundRechteck(a - d, b - d, Math.max(0, r0 - d));
+    }
+  } else if(art === 'tascheK' || art === 'zapfenK'){
+    const R = (+s.dm || 0) / 2; if(!(R > 0)) return nein('Durchmesser fehlt');
+    if(zapfen){
+      const rr = (+s.dmRoh || 0) / 2; if(!(rr >= R)) return nein('Rohteil-Durchmesser kleiner als das Fertigmass');
+      aussenMax = rr - R;
+      ring = (d) => fKreis(R + d);
+    } else {
+      innenMax = R;
+      ring = (d) => (d > R + 1e-9) ? null : fKreis(R - d);
+    }
+  } else if(art === 'nutR'){
+    const Rt = (+s.teilkreis || 0) / 2, w = (+s.l2 || 0) / 2;
+    const a1 = (+s.start || 0) * Math.PI / 180, oe = (+s.oeffnung || 0) * Math.PI / 180;
+    if(!(Rt > 0) || !(w > 0) || !(oe > 0)) return nein('Teilkreis, Nutbreite oder Oeffnungswinkel fehlt');
+    innenMax = w;
+    ring = (d) => (d > w + 1e-9) ? null : fBogenNut(Rt, w - d, a1, oe);
+  } else return nein('fuer ' + art + ' gibt es noch keine eigene Bahn');
+
+  // Ringabstaende: gleichmaessig verteilt, hoechstens sMax; Taschen von innen
+  // (groesster Versatz) nach aussen (Versatz uxy + rt), Zapfen von aussen
+  // (Versatz ueber Rohteil + rt) nach innen (uxy + rt).
+  const dSchl = rt;                                 // Schlichtkontur: Werkzeugradius
+  const dRoh = uxy + rt;                            // aeusserste Schruppkontur (Tasche) / innerste (Zapfen)
+  let versaetze = [];
+  if(zapfen){
+    const dMax = aussenMax + rt;                    // ausserhalb des Rohteils
+    const n = Math.max(1, Math.ceil((dMax - dRoh) / sMax));
+    for(let i = n; i >= 0; i--) versaetze.push(fRund(dRoh + (dMax - dRoh) * i / n));
+  } else {
+    const spanne = innenMax - dRoh;                 // Weg von der aeussersten Schruppkontur bis zur Mitte
+    if(spanne < -1e-9) return nein('Form kleiner als Werkzeug plus Aufmass');
+    const n = Math.max(1, Math.ceil(spanne / sMax));
+    for(let i = n; i >= 0; i--) versaetze.push(fRund(dRoh + spanne * i / n));
+  }
+  // Bezugspunkt (Lage) -> Formmitte je Position; Drehlage um die Mitte.
+  const lage = Math.round(+s.lage || 0);
+  const rotP = (p) => ({x:p.x * cD - p.y * sD, y:p.x * sD + p.y * cD});
+  const mittePunkt = (p) => {
+    if(art === 'nutR'){
+      const Rt = (+s.teilkreis || 0) / 2, a1 = (+s.start || 0) * Math.PI / 180, oe = (+s.oeffnung || 0) * Math.PI / 180;
+      if(lage === 0) return {x:+s.xm || 0, y:+s.ym || 0};
+      const w = lage === 1 ? a1 : (lage === 3 ? a1 + oe : a1 + oe / 2);
+      return {x:p.x - Rt * Math.cos(w), y:p.y - Rt * Math.sin(w)};
+    }
+    let o = {x:0, y:0};
+    if(art === 'tascheR' || art === 'zapfenR'){ const a = (+s.l1 || 0) / 2, b = (+s.l2 || 0) / 2; o = ({1:{x:a, y:b}, 2:{x:-a, y:b}, 3:{x:-a, y:-b}, 4:{x:a, y:-b}})[lage] || o; }
+    if(art === 'nut'){ const a = (+s.l1 || 0) / 2 - (+s.l2 || 0) / 2; o = ({1:{x:a, y:0}, 2:{x:-a, y:0}})[lage] || o; }
+    const ro = rotP(o); return {x:p.x + ro.x, y:p.y + ro.y};
+  };
+  // Runde Nut mit N Wiederholungen um den Winkelschritt: je Nut eigene Positionen
+  const positionen = [];
+  punkte.forEach(p => {
+    if(art === 'nutR'){
+      const n = Math.max(1, Math.round(+s.anzahl || 1)), ws = (+s.wschritt || 0) * Math.PI / 180;
+      const m = mittePunkt(p);
+      for(let j = 0; j < n; j++) positionen.push({m:m, dw:j * ws});
+    } else positionen.push({m:mittePunkt(p), dw:0});
+  });
+  const zuWelt = (m, dw) => (q) => { const c = Math.cos(dreh + dw), sn = Math.sin(dreh + dw); return {x:fRund(m.x + q.x * c - q.y * sn), y:fRund(m.y + q.x * sn + q.y * c)}; };
+  // Kontur abfahren: Startpunkt anfahren (vor bei feed), dann die Segmente.
+  const fahreKontur = (kontur, W, z, feed) => {
+    const seg = ccw ? kontur : fKonturUmkehren(kontur);
+    const p0 = W(seg[seg.length - 1]);
+    vor({x:p0.x, y:p0.y, z:z, f:feed});
+    seg.forEach(g => { const p = W(g); if(g.cx != null){ const c = W({x:g.cx, y:g.cy}); kreis({x:p.x, y:p.y, z:z, cx:c.x, cy:c.y, dr:g.dr, f:feed}); } else vor({x:p.x, y:p.y, z:z, f:feed}); });
+  };
+  const ebenen = [];   // Schrupptiefen
+  { let z = z0; while(z > zRoh + 1e-9){ z = Math.max(zRoh, fRund(z - zust)); ebenen.push(z); } }
+  if(!ebenen.length) ebenen.push(zRoh);
+  positionen.forEach(pos => {
+    const W = zuWelt(pos.m, pos.dw);
+    const m = W({x:0, y:0});
+    // Startpunkt der innersten Kontur (Tasche) / aeussersten (Zapfen)
+    const erste = ring(versaetze[0]);
+    const startP = W(erste[erste.length - 1]);
+    const eintauchStart = zapfen ? startP : m;
+    eil({x:eintauchStart.x, y:eintauchStart.y});
+    eil({z:zSC});
+    let zAkt = zSC;
+    const runter = (zNeu, W2) => {
+      // Eintauchen von zAkt auf zNeu: Zapfen in der Luft senkrecht, Tasche je Q366
+      if(zapfen || eint === 0){ vor({z:zNeu, f:fZ}); zAkt = zNeu; return; }
+      const dz = zAkt - zNeu;
+      if(eint === 1){
+        // Helix um die Mitte: Radius hoechstens Werkzeugradius, innerhalb der Form
+        const rh = fRund(Math.min(rt, innenMax - dRoh));
+        if(!(rh > 0.2)){ vor({z:zNeu, f:fZ}); zAkt = zNeu; warn.push('Helix-Radius unter 0,2 mm — senkrecht eingetaucht.'); return; }
+        const steig = 2 * Math.PI * rh * Math.tan(angle * Math.PI / 180);
+        const turns = Math.max(1, Math.ceil(dz / steig));
+        const st = W2({x:rh, y:0});
+        vor({x:st.x, y:st.y, f:fZ});
+        B.push({a:'helix', cx:m.x, cy:m.y, r:rh, dr:ccw ? 1 : -1, dz:-fRund(dz), turns:turns, z:zNeu, f:fZ}); pos.z = zNeu;
+        // Vollkreis auf der Tiefe (zwei Halbkreise), damit der Grund der Helix eben ist
+        const gg = W2({x:-rh, y:0});
+        kreis({x:gg.x, y:gg.y, z:zNeu, cx:m.x, cy:m.y, dr:ccw ? 1 : -1, f:fZ});
+        kreis({x:st.x, y:st.y, z:zNeu, cx:m.x, cy:m.y, dr:ccw ? 1 : -1, f:fZ});
+        zAkt = zNeu; return;
+      }
+      // Pendelnd: Rampe auf der Laengsachse hin und her
+      const L = (art === 'tascheK' || art === 'zapfenK') ? (innenMax - dRoh) : ((art === 'nutR') ? 0 : (((+s.l1 || 0) / 2) - dRoh));
+      if(!(L > 0.5)){ vor({z:zNeu, f:fZ}); zAkt = zNeu; warn.push('Pendelweg zu kurz — senkrecht eingetaucht.'); return; }
+      const dzJe = 2 * L * Math.tan(angle * Math.PI / 180);
+      let z = zAkt, ende = 1;
+      const A = W2({x:-L, y:0}), Bp = W2({x:L, y:0});
+      vor({x:A.x, y:A.y, f:fZ});
+      while(z > zNeu + 1e-9){
+        z = Math.max(zNeu, fRund(z - dzJe));
+        const P = ende > 0 ? Bp : A;
+        vor({x:P.x, y:P.y, z:z, f:fZ}); ende = -ende;
+      }
+      zAkt = zNeu;
+    };
+    if(umfang !== 2){
+      ebenen.forEach((z, ei) => {
+        // zurueck zum Eintauchpunkt: im Vorschub, das Werkzeug steht auf Tiefe im geraeumten Bereich
+        if(ei > 0){ const st = zapfen ? startP : m; vor({x:st.x, y:st.y, f:f}); }
+        runter(z, W);
+        versaetze.forEach(d => { const kon = ring(d); if(kon) fahreKontur(kon, W, z, f); });
+      });
+    }
+    if(umfang !== 1){
+      // Schlichten auf Endtiefe: Boden (Ringmuster, nur bei UZ > 0), dann Seite
+      if(umfang === 2){ vor({z:zT, f:fZ}); zAkt = zT; }
+      else if(uz > 0){ const st = zapfen ? startP : m; vor({x:st.x, y:st.y, f:f}); runter(zT, W); versaetze.forEach(d => { const kon = ring(d); if(kon) fahreKontur(kon, W, zT, fS); }); }
+      const ds = (+s.zustSchl > 0) ? +s.zustSchl : 0;
+      const zSeiten = [];
+      if(ds > 0){ let z = z0; while(z > zT + 1e-9){ z = Math.max(zT, fRund(z - ds)); zSeiten.push(z); } } else zSeiten.push(zT);
+      zSeiten.forEach(z => { const kon = ring(dSchl); if(kon) fahreKontur(kon, W, z, fS); });
+    }
+    eil({z:zSC});
+    eil({z:zSC2});
+  });
+  return {ok:true, bahn:B, warn:warn, zT:zT};
+}
+// Rundes Rechteck (Halbmasse a, b, Eckenradius r) gegen den Uhrzeigersinn,
+// Start und Ende in der Mitte der unteren Seite. b = 0 -> Linie auf der Achse.
+function fRundRechteck(a, b, r){
+  if(a <= 1e-9 && b <= 1e-9) return [{x:0, y:0}];
+  if(b <= 1e-9) return [{x:a, y:0}, {x:-a, y:0}, {x:0, y:0}];
+  if(a <= 1e-9) return [{x:0, y:b}, {x:0, y:-b}, {x:0, y:0}];
+  r = Math.max(0, Math.min(r, a, b));
+  const seg = [];
+  seg.push({x:fRund(a - r), y:fRund(-b)});
+  if(r > 1e-9) seg.push({x:fRund(a), y:fRund(-(b - r)), cx:fRund(a - r), cy:fRund(-(b - r)), dr:1});
+  seg.push({x:fRund(a), y:fRund(b - r)});
+  if(r > 1e-9) seg.push({x:fRund(a - r), y:fRund(b), cx:fRund(a - r), cy:fRund(b - r), dr:1});
+  seg.push({x:fRund(-(a - r)), y:fRund(b)});
+  if(r > 1e-9) seg.push({x:fRund(-a), y:fRund(b - r), cx:fRund(-(a - r)), cy:fRund(b - r), dr:1});
+  seg.push({x:fRund(-a), y:fRund(-(b - r))});
+  if(r > 1e-9) seg.push({x:fRund(-(a - r)), y:fRund(-b), cx:fRund(-(a - r)), cy:fRund(-(b - r)), dr:1});
+  seg.push({x:0, y:fRund(-b)});
+  return seg;
+}
+// Vollkreis um die Mitte, Start/Ende rechts (x = R). R = 0 -> Punkt.
+function fKreis(R){
+  if(R <= 1e-9) return [{x:0, y:0}];
+  return [{x:fRund(-R), y:0, cx:0, cy:0, dr:1}, {x:fRund(R), y:0, cx:0, cy:0, dr:1}];
+}
+// Runde Nut: Mittellinie = Bogen Radius Rt von a1 ueber oe, halbe Breite w
+// (w = 0 -> Mittellinie hin und zurueck). Gegen den Uhrzeigersinn: aussen
+// vor, Endkappe, innen zurueck, Startkappe. Start/Ende: Mittellinie am Anfang.
+function fBogenNut(Rt, w, a1, oe){
+  const P = (r, a) => ({x:fRund(r * Math.cos(a)), y:fRund(r * Math.sin(a))});
+  const a2 = a1 + oe;
+  if(w <= 1e-9){
+    const seg = []; const n = Math.max(1, Math.ceil(oe / (Math.PI * 0.9)));   // Boegen unter 180 Grad je Satz
+    for(let i = 1; i <= n; i++){ const p = P(Rt, a1 + oe * i / n); seg.push({x:p.x, y:p.y, cx:0, cy:0, dr:1}); }
+    for(let i = n - 1; i >= 0; i--){ const p = P(Rt, a1 + oe * i / n); seg.push({x:p.x, y:p.y, cx:0, cy:0, dr:-1}); }
+    return seg;
+  }
+  const seg = [], n = Math.max(1, Math.ceil(oe / (Math.PI * 0.9)));
+  const e1 = P(Rt, a1), e2 = P(Rt, a2);
+  // vom Mittelpunkt der Startkappe nach aussen
+  seg.push({x:P(Rt + w, a1).x, y:P(Rt + w, a1).y});
+  for(let i = 1; i <= n; i++){ const p = P(Rt + w, a1 + oe * i / n); seg.push({x:p.x, y:p.y, cx:0, cy:0, dr:1}); }
+  { const p = P(Rt - w, a2); seg.push({x:p.x, y:p.y, cx:e2.x, cy:e2.y, dr:1}); }          // Endkappe
+  for(let i = n - 1; i >= 0; i--){ const p = P(Rt - w, a1 + oe * i / n); seg.push({x:p.x, y:p.y, cx:0, cy:0, dr:-1}); }
+  { const p = P(Rt + w, a1); seg.push({x:p.x, y:p.y, cx:e1.x, cy:e1.y, dr:1}); }          // Startkappe (zurueck zum Start)
+  seg.push({x:e1.x, y:e1.y});
+  return seg;
+}
+// Kontur rueckwaerts: Bogen und Gerade haengen am Zielpunkt — rueckwaerts
+// gehoert das Segment zum jeweils vorigen Punkt, der Drehsinn kippt.
+function fKonturUmkehren(seg){
+  const n = seg.length; if(n < 2) return seg.slice();
+  const out = [];
+  for(let i = n - 1; i >= 1; i--){
+    const g = seg[i], ziel = seg[i - 1];
+    out.push(g.cx != null ? {x:ziel.x, y:ziel.y, cx:g.cx, cy:g.cy, dr:-g.dr} : {x:ziel.x, y:ziel.y});
+  }
+  // zurueck zum Start (= letztes Element des Originals)
+  const g0 = seg[0], letzte = seg[n - 1];
+  out.push(g0.cx != null ? {x:letzte.x, y:letzte.y, cx:g0.cx, cy:g0.cy, dr:-g0.dr} : {x:letzte.x, y:letzte.y});
+  return out;
+}
+// Planfraesen 232 als Maeander (siehe Kopf des Blocks).
+function fBahnPlan(s, tool, prog, rt, f, fS, k, warn, B){
+  const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  const px = +s.px || 0, py = +s.py || 0, pz = +s.pz || 0, zE = +s.zEnd || 0;
+  const l1 = +s.l1 || 0, l2 = +s.l2 || 0;
+  if(!(Math.abs(l1) > 0) || !(Math.abs(l2) > 0)) return nein('Seitenlaengen fehlen');
+  if(!(zE < pz)) return nein('Endhoehe liegt nicht unter dem Startpunkt');
+  const uz = Math.max(0, +s.aufTiefe || 0), zust = (+s.zust > 0) ? +s.zust : (pz - zE);
+  const strat = Math.round(+s.strategie || 0), scS = (strat === 0) ? Math.max(0, +s.scSeite || 0) : 0;
+  const fV = (+s.fVor > 0) ? +s.fVor : f;
+  const sc = +s.sc || 0; if(!(sc > 0)) return nein('Sicherheitsabstand fehlt');
+  const zSC = fRund(pz + sc), zSC2b = fRund(pz + Math.max(+s.sc2 || 0, sc));
+  const sx = Math.sign(l1), sy = Math.sign(l2), Lx = Math.abs(l1), Ly = Math.abs(l2);
+  // Zeilen ueber die Breite: Werkzeugmitte von rt innen bis rt vor dem Ende
+  const nZ = (Ly > 2 * rt + 1e-9) ? Math.ceil((Ly - 2 * rt) / (k * rt)) + 1 : 1;
+  const ys = []; for(let j = 0; j < nZ; j++) ys.push(fRund(py + sy * (nZ === 1 ? Ly / 2 : (rt + (Ly - 2 * rt) * j / (nZ - 1)))));
+  const xA = fRund(px - sx * (rt + scS)), xB = fRund(px + sx * (Lx + rt + scS));
+  const eil = (o) => B.push(Object.assign({a:'eil'}, o)), vor = (o) => B.push(Object.assign({a:'vor'}, o));
+  const ebenen = []; { let z = pz; const zR = fRund(zE + uz); while(z > zR + 1e-9){ z = Math.max(zR, fRund(z - zust)); ebenen.push({z:z, f:f}); } if(uz > 0) ebenen.push({z:fRund(zE), f:fS}); }
+  if(!ebenen.length) ebenen.push({z:fRund(zE), f:f});
+  eil({x:xA, y:ys[0]});
+  eil({z:zSC});
+  ebenen.forEach((eb, ei) => {
+    if(ei > 0){ eil({z:zSC}); eil({x:xA, y:ys[0]}); }
+    vor({z:eb.z, f:fV});
+    ys.forEach((y, j) => {
+      if(strat === 2){
+        if(j > 0){ eil({z:zSC}); eil({x:xA, y:y}); vor({z:eb.z, f:fV}); }
+        vor({x:xB, y:y, z:eb.z, f:eb.f});
+      } else {
+        const hin = (j % 2 === 0);
+        if(j > 0) vor({x:hin ? xA : xB, y:y, z:eb.z, f:eb.f});   // seitliche Zustellung ausserhalb der Flaeche
+        vor({x:hin ? xB : xA, y:y, z:eb.z, f:eb.f});
+      }
+    });
+  });
+  eil({z:zSC});
+  eil({z:zSC2b});
+  return {ok:true, bahn:B, warn:warn, zT:fRund(zE)};
 }
 
 // ---------------------------------------------------------------------
@@ -3987,8 +4336,8 @@ function fProgrammSchreiben(prog, opt){
     // jeder Position. Sonst der Zyklus — mit Ansage, wenn der Wunsch nicht
     // erfuellbar war (stumm zurueckfallen waere eine Falle).
     let einzel = null;
-    if(s.ausgabe === 'einzel' && z && !z.eigenePosition && m){
-      const bh = fBahnSchritt(s, tool, prog, fMusterPunkte(m));
+    if(s.ausgabe === 'einzel' && z && (z.eigenePosition || m)){
+      const bh = fBahnSchritt(s, tool, prog, z.eigenePosition ? [] : fMusterPunkte(m));
       if(bh.ok) einzel = bh; else warn.push('Schritt ' + (si + 1) + ': Einzelsaetze nicht moeglich — ' + bh.grund + '. Steuerungszyklus geschrieben.');
     }
     if(einzel){
@@ -4309,13 +4658,40 @@ function fDemoEinzel(){
   p.schritte.forEach(s => { s.ausgabe = 'einzel'; });
   return p;
 }
+// DZ7 / DZ8 (Paket C2): Formen als Einzelsaetze fuer den Programmierplatz, je
+// unter 100 Saetzen (Demo-Wandler). DZ7: Kreistasche, Nut, Kreiszapfen mit
+// dem 8er-Fraeser; DZ8: Planfraesen mit dem Messerkopf 90 und eine
+// Rechtecktasche mit Helix-Eintauchen (ANGLE 6 wie die TOOL.T der Demo).
+function fDemoFormenEinzel(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ7';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-20, x1:120, y1:80, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [{nr:4, name:'Schaftfraeser 8', art:'fraeser', d:8, angle:6, s:3500, f:500}, {nr:5, name:'Schaftfraeser 10', art:'fraeser', d:10, angle:6, s:3000, f:600}];
+  p.muster = [{name:'Kreistasche', typ:'punkte', punkte:[{x:30, y:40}], ausgabe:'punkte'}, {name:'Nut', typ:'punkte', punkte:[{x:80, y:20}], ausgabe:'punkte'}, {name:'Kreiszapfen', typ:'punkte', punkte:[{x:85, y:58}], ausgabe:'punkte'}];
+  const k = fSchrittNeu(p, 'tascheK', 4, 0); Object.assign(k, {dm:30, tiefe:-6, zust:6, umfang:0, aufSeite:0, aufTiefe:0, zustSchl:0, ueberl:1, eintauch:0, f:500, fTief:150, fSchl:500, s:3500, ausgabe:'einzel'});
+  const n = fSchrittNeu(p, 'nut', 4, 1); Object.assign(n, {l1:40, l2:12, dreh:0, lage:0, tiefe:-5, zust:5, umfang:0, aufSeite:0, aufTiefe:0, zustSchl:0, eintauch:0, f:500, fTief:150, fSchl:500, s:3500, ausgabe:'einzel'});
+  const z = fSchrittNeu(p, 'zapfenK', 4, 2); Object.assign(z, {dm:20, dmRoh:30, tiefe:-5, zust:5, aufSeite:0, ueberl:1, f:500, fTief:150, s:3500, ausgabe:'einzel'});
+  p.schritte = [k, n, z];
+  return p;
+}
+function fDemoPlanEinzel(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ8';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-30, x1:150, y1:100, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [{nr:5, name:'Schaftfraeser 10', art:'fraeser', d:10, angle:6, s:3000, f:600}, {nr:32, name:'Messerkopf 90', art:'fraeser', d:90, s:1400, f:800}];
+  p.muster = [{name:'Rechtecktasche', typ:'punkte', punkte:[{x:75, y:50}], ausgabe:'punkte'}];
+  const pl = fSchrittNeu(p, 'planfraesen', 32, -1); Object.assign(pl, {strategie:0, px:0, py:0, pz:0, zEnd:-1, l1:150, l2:100, zust:1, aufTiefe:0, ueberl:0.8, f:800, fSchl:800, fVor:2000, sc:2, scSeite:2, sc2:50, s:1400, ausgabe:'einzel'});
+  const t = fSchrittNeu(p, 'tascheR', 5, 0); Object.assign(t, {l1:40, l2:24, r:5, dreh:0, lage:0, tiefe:-8, zust:8, umfang:0, aufSeite:0.3, aufTiefe:0.2, zustSchl:0, ueberl:1, eintauch:1, f:600, fTief:200, fSchl:600, s:3000, ausgabe:'einzel'});
+  p.schritte = [pl, t];
+  return p;
+}
 var F_DEMOS = [
   {id:'flansch', name:'Flanschplatte (Lochkreis + M8-Ecken)', lade:fDemoFlansch},
   {id:'leiste',  name:'Leiste (Tieflochbohren + Reiben)',    lade:fDemoLeiste},
   {id:'muster',  name:'Musterzyklen 220/221 (Gewinde GS)',   lade:fDemoMusterzyklen},
   {id:'taschen', name:'Taschen, Nuten, Zapfen (251-257)',    lade:fDemoTaschen},
   {id:'bohren2', name:'Planfraesen 232 + Bohrzyklen 202/204/205/208/209/241', lade:fDemoBohren2},
-  {id:'einzel',  name:'Einzelsaetze: Leiste als eigene Bahn ohne Zyklen (eine Bohrung je Schritt)', lade:fDemoEinzel}
+  {id:'einzel',  name:'Einzelsaetze: Leiste als eigene Bahn ohne Zyklen (eine Bohrung je Schritt)', lade:fDemoEinzel},
+  {id:'formen',  name:'Einzelsaetze: Kreistasche, Nut, Kreiszapfen als eigene Bahn', lade:fDemoFormenEinzel},
+  {id:'plan',    name:'Einzelsaetze: Planfraesen + Rechtecktasche mit Helix', lade:fDemoPlanEinzel}
 ];
 
 // Merkmale der Fraesausgabe fuer die NC-Ansicht: Status je Zyklusfamilie.
@@ -4346,6 +4722,7 @@ function fMerkmale(profilId){
     z('muster220',  'Lochkreis als Zyklus 220 (Option je Muster; Q246 bei Q247 ungleich 0 ohne Bedeutung)'),
     z('muster221',  'Reihe/Gitter als Zyklus 221 (Option je Muster)'),
     {t:'Einzelsaetze statt Zyklus (Paket C, je Schritt waehlbar): Zentrieren, Bohren, Tieflochbohren 203/205, Reiben, Gewinde mit Ausgleichsfutter, Ausdrehen ohne Freifahren als eigene Bahn nach dem Zyklusablauf des Handbuchs — L-Saetze mit FMAX/F, Verweilzeit als Zyklus 9, Drehrichtung M4/M3; DZ6 am Programmierplatz durchgelaufen (12.09.2026, 91 Saetze — der Demo-Wandler nimmt hoechstens 100)', s:'pgst'},
+    {t:'Formen als eigene Bahn (Paket C2): Rechteck-/Kreistasche, Nut, runde Nut von innen nach aussen (Ringe, Stepover hoechstens Q370 x Werkzeugradius), Zapfen von aussen nach innen, Eintauchen senkrecht/Helix (CP IPA IZ)/pendelnd, Schlichten Boden und Seite, Planfraesen als Maeander; Kreisbogen als CC + C mit DR; DZ7 (Kreistasche, Nut, Kreiszapfen) und DZ8 (Planfraesen, Rechtecktasche mit Helix) am Programmierplatz durchgelaufen (13.09.2026)', s:'pgst'},
     {t:'Programmrahmen: BEGIN/END PGM, BLK FORM 0.1/0.2, TOOL CALL n Z S, M13/M3, M9, M2, Kommentarsaetze, ~-Fortsetzung, CR LF, Name = Dateiname', s:'pgst'},
     {t:'Werkzeugtabelle im TOOL.T-Stil: Import der ASCII-TOOL.T (Spaltenstarts aus der Kopfzeile, T0 und leere Plaetze uebersprungen; gelesen: die Tabelle des Programmierplatzes mit 49 Spalten) und Export als TOOL.T im Layout 606 42x — der Export lief am Programmierplatz durch ascbin/binasc und kam mit R, NAME, TYP zurueck', s:'pgst'},
     {t:'Weg in die TNC: .H-Dateien nur ueber die TNC-Dateiverwaltung (USB) oder TNCremo einlesen — die Steuerung wandelt sie dabei ins Binaerformat; eine per Explorer in ein TNC-Laufwerk kopierte Datei quittiert sie mit "Dateiformat geaendert"', s:'pgst'},
@@ -4583,7 +4960,7 @@ function fArbeitsplanRender(){
          '<button class="ap-edit" data-es="' + i + '">✎</button><button class="ap-del" data-ds="' + i + '">✕</button></div>';
   });
   if(!fProg.schritte.length && !fProg.muster.length){
-    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen sechs Testvorlagen.</div>';
+    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen acht Testvorlagen.</div>';
   }
   body.innerHTML = h;
 }
@@ -5362,6 +5739,8 @@ function fProgListe(){
   on('btnDemoMuster', ()=>{ fProgrammSetzen(fDemoMusterzyklen(), 'DZ3 geladen: Gitter als Zyklus 221, Lochkreis als Zyklus 220, Gewinde GS 207.'); maskZu('maskProgramme'); });
   on('btnDemoTaschen', ()=>{ fProgrammSetzen(fDemoTaschen(), 'DZ4 geladen: Rechteck- und Kreistasche, Nut, runde Nut, Rechteck- und Kreiszapfen (Zyklen 251-257).'); maskZu('maskProgramme'); });
   on('btnDemoBohren2', ()=>{ fProgrammSetzen(fDemoBohren2(), 'DZ5 geladen: Planfraesen 232, Bohren 200, Gewinde Spanbruch 209, Tiefbohren 205, Bohrfraesen 208, Ausdrehen 202, Rueckwaerts-Senken 204, Einlippen 241.'); maskZu('maskProgramme'); });
+  on('btnDemoFormen', ()=>{ fProgrammSetzen(fDemoFormenEinzel(), 'DZ7 geladen: Kreistasche, Nut und Kreiszapfen als eigene Bahn (Einzelsaetze mit Kreisboegen).'); maskZu('maskProgramme'); });
+  on('btnDemoPlan', ()=>{ fProgrammSetzen(fDemoPlanEinzel(), 'DZ8 geladen: Planfraesen als Maeander und Rechtecktasche mit Helix-Eintauchen als Einzelsaetze.'); maskZu('maskProgramme'); });
   on('btnDemoEinzel', ()=>{ fProgrammSetzen(fDemoEinzel(), 'DZ6 geladen: die Leiste als Einzelsaetze — Zentrieren, Tieflochbohren mit Spanbruch, Bohren, Reiben als eigene Bahn ohne Zyklus, eine Bohrung je Schritt.'); maskZu('maskProgramme'); });
   on('btnCloseProgs', ()=>maskZu('maskProgramme'));
 }
