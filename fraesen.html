@@ -2492,13 +2492,14 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <button class="gcbtn" id="btnSimNeu" title="Rohteil neu, von vorn">↺ Neu</button>
           <label style="font-size:11.5px;display:flex;align-items:center;gap:4px;">Tempo <select id="simTempo" class="tool-select" style="width:auto;min-width:0;"><option value="1">1×</option><option value="5" selected>5×</option><option value="25">25×</option><option value="max">max</option></select></label>
           <span style="display:inline-flex;gap:2px;"><button class="gcbtn" id="btnSimAnsicht2D" title="Draufsicht">2D</button><button class="gcbtn primary" id="btnSimAnsicht3D" title="3D-Ansicht: ziehen = drehen, Rad = Zoom, Doppelklick = Ausgangslage">3D</button></span>
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;"><input type="checkbox" id="simKanten"> Rohteilkanten</label>
           <input type="range" id="simPos" min="0" max="1000" value="0" style="flex:1 1 120px;min-width:80px;" title="Zeitachse">
         </div>
         <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
           <canvas id="simCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;"></canvas>
           <canvas id="simGl" style="width:100%;flex:1 1 auto;min-height:260px;display:none;border:1px solid var(--line);border-radius:4px;background:#e9edf1;touch-action:none;cursor:grab;"></canvas>
           <div class="small-hint" id="simHinweise" style="flex:0 0 auto;max-height:18vh;overflow-y:auto;"></div>
-          <div class="small-hint" style="flex:0 0 auto;">3D: ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage; von unten gesehen zeigt sich die Senkung des Rückwärts-Senkens. 2D-Draufsicht: unberührt blaugrau, Abtrag je tiefer je dunkler, Senkung von unten violett. Werkzeug orange mit Bohrerspitze, Vorschub grün, Eilgang rot gestrichelt, Kollision = rotes Kreuz (Eilgang durch stehendes Material). Zeit aus Vorschubweg / F, Eilgang mit 6 m/min.</div>
+          <div class="small-hint" style="flex:0 0 auto;">3D: ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage; das Rohteil ist undurchsichtig, seine Kanten zeichnet nur der Haken Rohteilkanten; von unten gesehen zeigt sich die Senkung des Rückwärts-Senkens. 2D-Draufsicht: unberührt blaugrau, Abtrag je tiefer je dunkler, Senkung von unten violett. Werkzeug orange mit Bohrerspitze, Vorschub grün, Eilgang rot gestrichelt, Kollision = rotes Kreuz (Eilgang durch stehendes Material). Zeit aus Vorschubweg / F, Eilgang mit 6 m/min.</div>
         </div>
       </div>
 
@@ -2580,6 +2581,8 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <div class="mrow"><button class="gcbtn" id="btnDemoPlan" style="width:100%;padding:10px;">DZ8 Einzels&auml;tze: Planfr&auml;sen + Rechtecktasche mit Helix</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoKontur" style="width:100%;padding:10px;">DZ9 Konturzug: Insel als Zyklus 14/25 und als eigene Bahn</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoKonturFormen" style="width:100%;padding:10px;">DZ10 Konturzug: Rundung, Fase, tangentialer Bogen, Vollkreis</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoBohrfraes" style="width:100%;padding:10px;">DZ11 Einzels&auml;tze: Bohrfr&auml;sen 208 und Einlippen-Bohren 241</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoSL" style="width:100%;padding:10px;">DZ12 SL-Zyklen 20&ndash;24: Konturtasche mit Insel</button></div>
             </div>
           </div>
           <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
@@ -2883,6 +2886,22 @@ Radius h&ouml;chstens Werkzeugradius) oder pendelnd auf der L&auml;ngsachse; ohn
 Planfr&auml;sen: M&auml;ander in Zeilen entlang LX, Zeilenabstand h&ouml;chstens &Uuml;berlappung &times; Werkzeugradius, das Werkzeug f&auml;hrt an beiden
 Enden ganz von der Fl&auml;che (Strategie 0 zus&auml;tzlich um SC seitlich), Strategie 2 zeilenweise mit R&uuml;cklauf im Eilgang auf SC; Tiefen in
 Schritten DZ, bei UZ &gt; 0 der letzte Schnitt mit FS. Kreisb&ouml;gen stehen als <code>CC</code> + <code>C X Y DR&plusmn; R0 F</code>.</dd>
+<dt id="ba-fk06c-sl">SL-Zyklen 20&ndash;24 (Konturtasche mit Inseln)</dt><dd>Die Softkey-Gruppe <b>Kontur</b> f&uuml;hrt seit dem 13.09.2026 zwei weitere Schritte. <b>SL R&auml;umen</b> schreibt den
+Zyklus&nbsp;14 mit der <b>Tasche</b> und allen gew&auml;hlten <b>Inseln</b> (h&ouml;chstens elf &mdash; die Steuerung nimmt zw&ouml;lf Teilkonturen), danach <b>20 KONTUR-DATEN</b> mit den
+gemeinsamen Werten (Z1, Bahn&uuml;berlappung, UXY, UZ, Z0, SC, sichere H&ouml;he, Rundungsradius an Innenecken, Fr&auml;sart), <b>22 R&AUML;UMEN</b> und je nach Bearbeitungsumfang
+<b>23 SCHLICHTEN TIEFE</b> und <b>24 SCHLICHTEN SEITE</b> &mdash; jeder Block mit eigenem <code>CYCL CALL</code>. <b>SL Vorbohren</b> schreibt 14&nbsp;+&nbsp;20&nbsp;+&nbsp;<b>21 VORBOHREN</b>;
+dort ist <b>T Ausr&auml;um-Werkzeug</b> der Fr&auml;ser, der sp&auml;ter r&auml;umt &mdash; die Steuerung setzt die Bohrungen genau an dessen Eintauchpunkte.
+Die Werkzeugseite braucht man nicht einzugeben: die Tasche wird innen umlaufen, jede Insel au&szlig;en (Handbuch Kap.&nbsp;7.1); die App schreibt das RL/RR in die Unterprogramme.</dd>
+<dd>Als <b>Einzels&auml;tze</b> f&auml;hrt die App eine eigene, ehrlich andere Strategie: zeilenweise in X (Zeilenabstand h&ouml;chstens Bahn&uuml;berlappung &times; Werkzeugradius) im
+Zickzack, danach ein Umlauf am Taschenrand und um jede Insel; zwischen zwei Abschnitten f&auml;hrt sie im Vorschub, wenn die Verbindung frei ist, sonst hebt sie auf SC ab und
+taucht senkrecht mit FZ neu ein. Der Zyklus&nbsp;22 der Steuerung r&auml;umt <i>konturparallel</i> &mdash; das Ergebnis am Rand ist dasselbe, die Sp&auml;ne fallen anders. Vorbohren
+als Einzels&auml;tze ist eine Bohrleiter an genau diesen Eintauchpunkten.</dd>
+<dt id="ba-fk06c-einzel208">Bohrfr&auml;sen 208 und Einlippen-Bohren 241 als Einzels&auml;tze</dt><dd>Beide Familien haben seit dem 13.09.2026 die Wahl <b>NC-Ausgabe:
+Einzels&auml;tze</b>. Der <b>208</b> f&auml;hrt den Handbuch-Ablauf: Rundungskreis vom Mittelpunkt auf den Helixradius, Schraubenlinie mit der Zustellung je Umlauf bis zur Tiefe,
+Vollkreis am Grund, zur&uuml;ck zur Mitte. Die Schraubenlinie steht in St&uuml;cken von h&ouml;chstens acht Uml&auml;ufen (<code>CP IPA</code>) &mdash; geometrisch dieselbe Bahn, aber
+sicher lesbar. Der <b>241</b> schaltet wie der Zyklus: Drehrichtung und Drehzahl Ein-/Ausfahren beim Anfahren, Bohrdrehzahl und K&uuml;hlung am Bohrsatz, K&uuml;hlung aus und
+Drehzahl zur&uuml;ck am R&uuml;ckzug. Die Drehzahlwechsel stehen als eigener <code>TOOL CALL S</code>-Satz (Werkzeug-Nummer und Spindelachse werden im Dialog mit NO&nbsp;ENT
+&uuml;bergangen), die M-Worte am jeweiligen Fahrsatz.</dd>
 <dt id="ba-fk06c-kontur">Konturzug als eigene Bahn</dt><dd>Der Schritt <b>Konturzug</b> (Softkey-Gruppe Kontur) f&auml;hrt eine Kontur aus Kap.&nbsp;5b: als
 <b>Steuerungszyklus</b> schreibt die App <code>CYCL DEF 14.0 KONTUR</code>, <code>14.1 KONTURLABEL n</code>, <code>CYCL DEF 25 KONTUR-ZUG</code>
 (Q1 Tiefe, Q3 Aufma&szlig; Seite, Q5 Z0, Q7 sichere H&ouml;he = Z0 + SC2, Q10 Zustellung, Q11 FZ, Q12 F, Q15 Fr&auml;sart) und <code>CYCL CALL</code>; die Kontur
@@ -2923,6 +2942,9 @@ Ausdrehen 202 mit Freifahren, R&uuml;ckw&auml;rts-Senken 204, Bohrfr&auml;sen 20
 R&uuml;ckz&uuml;ge, Helix, Exzenter-Versatz, Freifahren 0,2&nbsp;mm) &mdash; nach dem Buch nachgebaut, nicht die Steuerung selbst. Beim R&uuml;ckw&auml;rts-Senken ist das Durchfahren
 ohne vorgebohrte Bohrung eine Kollision. Helix und Pendeln ohne ANGLE laufen senkrecht. Nicht dargestellt: Halter und Spannmittel. Der Programm-Test der Steuerung bleibt
 die Referenz vor dem ersten Lauf.</p>
+<p id="ba-fk06d-kanten"><b>Rohteilkanten:</b> Das Rohteil ist in der 3D-Ansicht <b>undurchsichtig</b> &mdash; was hinter dem Bauteil liegt, sieht man nicht. Das ist Absicht: durchscheinende
+R&uuml;ckkanten laufen quer durch Werkzeug und Bahn und verf&auml;lschen die Konturen der Elemente, die sich davor bewegen. Wer die Umrisse des Rohteils trotzdem braucht, setzt
+den Haken <b>Rohteilkanten</b> neben den Kn&ouml;pfen 2D/3D; die Kanten werden dann gezeichnet, bleiben aber hinter dem Material verdeckt (kein Durchsehen). Der Haken wird gemerkt.</p>
 <h2 id="ba-fk07">7 &nbsp;NC-Ausgabe und Weg zur Maschine</h2>
 <p>Aufbau: <code>BEGIN PGM</code>, zwei <code>BLK FORM</code>-S&auml;tze, Kommentar, je Schritt <code>TOOL CALL</code>,
 <code>L Z+.. R0 FMAX M13</code>, <code>CYCL DEF</code> mit den Q-Zeilen, <code>CALL LBL n</code> (oder Musterzyklus),
@@ -2939,12 +2961,12 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 
 <h2 id="ba-fk08">8 &nbsp;Was fehlt (ehrlich)</h2>
 <ul>
-<li>SL-Zyklen 20&ndash;24 (Konturtasche mit Inseln, Vorbohren, R&auml;umen) &mdash; der Konturzug 14/25 und der XY-Kontureditor sind seit dem 13.09.2026 da (Kap.&nbsp;5b, 6c). Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
+<li>Gewindefr&auml;sen (262&ndash;267) und Zylindermantel (27/28/29) &mdash; die SL-Zyklen 20&ndash;24 mit Tasche und Inseln sind seit dem 13.09.2026 da (Kap.&nbsp;6c), ebenso der Konturzug 14/25 mit XY-Kontureditor (Kap.&nbsp;5b). Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
 <li>Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39, Abzeilen 230/231/233 &mdash; in dieser Reihenfolge danach.</li>
 <li>Eigene Bahnlogik: Bohrfamilie, Taschen, Nuten, Zapfen, Planfr&auml;sen und Konturzug schreiben seit dem 12./13.09.2026 Einzels&auml;tze (Kap.&nbsp;6c) &mdash; darauf der Siemens-Post.</li>
 <li>DXF-Import: gebaut (Kap.&nbsp;5b), aber nur an handgeschriebenen DXF-Dateien gepr&uuml;ft &mdash; echte CAD-Exporte von Daniel fehlen noch als Fixtures; Bema&szlig;ung, Bl&ouml;cke und Ellipsen liest er nicht.</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
-<li>Simulation (Kap.&nbsp;6d): 3D und Draufsicht, Bohrerspitze, Handbuch-Abl&auml;ufe der Zyklen ohne Einzels&auml;tze &mdash; keine Halter/Spannmittel (bewusst), keine SL-Zyklen.</li>
+<li>Simulation (Kap.&nbsp;6d): 3D und Draufsicht, Bohrerspitze, Handbuch-Abl&auml;ufe der Zyklen ohne Einzels&auml;tze, SL-Zyklen &uuml;ber die eigene Zeilenbahn &mdash; keine Halter/Spannmittel (bewusst).</li>
 <li>Sinumerik 840D powerline als zweites Profil &mdash; nach den MPF-Dateien vom Schwager.</li>
 </ul>
     </div></div>
@@ -3128,6 +3150,7 @@ var F_PROFILE = {
       // durchgelaufen (13.09.2026, 0:53 min, 0 ERROR im Wandler, Rueckexport =
       // App-Ausgabe).
       konturzug:'pgst',
+      slRaeumen:'pgst', slVorbohren:'pgst',
       // Paket 3: 12.09.2026 abends mit DZ5 im Programm-Test durchgelaufen
       // (5:01 min, alle acht Schritte in der Grafik). Der erste Lauf brach
       // beim 241 mit "Falsche Drehzahl" ab: Q427 25 aus dem Handbuchbeispiel
@@ -3197,7 +3220,13 @@ var F_Q = {
   // Paket C3 (13.09.2026): Konturzug 25 (Beispielsaetze 670 388-12 S. 208 und 223)
   Q1:'FRAESTIEFE',           Q3:'AUFMASS SEITE',          Q5:'KOOR. OBERFLAECHE',
   Q7:'SICHERE HOEHE',        Q10:'ZUSTELL-TIEFE',         Q11:'VORSCHUB TIEFENZ.',
-  Q12:'VORSCHUB FRAESEN',    Q15:'FRAESART'
+  Q12:'VORSCHUB FRAESEN',    Q15:'FRAESART',
+  // Paket D3 (13.09.2026): SL-Zyklen 20-24, Beispielsaetze 670 388-12
+  // S. 195 (20), 197 (21), 200 (22), 202 (23), 204 (24)
+  Q2:'BAHN-UEBERLAPPUNG',    Q4:'AUFMASS TIEFE',          Q6:'SICHERHEITS-ABST.',
+  Q8:'RUNDUNGSRADIUS',       Q9:'DREHSINN',               Q13:'AUSRAEUM-WERKZEUG',
+  Q14:'AUFMASS SEITE',       Q18:'VORRAEUM-WERKZEUG',     Q19:'VORSCHUB PENDELN',
+  Q401:'VORSCHUBREDUZIERUNG', Q404:'NACHRAEUMSTRATEGIE'
 };
 
 // wort = Klartext fuer Meldungen, kurz = Arbeitsplanzeile (die lange Form
@@ -3274,10 +3303,22 @@ var F_ZYKLEN = {
   // Paket C3: Konturzug 25 auf einer XY-Kontur der App (Zyklus 14 KONTUR +
   // 25 KONTUR-ZUG + CYCL CALL, Kontur als LBL mit RL/RR). Q-Liste S. 208.
   konturzug: {nr:25, titel:'KONTUR-ZUG', wort:'Konturzug (Kontur fraesen)', kurz:'Konturzug', kontur:true,
-    q:['Q1','Q3','Q5','Q7','Q10','Q11','Q12','Q15'], qSigned:{Q1:1, Q3:1, Q5:1, Q7:1, Q15:1}}
+    q:['Q1','Q3','Q5','Q7','Q10','Q11','Q12','Q15'], qSigned:{Q1:1, Q3:1, Q5:1, Q7:1, Q15:1}},
+  // Paket D3: SL-Zyklen. Anders als jeder andere Schritt schreiben diese
+  // beiden MEHRERE Zyklusbloecke (fSlDefs): der 20 traegt die gemeinsamen
+  // Bearbeitungsdaten, danach kommt je nach Familie und Bearbeitungsumfang
+  // der 21 bzw. 22/23/24, jeder mit eigenem CYCL CALL (Schema S. 186).
+  // Die q-Liste hier ist die Vereinigung aller Q-Worte, die der Schritt
+  // schreibt — daran haengen der Q-Zusatz in der Maske und Pruefung 6a.
+  slVorbohren:{nr:21, titel:'VORBOHREN', wort:'SL Vorbohren (Konturtasche)', kurz:'SL Vorbohren', kontur:true, sl:true,
+    q:['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10','Q11','Q13'],
+    qSigned:{Q1:1, Q3:1, Q4:1, Q5:1, Q7:1, Q9:1, Q10:1}},
+  slRaeumen:  {nr:22, titel:'RAEUMEN', wort:'SL Raeumen (Konturtasche mit Inseln)', kurz:'SL Raeumen', kontur:true, sl:true,
+    q:['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10','Q11','Q12','Q14','Q18','Q19','Q208','Q401','Q404'],
+    qSigned:{Q1:1, Q3:1, Q4:1, Q5:1, Q7:1, Q9:1, Q10:1, Q14:1}}
 };
 var F_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen',
-  'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen','konturzug'];
+  'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen','konturzug','slVorbohren','slRaeumen'];
 var F_FRAES_ARTEN = ['tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen'];
 var F_BOHR_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen'];
 
@@ -3306,6 +3347,17 @@ var F_FELDER = {
   // geschlossen: innen (Tasche) / aussen (Insel), offen: links / rechts der
   // gezeichneten Laufrichtung (RL / RR). nurWenn blendet das jeweils andere aus.
   kontur:     {name:'Kontur (XY)', typ:'kontur', ba:'ba-fk05b'},
+  // Paket D3: Inseln der SL-Zyklen — Haekchenliste ueber alle geschlossenen
+  // Konturen des Programms (der Zyklus 14 nimmt 12 Teilkonturen, also
+  // Tasche + hoechstens 11 Inseln).
+  inseln:     {name:'Inseln (Konturen XY)', typ:'konturen', ba:'ba-fk06c-sl'},
+  q8:         {name:'R Rundungsradius an Innenecken', einheit:'mm', ba:'ba-fk06c-sl'},
+  q13:        {name:'T Ausräum-Werkzeug (Nummer)', typ:'ganz', ba:'ba-fk06c-sl'},
+  q14:        {name:'UXY Restaufmaß Seite (0 = fertig schlichten)', einheit:'mm', ba:'ba-fk06c-sl'},
+  q18:        {name:'T Vorräum-Werkzeug (0 = nicht vorgeräumt)', typ:'ganz', ba:'ba-fk06c-sl'},
+  fPendel:    {name:'FP Vorschub Pendeln (Eintauchen)', einheit:'mm/min', ba:'ba-fk06c-sl'},
+  q401:       {name:'Vorschubreduzierung an Engstellen', einheit:'%', ba:'ba-fk06c-sl'},
+  q404:       {name:'Nachräumen: Weg zwischen den Bereichen', typ:'wahl', zahlWahl:true, wahl:[['0','auf Tiefe an der Kontur entlang'],['1','auf SC abheben']], ba:'ba-fk06c-sl'},
   seiteZu:    {name:'Werkzeug zur Kontur', typ:'wahl', wahl:[['innen','innen (Tasche)'],['aussen','außen (Insel)']], nurWenn:(s, p)=>{ const kt = ((p && p.konturen) || [])[s.kontur]; return !kt || !!kt.geschlossen; }, ba:'ba-fk06c-kontur'},
   seiteAuf:   {name:'Werkzeug zur Kontur', typ:'wahl', wahl:[['links','links (RL)'],['rechts','rechts (RR)']], nurWenn:(s, p)=>{ const kt = ((p && p.konturen) || [])[s.kontur]; return !!kt && !kt.geschlossen; }, ba:'ba-fk06c-kontur'},
   s:          {name:'S Drehzahl', einheit:'U/min', ba:'ba-fk06-fs'},
@@ -3391,16 +3443,18 @@ var F_FELDER = {
 // Q224). Felder ohne Eintrag (t, muster, s, kuehl) haben kein Q-Wort.
 var F_FELD_Q = {
   f:['Q207','Q206','Q12'], fTief:['Q206','Q11'], fSchl:['Q385'], fVor:['Q253'], fRueck:['Q208'], fSenk:['Q254'],
-  umfang:['Q215'], fraesart:['Q351','Q15'], sc:['Q200'], sc2:['Q204','Q7'], q203:['Q203','Q5'], tiefe:['Q201','Q1'], zust:['Q202','Q10'],
+  umfang:['Q215'], fraesart:['Q351','Q15','Q9'], sc:['Q200','Q6'], sc2:['Q204','Q7'], q203:['Q203','Q5'], tiefe:['Q201','Q1'], zust:['Q202','Q10'],
   vOben:['Q210'], vUnten:['Q211'], abnahme:['Q212'], spanbrueche:['Q213'], minZust:['Q205'], rzSpan:['Q256'],
   q257:['Q257'], q258:['Q258'], q259:['Q259'], q379:['Q379'], zAuswahl:['Q343'], zDurchm:['Q344'], steigung:['Q239'],
   q403:['Q403'], freifahr:['Q214'], spWinkel:['Q336'], q249:['Q249'], q250:['Q250'], q251:['Q251'], q252:['Q252'],
   vSenk:['Q255'], q334:['Q334'], q335:['Q335'], q342:['Q342'], q426:['Q426'], q427:['Q427'], q428:['Q428'],
   q429:['Q429'], q430:['Q430'], q435:['Q435'], l1:['Q218'], l2:['Q219'], r:['Q220'], dm:['Q223'], dmRoh:['Q222'],
   roh1:['Q424'], roh2:['Q425'], dreh:['Q374','Q224'], lage:['Q367'], teilkreis:['Q375'], xm:['Q216'], ym:['Q217'],
-  start:['Q376'], oeffnung:['Q248'], wschritt:['Q378'], anzahl:['Q377'], aufSeite:['Q368','Q3'], aufTiefe:['Q369'],
-  zustSchl:['Q338'], ueberl:['Q370'], eintauch:['Q366'], strategie:['Q389'], px:['Q225'], py:['Q226'], pz:['Q227'],
-  zEnd:['Q386'], scSeite:['Q357']
+  start:['Q376'], oeffnung:['Q248'], wschritt:['Q378'], anzahl:['Q377'], aufSeite:['Q368','Q3'], aufTiefe:['Q369','Q4'],
+  zustSchl:['Q338'], ueberl:['Q370','Q2'], eintauch:['Q366'], strategie:['Q389'], px:['Q225'], py:['Q226'], pz:['Q227'],
+  zEnd:['Q386'], scSeite:['Q357'],
+  // Paket D3: SL-Zyklen
+  q8:['Q8'], q13:['Q13'], q14:['Q14'], q18:['Q18'], fPendel:['Q19'], q401:['Q401'], q404:['Q404']
 };
 // Feldlisten je Zyklus in Maskenreihenfolge. '#Titel' = Abschnitt,
 // '#!Titel' = aufklappbare Gruppe, die im einfachen Modus verborgen ist
@@ -3423,8 +3477,8 @@ var F_MASKE = {
   ausdrehen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#Freifahren am Grund','freifahr','spWinkel','#!Verweilzeit & Rückzug','vUnten','fRueck']},
   senkenRueck:{felder:['#Werkzeug & Schnittwerte','t','muster','s','kuehl','#Senkung von unten','sc','q249','q250','q251','q252','q203','sc2','#Vorschübe & Verweilzeit','fVor','fSenk','vSenk','#Freifahren','freifahr','spWinkel']},
   tiefUni:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','minZust','q257','rzSpan','q258','q259','#!Verweilzeit & Vorposition','vUnten','q379','fVor']},
-  bohrfraesen:{felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fraesart','kuehl','#Bohrung','sc','tiefe','q335','q342','q334','q203','sc2']},
-  einlippen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','q203','sc2','#Spindel & Kühlung','q426','q427','q428','q429','q430','#!Vorposition, Rückzug & Verweilen','q379','fVor','fRueck','vUnten','q435']},
+  bohrfraesen:{felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fraesart','kuehl','ausgabe','#Bohrung','sc','tiefe','q335','q342','q334','q203','sc2']},
+  einlippen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#Spindel & Kühlung','q426','q427','q428','q429','q430','#!Vorposition, Rückzug & Verweilen','q379','fVor','fRueck','vUnten','q435']},
   tascheR:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','l1','l2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'L 1. Seitenlänge', l2:'W 2. Seitenlänge', lage:'Bezugspunkt der Tasche'},
                feldWahl:{lage:[['0','Mitte'],['1','links unten'],['2','rechts unten'],['3','rechts oben'],['4','links oben']]}},
@@ -3448,6 +3502,14 @@ var F_MASKE = {
   konturzug:  {felder:['#Werkzeug & Schnittwerte','t','kontur','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Kontur','seiteZu','seiteAuf','#Tiefe & Aufmaß','tiefe','zust','aufSeite','zustSchl','#!Sicherheit','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', sc2:'SC2 Sichere Höhe über Z0', zust:'D Zustellung', aufSeite:'UXY Aufmaß Seite (Schlichten holt es)'},
                ohneQ:['umfang','fSchl','zustSchl','sc','seiteZu','seiteAuf']},
+  // Paket D3: SL-Zyklen. Der Raeumschritt schreibt 20 + 22 [+ 23 + 24];
+  // Bearbeitungsumfang, Schlichtvorschub und DS haben kein eigenes Q-Wort
+  // (der 23/24 bekommt sie ueber Q12 und Q10), deshalb ohneQ.
+  slRaeumen:  {felder:['#Werkzeug & Schnittwerte','t','kontur','inseln','umfang','s','f','fTief','fSchl','fPendel','fraesart','kuehl','ausgabe','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','q14','#Bahn','ueberl','q8','q18','q401','q404','#!Sicherheit','sc','q203','sc2','fRueck'],
+               feldText:{kontur:'Tasche (Kontur XY)', f:'F Vorschub Räumen', fTief:'FZ Vorschub Tiefenzustellung', tiefe:'Z1 Frästiefe', zust:'D Zustellung', aufSeite:'UXY Aufmaß Seite', aufTiefe:'UZ Aufmaß Tiefe', zustSchl:'DS Zustellung Schlichten Seite', sc2:'SC2 Sichere Höhe über Z0', fRueck:'F Rückzug (99999 = FMAX)'},
+               ohneQ:['umfang','fSchl','zustSchl']},
+  slVorbohren:{felder:['#Werkzeug & Schnittwerte','t','kontur','inseln','s','fTief','fraesart','kuehl','ausgabe','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','#Bahn','ueberl','q8','q13','#!Sicherheit','sc','q203','sc2'],
+               feldText:{kontur:'Tasche (Kontur XY)', fTief:'FZ Bohrvorschub', tiefe:'Z1 Frästiefe', zust:'D Zustellung', aufSeite:'UXY Aufmaß Seite', aufTiefe:'UZ Aufmaß Tiefe', sc2:'SC2 Sichere Höhe über Z0'}},
   planfraesen:{felder:['#Werkzeug & Schnittwerte','t','s','f','fSchl','fVor','kuehl','ausgabe','#Fläche','strategie','px','pz','zEnd','l1','l2','#Zustellung & Aufmaß','zust','aufTiefe','ueberl','#!Sicherheit','sc','scSeite','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'LX Länge in X (± = Richtung)', l2:'LY Länge in Y (± = Richtung)', zust:'DZ max. Zustellung', ueberl:'max. Überlappung'}}
 };
@@ -3458,7 +3520,7 @@ var F_ZYKLUS_GRUPPEN = [
   {id:'gewinde', name:'Gewinde',           arten:['gewinde','gewindeGS','gewindeSpan']},
   {id:'taschen', name:'Taschen · Zapfen',  arten:['tascheR','tascheK','nut','nutR','zapfenR','zapfenK']},
   {id:'flaechen', name:'Flächen',          arten:['planfraesen']},
-  {id:'kontur',  name:'Kontur',            arten:['konturzug']}
+  {id:'kontur',  name:'Kontur',            arten:['konturzug','slRaeumen','slVorbohren']}
 ];
 // Feldliste eines Zyklus ohne Abschnittsmarken.
 function fZyklusFelder(art){ return ((F_MASKE[art] || {}).felder || []).filter(x => x[0] !== '#'); }
@@ -3782,6 +3844,16 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
     s.typ = 'kontur'; s.muster = -1; s.kontur = (musterIdx == null) ? 0 : musterIdx;
     s.s = t.s || 3000; s.f = t.f || 600;
     Object.assign(s, {umfang:0, fraesart:1, tiefe:-10, zust:5, aufSeite:0, zustSchl:0, fTief:fRund(s.f * 0.3), fSchl:s.f, seiteZu:'aussen', seiteAuf:'links'});
+    if(F_ZYKLEN[art].sl){
+      // Paket D3: die SL-Zyklen fuehren die Tasche als Kontur und die Inseln
+      // als eigene Liste; die Werkzeugseite steht fest (Tasche innen, Insel
+      // aussen) und ist deshalb kein Maskenfeld. Vorgaben nach den
+      // Handbuchbeispielen: Ueberlappung 1, Rueckzug FMAX (99999),
+      // Vorschubreduzierung 100 % (aus), Nachraeumen an der Kontur entlang.
+      s.typ = 'fraesen'; s.inseln = [];
+      Object.assign(s, {umfang:0, tiefe:-10, zust:5, aufSeite:0.2, aufTiefe:0.1, zustSchl:0,
+        ueberl:1, q8:0, q13:0, q14:0, q18:0, fPendel:fRund(s.f * 0.3), fRueck:99999, q401:100, q404:0});
+    }
   }
   // Paket 3: Bohrzyklen 202/204/205/208/209/241 mit den Werten der
   // Handbuchbeispiele als Vorgabe.
@@ -3864,6 +3936,22 @@ function fZyklusWerte(s, tool){
       Q10: (+s.zust > 0) ? +s.zust : Math.abs(tiefe), Q11: (+s.fTief > 0) ? +s.fTief : (+s.f || 0), Q12: +s.f || 0, Q15: (+s.fraesart < 0) ? -1 : 1});
   }
   if(s.art === 'planfraesen'){ w.Q218 = +s.l1 || 0; w.Q219 = +s.l2 || 0; w.Q202 = +s.zust || 0; }
+  // Paket D3: SL-Zyklen. Q7 ist die sichere Hoehe ABSOLUT (Z0 + SC2) wie
+  // beim 25, Q6 der Sicherheitsabstand, Q208 der Rueckzugsvorschub (99999 =
+  // FMAX, so druckt es das Handbuch). Q10s/Q12s sind die Schlichtwerte fuer
+  // die Bloecke 23 und 24 — dort steht dasselbe Q-Wort mit anderem Inhalt.
+  if(F_ZYKLEN[s.art] && F_ZYKLEN[s.art].sl){
+    const sc = Math.max(+s.sc || 0, 0), sc2 = Math.max(+s.sc2 || 0, sc), zu = (+s.zust > 0) ? +s.zust : Math.abs(tiefe);
+    Object.assign(w, {
+      Q1: tiefe, Q2: (+s.ueberl > 0) ? +s.ueberl : 1, Q3: +s.aufSeite || 0, Q4: +s.aufTiefe || 0,
+      Q5: +s.q203 || 0, Q6: sc, Q7: fRund((+s.q203 || 0) + sc2), Q8: +s.q8 || 0,
+      Q9: (+s.fraesart < 0) ? -1 : 1, Q10: zu, Q11: (+s.fTief > 0) ? +s.fTief : (+s.f || 0),
+      Q12: +s.f || 0, Q13: Math.round(+s.q13 || 0), Q14: +s.q14 || 0, Q18: Math.round(+s.q18 || 0),
+      Q19: +s.fPendel || 0, Q208: (+s.fRueck > 0) ? +s.fRueck : 99999,
+      Q401: (+s.q401 > 0) ? +s.q401 : 100, Q404: Math.round(+s.q404 || 0),
+      Q10s: (+s.zustSchl > 0) ? +s.zustSchl : zu, Q12s: (+s.fSchl > 0) ? +s.fSchl : (+s.f || 0)
+    });
+  }
   return w;
 }
 // stand: Software-Stand der Zielsteuerung (F_STAENDE). Der 253 schreibt die
@@ -3948,18 +4036,28 @@ function fMusterZyklusDef(m, s){
 // Daniel sieht im Einzelsatz, was die Maschine tut.
 // Was BEWUSST beim Zyklus bleibt: 207/209 (Synchronspindel — ohne den
 // Zyklus gibt es kein Gewindebohren ohne Ausgleichsfutter), 204 und 202
-// mit Freifahren (Spindel-Orientierung M19 ist maschinenspezifisch),
-// 208 (Helix, kommt mit den Taschenbahnen), 241 (Spindel-/Kuehlmittel-
-// Folge des Einlippenbohrens).
+// mit Freifahren (Spindel-Orientierung M19 ist maschinenspezifisch).
+// Paket D3 (Daniels "auch die Einzelsatz-NC fuer 208 und 241 setzt bitte
+// um"): 208 Bohrfraesen und 241 Einlippen-Bohren fahren ihren
+// Handbuch-Ablauf jetzt auch als Einzelsaetze — der Weg dorthin ist
+// derselbe wie in der Simulation (fBahnSimSonder), denn Helix (208) und
+// Drehzahl-/Kuehlmittelfolge (241) lassen sich im Klartext schreiben:
+// die Schraubenlinie als CP-Satz, der Drehzahlwechsel als TOOL CALL S
+// ohne Werkzeugnummer (Nummer und Spindelachse mit NO ENT uebergangen),
+// die M-Worte am jeweiligen Fahrsatz (hoechstens zwei je Satz).
 // ---------------------------------------------------------------------
 var F_BAHN_ARTEN = ['zentrieren', 'bohren', 'tief', 'tiefUni', 'reiben', 'gewinde', 'ausdrehen',
+  'bohrfraesen', 'einlippen',                                                // Paket D3: Handbuch-Ablauf als Einzelsaetze (fBahnSimSonder)
   'tascheR', 'tascheK', 'nut', 'nutR', 'zapfenR', 'zapfenK', 'planfraesen',   // Paket C2: Formen (fBahnFormen)
-  'konturzug'];                                                              // Paket C3: Konturbahn (fBahnKontur)
+  'konturzug',                                                               // Paket C3: Konturbahn (fBahnKontur)
+  'slRaeumen', 'slVorbohren'];                                               // Paket D3: Zeilenbahn der Konturtasche (fBahnSL)
 function fBahnSchritt(s, tool, prog, punkte){
   const art = s.art, warn = [], B = [];
   const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  if(F_ZYKLEN[art] && F_ZYKLEN[art].sl) return fBahnSL(s, tool, prog);                   // Paket D3 (vor der Kontur-Weiche: die SL-Familien tragen kontur:true)
   if(F_ZYKLEN[art] && F_ZYKLEN[art].kontur) return fBahnKontur(s, tool, prog);           // Paket C3
   if(F_ZYKLEN[art] && F_ZYKLEN[art].fraes) return fBahnFormen(s, tool, prog, punkte);   // Paket C2
+  if(art === 'bohrfraesen' || art === 'einlippen') return fBahnSimSonder(s, tool, prog, punkte);   // Paket D3: Helix bzw. Drehzahlfolge
   if(F_BAHN_ARTEN.indexOf(art) < 0) return nein('fuer ' + ((F_ZYKLEN[art] || {}).wort || art) + ' gibt es noch keine eigene Bahn');
   if(!punkte || !punkte.length) return nein('keine Position');
   const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
@@ -4117,6 +4215,11 @@ function fBahnKlartext(B){
     if(!cc || Math.abs(cc.x - k.cx) > 1e-9 || Math.abs(cc.y - k.cy) > 1e-9){ out.push(k.txt); cc = {x:k.cx, y:k.cy}; }
   };
   B.forEach(m => {
+    // Drehzahlwechsel ohne Werkzeugwechsel: eigener TOOL CALL S-Satz (im
+    // Dialog werden Werkzeug-Nummer und Spindelachse mit NO ENT uebergangen,
+    // Klartext-Handbuch Kap. 5.2) — der 241 wechselt zwischen Ein-/Ausfahr-
+    // und Bohrdrehzahl.
+    if(m.s) out.push('TOOL CALL S' + Math.round(m.s));
     if(m.a === 'eil' || m.a === 'vor'){
       let a = ach(m);
       if(!a){ if(!m.m) return; a = ' Z' + klNum(pos.z == null ? (m.z || 0) : pos.z); }   // nur ein M-Wort: Satz auf der Stelle
@@ -4133,7 +4236,7 @@ function fBahnKurz(B){
   return B.map(m => {
     if(m.a === 'verweil') return 'verweil ' + m.t;
     if(m.a === 'kom') return 'kom';
-    const t = [m.a, m.x != null ? 'X' + m.x : '', m.y != null ? 'Y' + m.y : '', m.z != null ? 'Z' + m.z : '', (m.a === 'vor' || m.a === 'kreis') ? 'F' + m.f : '', m.m ? 'M' + m.m : ''].filter(Boolean);
+    const t = [m.a, m.x != null ? 'X' + m.x : '', m.y != null ? 'Y' + m.y : '', m.z != null ? 'Z' + m.z : '', (m.a === 'vor' || m.a === 'kreis') ? 'F' + m.f : '', m.m ? 'M' + m.m : '', m.s ? 'S' + m.s : ''].filter(Boolean);
     return t.join(' ');
   }).join('|');
 }
@@ -4869,6 +4972,253 @@ function fBahnKontur(s, tool, prog){
 }
 
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// SL-ZYKLEN 20-24 (Paket D3, 13.09.2026, Daniels "die SL-Zyklen ... setzt
+// bitte auch um"): Konturtasche aus einer TASCHE (geschlossene XY-Kontur,
+// Werkzeug innen) und bis zu 11 INSELN (geschlossene Konturen, Werkzeug
+// aussen) — die Steuerung setzt sie im Zyklus 14 KONTUR aus den LBL-
+// Unterprogrammen zusammen (Handbuch 670 388-12 Kap. 7.1: "Tasche, wenn Sie
+// die Kontur innen umlaufen, z. B. im Uhrzeigersinn mit RR; Insel, wenn Sie
+// sie aussen umlaufen, z. B. im Uhrzeigersinn mit RL"). Familien:
+//   slVorbohren  Zyklus 20 KONTUR-DATEN + 21 VORBOHREN + CYCL CALL
+//   slRaeumen    Zyklus 20 + 22 RAEUMEN [+ 23 SCHLICHTEN TIEFE + 24
+//                SCHLICHTEN SEITE], je mit CYCL CALL (Schema S. 186)
+// Die Bearbeitungsdaten stehen zentral im Zyklus 20 (Q1 Tiefe, Q2
+// Ueberlappung, Q3/Q4 Aufmass, Q5 Oberflaeche, Q6 SC, Q7 sichere Hoehe, Q8
+// Innen-Rundungsradius, Q9 Drehsinn); 21: Q10 Q11 Q13 (Ausraeum-Werkzeug);
+// 22: Q10 Q11 Q12 Q18 Q19 Q208 Q401 Q404; 23: Q11 Q12 Q208; 24: Q9 Q10 Q11
+// Q12 Q14 (S. 195-204).
+// EIGENE BAHN (Einzelsaetze / Simulation, fBahnSL): das Werkzeug darf nur
+// dort stehen, wo seine Mitte innerhalb der um d = Werkzeugradius + UXY nach
+// INNEN versetzten Tasche und ausserhalb der um d nach AUSSEN versetzten
+// Inseln liegt (fKonturVersatz wie beim Konturzug, Boegen alle 5 Grad
+// abgetastet). Geraeumt wird ZEILENWEISE in X (Zeilenabstand hoechstens
+// Ueberlappung x Werkzeugradius, Zeilen liegen zwischen den Randlinien —
+// den Rand nimmt danach ein Umlauf auf der versetzten Tasche und um jede
+// Insel), je Zeile die Abschnitte zwischen den Schnittpunkten mit allen
+// Randlinien, deren Mitte im Bereich liegt (dadurch zerfaellt die Tasche an
+// einer Insel von selbst in zwei Abschnitte). Zwischen zwei Abschnitten
+// faehrt das Werkzeug im Vorschub, wenn die Verbindung ganz im Bereich
+// liegt, sonst hebt es auf SC ab, eilt und taucht neu ein (senkrecht mit
+// FZ). Tiefen in Zustellungen bis Tiefe + UZ; Schlichten Tiefe = dieselben
+// Zeilen auf Endtiefe mit FS, Schlichten Seite = Umlaeufe im Versatz
+// Werkzeugradius (+ Q14 Rest) mit FS. Der Zyklus 22 raeumt konturparallel
+// von innen nach aussen — die eigene Bahn ist eine ANDERE, ehrliche
+// Strategie mit demselben Ergebnis am Rand; die TNC-Bahn ist nur im
+// Programm-Test zu sehen. Vorbohren (21): die Einstichpunkte sind die
+// Eintauchpunkte des Raeumens (Handbuch S. 196: "zugleich die Startpunkte
+// fuers Raeumen"), gerechnet mit dem Radius des Ausraeum-Werkzeugs Q13.
+// ---------------------------------------------------------------------
+// Teilkonturen des Schritts mit Segmenten und Werkzeugseite (Tasche innen,
+// Inseln aussen); Fehler als Text.
+function fSlKonturen(s, prog){
+  const kts = prog.konturen || [], out = {tasche:null, inseln:[], fehler:[]};
+  const kt = kts[s.kontur];
+  if(!kt) out.fehler.push('keine Tasche gewaehlt');
+  else if(!kt.geschlossen) out.fehler.push('Tasche "' + kt.name + '" ist nicht geschlossen');
+  else {
+    const K = fKonturSegmente(kt);
+    if(K.fehler.length) out.fehler.push('Tasche "' + kt.name + '": ' + K.fehler[0]);
+    else if(!K.seg.length) out.fehler.push('Tasche "' + kt.name + '" hat kein Element');
+    else out.tasche = {kt:kt, idx:s.kontur, seg:K.seg, seite:fKonturSeite({seiteZu:'innen'}, kt, K.seg)};
+  }
+  (s.inseln || []).forEach(i => {
+    const ik = kts[i]; if(!ik) return;
+    if(i === s.kontur){ out.fehler.push('Insel "' + ik.name + '" ist zugleich die Tasche'); return; }
+    if(!ik.geschlossen){ out.fehler.push('Insel "' + ik.name + '" ist nicht geschlossen'); return; }
+    const K = fKonturSegmente(ik);
+    if(K.fehler.length){ out.fehler.push('Insel "' + ik.name + '": ' + K.fehler[0]); return; }
+    if(!K.seg.length) return;
+    out.inseln.push({kt:ik, idx:i, seg:K.seg, seite:fKonturSeite({seiteZu:'aussen'}, ik, K.seg)});
+  });
+  if(out.inseln.length > 11) out.fehler.push('hoechstens 11 Inseln (Zyklus 14 nimmt 12 Teilkonturen)');
+  return out;
+}
+// Geschlossenes Polygon (Stuetzpunkte) aus einer Segmentliste.
+function fSlPolygon(seg){ const p = []; seg.forEach(s => { const q = fSegPunkte(s); for(let i = 0; i < q.length - 1; i++) p.push({x:q[i].x, y:q[i].y}); }); return p; }
+// Punkt im Polygon (Strahlprobe).
+function fSlInnen(p, poly){
+  let c = false;
+  for(let i = 0, j = poly.length - 1; i < poly.length; j = i++){
+    const a = poly[i], b = poly[j];
+    if(((a.y > p.y) !== (b.y > p.y)) && (p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x)) c = !c;
+  }
+  return c;
+}
+// Schnittpunkte einer waagerechten Zeile y mit einem Polygon (X-Werte).
+function fSlSchnitte(y, poly){
+  const xs = [];
+  for(let i = 0, j = poly.length - 1; i < poly.length; j = i++){ const a = poly[i], b = poly[j]; if((a.y > y) !== (b.y > y)) xs.push(a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y)); }
+  return xs;
+}
+// Bereich der Werkzeugmitte fuer den Versatz d: versetzte Tasche (innen)
+// und versetzte Inseln (aussen), je als Segmente und Polygon.
+function fSlBereich(SL, d){
+  const V = fKonturVersatz(SL.tasche.seg, d, SL.tasche.seite, true);
+  if(!V.ok) return {ok:false, grund:'Tasche "' + SL.tasche.kt.name + '": ' + V.grund};
+  const R = {ok:true, tasche:{seg:V.seg, poly:fSlPolygon(V.seg)}, inseln:[]};
+  for(const I of SL.inseln){
+    const W = fKonturVersatz(I.seg, d, I.seite, true);
+    if(!W.ok) return {ok:false, grund:'Insel "' + I.kt.name + '": ' + W.grund};
+    R.inseln.push({seg:W.seg, poly:fSlPolygon(W.seg), kt:I.kt});
+  }
+  R.innen = (p) => fSlInnen(p, R.tasche.poly) && !R.inseln.some(I => fSlInnen(p, I.poly));
+  // Laeuft die Verbindung von a nach b ganz im Bereich? Punkte GENAU auf
+  // einer versetzten Randlinie sind fuer die Strahlprobe mehrdeutig (die
+  // Rundung entscheidet sie mal so, mal so) — und genau dort liegen die
+  // Zeilenenden einer Rechtecktasche. Deshalb wird die Strecke um 0,02 mm
+  // nach LINKS und nach RECHTS versetzt geprueft: laeuft eine der beiden
+  // Spuren ganz im Bereich, liegt die Verbindung hoechstens AUF der
+  // Randlinie und ist frei. Eine Strecke ueber eine Insel oder aus der
+  // Tasche heraus faellt bei beiden Spuren durch.
+  R.strecke = (a, b) => {
+    const L = Math.hypot(b.x - a.x, b.y - a.y);
+    if(L < 1e-9) return R.innen(a);
+    const nx = -(b.y - a.y) / L, ny = (b.x - a.x) / L;
+    const n = Math.max(2, Math.ceil(L / Math.max(0.5, d / 4)));
+    // Die Endpunkte sind Bahnpunkte und damit erreichbar; sie liegen aber oft
+    // in einer ECKE des Bereichs, wo BEIDE Spuren herausfallen wuerden.
+    // Geprueft wird deshalb die um 0,05 mm eingerueckte Strecke.
+    const ein = Math.min(0.4, 0.05 / L), t0 = ein, t1 = 1 - ein;
+    const spur = (e) => { for(let i = 0; i <= n; i++){ const t = t0 + (t1 - t0) * i / n, p = {x:a.x + (b.x - a.x) * t + nx * e, y:a.y + (b.y - a.y) * t + ny * e}; if(!R.innen(p)) return false; } return true; };
+    return spur(0.02) || spur(-0.02);
+  };
+  return R;
+}
+// Zeilen des Raeumens: je Zeile die Abschnitte [xa, xb] im Bereich.
+function fSlZeilen(R, k){
+  let ymin = Infinity, ymax = -Infinity; R.tasche.poly.forEach(p => { ymin = Math.min(ymin, p.y); ymax = Math.max(ymax, p.y); });
+  const n = Math.max(1, Math.ceil((ymax - ymin) / Math.max(k, 0.01))), st = (ymax - ymin) / n, zeilen = [];
+  for(let i = 1; i < n; i++){
+    const y = fRund(ymin + i * st);
+    let xs = fSlSchnitte(y, R.tasche.poly); R.inseln.forEach(I => { xs = xs.concat(fSlSchnitte(y, I.poly)); });
+    xs.sort((a, b) => a - b);
+    const abs = [];
+    for(let j = 0; j + 1 < xs.length; j++){ const xa = xs[j], xb = xs[j + 1]; if(xb - xa < 1e-6) continue; if(R.innen({x:(xa + xb) / 2, y:y})) abs.push({xa:fRund(xa), xb:fRund(xb)}); }
+    if(abs.length) zeilen.push({y:y, abs:abs});
+  }
+  return zeilen;
+}
+// Die Bahn eines SL-Schritts (Raeumen mit Schlichten oder Vorbohren).
+function fBahnSL(s, tool, prog){
+  const warn = [], B = [];
+  const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  const SL = fSlKonturen(s, prog);
+  if(SL.fehler.length) return nein(SL.fehler[0]);
+  const vorbohren = (s.art === 'slVorbohren');
+  // Raeumwerkzeug: beim Vorbohren das Ausraeum-Werkzeug Q13 (die Punkte gehoeren zu SEINEM Radius)
+  let rw = tool;
+  if(vorbohren){ rw = (prog.werkzeuge || []).find(w => w.nr === Math.round(+s.q13 || 0)); if(!rw || !(+rw.d > 0)) return nein('Ausraeum-Werkzeug Q13 (T' + (s.q13 || '?') + ') fehlt in der Tabelle'); }
+  const rt = (rw && +rw.d > 0) ? +rw.d / 2 : 0;
+  if(!(rt > 0)) return nein('Werkzeug-Durchmesser fehlt (Werkzeugtabelle)');
+  const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
+  if(!(sc > 0)) return nein('Sicherheitsabstand fehlt');
+  const zSC = fRund(z0 + sc), zSC2 = fRund(z0 + sc2);
+  const tiefe = +s.tiefe || 0; if(!(tiefe < 0)) return nein('Tiefe fehlt');
+  const zT = fRund(z0 + tiefe);
+  const uxy = Math.max(0, +s.aufSeite || 0), uz = Math.max(0, +s.aufTiefe || 0), umfang = Math.round(+s.umfang || 0);
+  const ue = (+s.ueberl > 0) ? Math.min(+s.ueberl, 1.9999) : 1, k = ue * rt;
+  const f = +s.f || 0, fZ = (+s.fTief > 0) ? +s.fTief : f, fS = (+s.fSchl > 0) ? +s.fSchl : f;
+  const R = fSlBereich(SL, rt + uxy); if(!R.ok) return nein(R.grund);
+  const Z = fSlZeilen(R, k);
+  if(!Z.length) return nein('kein Platz fuer das Werkzeug in der Tasche (Versatz ' + fRund(rt + uxy) + ')');
+  const pos = {x:null, y:null, z:null};
+  const gleichLage = (o) => ['x', 'y', 'z'].every(q => o[q] == null || (pos[q] != null && Math.abs(pos[q] - o[q]) < 1e-9));
+  const merk = (o) => { ['x', 'y', 'z'].forEach(q => { if(o[q] != null) pos[q] = o[q]; }); };
+  const eil = (o) => { if(gleichLage(o)) return; B.push(Object.assign({a:'eil'}, o)); merk(o); };
+  const vor = (o) => { if(gleichLage(o)) return; B.push(Object.assign({a:'vor'}, o)); merk(o); };
+  const kreis = (o) => { B.push(Object.assign({a:'kreis'}, o)); merk(o); };
+  const ebenen = (zEnde, schritt) => { const e = []; let z = z0; const st = (schritt > 0) ? schritt : (z0 - zEnde); while(z > zEnde + 1e-9){ z = Math.max(zEnde, fRund(z - st)); e.push(z); } if(!e.length) e.push(zEnde); return e; };
+  const einstiche = [];
+  // hin: zum Punkt p auf Tiefe z — im Vorschub, wenn die Strecke im Bereich liegt, sonst abheben/eilen/eintauchen
+  const hin = (p, z, fXY, Rb) => {
+    if(pos.x != null && pos.z != null && pos.z <= z + 1e-9 && Rb.strecke({x:pos.x, y:pos.y}, p)){ vor({x:p.x, y:p.y, z:z, f:fXY}); return; }
+    if(pos.z != null && pos.z < zSC - 1e-9) eil({z:zSC});
+    eil({x:p.x, y:p.y}); if(pos.z == null || pos.z > zSC + 1e-9) eil({z:zSC});
+    vor({z:z, f:fZ}); einstiche.push({x:p.x, y:p.y});
+  };
+  // Zeilen raeumen auf Tiefe z (Zickzack), danach Randumlaeufe
+  const zeilen = (Rb, zl, z, fXY) => {
+    let richtung = 1;
+    zl.forEach(row => {
+      const abs = richtung > 0 ? row.abs : row.abs.slice().reverse();
+      abs.forEach(a => {
+        const p0 = {x:richtung > 0 ? a.xa : a.xb, y:row.y}, p1 = {x:richtung > 0 ? a.xb : a.xa, y:row.y};
+        hin(p0, z, fXY, Rb); vor({x:p1.x, y:p1.y, z:z, f:fXY});
+      });
+      richtung = -richtung;
+    });
+  };
+  const umlauf = (Rb, z, fXY) => {
+    const alle = [Rb.tasche].concat(Rb.inseln);
+    alle.forEach(T => {
+      const a0 = T.seg[0]; hin({x:fRund(a0.x0), y:fRund(a0.y0)}, z, fXY, Rb);
+      T.seg.forEach(o => { if(o.typ === 'g') vor({x:fRund(o.x1), y:fRund(o.y1), z:z, f:fXY}); else kreis({x:fRund(o.x1), y:fRund(o.y1), z:z, cx:fRund(o.cx), cy:fRund(o.cy), dr:o.dr, f:fXY}); });
+    });
+  };
+  if(vorbohren){
+    // Einstichpunkte = Eintauchpunkte der ersten Ebene des Raeumens; dort bohren (Leiter Q10, F Q11, FMAX heraus)
+    const probe = {}; Object.assign(probe, pos); zeilen(R, Z, fRund(z0 - 1), f); B.length = 0; pos.x = pos.y = pos.z = null;
+    const zust = (+s.zust > 0) ? +s.zust : (z0 - zT);
+    const fB = (+s.fTief > 0) ? +s.fTief : f; if(!(fB > 0)) return nein('Bohrvorschub Q11 fehlt');
+    if(!einstiche.length) return nein('kein Einstichpunkt');
+    einstiche.forEach(p => {
+      eil({x:p.x, y:p.y}); eil({z:zSC});
+      let z = z0; const vorhalte = Math.min(7, (z0 - zT) <= 30 ? 0.6 : (z0 - zT) / 50);
+      while(z > zT + 1e-9){ const zn = Math.max(zT, fRund(z - zust)); if(z < z0 - 1e-9) eil({z:fRund(z + vorhalte)}); vor({z:zn, f:fB}); z = zn; if(z > zT + 1e-9) eil({z:zSC}); }
+      eil({z:zSC});
+    });
+    eil({z:zSC2});
+    warn.push('Vorbohren: ' + einstiche.length + ' Einstichpunkt(e) = Eintauchpunkte des Raeumens mit T' + rw.nr + ' (⌀' + rw.d + '); die TNC rechnet sie im Zyklus 21 selbst.');
+    return {ok:true, bahn:B, warn:warn, zT:zT, punkte:einstiche};
+  }
+  if(!(f > 0)) return nein('Vorschub fehlt');
+  if(umfang !== 2){
+    const zSchrupp = fRund(zT + uz);
+    ebenen(zSchrupp, +s.zust).forEach(z => { zeilen(R, Z, z, f); umlauf(R, z, f); });
+  }
+  if(umfang !== 1){
+    if(umfang === 2) warn.push('Nur Schlichten: die Tasche muss vorgeraeumt sein — die Bahn faehrt gleich auf Tiefe.');
+    if(uz > 0 || umfang === 2){ zeilen(R, Z, zT, fS); umlauf(R, zT, fS); }   // Schlichten Tiefe (23): Boden im Raster auf Endtiefe
+    if(uxy > 0 || umfang === 2){
+      const d2 = rt + Math.max(0, +s.q14 || 0);
+      const R2 = fSlBereich(SL, d2); if(!R2.ok) return nein('Schlichten Seite: ' + R2.grund);
+      ebenen(zT, +s.zustSchl).forEach(z => umlauf(R2, z, fS));                // Schlichten Seite (24): Umlaeufe im Werkzeugradius
+    }
+  }
+  if(umfang === 1 && uxy > 0) warn.push('Nur Schruppen: Aufmass ' + uxy + ' bleibt an der Kontur stehen.');
+  warn.push('SL-Raeumen als eigene Bahn: zeilenweise in X mit Randumlaeufen (der Zyklus 22 raeumt konturparallel) — Eintauchen senkrecht mit FZ ' + fZ + ', Fraeser muss ueber Mitte schneiden.');
+  eil({z:zSC}); eil({z:zSC2});
+  return {ok:true, bahn:B, warn:warn, zT:zT, punkte:einstiche, zeilen:Z.length};
+}
+// Die Zyklusbloecke eines SL-Schritts: 20 KONTUR-DATEN, dann 21 bzw. 22
+// [+ 23 + 24], je mit CYCL CALL — jeder Block als Zeilenliste (erster
+// Eintrag = nummerierter Satz, die Q-Zeilen darunter).
+function fSlDefs(s, tool, stand){
+  const w = fZyklusWerte(s, tool);
+  const block = (nr, titel, qs, signed) => {
+    const z = ['CYCL DEF ' + nr + ' ' + titel + ' ~'];
+    qs.forEach((q, i) => { z.push('    ' + klQ(q, w[q], !!signed[q]).padEnd(11, ' ') + ';' + F_Q[q] + (i === qs.length - 1 ? '' : ' ~')); });
+    return z;
+  };
+  const S = {Q1:1, Q3:1, Q4:1, Q5:1, Q7:1, Q9:1, Q10:1, Q14:1};
+  const out = [block(20, 'KONTUR-DATEN', ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9'], S)];
+  if(s.art === 'slVorbohren'){ out.push(block(21, 'VORBOHREN', ['Q10', 'Q11', 'Q13'], S)); out.push(['CYCL CALL']); return out; }
+  const umfang = Math.round(+s.umfang || 0);
+  if(umfang !== 2){ out.push(block(22, 'RAEUMEN', ['Q10', 'Q11', 'Q12', 'Q18', 'Q19', 'Q208', 'Q401', 'Q404'], S)); out.push(['CYCL CALL']); }
+  if(umfang !== 1){
+    out.push(block(23, 'SCHLICHTEN TIEFE', ['Q11', 'Q12', 'Q208'], S)); out.push(['CYCL CALL']);
+    const w24 = Object.assign({}, w, {Q10:w.Q10s, Q12:w.Q12s});
+    const z = ['CYCL DEF 24 SCHLICHTEN SEITE ~'];
+    ['Q9', 'Q10', 'Q11', 'Q12', 'Q14'].forEach((q, i, a) => { z.push('    ' + klQ(q, w24[q], !!S[q]).padEnd(11, ' ') + ';' + F_Q[q] + (i === a.length - 1 ? '' : ' ~')); });
+    out.push(z); out.push(['CYCL CALL']);
+  }
+  // 23 schlichtet mit FS statt F: Q12 des 23 ist der Schlichtvorschub
+  out.forEach(b => { if(/^CYCL DEF 23 /.test(b[0])) b[2] = '    ' + klQ('Q12', w.Q12s).padEnd(11, ' ') + ';' + F_Q.Q12 + ' ~'; });
+  return out;
+}
+
+// ---------------------------------------------------------------------
 // DXF-IMPORT FUER FRAESKONTUREN (Paket C3c, 13.09.2026): 2D-DXF (ASCII) in
 // der XY-Ebene -> Konturen des Editors. Gelesen werden LINE, ARC, CIRCLE,
 // LWPOLYLINE (mit Bulge-Boegen, geschlossen ueber Flag 70) und SPLINE ueber
@@ -5106,8 +5456,11 @@ function fBahnSimSonder(s, tool, prog, punkte){
   const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
   if(!(sc > 0)) return nein('Sicherheitsabstand fehlt');
   const zSC = fRund(z0 + sc), zSC2 = fRund(z0 + sc2);
-  const rt = (+tool.d > 0) ? +tool.d / 2 : 2.5;
+  const rt = (tool && +tool.d > 0) ? +tool.d / 2 : 2.5;
   const eil = (o) => B.push(Object.assign({a:'eil'}, o)), vor = (o) => B.push(Object.assign({a:'vor'}, o)), verweil = (t) => { if(+t > 0) B.push({a:'verweil', t:fRund(t)}); };
+  // haengt Drehzahl- und M-Worte an den zuletzt gesetzten Satz (M-Worte
+  // reiten im Klartext immer auf einem Fahrsatz, nie allein)
+  const letzte = (o) => { const l = B[B.length - 1]; if(l) Object.assign(l, o); };
   const richt = (q) => [[1, 0], [-1, 0], [0, -1], [1, 0], [0, 1]][Math.max(0, Math.min(4, Math.round(+q || 0)))];   // Q214: 1 -X, 2 -Y, 3 +X, 4 +Y (0 beim 204 nicht erlaubt -> +X)
   const fG = (+s.steigung > 0 && +s.s > 0) ? fRund(+s.steigung * +s.s) : 0;   // Gewinde: F = P x S
   const tiefe = +s.tiefe || 0;
@@ -5135,16 +5488,24 @@ function fBahnSimSonder(s, tool, prog, punkte){
       }
       vor({z:zSC, f:fR, m:4}); eil({z:zSC2, m:5});
     } else if(art === 'einlippen'){
-      // 241: Positioniervorschub bis SC ueber den vertieften Startpunkt, bohren
-      // mit F (bis zur Verweiltiefe, falls gesetzt), verweilen, Rueckzug im
-      // Vorschub Rueckzug auf SC
+      // 241 (S. 102) vollstaendig: die TNC positioniert mit der Drehzahl
+      // Ein-/Ausfahren Q427 und der Drehrichtung Q426 auf SC, faehrt mit dem
+      // Positioniervorschub Q253 auf SC ueber den vertieften Startpunkt Q379,
+      // schaltet auf die Bohrdrehzahl Q428 und das Kuehlmittel Q429, bohrt mit
+      // Q206 (mit Halt auf der Verweiltiefe Q435, wenn gesetzt), verweilt
+      // unten Q211, schaltet das Kuehlmittel mit Q430 aus und auf Q427
+      // zurueck und zieht mit Q208 auf SC heraus. Die Drehzahlen stehen im NC
+      // als TOOL CALL S, die M-Worte am jeweiligen Fahrsatz.
       const f = +s.f; if(!(f > 0)){ warn.push('Vorschub fehlt'); return; }
       const fV = (+s.fVor > 0) ? +s.fVor : f, fR = (+s.fRueck > 0) ? +s.fRueck : f;
+      const sEin = (+s.q427 > 0) ? +s.q427 : null, sBohr = (+s.q428 > 0) ? +s.q428 : null;
+      const mKuehlAn = Math.round(+s.q429 || 0) || null, mKuehlAus = Math.round(+s.q430 || 0) || null;
+      letzte({s:sEin, m:(Math.round(+s.q426 || 3) === 4) ? 4 : 3});
       if(+s.q379 > 0) vor({z:fRund(z0 - (+s.q379) + sc), f:fV});
-      const zV = +s.q435 || 0;
-      if(zV && zV > zT && zV < z0){ vor({z:fRund(zV), f:f}); verweil(s.vUnten); vor({z:zT, f:f}); }
-      else { vor({z:zT, f:f}); verweil(s.vUnten); }
-      vor({z:zSC, f:fR}); eil({z:zSC2});
+      const zV = +s.q435 || 0, ein = {s:sBohr, m:mKuehlAn};
+      if(zV && zV > zT && zV < z0){ vor(Object.assign({z:fRund(zV), f:f}, ein)); verweil(s.vUnten); vor({z:zT, f:f}); }
+      else { vor(Object.assign({z:zT, f:f}, ein)); verweil(s.vUnten); }
+      vor({z:zSC, f:fR, s:sEin, m:mKuehlAus}); eil({z:zSC2});
     } else if(art === 'ausdrehen'){
       // 202 mit Freifahren: bohren, verweilen, Spindel-Orientierung (Q336),
       // 0,2 mm (fester Wert) in der Freifahrrichtung vom Rand weg, im
@@ -5166,7 +5527,17 @@ function fBahnSimSonder(s, tool, prog, punkte){
       const sx = fRund(px + rH);
       B.push({a:'kreis', x:sx, y:py, cx:fRund(px + rH / 2), cy:py, dr:dr, f:f});
       const tiefeH = fRund(zSC - zT), pitch = (+s.q334 > 0) ? +s.q334 : tiefeH;
-      B.push({a:'helix', cx:px, cy:py, r:rH, dr:dr, dz:fRund(-tiefeH), turns:fRund(tiefeH / pitch), f:f, z:zT});
+      // Die Schraubenlinie wird in Stuecke von hoechstens 8 Umlaeufen geteilt.
+      // Das laengste gedruckte CP-Beispiel des Klartext-Handbuchs faehrt
+      // IPA+3240 (9 Umlaeufe); darueber ist nichts belegt. Mehrere Saetze sind
+      // geometrisch dieselbe Bahn, aber sicher lesbar — bei 80 mm Tiefe und
+      // 1,5 mm Steigung waeren es sonst 54 Umlaeufe in einem Satz.
+      let rest = tiefeH / pitch, zAkt = zSC;
+      while(rest > 1e-9){
+        const t = Math.min(8, rest), zEnde = (rest - t <= 1e-9) ? zT : fRund(zAkt - t * pitch);
+        B.push({a:'helix', cx:px, cy:py, r:rH, dr:dr, dz:fRund(zEnde - zAkt), turns:fRund(t), f:f, z:zEnde});
+        zAkt = zEnde; rest -= t;
+      }
       B.push({a:'kreis', x:fRund(px - rH), y:py, cx:px, cy:py, dr:dr, f:f});
       B.push({a:'kreis', x:sx, y:py, cx:px, cy:py, dr:dr, f:f});
       vor({x:px, y:py, f:f}); eil({z:zSC}); eil({z:zSC2});
@@ -5477,6 +5848,14 @@ function fProgrammSchreiben(prog, opt){
   const schritte = (prog.schritte || []).filter(s => s && s.aktiv !== false);
   const lblNr = new Map();     // Musterindex -> LBL-Nummer, in Reihenfolge der ersten Nutzung
   const lblListe = [];
+  // Paket D3: Kontur-LBLs merken sich Kontur UND Werkzeugseite — dieselbe
+  // Kontur kann in einem Schritt die Tasche (innen) und in einem anderen
+  // eine Insel (aussen) sein, und das RL/RR steht IM Unterprogramm.
+  const lblFuer = (idx, kt, seite) => {
+    const key = 'k' + idx + ':' + seite; let nr = lblNr.get(key);
+    if(!nr){ nr = lblNr.size + 1; lblNr.set(key, nr); lblListe.push({nr:nr, kontur:kt, seite:seite}); }
+    return nr;
+  };
   schritte.forEach((s, si) => {
     const tool = (prog.werkzeuge || []).find(w => w.nr === s.t) || {};
     const z = F_ZYKLEN[s.art];
@@ -5502,14 +5881,27 @@ function fProgrammSchreiben(prog, opt){
       einzel.warn.forEach(w => warn.push('Schritt ' + (si + 1) + ': ' + w));
       fBahnKlartext(einzel.bahn).forEach(l => satz(l));
     } else {
+      if(z && z.sl){
+        // Paket D3: Der Zyklus 14 nennt ALLE Teilkonturen des Schritts —
+        // die Tasche zuerst, dann jede Insel (S. 186/194). Danach kommen die
+        // Bloecke des Schritts: 20 KONTUR-DATEN, dann 21 bzw. 22/23/24, jeder
+        // mit eigenem CYCL CALL. Ein zusaetzliches CYCL CALL gibt es nicht.
+        const SL = fSlKonturen(s, prog), nrn = [];
+        if(SL.tasche) nrn.push(lblFuer(SL.tasche.idx, SL.tasche.kt, SL.tasche.seite));
+        SL.inseln.forEach(I => nrn.push(lblFuer(I.idx, I.kt, I.seite)));
+        if(!nrn.length) warn.push('Schritt ' + (si + 1) + ': ' + (SL.fehler[0] || 'keine Kontur') + ' — kein Zyklus geschrieben.');
+        else {
+          if(SL.fehler.length) warn.push('Schritt ' + (si + 1) + ': ' + SL.fehler[0]);
+          satz('CYCL DEF 14.0 KONTUR'); satz('CYCL DEF 14.1 KONTURLABEL ' + nrn.join('/'));
+          fSlDefs(s, tool, k.stand || '07').forEach(b => { satz(b[0]); for(let i = 1; i < b.length; i++) zeilen.push(b[i]); });
+        }
+      } else {
       if(z && z.kontur){
         // Paket C3: Zyklus 14 nennt das Kontur-Unterprogramm (DEF-aktiv), der
         // Zyklus 25 folgt, CYCL CALL ruft ihn (670 388-12 S. 223). Das LBL
         // steht mit den Bohrbild-LBLs hinter dem M2-Satz, RL/RR = Werkzeugseite.
         const kt = (prog.konturen || [])[s.kontur];
-        let nr = lblNr.get('k' + s.kontur);
-        if(!nr){ nr = lblNr.size + 1; lblNr.set('k' + s.kontur, nr); lblListe.push({nr:nr, kontur:kt, seite:fKonturSeite(s, kt)}); }
-        satz('CYCL DEF 14.0 KONTUR'); satz('CYCL DEF 14.1 KONTURLABEL ' + nr);
+        satz('CYCL DEF 14.0 KONTUR'); satz('CYCL DEF 14.1 KONTURLABEL ' + lblFuer(s.kontur, kt, fKonturSeite(s, kt)));
       }
       const def = fZyklusDef(s, tool, k.stand || '07');
       if(def){ satz(def[0]); for(let i = 1; i < def.length; i++) zeilen.push(def[i]); }
@@ -5527,6 +5919,7 @@ function fProgrammSchreiben(prog, opt){
         let nr = lblNr.get(s.muster);
         if(!nr){ nr = lblNr.size + 1; lblNr.set(s.muster, nr); lblListe.push({nr:nr, m:m}); }
         satz('CALL LBL ' + nr);
+      }
       }
     }
     satz('L Z' + klNum(rz) + ' R0 FMAX ' + (letzter ? 'M2' : (s.kuehl === 'aus' ? 'M5' : 'M9')));
@@ -5569,6 +5962,19 @@ function fPruefen(prog){
     const m = (prog.muster || [])[s.muster];
     if(zyk.eigenePosition){
       // Planfraesen: die Flaeche steckt im Zyklus, kein Bohrbild noetig.
+    } else if(zyk.sl){
+      // Paket D3: SL-Zyklen. Geometriefehler der Teilkonturen sind rot (ohne
+      // Tasche gibt es keinen Zyklus); was das Werkzeug nicht erreicht, meldet
+      // die eigene Bahn gelb — der Zyklus 22 raeumt dort einfach weniger aus.
+      const SL = fSlKonturen(s, prog);
+      SL.fehler.forEach(x => rot.push(nr + x + '.'));
+      if(SL.tasche){
+        const tp = fSlPolygon(SL.tasche.seg);
+        SL.inseln.forEach(I => { const p = fSegPunkte(I.seg[0])[0]; if(!fSlInnen(p, tp)) gelb.push(nr + 'Insel "' + I.kt.name + '" liegt nicht in der Tasche "' + SL.tasche.kt.name + '" — die Steuerung raeumt sie dann nicht als Insel.'); });
+        if(tool && +tool.d > 0){ const b = fBahnSL(s, tool, prog); if(!b.ok) gelb.push(nr + 'eigene Bahn: ' + b.grund + (s.ausgabe === 'einzel' ? ' — Einzelsaetze nicht moeglich, es werden die Zyklen geschrieben.' : ' — die Simulation zeigt den Schritt nicht.')); }
+      }
+      if(tool && tool.art !== 'fraeser' && s.art === 'slRaeumen') gelb.push(nr + 'T' + s.t + ' ist kein Fraeser (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
+      if(s.art === 'slVorbohren' && !(+s.q13 > 0)) rot.push(nr + 'kein Ausraeum-Werkzeug (Q13) — der Zyklus 21 rechnet die Einstichpunkte fuer das Werkzeug, das spaeter raeumt.');
     } else if(zyk.kontur){
       // Paket C3: Konturzug auf einer XY-Kontur. Geometriefehler sind rot;
       // was das Werkzeug nicht erreicht (Engstelle, Innenradius), meldet die
@@ -5908,6 +6314,48 @@ function fDemoKonturFormen(){
   p.schritte = [z, e, k];
   return p;
 }
+// DZ11 (Paket D3, 13.09.2026): Bohrfraesen 208 und Einlippen-Bohren 241 als
+// EINZELSAETZE — der Handbuch-Ablauf beider Zyklen als eigene Bahn (Helix in
+// Stuecken, TOOL CALL S fuer die Drehzahlwechsel des 241, M-Worte fuer
+// Spindel und Kuehlmittel). Testprogramm fuer den Programmierplatz, unter
+// 100 Saetzen (Demo-Wandler).
+function fDemoBohrfraesEinzel(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ11';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-30, x1:80, y1:60, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [
+    {nr:5,  name:'Schaftfraeser 10', art:'fraeser', d:10, s:3000, f:600},
+    {nr:40, name:'VHM-Bohrer 8', art:'bohrer', d:8, spitze:140, s:2500, f:150}
+  ];
+  p.muster = [
+    {name:'Bohrung 18 (Bohrfraesen)', typ:'punkte', punkte:[{x:25, y:30}], ausgabe:'punkte'},
+    {name:'Einlippenbohrung', typ:'punkte', punkte:[{x:60, y:30}], ausgabe:'punkte'}
+  ];
+  const bf = fSchrittNeu(p, 'bohrfraesen', 5, 0); Object.assign(bf, {tiefe:-20, q334:2, q335:18, q342:0, fraesart:1, f:250, s:3000, ausgabe:'einzel'});
+  const el = fSchrittNeu(p, 'einlippen', 40, 1); Object.assign(el, {tiefe:-25, vUnten:0.25, q379:0, fVor:750, fRueck:1000, q426:3, q427:100, q428:2500, q429:8, q430:9, q435:0, f:150, s:2500, ausgabe:'einzel'});
+  p.schritte = [bf, el];
+  return p;
+}
+// DZ12 (Paket D3): Konturtasche 70 x 50 mit Kreisinsel ⌀12 — Schritt 1
+// Vorbohren 21 (Bohrer 6, Einstichpunkte des Raeumers), Schritt 2 die
+// SL-Zyklen 20/22/23/24 mit Fraeser 10, Schritt 3 dieselbe Tasche als eigene
+// Bahn (nur Schruppen, zeilenweise). Unter 100 Saetzen.
+function fDemoSL(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ12';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-20, x1:100, y1:80, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [
+    {nr:5, name:'Schaftfraeser 10', art:'fraeser', d:10, s:3000, f:600},
+    {nr:2, name:'Bohrer 6', art:'bohrer', d:6, spitze:118, s:2000, f:150}
+  ];
+  p.konturen = [
+    {name:'Tasche', geschlossen:true, x0:15, y0:15, elemente:[{typ:'g', x:85, y:15}, {typ:'g', x:85, y:65}, {typ:'g', x:15, y:65}]},
+    {name:'Insel', geschlossen:true, x0:56, y0:40, elemente:[{typ:'k', x:50, y:40, dr:1}]}
+  ];
+  const v = fSchrittNeu(p, 'slVorbohren', 2, 0); Object.assign(v, {inseln:[1], tiefe:-8, zust:4, fTief:150, s:2000, q13:5, aufSeite:0.3, aufTiefe:0.2, ueberl:1, fraesart:1, q8:0});
+  const z = fSchrittNeu(p, 'slRaeumen', 5, 0); Object.assign(z, {inseln:[1], umfang:0, tiefe:-8, zust:4, aufSeite:0.3, aufTiefe:0.2, zustSchl:0, ueberl:1, f:600, fTief:200, fSchl:400, fRueck:0, fPendel:200, q401:100, q404:0, q8:0, q14:0, q18:0, fraesart:1, s:3000});
+  const e = fSchrittNeu(p, 'slRaeumen', 5, 0); Object.assign(e, {inseln:[1], umfang:1, tiefe:-8, zust:8, aufSeite:0.3, aufTiefe:0, ueberl:1.4, f:600, fTief:200, fSchl:400, fraesart:1, s:3000, ausgabe:'einzel'});
+  p.schritte = [v, z, e];
+  return p;
+}
 var F_DEMOS = [
   {id:'flansch', name:'Flanschplatte (Lochkreis + M8-Ecken)', lade:fDemoFlansch},
   {id:'leiste',  name:'Leiste (Tieflochbohren + Reiben)',    lade:fDemoLeiste},
@@ -5918,7 +6366,9 @@ var F_DEMOS = [
   {id:'formen',  name:'Einzelsaetze: Kreistasche, Nut, Kreiszapfen als eigene Bahn', lade:fDemoFormenEinzel},
   {id:'plan',    name:'Einzelsaetze: Planfraesen + Rechtecktasche mit Helix', lade:fDemoPlanEinzel},
   {id:'kontur',  name:'Konturzug: Insel als Zyklus 14/25 und als eigene Bahn', lade:fDemoKonturEinzel},
-  {id:'konturformen', name:'Konturzug: Rundung, Fase, tangentialer Bogen, Vollkreis', lade:fDemoKonturFormen}
+  {id:'konturformen', name:'Konturzug: Rundung, Fase, tangentialer Bogen, Vollkreis', lade:fDemoKonturFormen},
+  {id:'bohrfraes', name:'Einzelsaetze: Bohrfraesen 208 und Einlippen-Bohren 241', lade:fDemoBohrfraesEinzel},
+  {id:'sl',      name:'SL-Zyklen 20-24: Konturtasche mit Insel, Vorbohren und Raeumen', lade:fDemoSL}
 ];
 
 // Merkmale der Fraesausgabe fuer die NC-Ansicht: Status je Zyklusfamilie.
@@ -5939,13 +6389,15 @@ function fMerkmale(profilId){
     z('zapfenR',    'Rechteckzapfen — Zyklus 256 (Q424/Q425 Rohteilmasse; erst ab Stand 340 49x-06)'),
     z('zapfenK',    'Kreiszapfen — Zyklus 257 (Q222 Rohteil-Durchmesser; erst ab Stand 340 49x-06)'),
     z('konturzug',  'Konturzug — Zyklus 14 KONTUR + 25 KONTUR-ZUG auf einer XY-Kontur der App (Geraden, Kreisboegen CR, tangentiale Boegen CT, Vollkreis, Rundung RND, Fase CHF als native Saetze im LBL mit RL/RR; Q1 Q3 Q5 Q7 Q10 Q11 Q12 Q15; CYCL CALL)'),
+    z('slRaeumen',  'SL Raeumen — Zyklus 14 KONTUR mit Tasche und bis zu 11 Inseln + 20 KONTUR-DATEN + 22 RAEUMEN [+ 23 SCHLICHTEN TIEFE + 24 SCHLICHTEN SEITE], je mit CYCL CALL (Q1-Q9 im 20, Q10 Q11 Q12 Q18 Q19 Q208 Q401 Q404 im 22, Q14 im 24); als Einzelsaetze eine eigene Zeilenbahn mit Randumlaeufen'),
+    z('slVorbohren', 'SL Vorbohren — Zyklus 14 + 20 + 21 VORBOHREN + CYCL CALL (Q10 Q11 Q13); als Einzelsaetze eine Bohrleiter an den Eintauchpunkten des Raeumens, gerechnet mit dem Radius des Ausraeum-Werkzeugs Q13'),
     z('planfraesen', 'Planfraesen — Zyklus 232 (Q389 Strategie, Startpunkt Q225-Q227, Endhoehe Q386, Q218/Q219 Laengen, Q357 SC Seite; CYCL CALL ohne Bohrbild)'),
     z('ausdrehen',  'Ausdrehen — Zyklus 202 (Q214 Freifahr-Richtung 0-4, Q336 Spindelwinkel)'),
     z('senkenRueck', 'Rueckwaerts-Senken — Zyklus 204 (Q249 Senktiefe nach oben, Q250 Materialstaerke, Q251/Q252 Exzenter/Schneidenhoehe, Q253/Q254 Vorschuebe, Q214 1-4)'),
     z('tiefUni',    'Universal-Tiefbohren — Zyklus 205 (Q258/Q259 Vorhalteabstaende, Q257 Bohrtiefe Spanbruch, Q379 Startpunkt, Q253 Vorschub Vorpos.)'),
-    z('bohrfraesen', 'Bohrfraesen — Zyklus 208 (Q334 Zustellung je Helix, Q335 Soll-⌀, Q342 vorgebohrt, Q351 Fraesart — Stand 02 ohne Q351)'),
+    z('bohrfraesen', 'Bohrfraesen — Zyklus 208 (Q334 Zustellung je Helix, Q335 Soll-⌀, Q342 vorgebohrt, Q351 Fraesart — Stand 02 ohne Q351); als Einzelsaetze seit dem 13.09.2026 der Handbuch-Ablauf: Rundungskreis, Schraubenlinie (CP) in Stuecken bis 8 Umlaeufe, Vollkreis am Grund, zurueck zur Mitte'),
     z('gewindeSpan', 'Gewindebohren mit Spanbruch — Zyklus 209 (Q257 Bohrtiefe Spanbruch, Q256 Rueckzug, Q336 Spindelwinkel, Q403 Drehzahlfaktor — Stand 02 ohne Q403)'),
-    z('einlippen',  'Einlippen-Bohren — Zyklus 241 (Q379 Startpunkt, Q426 Drehrichtung, Q427/Q428 Drehzahlen, Q429/Q430 Kuehlung, Q435 Verweiltiefe; erst ab Stand -06)'),
+    z('einlippen',  'Einlippen-Bohren — Zyklus 241 (Q379 Startpunkt, Q426 Drehrichtung, Q427/Q428 Drehzahlen, Q429/Q430 Kuehlung, Q435 Verweiltiefe; erst ab Stand -06); als Einzelsaetze seit dem 13.09.2026 mit TOOL CALL S fuer die Drehzahlwechsel und den M-Worten am Fahrsatz'),
     z('lbl',        'Positionsmuster als Unterprogramm LBL n mit L X Y R0 FMAX M99 je Punkt (Vorgabe)'),
     z('muster220',  'Lochkreis als Zyklus 220 (Option je Muster; Q246 bei Q247 ungleich 0 ohne Bedeutung)'),
     z('muster221',  'Reihe/Gitter als Zyklus 221 (Option je Muster)'),
@@ -6183,7 +6635,7 @@ function fArbeitsplanRender(){
     // 232 traegt seine Flaeche selbst (kein Bohrbild), 204 hat statt der
     // Tiefe die Senkung nach oben. Neutrale Kurzzeichen wie in der Maske
     // (Z1, SC ...); die Zyklusnummer der Steuerung steht nur im Titel.
-    const detail = (z.eigenePosition ? 'Fläche im Zyklus' : (z.kontur ? (kt ? 'Kontur ' + esc(kt.name) + ' · ' + (kt.geschlossen ? (s.seiteZu === 'aussen' ? 'außen' : 'innen') : (s.seiteAuf === 'rechts' ? 'rechts (RR)' : 'links (RL)')) : '<span style="color:#c0392b">keine Kontur</span>') : (m ? esc(m.name) : '<span style="color:#c0392b">kein Bohrbild</span>'))) +
+    const detail = (z.sl ? (kt ? 'Tasche ' + esc(kt.name) + ((s.inseln || []).length ? ' + ' + (s.inseln || []).length + ' Insel' + ((s.inseln || []).length > 1 ? 'n' : '') : '') : '<span style="color:#c0392b">keine Tasche</span>') : z.eigenePosition ? 'Fläche im Zyklus' : (z.kontur ? (kt ? 'Kontur ' + esc(kt.name) + ' · ' + (kt.geschlossen ? (s.seiteZu === 'aussen' ? 'außen' : 'innen') : (s.seiteAuf === 'rechts' ? 'rechts (RR)' : 'links (RL)')) : '<span style="color:#c0392b">keine Kontur</span>') : (m ? esc(m.name) : '<span style="color:#c0392b">kein Bohrbild</span>'))) +
       (z.fraes ? ' · ' + esc(fFormText(s)) : '') +
       (z.eigenePosition ? '' : (z.ohneTiefe ? ' · Senkung +' + (s.q249 || 0) : ' · Z1 ' + s.tiefe)) + (/^(gewinde|gewindeGS|gewindeSpan)$/.test(s.art) ? ' · P' + s.steigung : '') +
       ' · F' + s.f + ' S' + s.s + (s.kuehl === 'aus' ? ' · trocken' : '') + (s.ausgabe === 'einzel' ? ' · Einzelsätze' : '');
@@ -6216,7 +6668,9 @@ function fArbeitsplanRender(){
         const genutzt = fProg.schritte.filter(s => (F_ZYKLEN[s.art] || {}).kontur && s.kontur === i).length;
         zweiklickBestaetigen(b, genutzt ? 'Wirklich? ' + genutzt + ' Schritt(e) nutzen sie' : 'Wirklich löschen?', ()=>{
           fProg.konturen.splice(i, 1);
-          fProg.schritte.forEach(s => { if(!(F_ZYKLEN[s.art] || {}).kontur) return; if(s.kontur === i) s.kontur = -1; else if(s.kontur > i) s.kontur--; });
+          fProg.schritte.forEach(s => { if(!(F_ZYKLEN[s.art] || {}).kontur) return; if(s.kontur === i) s.kontur = -1; else if(s.kontur > i) s.kontur--;
+            // Paket D3: die Inselliste haelt Indizes derselben Liste
+            if(s.inseln) s.inseln = s.inseln.filter(j => j !== i).map(j => j > i ? j - 1 : j); });
           fSel = null; fRender();
         });
         return;
@@ -6773,6 +7227,10 @@ const ZY = {art:null, felder:[], komplett:[]};   // Zustand der offenen Maske
 // der hsk-Icons; Heidenhains Bilder darf die App nicht uebernehmen).
 const F_ICON_KOPF = '<svg viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
 const F_ICONS = {
+  // Paket D3: SL-Zyklen — Tasche mit Insel (Raeumen) bzw. Tasche mit
+  // Einstichpunkten (Vorbohren).
+  slRaeumen:'<rect x="4" y="6" width="24" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="4.5" fill="currentColor" opacity=".55"/>',
+  slVorbohren:'<rect x="4" y="6" width="24" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="1.8" fill="currentColor"/><circle cx="22" cy="12" r="1.8" fill="currentColor"/><circle cx="10" cy="21" r="1.8" fill="currentColor"/><circle cx="22" cy="21" r="1.8" fill="currentColor"/>',
   zentrieren: '<line x1="2" y1="6" x2="20" y2="6"/><path d="M9 1h4v4l-2 4-2-4z"/><path d="M11 6l-1.5 3.5h3z" fill="currentColor"/>',
   bohren:     '<line x1="2" y1="6" x2="20" y2="6"/><path d="M9 1h4v8l-2 4-2-4z"/><path d="M9 6h4M9 9h4"/>',
   tief:       '<line x1="2" y1="6" x2="20" y2="6"/><path d="M9 1h4v9l-2 4-2-4z"/><path d="M16 4l2 1.5-2 1.5M16 9l2 1.5-2 1.5"/>',
@@ -6826,6 +7284,10 @@ function fZyklusMaskeHtml(art, prog){
     if(d.typ === 'werkzeug') return '<select id="zf_' + feld + '" class="tool-select"></select>';
     if(d.typ === 'muster') return '<select id="zf_' + feld + '" class="tool-select"></select>';
     if(d.typ === 'kontur') return '<select id="zf_' + feld + '" class="tool-select"></select>';
+    // Paket D3: Inseln als Haekchenliste. BEWUSST ohne die Klasse radiobtns —
+    // die Wache aus Pruefung 99 verlangt fuer jede .radiobtns-Gruppe einen
+    // Listener, und hier ist jede Zeile ihr eigenes Kaestchen.
+    if(d.typ === 'konturen') return '<div class="konturliste" id="zf_' + feld + '" style="display:flex;flex-direction:column;gap:2px;max-height:120px;overflow:auto;"></div>';
     if(d.typ === 'wahl'){
       const w = fFeldWahl(art, feld);
       if(d.select) return '<select id="zf_' + feld + '" class="tool-select" style="width:170px;">' + w.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join('') + '</select>';
@@ -6890,8 +7352,22 @@ function fZyklusWerkzeugeFuellen(tNr, art){
   if(!(fProg.werkzeuge || []).some(w => w.nr === tNr) && tNr) sel.innerHTML += '<option value="' + tNr + '" selected>T' + tNr + ' (nicht in der Tabelle)</option>';
   const ks = document.getElementById('zf_kontur');
   if(ks) ks.innerHTML = (fProg.konturen || []).map((kt, i) => '<option value="' + i + '">' + esc(kt.name) + ' — ' + esc(fKonturText(kt)) + '</option>').join('') || '<option value="-1">— erst eine Kontur anlegen —</option>';
+  fZyklusInselnFuellen();
   const ms = document.getElementById('zf_muster'); if(!ms) return;
   ms.innerHTML = fProg.muster.map((m, i) => '<option value="' + i + '">' + esc(m.name) + ' — ' + esc(fMusterText(m)) + '</option>').join('') || '<option value="-1">— erst Positionen anlegen —</option>';
+}
+// Paket D3: Haekchenliste der Inseln. Es stehen alle GESCHLOSSENEN Konturen
+// darin ausser der gewaehlten Tasche — eine offene Kontur kann keine Insel
+// sein (der Zyklus 14 braucht geschlossene Teilkonturen).
+function fZyklusInselnFuellen(){
+  const box = document.getElementById('zf_inseln'); if(!box) return;
+  const tasche = Math.round(getNum('zf_kontur', -1));
+  const an = (box.__wahl || []).slice();
+  const zeilen = (fProg.konturen || []).map((kt, i) => {
+    if(i === tasche || !kt.geschlossen) return '';
+    return '<label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input type="checkbox" data-i="' + i + '"' + (an.indexOf(i) >= 0 ? ' checked' : '') + '> ' + esc(kt.name) + ' — ' + esc(fKonturText(kt)) + '</label>';
+  }).filter(Boolean);
+  box.innerHTML = zeilen.join('') || '<span class="small-hint">keine weitere geschlossene Kontur</span>';
 }
 // Werkzeugvorschlag je Zyklus. Die App kennt fuenf Arten (F_WERKZEUGARTEN);
 // Bohrstange (TOOL.T-Typ BOR) und Rueckwaertssenker (BCKBOR) laufen als
@@ -6917,6 +7393,7 @@ function fZyklusSetzen(s){
     if(d.typ === 'werkzeug'){ setVal('zf_t', s.t); return; }
     if(d.typ === 'muster'){ setVal('zf_muster', s.muster); return; }
     if(d.typ === 'kontur'){ setVal('zf_kontur', s.kontur); return; }
+    if(d.typ === 'konturen'){ const box = document.getElementById('zf_' + f); if(box){ box.__wahl = (s[f] || []).slice(); fZyklusInselnFuellen(); } return; }
     if(d.typ === 'wahl'){ const v = String(wert(f) == null ? '' : wert(f)); if(d.select) setVal('zf_' + f, v); else setRadio('zg_' + f, v); return; }
     setVal('zf_' + f, wert(f) == null ? '' : wert(f));
     if(d.mit) setVal('zf_' + d.mit, wert(d.mit) == null ? '' : wert(d.mit));
@@ -6933,6 +7410,12 @@ function fZyklusLesen(basis){
     if(d.typ === 'werkzeug'){ s.t = Math.round(getNum('zf_t', 0)); return; }
     if(d.typ === 'muster'){ s.muster = Math.round(getNum('zf_muster', -1)); return; }
     if(d.typ === 'kontur'){ s.kontur = Math.round(getNum('zf_kontur', -1)); return; }
+    if(d.typ === 'konturen'){
+      const box = document.getElementById('zf_' + f), aus = [];
+      if(box && box.querySelectorAll) box.querySelectorAll('input[type=checkbox]').forEach(c => { if(c.checked) aus.push(Math.round(+((c.dataset || {}).i))); });
+      else if(box && box.__wahl) aus.push.apply(aus, box.__wahl);
+      s[f] = aus; return;
+    }
     if(d.typ === 'wahl'){
       let v = d.select ? getStr('zf_' + f) : selBtnVal('zg_' + f);
       if(v == null || v === '') v = String(ref[f]);
@@ -7267,6 +7750,8 @@ function fProgListe(){
   on('btnDemoFormen', ()=>{ fProgrammSetzen(fDemoFormenEinzel(), 'DZ7 geladen: Kreistasche, Nut und Kreiszapfen als eigene Bahn (Einzelsaetze mit Kreisboegen).'); maskZu('maskProgramme'); });
   on('btnDemoPlan', ()=>{ fProgrammSetzen(fDemoPlanEinzel(), 'DZ8 geladen: Planfraesen als Maeander und Rechtecktasche mit Helix-Eintauchen als Einzelsaetze.'); maskZu('maskProgramme'); });
   on('btnDemoKonturFormen', ()=>{ fProgrammSetzen(fDemoKonturFormen(), 'DZ10 geladen: Insel mit Rundung, Fase, tangentialem Bogen und Kreisinsel als Vollkreis — Zyklus 14/25 und eigene Bahn.'); maskZu('maskProgramme'); });
+  on('btnDemoBohrfraes', ()=>{ fProgrammSetzen(fDemoBohrfraesEinzel(), 'DZ11 geladen: Bohrfraesen 208 und Einlippen-Bohren 241 als Einzelsaetze — Helix in Stuecken, TOOL CALL S fuer die Drehzahlwechsel.'); maskZu('maskProgramme'); });
+  on('btnDemoSL', ()=>{ fProgrammSetzen(fDemoSL(), 'DZ12 geladen: Konturtasche mit Kreisinsel — Vorbohren 21, SL-Zyklen 20/22/23/24 und dieselbe Tasche als eigene Bahn.'); maskZu('maskProgramme'); });
   on('btnDemoKontur', ()=>{ fProgrammSetzen(fDemoKonturEinzel(), 'DZ9 geladen: Insel mit Nut als XY-Kontur — Schritt 1 Zyklus 14/25 der Steuerung, Schritt 2 dieselbe Kontur als eigene Bahn.'); maskZu('maskProgramme'); });
   on('btnDemoEinzel', ()=>{ fProgrammSetzen(fDemoEinzel(), 'DZ6 geladen: die Leiste als Einzelsaetze — Zentrieren, Tieflochbohren mit Spanbruch, Bohren, Reiben als eigene Bahn ohne Zyklus, eine Bohrung je Schritt.'); maskZu('maskProgramme'); });
   on('btnCloseProgs', ()=>maskZu('maskProgramme'));
@@ -7802,7 +8287,11 @@ function fSimZeichnen2D(){
 }
 // ---- 3D (WebGL) ------------------------------------------------------
 // Ausgangslage: von vorn links oben, Abstand 0,8 x Umkreis (das Rohteil ist flach — bei 1,0 stand es klein im breiten Bild)
-const SIM3D = {gl:null, cv:null, ok:false, versucht:false, pT:null, pS:null, az:-0.62, el:0.55, dist:0.8, drag:null, feldKey:'', gen:-1, netzN:0, idxTyp:0, randN:0, spurN:-1, spurV:0, spurE:0, wz:null, wzKey:'', wzN:0, b:{}};
+// kanten: die Rohteilkanten sind seit Daniels Befund vom 13.09.2026 NUR auf
+// Wunsch da ("ich moechte eigentlich nicht durchschauen koennen durch das
+// Bauteil, das verfaelscht mir die Konturen von den Elementen")  Vorgabe aus,
+// Haken simKanten, Slot dzf_simkanten, und auch eingeschaltet mit Tiefentest.
+const SIM3D = {gl:null, cv:null, ok:false, versucht:false, pT:null, pS:null, az:-0.62, el:0.55, dist:0.8, drag:null, kanten:false, feldKey:'', gen:-1, netzN:0, idxTyp:0, randN:0, spurN:-1, spurV:0, spurE:0, wz:null, wzKey:'', wzN:0, b:{}};
 function fSim3dShader(gl, typ, src){ const sh = gl.createShader(typ); gl.shaderSource(sh, src); gl.compileShader(sh); if(!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error('Shader: ' + gl.getShaderInfoLog(sh)); return sh; }
 function fSim3dProgramm(gl, vs, fs, attr){
   const p = gl.createProgram(); gl.attachShader(p, fSim3dShader(gl, gl.VERTEX_SHADER, vs)); gl.attachShader(p, fSim3dShader(gl, gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
@@ -7909,6 +8398,9 @@ function fSim3dZeichnen(){
   gl.bindBuffer(gl.ARRAY_BUFFER, b.xy); gl.enableVertexAttribArray(T.a.a_xy); gl.vertexAttribPointer(T.a.a_xy, 2, gl.FLOAT, false, 0, 0);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b.idx);
   gl.disable(gl.CULL_FACE);
+  // Flaechen einen Tiefenschritt nach hinten: eine eingeschaltete Kantenlinie
+  // liegt damit AUF der Flaeche statt mit ihr zu flimmern.
+  gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1, 1);
   [[b.zn, 1], [b.znU, -1]].forEach(q => {
     gl.bindBuffer(gl.ARRAY_BUFFER, q[0]); gl.enableVertexAttribArray(T.a.a_zn); gl.vertexAttribPointer(T.a.a_zn, 3, gl.FLOAT, false, 0, 0);
     gl.uniform1f(T.u.u_nz, q[1]); gl.drawElements(gl.TRIANGLES, SIM3D.netzN, SIM3D.idxTyp, 0);
@@ -7931,12 +8423,15 @@ function fSim3dZeichnen(){
     gl.drawArrays(gl.LINES, 0, arr.length / 3);
   };
   koerper(b.rand, SIM3D.randN, [0.56, 0.60, 0.64, 1], 1);
-  // Kanten des Rohteils und Nullpunkt-Achsen
+  gl.disable(gl.POLYGON_OFFSET_FILL);
+  // Kanten des Rohteils NUR mit Haken, und dann MIT Tiefentest: verdeckte
+  // Kanten bleiben verdeckt. Vorher lagen sie halbdurchsichtig ohne
+  // Tiefentest obenauf  das Rohteil sah durchscheinend aus und die
+  // rueckwaertigen Laengskanten liefen durch die Bahnen und das Werkzeug.
+  // Nullpunkt-Achsen stehen immer.
   const bw = F.nx * F.raster, bh = F.ny * F.raster, x0 = F.x0, y0 = F.y0, x1 = x0 + bw, y1 = y0 + bh, zo = F.oben, zu = F.unten;
   const kanten = [x0, y0, zu, x1, y0, zu, x1, y0, zu, x1, y1, zu, x1, y1, zu, x0, y1, zu, x0, y1, zu, x0, y0, zu, x0, y0, zo, x1, y0, zo, x1, y0, zo, x1, y1, zo, x1, y1, zo, x0, y1, zo, x0, y1, zo, x0, y0, zo, x0, y0, zu, x0, y0, zo, x1, y0, zu, x1, y0, zo, x1, y1, zu, x1, y1, zo, x0, y1, zu, x0, y1, zo];
-  gl.disable(gl.DEPTH_TEST);
-  linien(new Float32Array(kanten), dunkel ? [0.62, 0.70, 0.77, 0.4] : [0.24, 0.35, 0.45, 0.35], b.lin);
-  gl.enable(gl.DEPTH_TEST);
+  if(SIM3D.kanten) linien(new Float32Array(kanten), dunkel ? [0.70, 0.78, 0.85, 0.9] : [0.16, 0.24, 0.32, 0.9], b.lin);
   const aL = Math.max(8, K.R * 0.12);
   linien(new Float32Array([0, 0, zo, aL, 0, zo]), [0.85, 0.15, 0.15, 1], b.lin);
   linien(new Float32Array([0, 0, zo, 0, aL, zo]), [0.10, 0.60, 0.20, 1], b.lin);
@@ -8004,6 +8499,9 @@ function fSimOeffnen(){
   on('btnSimZu', ()=>{ fSimPause(); maskZu('maskSim'); });
   on('btnSimAnsicht2D', ()=>fSimAnsicht('2d'));
   on('btnSimAnsicht3D', ()=>fSimAnsicht('3d'));
+  try{ SIM3D.kanten = localStorage.getItem('dzf_simkanten') === 'an'; }catch(e){}
+  const kb = document.getElementById('simKanten');
+  if(kb){ kb.checked = SIM3D.kanten; if(kb.addEventListener) kb.addEventListener('change', ()=>{ SIM3D.kanten = !!kb.checked; try{ localStorage.setItem('dzf_simkanten', SIM3D.kanten ? 'an' : 'aus'); }catch(e){} fSimZeichnen(); }); }
   const tempo = document.getElementById('simTempo'); if(tempo && tempo.addEventListener) tempo.addEventListener('change', ()=>{ const v = tempo.value; SIM.tempo = (v === 'max') ? 'max' : (+v || 1); });
   const sl = document.getElementById('simPos');
   if(sl && sl.addEventListener) sl.addEventListener('input', ()=>{ fSimPause(); const tZiel = (+sl.value / 1000) * SIM.gesamt; if(!SIM.liste) fSimAufbauen(); if(tZiel < SIM.t) fSimAufbauen(); fSimBis(tZiel); fSimZeichnen(); fSimInfo(); });
