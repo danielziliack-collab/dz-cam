@@ -2529,6 +2529,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <div class="mrow"><button class="gcbtn" id="btnDemoMuster" style="width:100%;padding:10px;">DZ3 Musterzyklen 220/221 + Gewinde GS</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoTaschen" style="width:100%;padding:10px;">DZ4 Taschen, Nuten, Zapfen (251&ndash;257)</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoBohren2" style="width:100%;padding:10px;">DZ5 Planfr&auml;sen 232 + Bohrzyklen 202/204/205/208/209/241</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoEinzel" style="width:100%;padding:10px;">DZ6 Einzels&auml;tze: eigene Bahn ohne Zyklen (eine Bohrung je Schritt)</button></div>
             </div>
           </div>
           <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
@@ -2773,6 +2774,27 @@ Kommt ein zweiter Post dazu, bekommt er hier seine Spalte.</dd>
 </dl>
 <div id="baFeldtabellen"></div>
 
+<h2 id="ba-fk06c">6c &nbsp;Einzels&auml;tze statt Zyklus &mdash; die eigene Bahn der App</h2>
+<p>Jeder Schritt der Familien Zentrieren, Bohren, Tieflochbohren (203 und 205), Reiben, Gewinde mit Ausgleichsfutter und
+Ausdrehen (ohne Freifahren) hat das Feld <b>NC-Ausgabe</b>: <b>Steuerungszyklus</b> (Vorgabe) schreibt den CYCL DEF wie
+bisher, <b>Einzels&auml;tze</b> schreibt an jeder Position die Bahn Satz f&uuml;r Satz &mdash; <code>L X Y R0 FMAX</code>,
+<code>L Z R0 FMAX</code> auf den Sicherheitsabstand, <code>L Z R0 F</code> je Zustellung, die R&uuml;ckz&uuml;ge, Verweilzeiten
+als <code>CYCL DEF 9</code>, beim Gewinde die Drehrichtung mit M4 (am R&uuml;ckzugssatz, wirkt am Satzanfang) und M3. Die
+Bahn folgt dem Zyklusablauf des Handbuchs Punkt f&uuml;r Punkt: Zustellung, Entspanen auf SC, Wiederanfahrt im Eilgang bis
+SC &uuml;ber die letzte Tiefe, beim 203 der Spanbruch um V1 und die Abnahme DF, beim 205 Spanbruch je Bohrtiefe, Vorhalte-
+abst&auml;nde und vertiefter Startpunkt. <b>Warum:</b> so l&auml;uft der Schritt an jeder Steuerung, die L-S&auml;tze kennt,
+Du siehst im Einzelsatz jede Bewegung, und dieselbe Bahn f&auml;hrt sp&auml;ter die eigene Simulation und der Siemens-Post.</p>
+<dl>
+<dt id="ba-fk06c-ausgabe">NC-Ausgabe</dt><dd>Steuerungszyklus oder Einzels&auml;tze &mdash; je Schritt. Was keine eigene Bahn hat
+(Gewinde GS 207 und 209 brauchen die Synchronspindel, R&uuml;ckw&auml;rts-Senken und Ausdrehen mit Freifahren die
+Spindel-Orientierung, Bohrfr&auml;sen die Helix, Einlippen seine Spindel-/K&uuml;hlmittelfolge), bleibt beim Zyklus; w&auml;hlst Du
+dort Einzels&auml;tze, schreibt die App den Zyklus und sagt es in der Warnung. Die Positionen kommen wie beim Zyklus aus dem
+Bohrbild; zwischen den Positionen f&auml;hrt das Werkzeug auf SC2, wie der Zyklusaufruf mit M99.</dd>
+</dl>
+<div class="ba-merk">Stand (12.09.2026 abends): nach dem Zyklusablauf des Handbuchs gebaut und im Programm-Test des Programmierplatzes
+durchgelaufen (DZ6, 3:06 min, ohne Meldung, R&uuml;ckexport Satz f&uuml;r Satz gleich); an der Maschine noch nicht gefahren. Die Vorlage DZ6 (die Leiste als Einzels&auml;tze, eine Bohrung je
+Schritt &mdash; der Wandler des Programmierplatzes nimmt nur 100 S&auml;tze) ist das Testprogramm f&uuml;r den Programmierplatz.</div>
+
 <h2 id="ba-fk07">7 &nbsp;NC-Ausgabe und Weg zur Maschine</h2>
 <p>Aufbau: <code>BEGIN PGM</code>, zwei <code>BLK FORM</code>-S&auml;tze, Kommentar, je Schritt <code>TOOL CALL</code>,
 <code>L Z+.. R0 FMAX M13</code>, <code>CYCL DEF</code> mit den Q-Zeilen, <code>CALL LBL n</code> (oder Musterzyklus),
@@ -2791,7 +2813,7 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 <ul>
 <li>Konturfr&auml;sen mit RL/RR, Konturzug 25 und SL-Zyklen 20&ndash;24 &mdash; n&auml;chstes Paket, braucht den XY-Kontureditor. Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
 <li>Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39, Abzeilen 230/231/233 &mdash; in dieser Reihenfolge danach.</li>
-<li>Eigene Bahnlogik mit Einzelsatz-Ausgabe je Schritt (Steuerungszyklus oder L/CC/C-S&auml;tze) &mdash; Paket C; darauf der Siemens-Post.</li>
+<li>Eigene Bahnlogik: die Bohrfamilie schreibt seit dem 12.09.2026 Einzels&auml;tze (Kap.&nbsp;6c); Taschen, Nuten und Zapfen als eigene Bahn, der XY-Kontureditor und die Konturbahnen folgen &mdash; darauf der Siemens-Post.</li>
 <li>XY-Kontureditor und DXF-Import f&uuml;r Fr&auml;skonturen &mdash; nach der Bahnlogik f&uuml;r Bohren und Taschen, vor den Konturbahnen.</li>
 <li>Winkelkopf / gekippte Ebene (PLANE, Zyklus 19) &mdash; Stufe 3, erst nach Daniels echten Programmen.</li>
 <li>Eigene Simulation auf den Bahnen aus Paket C &mdash; Paket D; bis dahin der Programm-Test der Steuerung.</li>
@@ -2981,7 +3003,7 @@ var F_PROFILE = {
       // Programmstart" ab (T241B). Beides gelb in fPruefen.
       ausdrehen:'pgst', senkenRueck:'pgst', tiefUni:'pgst', bohrfraesen:'pgst', gewindeSpan:'pgst', einlippen:'pgst', planfraesen:'pgst'
     },
-    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
+    termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; abends DZ6 (Einzelsaetze der eigenen Bahn, Paket C: 240/203/200/201 ohne Zyklus, 3:06 min) ebenso; alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
     offen:'Lauf an einer der drei Maschinen (Stand 340 49x): Softwarestand je Maschine (MOD), M13/M9 an der PLC, Option Synchron-Gewindebohren (207); danach Daniels eigene .H-Programme als Fixtures'
   }
 };
@@ -3142,6 +3164,9 @@ var F_FELDER = {
   s:          {name:'S Drehzahl', einheit:'U/min', ba:'ba-fk06-fs'},
   f:          {name:'F Vorschub', einheit:'mm/min', ba:'ba-fk06-fs'},
   kuehl:      {name:'Kühlmittel', typ:'wahl', wahl:[['an','an'],['aus','aus']], ba:'ba-fk06-fs'},
+  // Paket C: je Schritt Steuerungszyklus oder die eigene Bahn als Einzelsaetze
+  // (kein Q-Wort — die Wahl entscheidet, ob ueberhaupt ein Zyklus geschrieben wird).
+  ausgabe:    {name:'NC-Ausgabe', typ:'wahl', wahl:[['zyklus','Steuerungszyklus'],['einzel','Einzelsätze (eigene Bahn)']], ba:'ba-fk06c-ausgabe'},
   umfang:     {name:'Bearbeitung', typ:'wahl', zahlWahl:true, wahl:[['0','Schruppen + Schlichten'],['1','nur Schruppen'],['2','nur Schlichten']], ba:'ba-fk06b-umfang'},
   fTief:      {name:'FZ Vorschub Tiefenzustellung', einheit:'mm/min', ba:'ba-fk06b-fs'},
   fSchl:      {name:'FS Vorschub Schlichten', einheit:'mm/min', ba:'ba-fk06b-fs'},
@@ -3236,21 +3261,21 @@ var F_FELD_Q = {
 // automatisch wieder). feldText/feldWahl: Namen und Auswahlen, die je
 // Zyklus anders heissen (Nutlaenge, Bezugspunkt der runden Nut).
 var F_MASKE = {
-  zentrieren: {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Zentrierung','sc','zAuswahl','tiefe','zDurchm','q203','sc2','#!Verweilzeit','vUnten']},
-  bohren:     {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','zust','q203','sc2','#!Verweilzeiten','vOben','vUnten']},
-  tief:       {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','spanbrueche','minZust','rzSpan','#!Verweilzeiten & Rückzug','vOben','vUnten','fRueck']},
-  reiben:     {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','q203','sc2','#!Verweilzeit & Rückzug','vUnten','fRueck']},
+  zentrieren: {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Zentrierung','sc','zAuswahl','tiefe','zDurchm','q203','sc2','#!Verweilzeit','vUnten']},
+  bohren:     {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#!Verweilzeiten','vOben','vUnten']},
+  tief:       {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','spanbrueche','minZust','rzSpan','#!Verweilzeiten & Rückzug','vOben','vUnten','fRueck']},
+  reiben:     {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#!Verweilzeit & Rückzug','vUnten','fRueck']},
   // 206 schreibt die Steigung nicht als Q-Wort — sie steckt im Vorschub
   // F = P x S; das Feld bleibt in der Maske (ohneQ), damit die Kopplung
   // rechnen kann.
-  gewinde:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Gewinde','steigung','sc','tiefe','q203','sc2','#!Verweilzeit','vUnten'],
+  gewinde:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Gewinde','steigung','sc','tiefe','q203','sc2','#!Verweilzeit','vUnten'],
                feldText:{f:'F Vorschub = P × S (Ausgleichsfutter)'}, ohneQ:['steigung']},
   gewindeGS:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','kuehl','#Gewinde','steigung','sc','tiefe','q203','sc2']},
   gewindeSpan:{felder:['#Werkzeug & Schnittwerte','t','muster','s','kuehl','#Gewinde','steigung','q403','sc','tiefe','q203','sc2','#Spanbruch','q257','rzSpan','#!Spindel','spWinkel'],
                feldText:{spWinkel:'Spindelwinkel vor dem Gewinde'}},
-  ausdrehen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','q203','sc2','#Freifahren am Grund','freifahr','spWinkel','#!Verweilzeit & Rückzug','vUnten','fRueck']},
+  ausdrehen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#Freifahren am Grund','freifahr','spWinkel','#!Verweilzeit & Rückzug','vUnten','fRueck']},
   senkenRueck:{felder:['#Werkzeug & Schnittwerte','t','muster','s','kuehl','#Senkung von unten','sc','q249','q250','q251','q252','q203','sc2','#Vorschübe & Verweilzeit','fVor','fSenk','vSenk','#Freifahren','freifahr','spWinkel']},
-  tiefUni:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','minZust','q257','rzSpan','q258','q259','#!Verweilzeit & Vorposition','vUnten','q379','fVor']},
+  tiefUni:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','minZust','q257','rzSpan','q258','q259','#!Verweilzeit & Vorposition','vUnten','q379','fVor']},
   bohrfraesen:{felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fraesart','kuehl','#Bohrung','sc','tiefe','q335','q342','q334','q203','sc2']},
   einlippen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','#Bohrung','sc','tiefe','q203','sc2','#Spindel & Kühlung','q426','q427','q428','q429','q430','#!Vorposition, Rückzug & Verweilen','q379','fVor','fRueck','vUnten','q435']},
   tascheR:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','#Form','l1','l2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
@@ -3551,7 +3576,7 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
   const k = prog.kopf, t = (prog.werkzeuge || []).find(w => w.nr === tNr) || {};
   const s = {
     typ:'bohren', art:art || 'bohren', t:tNr || (t.nr || 0), muster:(musterIdx == null ? 0 : musterIdx), aktiv:true,
-    s:t.s || 1000, f:t.f || 100, kuehl:'an',
+    s:t.s || 1000, f:t.f || 100, kuehl:'an', ausgabe:'zyklus',
     sc:k.sc, sc2:k.sc2, q203:k.oberflaeche,
     tiefe:-10, zust:0, vOben:0, vUnten:0,
     // Tieflochbohren (203)
@@ -3727,6 +3752,176 @@ function fMusterZyklusDef(m, s){
 }
 
 // ---------------------------------------------------------------------
+// BAHNLOGIK (Paket C, 12.09.2026 nachts, Daniels Wunsch: "eine eigene
+// Bahnlogik fuers Fraesen, damit die App neben den Steuerungszyklen auch
+// ganz normale NC-Einzelsaetze ausgeben kann — und spaeter die eigene
+// Simulation"). Eine BAHN ist eine Liste neutraler Saetze, absolut in mm:
+//   {a:'eil', x,y,z}          Eilgang, nur die genannten Achsen
+//   {a:'vor', x,y,z, f}       Vorschub in mm/min
+//   {a:'verweil', t}          Verweilzeit in s
+//   {a:'kom', text}           Kommentar
+// eil/vor tragen optional m (M3/M4/M13 wirken am Satzanfang, M5/M9 am
+// Satzende — Klartext-Handbuch 670 387-12 Kap. 10.2). Der Klartext-
+// Schreiber fBahnKlartext macht daraus L-Saetze und CYCL DEF 9; ein
+// Siemens-Schreiber macht spaeter G0/G1/G4 aus DERSELBEN Bahn, und die
+// eigene Simulation (Paket D) faehrt sie ab. Die Bahn je Schritt folgt
+// dem "Zyklusablauf" des Zyklenhandbuchs 670 388-12 Punkt fuer Punkt
+// (240 S. 77, 200 S. 79, 201 S. 81, 202 S. 83, 203 S. 87, 205 S. 95,
+// 206 S. 111): der Einzelsatz-Schritt verhaelt sich wie der Zyklus, nur
+// dass jeder Satz im Programm steht — an jeder Steuerung lesbar, und
+// Daniel sieht im Einzelsatz, was die Maschine tut.
+// Was BEWUSST beim Zyklus bleibt: 207/209 (Synchronspindel — ohne den
+// Zyklus gibt es kein Gewindebohren ohne Ausgleichsfutter), 204 und 202
+// mit Freifahren (Spindel-Orientierung M19 ist maschinenspezifisch),
+// 208 (Helix, kommt mit den Taschenbahnen), 241 (Spindel-/Kuehlmittel-
+// Folge des Einlippenbohrens).
+// ---------------------------------------------------------------------
+var F_BAHN_ARTEN = ['zentrieren', 'bohren', 'tief', 'tiefUni', 'reiben', 'gewinde', 'ausdrehen'];
+function fBahnSchritt(s, tool, prog, punkte){
+  const art = s.art, warn = [], B = [];
+  const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  if(F_BAHN_ARTEN.indexOf(art) < 0) return nein('fuer ' + ((F_ZYKLEN[art] || {}).wort || art) + ' gibt es noch keine eigene Bahn');
+  if(!punkte || !punkte.length) return nein('keine Position');
+  const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
+  if(!(sc > 0)) return nein('Sicherheitsabstand fehlt');
+  const zSC = fRund(z0 + sc), zSC2 = fRund(z0 + sc2);
+  const f = +s.f || 0, fR = (+s.fRueck > 0) ? +s.fRueck : f;
+  let tiefe = +s.tiefe || 0;
+  if(art === 'zentrieren' && s.zAuswahl === 'durchmesser'){
+    // Zentrieren auf Durchmesser: die Tiefe folgt aus dem Spitzenwinkel des
+    // Werkzeugs (T-ANGLE der TOOL.T; ohne Angabe 90 Grad wie der NC-Anbohrer).
+    // Der Zyklus 240 rechnet dasselbe mit dem T-ANGLE der Maschinentabelle.
+    const sw = (tool && +tool.spitze > 0) ? +tool.spitze : 90;
+    tiefe = -fRund((+s.zDurchm || 0) / 2 / Math.tan(sw / 2 * Math.PI / 180));
+    warn.push('Zentriertiefe ' + tiefe + ' aus ⌀' + s.zDurchm + ' und Spitzenwinkel ' + sw + ' Grad gerechnet — der Zyklus 240 nimmt den T-ANGLE der Maschinentabelle.');
+  }
+  if(!(tiefe < 0)) return nein('Tiefe fehlt');
+  if(!(f > 0)) return nein('Vorschub fehlt');
+  if(art === 'ausdrehen' && Math.round(+s.freifahr || 0) !== 0) return nein('Ausdrehen mit Freifahren braucht die Spindel-Orientierung des Zyklus 202 — Einzelsaetze nur ohne Freifahren');
+  const zT = fRund(z0 + tiefe);
+  const eil = (o) => B.push(Object.assign({a:'eil'}, o));
+  const vor = (o) => B.push(Object.assign({a:'vor'}, o));
+  const verweil = (t) => { if(+t > 0) B.push({a:'verweil', t:fRund(t)}); };
+  punkte.forEach((p) => {
+    // XY im Eilgang auf der Hoehe, auf der das Werkzeug steht (sichere Hoehe
+    // beim ersten Punkt, SC2 danach — wie der Zyklusaufruf mit M99 und Q204),
+    // dann Z auf den Sicherheitsabstand.
+    eil({x:fRund(p.x), y:fRund(p.y)});
+    eil({z:zSC});
+    if(art === 'zentrieren'){
+      // 240: mit F bis Tiefe, verweilen, FMAX zurueck
+      vor({z:zT, f:f}); verweil(s.vUnten); eil({z:zSC});
+    } else if(art === 'reiben' || art === 'ausdrehen'){
+      // 201/202: mit F bis Tiefe, verweilen, im Vorschub Rueckzug (0 = F) heraus
+      vor({z:zT, f:f}); verweil(s.vUnten); vor({z:zSC, f:fR});
+    } else if(art === 'gewinde'){
+      // 206: in einem Zug auf Tiefe (F = P x S), Drehrichtung umkehren — M4
+      // wirkt am SATZANFANG, also dreht die Spindel um, bevor der Satz
+      // zurueckfaehrt — am Faden heraus, auf SC wieder M3 (mit dem Eilgang
+      // auf SC2). Das Ausgleichsfutter faengt die Umkehrzeit ab, wie beim
+      // Zyklus.
+      vor({z:zT, f:f}); verweil(s.vUnten); vor({z:zSC, f:f, m:4});
+      eil({z:zSC2, m:3});
+      return;
+    } else {
+      fBahnLeiter(B, s, art, z0, zT, zSC, sc, f, fR);
+    }
+    eil({z:zSC2});
+  });
+  return {ok:true, bahn:B, warn:warn, zT:zT};
+}
+// Zustellleiter fuer 200 / 203 / 205 (Zyklusablauf S. 79 / 87 / 95):
+// 200  bohrt je Zustellung, FMAX auf SC, Verweilzeit oben, FMAX bis SC ueber
+//      die letzte Tiefe, am Grund Verweilzeit unten, FMAX heraus.
+// 203  wie 200, aber die Zustellung nimmt je Schritt um DF ab (nie unter
+//      DMIN); mit Spanbruechen zieht sie nur um V1 zurueck (im Vorschub
+//      Rueckzug, 0 = F) und erst nach der eingegebenen Zahl Spanbrueche ganz
+//      auf SC (Entspanen); am Ende im Vorschub Rueckzug heraus.
+// 205  wie 203, Spanbruch aber nach je "Bohrtiefe bis Spanbruch" mm INNERHALB
+//      der Zustellung (Rueckzug V1 im Eilgang), Entspanen zwischen den
+//      Zustellungen im Eilgang, Wiederanfahrt bis auf den Vorhalteabstand
+//      (oben beim ersten, unten beim letzten Mal, dazwischen linear),
+//      vertiefter Startpunkt mit dem Positioniervorschub; am Ende FMAX heraus
+//      (der 205 hat kein Vorschub-Rueckzug-Wort).
+function fBahnLeiter(B, s, art, z0, zT, zSC, sc, f, fR){
+  const eil = (o) => B.push(Object.assign({a:'eil'}, o));
+  const vor = (o) => B.push(Object.assign({a:'vor'}, o));
+  const verweil = (t) => { if(+t > 0) B.push({a:'verweil', t:fRund(t)}); };
+  const gesamt = fRund(z0 - zT);
+  const zust = (+s.zust > 0) ? +s.zust : gesamt;
+  const abnahme = (art === 'bohren') ? 0 : Math.max(0, +s.abnahme || 0);
+  const minZust = Math.max(0.01, +s.minZust || 0);
+  const rz = Math.max(0, +s.rzSpan || 0);
+  let zAkt = z0;
+  if(art === 'tiefUni' && +s.q379 > 0){
+    zAkt = fRund(z0 - (+s.q379));
+    vor({z:fRund(zAkt + sc), f:(+s.fVor > 0) ? +s.fVor : f});
+  }
+  const spanN = (art === 'tief') ? Math.max(0, Math.round(+s.spanbrueche || 0)) : 0;   // 203: Spanbrueche bis Entspanen
+  const spanT = (art === 'tiefUni') ? Math.max(0, +s.q257 || 0) : 0;                    // 205: Bohrtiefe bis Spanbruch
+  // Zustellungen vorab (Abnahme, Mindestzustellung): der 205 haengt seinen
+  // Vorhalteabstand an der Zaehlung der Wiederanfahrten — die erste nimmt den
+  // oberen Wert (Q258), die letzte den unteren (Q259), dazwischen linear.
+  const stufen = []; { let zz = zAkt, j = 0; while(zz > zT + 1e-9){ zz = Math.max(zT, fRund(zz - Math.max(minZust, zust - j * abnahme))); stufen.push(zz); j++; } }
+  const nWieder = Math.max(1, stufen.length - 1);
+  let i = 0, spanZaehler = 0, imLoch = false;   // imLoch: nach einem Spanbruch steht das Werkzeug in der Bohrung
+  while(zAkt > zT + 1e-9){
+    const d = Math.max(minZust, zust - i * abnahme);
+    const zNeu = Math.max(zT, fRund(zAkt - d));
+    if(i > 0 && !imLoch){
+      // Wiederanfahrt im Eilgang: 200/203 bis SC ueber die letzte Tiefe, 205 bis
+      // auf den Vorhalteabstand (oben -> unten linear ueber die Zustellungen).
+      let vorhalte = sc;
+      if(art === 'tiefUni'){ const o = +s.q258 || 0, u = +s.q259 || 0; vorhalte = fRund(o + (u - o) * (nWieder > 1 ? (i - 1) / (nWieder - 1) : 0)); }
+      eil({z:fRund(zAkt + vorhalte)});
+    }
+    if(spanT > 0 && art === 'tiefUni'){
+      let zz = zAkt;
+      while(zz > zNeu + 1e-9){
+        const zs = Math.max(zNeu, fRund(zz - spanT));
+        vor({z:zs, f:f});
+        if(zs > zNeu + 1e-9 && rz > 0) eil({z:fRund(zs + rz)});
+        zz = zs;
+      }
+    } else vor({z:zNeu, f:f});
+    zAkt = zNeu; i++;
+    if(zAkt > zT + 1e-9){
+      if(art === 'tief' && spanN > 0 && rz > 0 && spanZaehler < spanN){
+        vor({z:fRund(zAkt + rz), f:fR}); spanZaehler++; imLoch = true;
+      } else {
+        if(art === 'tief') vor({z:zSC, f:fR}); else eil({z:zSC});
+        verweil(s.vOben); spanZaehler = 0; imLoch = false;
+      }
+    }
+  }
+  verweil(s.vUnten);
+  if(art === 'tief') vor({z:zSC, f:fR}); else eil({z:zSC});
+}
+// Klartext aus einer Bahn: L-Saetze mit R0, FMAX bzw. F, M-Wort am Satz;
+// Verweilzeit als Zyklus 9 (zwei Saetze, Handbuch 670 388-12 S. 309).
+function fBahnKlartext(B){
+  const out = [];
+  const ach = (m) => (m.x != null ? ' X' + klNum(m.x) : '') + (m.y != null ? ' Y' + klNum(m.y) : '') + (m.z != null ? ' Z' + klNum(m.z) : '');
+  const mw = (m) => m.m ? ' M' + m.m : '';
+  B.forEach(m => {
+    if(m.a === 'eil') out.push('L' + ach(m) + ' R0 FMAX' + mw(m));
+    else if(m.a === 'vor') out.push('L' + ach(m) + ' R0 F' + fRund(m.f) + mw(m));
+    else if(m.a === 'verweil'){ out.push('CYCL DEF 9.0 VERWEILZEIT'); out.push('CYCL DEF 9.1 V.ZEIT ' + fRund(m.t)); }
+    else if(m.a === 'kom') out.push('; ' + String(m.text).toUpperCase().replace(/[^A-Z0-9 .,\-:=+]/g, ''));
+  });
+  return out;
+}
+// Kurzbild einer Bahn fuer Pruefstand und Fehlersuche ("eil Z2|vor Z-8 F150|...").
+function fBahnKurz(B){
+  return B.map(m => {
+    if(m.a === 'verweil') return 'verweil ' + m.t;
+    if(m.a === 'kom') return 'kom';
+    const t = [m.a, m.x != null ? 'X' + m.x : '', m.y != null ? 'Y' + m.y : '', m.z != null ? 'Z' + m.z : '', m.a === 'vor' ? 'F' + m.f : '', m.m ? 'M' + m.m : ''].filter(Boolean);
+    return t.join(' ');
+  }).join('|');
+}
+
+// ---------------------------------------------------------------------
 // Programmname pruefen: Dateiname = Programmname (BEGIN/END PGM).
 // ---------------------------------------------------------------------
 function fName(prog){
@@ -3787,20 +3982,35 @@ function fProgrammSchreiben(prog, opt){
     // M13 = Spindel rechts + Kuehlmittel EIN in einem Wort (Standard-M der
     // TNC); ohne Kuehlmittel nur M3.
     satz('L Z' + klNum(rz) + ' R0 FMAX ' + (s.kuehl === 'aus' ? 'M3' : 'M13'));
-    const def = fZyklusDef(s, tool, k.stand || '07');
-    if(def){ satz(def[0]); for(let i = 1; i < def.length; i++) zeilen.push(def[i]); }
-    if(z && z.eigenePosition){
-      // Planfraesen 232: Startpunkt steckt im Zyklus, kein Bohrbild — ein
-      // CYCL CALL direkt hinter der Definition (CALL-aktiv).
-      satz('CYCL CALL');
-    } else if(m && m.ausgabe === 'zyklus' && (m.typ === 'kreis' || m.typ === 'reihe')){
-      const md = fMusterZyklusDef(m, s);
-      satz(md[0]); for(let i = 1; i < md.length; i++) zeilen.push(md[i]);
-      warn.push('Schritt ' + (si + 1) + ': Musterzyklus ' + (m.typ === 'kreis' ? '220' : '221') + ' nach Handbuch (DEF-aktiv, ruft den Bohrzyklus selbst) — im Programm-Test die Punktfolge ansehen.');
-    } else if(m){
-      let nr = lblNr.get(s.muster);
-      if(!nr){ nr = lblNr.size + 1; lblNr.set(s.muster, nr); lblListe.push({nr:nr, m:m}); }
-      satz('CALL LBL ' + nr);
+    // Paket C: wuenscht der Schritt Einzelsaetze und hat seine Familie eine
+    // eigene Bahn, stehen statt CYCL DEF + CALL LBL die Saetze der Bahn an
+    // jeder Position. Sonst der Zyklus — mit Ansage, wenn der Wunsch nicht
+    // erfuellbar war (stumm zurueckfallen waere eine Falle).
+    let einzel = null;
+    if(s.ausgabe === 'einzel' && z && !z.eigenePosition && m){
+      const bh = fBahnSchritt(s, tool, prog, fMusterPunkte(m));
+      if(bh.ok) einzel = bh; else warn.push('Schritt ' + (si + 1) + ': Einzelsaetze nicht moeglich — ' + bh.grund + '. Steuerungszyklus geschrieben.');
+    }
+    if(einzel){
+      satz('; EINZELSAETZE STATT ZYKLUS ' + z.nr + ' - EIGENE BAHN DER APP');
+      einzel.warn.forEach(w => warn.push('Schritt ' + (si + 1) + ': ' + w));
+      fBahnKlartext(einzel.bahn).forEach(l => satz(l));
+    } else {
+      const def = fZyklusDef(s, tool, k.stand || '07');
+      if(def){ satz(def[0]); for(let i = 1; i < def.length; i++) zeilen.push(def[i]); }
+      if(z && z.eigenePosition){
+        // Planfraesen 232: Startpunkt steckt im Zyklus, kein Bohrbild — ein
+        // CYCL CALL direkt hinter der Definition (CALL-aktiv).
+        satz('CYCL CALL');
+      } else if(m && m.ausgabe === 'zyklus' && (m.typ === 'kreis' || m.typ === 'reihe')){
+        const md = fMusterZyklusDef(m, s);
+        satz(md[0]); for(let i = 1; i < md.length; i++) zeilen.push(md[i]);
+        warn.push('Schritt ' + (si + 1) + ': Musterzyklus ' + (m.typ === 'kreis' ? '220' : '221') + ' nach Handbuch (DEF-aktiv, ruft den Bohrzyklus selbst) — im Programm-Test die Punktfolge ansehen.');
+      } else if(m){
+        let nr = lblNr.get(s.muster);
+        if(!nr){ nr = lblNr.size + 1; lblNr.set(s.muster, nr); lblListe.push({nr:nr, m:m}); }
+        satz('CALL LBL ' + nr);
+      }
     }
     satz('L Z' + klNum(rz) + ' R0 FMAX ' + (letzter ? 'M2' : (s.kuehl === 'aus' ? 'M5' : 'M9')));
   });
@@ -4084,12 +4294,28 @@ function fDemoBohren2(){
   p.schritte = [pl, b1, g9, t5, bf, au, rs, el];
   return p;
 }
+// DZ6 = die Leiste DZ2 als Einzelsaetze (Paket C): dieselben vier Schritte,
+// jeder als eigene Bahn statt Zyklus — das Testprogramm fuer den
+// Programmierplatz (Zentrieren 240, Universal-Bohren 203 mit Spanbruch,
+// Bohren 200, Reiben 201 mit Verweilzeit). EINE Bohrung je Schritt: der
+// Wandler der Demo 606 424 (ascbin) schreibt nach Satz 99 END PGM — die
+// volle Reihe (255 Saetze) kam am 12.09.2026 bei Satz 100 abgeschnitten
+// zurueck (Daniels Hinweis auf die 100-Satz-Grenze der Demo). Mit einer
+// Bohrung sind es 91 Saetze.
+function fDemoEinzel(){
+  const p = fDemoLeiste();
+  p.kopf.name = 'DZ6';
+  p.muster[0] = {name:'Bohrung links', typ:'punkte', punkte:[{x:20, y:20}], ausgabe:'punkte'};
+  p.schritte.forEach(s => { s.ausgabe = 'einzel'; });
+  return p;
+}
 var F_DEMOS = [
   {id:'flansch', name:'Flanschplatte (Lochkreis + M8-Ecken)', lade:fDemoFlansch},
   {id:'leiste',  name:'Leiste (Tieflochbohren + Reiben)',    lade:fDemoLeiste},
   {id:'muster',  name:'Musterzyklen 220/221 (Gewinde GS)',   lade:fDemoMusterzyklen},
   {id:'taschen', name:'Taschen, Nuten, Zapfen (251-257)',    lade:fDemoTaschen},
-  {id:'bohren2', name:'Planfraesen 232 + Bohrzyklen 202/204/205/208/209/241', lade:fDemoBohren2}
+  {id:'bohren2', name:'Planfraesen 232 + Bohrzyklen 202/204/205/208/209/241', lade:fDemoBohren2},
+  {id:'einzel',  name:'Einzelsaetze: Leiste als eigene Bahn ohne Zyklen (eine Bohrung je Schritt)', lade:fDemoEinzel}
 ];
 
 // Merkmale der Fraesausgabe fuer die NC-Ansicht: Status je Zyklusfamilie.
@@ -4119,6 +4345,7 @@ function fMerkmale(profilId){
     z('lbl',        'Positionsmuster als Unterprogramm LBL n mit L X Y R0 FMAX M99 je Punkt (Vorgabe)'),
     z('muster220',  'Lochkreis als Zyklus 220 (Option je Muster; Q246 bei Q247 ungleich 0 ohne Bedeutung)'),
     z('muster221',  'Reihe/Gitter als Zyklus 221 (Option je Muster)'),
+    {t:'Einzelsaetze statt Zyklus (Paket C, je Schritt waehlbar): Zentrieren, Bohren, Tieflochbohren 203/205, Reiben, Gewinde mit Ausgleichsfutter, Ausdrehen ohne Freifahren als eigene Bahn nach dem Zyklusablauf des Handbuchs — L-Saetze mit FMAX/F, Verweilzeit als Zyklus 9, Drehrichtung M4/M3; DZ6 am Programmierplatz durchgelaufen (12.09.2026, 91 Saetze — der Demo-Wandler nimmt hoechstens 100)', s:'pgst'},
     {t:'Programmrahmen: BEGIN/END PGM, BLK FORM 0.1/0.2, TOOL CALL n Z S, M13/M3, M9, M2, Kommentarsaetze, ~-Fortsetzung, CR LF, Name = Dateiname', s:'pgst'},
     {t:'Werkzeugtabelle im TOOL.T-Stil: Import der ASCII-TOOL.T (Spaltenstarts aus der Kopfzeile, T0 und leere Plaetze uebersprungen; gelesen: die Tabelle des Programmierplatzes mit 49 Spalten) und Export als TOOL.T im Layout 606 42x — der Export lief am Programmierplatz durch ascbin/binasc und kam mit R, NAME, TYP zurueck', s:'pgst'},
     {t:'Weg in die TNC: .H-Dateien nur ueber die TNC-Dateiverwaltung (USB) oder TNCremo einlesen — die Steuerung wandelt sie dabei ins Binaerformat; eine per Explorer in ein TNC-Laufwerk kopierte Datei quittiert sie mit "Dateiformat geaendert"', s:'pgst'},
@@ -4344,7 +4571,7 @@ function fArbeitsplanRender(){
     const detail = (z.eigenePosition ? 'Fläche im Zyklus' : (m ? esc(m.name) : '<span style="color:#c0392b">kein Bohrbild</span>')) +
       (z.fraes ? ' · ' + esc(fFormText(s)) : '') +
       (z.eigenePosition ? '' : (z.ohneTiefe ? ' · Senkung +' + (s.q249 || 0) : ' · Z1 ' + s.tiefe)) + (/^(gewinde|gewindeGS|gewindeSpan)$/.test(s.art) ? ' · P' + s.steigung : '') +
-      ' · F' + s.f + ' S' + s.s + (s.kuehl === 'aus' ? ' · trocken' : '');
+      ' · F' + s.f + ' S' + s.s + (s.kuehl === 'aus' ? ' · trocken' : '') + (s.ausgabe === 'einzel' ? ' · Einzelsätze' : '');
     h += '<div class="ap-row' + sel('schritt', i) + (s.aktiv === false ? ' ap-aus' : '') + '" data-sidx="' + i + '">' +
          '<div class="ap-icon zyklus" title="' + esc(z.wort || s.art) + (z.nr ? ' — iTNC Zyklus ' + z.nr : '') + '">' + fIcon(s.art) + '</div>' +
          '<div class="ap-name" title="' + esc(z.wort) + (t ? ' — T' + s.t + ' ' + esc(t.name) : '') + '">' + esc(z.kurz || z.wort) + ' T' + s.t + '</div>' +
@@ -4356,7 +4583,7 @@ function fArbeitsplanRender(){
          '<button class="ap-edit" data-es="' + i + '">✎</button><button class="ap-del" data-ds="' + i + '">✕</button></div>';
   });
   if(!fProg.schritte.length && !fProg.muster.length){
-    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen f&uuml;nf Testvorlagen.</div>';
+    h += '<div style="padding:14px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;">Noch leer. Rechts <b>Positionen</b> f&uuml;r ein Bohrbild anlegen, dann <b>Zentrieren</b>, <b>Bohren</b> oder <b>Gewinde</b> darauf setzen. Unter <b>Programme</b> liegen sechs Testvorlagen.</div>';
   }
   body.innerHTML = h;
 }
@@ -5135,6 +5362,7 @@ function fProgListe(){
   on('btnDemoMuster', ()=>{ fProgrammSetzen(fDemoMusterzyklen(), 'DZ3 geladen: Gitter als Zyklus 221, Lochkreis als Zyklus 220, Gewinde GS 207.'); maskZu('maskProgramme'); });
   on('btnDemoTaschen', ()=>{ fProgrammSetzen(fDemoTaschen(), 'DZ4 geladen: Rechteck- und Kreistasche, Nut, runde Nut, Rechteck- und Kreiszapfen (Zyklen 251-257).'); maskZu('maskProgramme'); });
   on('btnDemoBohren2', ()=>{ fProgrammSetzen(fDemoBohren2(), 'DZ5 geladen: Planfraesen 232, Bohren 200, Gewinde Spanbruch 209, Tiefbohren 205, Bohrfraesen 208, Ausdrehen 202, Rueckwaerts-Senken 204, Einlippen 241.'); maskZu('maskProgramme'); });
+  on('btnDemoEinzel', ()=>{ fProgrammSetzen(fDemoEinzel(), 'DZ6 geladen: die Leiste als Einzelsaetze — Zentrieren, Tieflochbohren mit Spanbruch, Bohren, Reiben als eigene Bahn ohne Zyklus, eine Bohrung je Schritt.'); maskZu('maskProgramme'); });
   on('btnCloseProgs', ()=>maskZu('maskProgramme'));
 }
 
