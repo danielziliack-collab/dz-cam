@@ -2349,7 +2349,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
         <div class="mask-head"><span class="mtitel">Programmkopf</span><button class="ansichtBtn" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="Kachel- oder Zeilenansicht">☰</button></div>
         <div class="mask-body">
           <div class="msec">Programm</div>
-          <div class="mrow"><label data-ba="ba-fk03-name">Name (= Datei .H)</label><input type="text" id="fkName" value="DZ1" maxlength="16" autocapitalize="characters" style="width:150px;"></div>
+          <div class="mrow"><label data-ba="ba-fk03-name">Name (= Datei .H)</label><input type="text" id="fkName" value="DZ1" maxlength="25" autocapitalize="characters" style="width:150px;"></div>
           <div class="mrow"><label data-ba="ba-fk03-masch">Zielmaschine</label><select id="fkProfil" class="tool-select" style="width:170px;"><option value="HEIDENHAIN_ITNC530" selected>Heidenhain iTNC 530</option></select></div>
           <div class="msec">Rohteil — BLK FORM (Werkzeugachse Z)</div>
           <div class="mrow"><label data-ba="ba-fk03-blk">MIN-Punkt X / Y</label><input type="number" step="any" id="fkX0" value="0" style="width:51px;"><input type="number" step="any" id="fkY0" value="0" style="width:51px;"><span class="unit unit2"><i>X</i><i>Y</i></span></div>
@@ -2541,9 +2541,13 @@ Er ist kein CAM f&uuml;r Freiformfl&auml;chen &mdash; daf&uuml;r bleibt hyperMIL
 beim einfachen Teil: Programm am Handy oder Laptop anlegen, als .H-Datei auf den Stick, an der
 Steuerung Programm-Test, fertig.</p>
 <div class="ba-merk"><b>Stand Stufe 1 (12.09.2026): NACH HANDBUCH gebaut, an der Maschine noch NICHT gepr&uuml;ft.</b>
-Kein einziger Satz dieser App ist bisher durch die iTNC gelaufen. Jedes erzeugte Programm tr&auml;gt deshalb im
-Kopf den Hinweis auf den Programm-Test. Erst wenn der Test an der Steuerung ohne Meldung durchl&auml;uft
-und ein Teil gefahren ist, wandert ein Zyklus in den Merkmalen von &bdquo;nach Handbuch&ldquo; auf &bdquo;belegt&ldquo;.</div>
+Kein einziger Satz dieser App ist bisher durch die iTNC gelaufen. Die Q-Listen, Zyklustitel und die Schreibweise
+der Werte sind an den Beispiels&auml;tzen der Heidenhain-Handb&uuml;cher (Klartext-Dialog 670&nbsp;387 und
+Zyklenprogrammierung 670&nbsp;388, Software-St&auml;nde 340&nbsp;49x-02, -06 und -07) gepr&uuml;ft &mdash; f&uuml;r die
+Zyklen 240, 200, 201, 203, 206, 207, 220 und 221 schreiben alle drei St&auml;nde dieselben Listen. Jedes erzeugte
+Programm tr&auml;gt trotzdem im Kopf den Hinweis auf den Programm-Test. Erst wenn der Test an der Steuerung ohne
+Meldung durchl&auml;uft und ein Teil gefahren ist, wandert ein Zyklus in den Merkmalen von &bdquo;am Handbuch
+belegt&ldquo; auf &bdquo;belegt&ldquo;.</div>
 <p>Drei Grunds&auml;tze gelten wie beim Drehteil: eine Datei, offline; die NC-Ausgabe ist heilig (eigener
 Pr&uuml;fstand gegen eingefrorene Programme); gemessen, nicht versprochen.</p>
 
@@ -2561,8 +2565,8 @@ Q-Nummern des TNC-Dialogs.</li>
 <h2 id="ba-fk03">3 &nbsp;Programmkopf</h2>
 <dl>
 <dt id="ba-fk03-name">Programmname</dt><dd>Wird zu <code>BEGIN PGM NAME MM</code> und zum Dateinamen <code>NAME.H</code>. Nur A&ndash;Z, 0&ndash;9,
-Unterstrich und Bindestrich, h&ouml;chstens 16 Zeichen &mdash; die sichere Grenze &auml;lterer TNC-St&auml;nde. Umlaute
-werden umgeschrieben.</dd>
+Unterstrich und Bindestrich, h&ouml;chstens 25 Zeichen (Handbuch 670&nbsp;387-12, S.&nbsp;122: dar&uuml;ber zeigt die TNC den
+Namen nicht mehr vollst&auml;ndig an). Umlaute werden umgeschrieben.</dd>
 <dt id="ba-fk03-masch">Zielmaschine</dt><dd>Heute nur die iTNC&nbsp;530 (Klartext). Die Sinumerik 840D powerline kommt als zweites Profil,
 sobald echte MPF-Dateien dieser Maschine vorliegen.</dd>
 <dt id="ba-fk03-blk">BLK FORM</dt><dd>Rohteil als Quader: MIN-Punkt (<code>BLK FORM 0.1 Z X Y Z</code>) und MAX-Punkt (<code>BLK FORM 0.2</code>).
@@ -2759,7 +2763,11 @@ var F_VERSION = 'Stufe 1 · 12.09.2026';
 // wandern die Zyklen einzeln nach "maschine".
 var F_STATUS = {
   maschine : {txt:'an der iTNC 530 im Programm-Test belegt', cls:'ok',  grp:'belegt'},
-  handbuch : {txt:'nach Klartext-Handbuch, an der Steuerung zu pruefen', cls:'ann', grp:'offen'},
+  // Seit dem 12.09.2026 liegen die Handbuecher der Staende 340 49x-02, -06
+  // und -07 im Ordner heidenhain/ (Daniels Freigabe) — die Q-Listen und
+  // Titel sind an den Beispielsaetzen des Zyklenhandbuchs 670 388-12
+  // geprueft, die Ausgabe 02 von 2006 schreibt dieselben Listen.
+  handbuch : {txt:'am Klartext-Handbuch belegt (670 387/388, Staende 02 bis 07), an der Steuerung zu pruefen', cls:'ann', grp:'offen'},
   gesperrt : {txt:'nicht gebaut', cls:'sperr', grp:'offen'}
 };
 
@@ -2773,16 +2781,19 @@ var F_PROFILE = {
   HEIDENHAIN_ITNC530: {
     id:'HEIDENHAIN_ITNC530', name:'Heidenhain iTNC 530 (Klartext)',
     dialekt:'klartext', endung:'.H', zeilenende:'\r\n',
-    // Dateiname = Programmname. 16 Zeichen sind die sichere Grenze
-    // aelterer TNC-Staende; Grossbuchstaben, Ziffern, _ und -.
-    nameMax:16, nameMuster:/^[A-Z0-9_\-]{1,16}$/,
+    // Dateiname = Programmname. Handbuch 670 387-12 S. 122 (und schon die
+    // Ausgabe 02): "Die Laenge von Dateinamen sollte 25 Zeichen nicht
+    // ueberschreiten", erlaubt sind Buchstaben, Ziffern, Punkt, _ und -.
+    // Die App bleibt bei Grossbuchstaben, Ziffern, _ und - (Punkt trennt
+    // die Endung).
+    nameMax:25, nameMuster:/^[A-Z0-9_\-]{1,25}$/,
     zyklen:{
       zentrieren:'handbuch', bohren:'handbuch', tief:'handbuch',
       reiben:'handbuch', gewinde:'handbuch', gewindeGS:'handbuch',
       muster220:'handbuch', muster221:'handbuch', lbl:'handbuch'
     },
-    termine:'noch kein Termin — Stufe 1 nach Handbuch gebaut (12.09.2026)',
-    offen:'Programm-Test an der Steuerung mit DZ1.H, DZ2.H, DZ3.H; danach Daniels eigene .H-Programme als Fixtures'
+    termine:'noch kein Termin — Stufe 1 am 12.09.2026 gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft (Q-Listen und Beispielsaetze wortgleich)',
+    offen:'Programm-Test an der Steuerung mit DZ1.H, DZ2.H, DZ3.H; danach Daniels eigene .H-Programme als Fixtures; Softwarestand je Maschine (MOD) notieren'
   }
 };
 
@@ -2806,7 +2817,7 @@ var F_Q = {
   Q203:'KOOR. OBERFLAECHE',  Q204:'2. SICHERHEITS-ABST.', Q205:'MIN. ZUSTELL-TIEFE',
   Q206:'VORSCHUB TIEFENZ.',  Q208:'VORSCHUB RUECKZUG',    Q210:'VERWEILZEIT OBEN',
   Q211:'VERWEILZEIT UNTEN',  Q212:'ABNAHMEBETRAG',        Q213:'ANZ. SPANBRUECHE',
-  Q239:'GEWINDESTEIGUNG',    Q256:'RZ BEI SPANBRUCH',     Q343:'AUSWAHL TIEFE/DURCHM.',
+  Q239:'GEWINDESTEIGUNG',    Q256:'RZ BEI SPANBRUCH',     Q343:'AUSWAHL DURCHM./TIEFE',
   Q344:'DURCHMESSER',
   Q216:'MITTE 1. ACHSE',     Q217:'MITTE 2. ACHSE',       Q244:'TEILKREIS-DURCHM.',
   Q245:'STARTWINKEL',        Q246:'ENDWINKEL',            Q247:'WINKELSCHRITT',
@@ -2829,20 +2840,38 @@ var F_ZYKLEN = {
     q:['Q200','Q201','Q206','Q211','Q208','Q203','Q204']},
   gewinde:   {nr:206, titel:'GEWINDEBOHREN NEU', wort:'Gewindebohren (Ausgleichsfutter)', kurz:'Gewinde AF',
     q:['Q200','Q201','Q206','Q211','Q203','Q204']},
-  gewindeGS: {nr:207, titel:'GEWINDEBOHREN GS NEU', wort:'Gewindebohren (Synchron, ohne Ausgleichsfutter)', kurz:'Gewinde GS',
+  // Titel wie im Beispielsatz des Handbuchs (670 388-12, S. 115): die
+  // Uebersicht nennt den Zyklus "GEWINDEBOHREN GS NEU", der Satz traegt
+  // die Kurzform.
+  gewindeGS: {nr:207, titel:'GEW.-BOHREN GS NEU', wort:'Gewindebohren (Synchron, ohne Ausgleichsfutter)', kurz:'Gewinde GS',
     q:['Q200','Q201','Q239','Q203','Q204']}
 };
 var F_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS'];
 
 // ---------------------------------------------------------------------
-// Zahlen im Klartext: IMMER mit Vorzeichen (X+10, Q201=-20), bis drei
-// Nachkommastellen, keine nachlaufenden Nullen, kein "-0".
+// Zahlen im Klartext: Koordinaten IMMER mit Vorzeichen (X+10, Z-20), bis
+// drei Nachkommastellen, keine nachlaufenden Nullen, kein "-0".
 // ---------------------------------------------------------------------
 function klNum(v){
   let n = Math.round((+v || 0) * 1000) / 1000;
   if(Math.abs(n) < 1e-9) n = 0;
   let s = n.toFixed(3).replace(/\.?0+$/, '');
   return (n < 0 ? '' : '+') + s;
+}
+// Q-Parameter: die TNC schreibt nur KOORDINATEN, WINKEL und die STEIGUNG
+// mit Vorzeichen (Q203=+20, Q201=-15, Q201=+0, Q245=+0, Q239=+1),
+// Abstaende, Vorschuebe, Zeiten und Zaehler ohne Plus (Q200=2, Q206=250,
+// Q204=100) — so stehen die Beispielsaetze im Zyklenhandbuch 670 388-12
+// (S. 80/82/84/92/115/118/183/185), und so sieht ein von der TNC
+// gespeichertes Programm aus. Die Steuerung liest beides; der Unterschied
+// zaehlt, sobald ein gezogener Maschinensatz Wort fuer Wort gegen die
+// App gehalten wird.
+var F_Q_SIGNED = {Q201:1, Q203:1, Q216:1, Q217:1, Q225:1, Q226:1, Q237:1, Q238:1, Q224:1, Q245:1, Q246:1, Q247:1, Q239:1};
+function klQ(q, v){
+  if(F_Q_SIGNED[q]) return q + '=' + klNum(v);
+  let n = Math.round((+v || 0) * 1000) / 1000;
+  if(Math.abs(n) < 1e-9) n = 0;
+  return q + '=' + n.toFixed(3).replace(/\.?0+$/, '');
 }
 // Rundung fuer Koordinaten aus Mustern (Lochkreis-Trigonometrie).
 function fRund(v){ const r = Math.round((+v || 0) * 1000) / 1000; return Math.abs(r) < 1e-9 ? 0 : r; }
@@ -2989,7 +3018,7 @@ function fZyklusDef(s, tool){
   const zeilen = ['CYCL DEF ' + z.nr + ' ' + z.titel + ' ~'];
   z.q.forEach((q, i) => {
     const letzte = (i === z.q.length - 1);
-    zeilen.push('    ' + (q + '=' + klNum(w[q])).padEnd(11, ' ') + ';' + F_Q[q] + (letzte ? '' : ' ~'));
+    zeilen.push('    ' + klQ(q, w[q]).padEnd(11, ' ') + ';' + F_Q[q] + (letzte ? '' : ' ~'));
   });
   return zeilen;
 }
@@ -2998,23 +3027,33 @@ function fZyklusDef(s, tool){
 // definierten Bearbeitungszyklus an jedem Punkt. Deshalb steht er
 // direkt HINTER dem Bohrzyklus und braucht keinen CYCL CALL.
 function fMusterZyklusDef(m, s){
-  const Q = (q, v) => (q + '=' + klNum(v)).padEnd(11, ' ') + ';' + F_Q[q];
+  const Q = (q, v) => klQ(q, v).padEnd(11, ' ') + ';' + F_Q[q];
   if(m.typ === 'kreis'){
     const n = Math.max(1, Math.round(+m.n || 1));
-    // Q247 wird IMMER geschrieben (Vollkreis: 360/n). Mit Q247 ungleich 0
-    // ist der Endwinkel Q246 laut Handbuch ohne Bedeutung — er traegt
-    // den Startwinkel, damit kein Wert erfunden wird. Am Termin pruefen.
-    const schritt = (+m.schritt) ? +m.schritt : 360 / n;
-    const zeilen = ['CYCL DEF 220 PUNKTEMUSTER KREIS ~'];
-    [['Q216', +m.xm || 0], ['Q217', +m.ym || 0], ['Q244', +m.d || 0], ['Q245', +m.start || 0],
-     ['Q246', +m.start || 0], ['Q247', schritt], ['Q241', n], ['Q200', +s.sc], ['Q203', +s.q203 || 0],
+    // VOLLKREIS in der Form des Handbuchs (670 388-12, S. 183/187):
+    // Endwinkel = Startwinkel + 360 und Winkelschritt 0 — die TNC rechnet
+    // den Schritt aus Start, Ende und Anzahl. Der Eingabebereich von Q246
+    // endet bei 360; liegt Start + 360 darueber, wird stattdessen der
+    // Winkelschritt 360/n geschrieben (dann ist Q246 laut S. 178 ohne
+    // Bedeutung und traegt den Startwinkel). Teilkreis: Schritt wie
+    // eingegeben, Vorzeichen = Richtung.
+    const start = +m.start || 0;
+    let ende, schritt;
+    if(+m.schritt){ schritt = +m.schritt; ende = start; }
+    else if(start + 360 <= 360){ ende = start + 360; schritt = 0; }
+    else { schritt = 360 / n; ende = start; }
+    const zeilen = ['CYCL DEF 220 MUSTER KREIS ~'];
+    [['Q216', +m.xm || 0], ['Q217', +m.ym || 0], ['Q244', +m.d || 0], ['Q245', start],
+     ['Q246', ende], ['Q247', schritt], ['Q241', n], ['Q200', +s.sc], ['Q203', +s.q203 || 0],
      ['Q204', +s.sc2], ['Q301', 1], ['Q365', 0]].forEach((p, i, a) => {
       zeilen.push('    ' + Q(p[0], p[1]) + (i === a.length - 1 ? '' : ' ~'));
     });
     return zeilen;
   }
   if(m.typ === 'reihe'){
-    const zeilen = ['CYCL DEF 221 PUNKTEMUSTER LINIEN ~'];
+    // Titel wie im Beispielsatz S. 185 ("MUSTER LINIEN"), nicht wie die
+    // Kapiteluerschrift ("PUNKTEMUSTER AUF LINIEN").
+    const zeilen = ['CYCL DEF 221 MUSTER LINIEN ~'];
     [['Q225', +m.x0 || 0], ['Q226', +m.y0 || 0], ['Q237', +m.dx || 0], ['Q238', +m.dy || 0],
      ['Q242', Math.max(1, Math.round(+m.nx || 1))], ['Q243', Math.max(1, Math.round(+m.ny || 1))],
      ['Q224', +m.winkel || 0], ['Q200', +s.sc], ['Q203', +s.q203 || 0], ['Q204', +s.sc2],
