@@ -2319,10 +2319,18 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
   /* Softkey-Gruppen: der Behaelter verhaelt sich wie seine Kinder (Spalte
      am Laptop, Streifen am Handy); offene Gruppe farbig, ihre Zyklen folgen. */
   .sk-zyklen{display:contents;}
-  .sk.sk-grp{background:hsl(var(--ton), 30%, 91%);}
+  /* Daniels Wunsch (12.09.2026 spaetabends): die Uebergruppen sollen sich
+     farblich von den Zyklen darunter abheben. Gruppe = dunkler Schiefer mit
+     weisser Schrift, offen = Akzentblau; Zyklus = hell mit blauer Kante
+     links, damit man beim Aufklappen sieht, was wozu gehoert. */
+  .sk.sk-grp{background:hsl(var(--ton), 26%, 40%);color:#fff;border-color:hsl(var(--ton), 26%, 32%);}
   .sk.sk-grp.auf{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .sk.sk-grp:active{background:hsl(var(--ton), 26%, 30%);}
+  .sk.sk-zyk{background:hsl(var(--ton), 45%, 97.5%);border-left:3px solid var(--blue);}
   .sk.sk-zyk .ic svg{width:22px;height:16px;}
-  body.dunkel .sk.sk-grp{background:hsl(var(--ton), 14%, 24%);}
+  body.dunkel .sk.sk-grp{background:hsl(var(--ton), 20%, 30%);border-color:hsl(var(--ton), 20%, 24%);}
+  body.dunkel .sk.sk-grp.auf{background:var(--blue);}
+  body.dunkel .sk.sk-zyk{background:var(--key);}
   .fmerk .ppoffen{color:#b35c00;}
   #fdKlein{font-size:10.5px;color:var(--text-dim);padding:0 13px 6px;line-height:1.4;}
   @media(min-width:900px){
@@ -2340,7 +2348,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
        der offenen Gruppe darunter etwas flacher, damit Bohren (neun Zyklen)
        in die Spalte passt. */
     body.mode-arbeitsplan .sk.sk-grp{min-height:34px;flex-direction:row;justify-content:flex-start;gap:6px;padding:2px 6px;
-      background:hsl(var(--ton), 30%, 91%);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;}
+      font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;}
     body.mode-arbeitsplan .sk.sk-grp .ic svg{width:18px;height:13px;}
     body.mode-arbeitsplan .sk.sk-zyk{min-height:40px;padding:1px 3px;gap:1px;}
     #maskKopf, #maskMuster{width:min(860px,94vw) !important;}
