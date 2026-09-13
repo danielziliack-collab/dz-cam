@@ -2536,11 +2536,12 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <span style="font-size:11px;color:var(--text-dim);">Z-Ebene</span>
           <select id="stepEbene" style="font-size:11px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--text);max-width:210px;"></select>
           <button class="gcbtn" id="btnStepKonturen" title="Die Schleifen dieser Ebene als XY-Konturen in den Arbeitsplan legen">Konturen übernehmen</button>
+          <span style="display:inline-flex;gap:2px;"><button class="gcbtn primary" id="btnStepDraht" title="Drahtbild des Modells">Drahtbild</button><button class="gcbtn" id="btnStepSoll" title="Sollform von oben: die Höhe, auf die gefräst werden muss">Sollform</button></span>
         </div>
         <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
           <canvas id="stepCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;touch-action:none;cursor:grab;"></canvas>
           <div class="small-hint" id="stepBericht" style="flex:0 0 auto;max-height:22vh;overflow-y:auto;"></div>
-          <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader, kräftig orange die gewählte Z-Ebene. Aus ihr werden mit <b>Konturen übernehmen</b> XY-Konturen für die Zyklen; Bahnen entstehen daraus erst über einen Zyklus.</div>
+          <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader, kräftig orange die gewählte Z-Ebene. Aus ihr werden mit <b>Konturen übernehmen</b> XY-Konturen für die Zyklen; Bahnen entstehen daraus erst über einen Zyklus. <b>Sollform</b> zeigt das Teil von oben mit der Höhe, auf die gefräst werden muss: hell ist oben, dunkel ist tief, blaugrau heißt "hier steht keine Fläche".</div>
         </div>
       </div>
 
@@ -2819,6 +2820,13 @@ unten. Die gew&auml;hlte Ebene steht im Drahtbild kr&auml;ftig orange. <b>Kontur
 die &auml;u&szlig;ere Schleife ist der Rand der Fl&auml;che, jede weitere ein Loch darin. Geraden bleiben Geraden, <b>Kreisb&ouml;gen bleiben B&ouml;gen</b>
 (Radius und Drehsinn aus dem Modell), ein voller Kreis wird ein Vollkreis-Element. Danach l&auml;uft jeder Zyklus darauf, der eine Kontur nimmt &mdash;
 Konturzug, SL-Zyklen, Taschen.</dd>
+<dt id="ba-fk05c-sollform">Sollform</dt><dd>Der Knopf <b>Sollform</b> zeigt das Teil von oben als H&ouml;henbild: f&uuml;r jeden Rasterpunkt die H&ouml;he,
+auf die gefr&auml;st werden muss. Hell ist oben, dunkel ist tief, blaugrau hei&szlig;t &bdquo;hier steht keine Fl&auml;che&ldquo; (Durchgangsbohrung oder Raum
+neben dem Teil). Das ist die Grundlage f&uuml;r das Abspanen gegen das Rohteil.
+<b>Ehrlich gesagt, wo die App sch&auml;tzt:</b> <b>ebene</b> Fl&auml;chen, waagerecht wie schr&auml;g, werden <b>exakt</b> gerechnet. Alles Gekr&uuml;mmte
+(Zylinder, Kegel, Torus, Freiform) wird mit der <b>h&ouml;chsten H&ouml;he seines eigenen Randes</b> gef&uuml;llt &mdash; bewusst zu hoch gegriffen, damit dort
+beim Schruppen etwas mehr stehen bleibt statt ins Teil geschnitten zu werden. Der Bericht nennt den Anteil solcher Fl&auml;chen. Das Raster w&auml;hlt die
+App nach der Teilgr&ouml;&szlig;e zwischen 0,3 und 2&nbsp;mm; die H&ouml;he gilt jeweils f&uuml;r die Mitte einer Rasterzelle.</dd>
 <dt>Was die App NICHT tut</dt><dd>Aus dem Modell entstehen <b>keine Bahnen von selbst</b>: eine Kontur wird erst durch einen Zyklus zur Bahn, und die Tiefe
 tr&auml;gt der Zyklus, nicht das Modell. <b>Freiformfl&auml;chen</b> werden nur als Kanten gezeichnet und ausdr&uuml;cklich gemeldet; Kanten, die weder Gerade
 noch Kreis sind, stehen als Streckenzug in der Kontur. Baugruppen werden dort gelesen, wo die Teile im Modell liegen.</dd>
@@ -6153,7 +6161,111 @@ function fStepEbeneKonturen(ebene, basis){
   return {konturen:konturen, hinweise:hinweise};
 }
 
+// ---- Stufe 3 Teil A: die Sollform als Hoehenfeld ----------------------
+// Fuer jeden Rasterpunkt in XY die Hoehe des FERTIGEN Teils — die obere
+// Huelle. Alles darueber ist Zugabe und wird beim Abspanen weggenommen.
+//
+// WIE DIE HOEHE ENTSTEHT, und wo die App ehrlich schaetzt:
+//   - EBENE Flaechen (waagerecht und schraeg) werden EXAKT gerechnet: die
+//     Ebenengleichung liefert die Hoehe, der projizierte Rand die Flaeche.
+//   - Alles Gekruemmte (Zylinder, Kegel, Torus, Freiform) wird mit der
+//     HOECHSTEN Hoehe seines eigenen Randes gefuellt. Das ist bewusst zu hoch
+//     gegriffen: beim Schruppen bleibt dort etwas mehr Material stehen. Zu
+//     niedrig waere ein Schnitt ins Teil, zu hoch ist nur Arbeit fuer das
+//     Schlichtwerkzeug. Die Zahl solcher Zellen steht im Bericht.
+//   - Senkrechte Waende haben keine Flaeche in der Draufsicht und tragen
+//     nichts bei; wo gar keine Flaeche liegt (Durchgangsbohrung), gilt die
+//     Unterkante des Rohteils.
+//
+// Eine Flaeche ZEILENWEISE in das Feld fuellen: je Rasterzeile die
+// Schnittpunkte aller Schleifen sammeln, sortieren und die Abschnitte
+// dazwischen fuellen (gerade/ungerade — ein Loch faellt damit von selbst
+// heraus, Loecher brauchen keine Sonderbehandlung).
+// Der erste Bau prueffte jede Zelle einzeln gegen jede Kante; bei der
+// Grundplatte mit 182 Bohrungen im Rand der Deckflaeche waren das 2,9 s fuer
+// EIN Feld. Zeilenweise sind es Zeilen mal Kanten statt Zellen mal Kanten.
+function fStepFuellen(F, G, eben, n, o, r){
+  const xs = [];
+  for(let j = 0; j < F.ny; j++){
+    const cy = F.y0 + (j + 0.5) * r;
+    if(cy < G.y0 || cy > G.y1) continue;
+    xs.length = 0;
+    for(let q = 0; q < G.polys.length; q++){
+      const P = G.polys[q];
+      for(let i = 0, k = P.length - 2; i < P.length; k = i, i += 2){
+        const yi = P[i + 1], yj = P[k + 1];
+        if((yi > cy) !== (yj > cy)) xs.push(P[k] + (cy - yj) * (P[i] - P[k]) / (yi - yj));
+      }
+    }
+    if(xs.length < 2) continue;
+    xs.sort((a, b) => a - b);
+    for(let q = 0; q + 1 < xs.length; q += 2){
+      let i0 = Math.ceil((xs[q] - F.x0) / r - 0.5), i1 = Math.floor((xs[q + 1] - F.x0) / r - 0.5);
+      if(i0 < 0) i0 = 0;
+      if(i1 > F.nx - 1) i1 = F.nx - 1;
+      for(let i = i0; i <= i1; i++){
+        const cx = F.x0 + (i + 0.5) * r;
+        const z = eben ? (o[2] - (n[0] * (cx - o[0]) + n[1] * (cy - o[1])) / n[2]) : G.zMax;
+        const idx = j * F.nx + i;
+        if(z > F.h[idx]){ F.h[idx] = z; F.quelle[idx] = eben ? 1 : 2; }
+      }
+    }
+  }
+}
+// Die Schleifen einer Flaeche als flache XY-Polygone (x,y,x,y,...) plus
+// Huellrechteck und hoechster Randhoehe.
+function fStepFlaechePoly(f){
+  const polys = [];
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, zMax = -Infinity;
+  f.rand.forEach(lo => {
+    const P = [];
+    lo.kanten.forEach(k => k.p.forEach(p => {
+      P.push(p[0], p[1]);
+      if(p[0] < x0) x0 = p[0]; if(p[0] > x1) x1 = p[0];
+      if(p[1] < y0) y0 = p[1]; if(p[1] > y1) y1 = p[1];
+      if(p[2] > zMax) zMax = p[2];
+    }));
+    if(P.length >= 6) polys.push(P);
+  });
+  return {polys:polys, x0:x0, y0:y0, x1:x1, y1:y1, zMax:zMax};
+}
+function fStepSollfeld(A, raster){
+  const B = A.box;
+  const bw = Math.max(1, B.x1 - B.x0), bh = Math.max(1, B.y1 - B.y0);
+  const r = raster || Math.max(0.3, Math.min(2, Math.max(bw, bh) / 300));
+  const nx = Math.max(1, Math.ceil(bw / r)), ny = Math.max(1, Math.ceil(bh / r));
+  const h = new Float32Array(nx * ny); h.fill(B.z0);
+  const quelle = new Uint8Array(nx * ny);          // 0 = leer, 1 = Ebene, 2 = geschaetzt
+  const F = {x0:B.x0, y0:B.y0, nx:nx, ny:ny, raster:r, h:h, quelle:quelle, oben:B.z1, unten:B.z0};
+  let exakt = 0, geschaetzt = 0;
+  A.flaechen.forEach(f => {
+    const G = fStepFlaechePoly(f);
+    if(!G.polys.length || !isFinite(G.x0)) return;
+    // Der einzige Waechter, der hier etwas Echtes verhindert: die Division
+    // durch null bei exakt senkrechter Normale. Alles andere braucht keinen —
+    // eine senkrechte Ebene hat in der DRAUFSICHT keine Flaeche, das
+    // zeilenweise Fuellen findet dort keine einzige Zelle. Und fuer Zellen,
+    // die wirklich in der Flaeche liegen, ist die Hoehe durch die Flaeche
+    // selbst begrenzt. ZWEI Anlaeufe standen hier vorher: eine Pruefung auf
+    // duennes Huellrechteck und eine auf fast waagerechte Normale — beide an
+    // allen 143 echten Teilen ohne jede Wirkung gemessen, also toter Code.
+    const eben = (f.art === 'ebene' && f.achse && Math.abs(f.achse[2]) > 1e-9 && f.ort);
+    if(!eben && !isFinite(G.zMax)) return;
+    fStepFuellen(F, G, eben, f.achse, f.ort, r);
+  });
+  for(let q = 0; q < quelle.length; q++){ if(quelle[q] === 1) exakt++; else if(quelle[q] === 2) geschaetzt++; }
+  F.exakt = exakt; F.geschaetzt = geschaetzt; F.leer = nx * ny - exakt - geschaetzt;
+  return F;
+}
+// Sollhoehe an einer Stelle (fuer Proben und spaeter fuer die Bahn).
+function fStepSollHoehe(F, x, y){
+  const i = Math.floor((x - F.x0) / F.raster), j = Math.floor((y - F.y0) / F.raster);
+  if(i < 0 || j < 0 || i >= F.nx || j >= F.ny) return F.unten;
+  return F.h[j * F.nx + i];
+}
+
 // ---------------------------------------------------------------------
+// EIGENE SIMULATION (Paket D,// ---------------------------------------------------------------------
 // EIGENE SIMULATION (Paket D, 13.09.2026, Daniels "eine eigene Simulation
 // waere super"; Paket D2 am selben Tag: "das volle Paket — 3D, Bohrerspitze,
 // die einzelnen Zyklen"): faehrt die Bahnen der App (eil/vor/kreis/helix/
@@ -9548,7 +9660,8 @@ function fSimOeffnen(){
 // richtige Teil in der richtigen Lage steht, nicht huebsch aussehen.
 // =====================================================================
 const STEP = {modell:null, aus:null, name:'', achse:'+Z', nullp:'ecke',
-  az:-0.7, el:0.5, zoom:1, mitte:[0, 0, 0], zieh:null, ebenen:[], ebene:-1};
+  az:-0.7, el:0.5, zoom:1, mitte:[0, 0, 0], zieh:null, ebenen:[], ebene:-1,
+  ansicht:'draht', feld:null, bild:null};
 const F_STEP_FARBE = {waagerecht:'#2f6fb2', senkrecht:'#7a8593', schraege:'#d08a2a',
   laengs:'#2f9e5a', quer:'#9b6fd0', frei:'#c0392b'};
 function fStepFarbe(f){
@@ -9565,6 +9678,7 @@ function fStepAusrichtenJetzt(){
   STEP.mitte = [(A.box.x0 + A.box.x1) / 2, (A.box.y0 + A.box.y1) / 2, (A.box.z0 + A.box.z1) / 2];
   STEP.ebenen = fStepEbenen(A);
   STEP.ebene = STEP.ebenen.length ? 0 : -1;
+  STEP.feld = null; STEP.bild = null;                 // Sollform wird bei Bedarf gerechnet
   fStepEbenenFuellen();
   fStepBericht(); fStepZeichnen();
 }
@@ -9614,6 +9728,11 @@ function fStepBericht(){
     + ' mm &nbsp; X ' + B.x0 + '..' + B.x1 + ' &nbsp; Y ' + B.y0 + '..' + B.y1 + ' &nbsp; Z ' + B.z0 + '..' + B.z1);
   if(STEP.ebenen.length) t.push('<b>Z-Ebenen:</b> ' + STEP.ebenen.length + ' waagerechte Hoehe(n), zusammen '
     + STEP.ebenen.reduce((s, e) => s + e.schleifen, 0) + ' Konturen — oben in der Liste waehlen und uebernehmen.');
+  if(STEP.feld){ const F = STEP.feld, ges = F.nx * F.ny;
+    t.push('<b>Sollform:</b> Raster ' + fRund(F.raster) + ' mm (' + F.nx + ' x ' + F.ny + '), '
+      + Math.round(F.exakt / ges * 100) + ' % der Flaeche exakt aus Ebenen, '
+      + Math.round(F.geschaetzt / ges * 100) + ' % geschaetzt (gekruemmt — dort bleibt beim Schruppen etwas mehr stehen), '
+      + Math.round(F.leer / ges * 100) + ' % ohne Flaeche.'); }
   if(z) t.push('<b>Einordnung:</b> ' + z.waagerecht + ' waagerecht, ' + z.senkrecht + ' senkrecht, '
     + z.schraege + ' Schraege' + (A.neigungen.length ? ' (' + A.neigungen.join(', ') + ' Grad)' : '')
     + ', ' + z.laengs + ' Bohrung/Zylinder laengs, ' + z.quer + ' quer, ' + z.frei + ' Freiform.');
@@ -9621,8 +9740,62 @@ function fStepBericht(){
   el.innerHTML = t.join('<br>');
   if(inf && B) inf.textContent = esc(STEP.name) + ' — ' + fRund(B.x1 - B.x0) + ' x ' + fRund(B.y1 - B.y0) + ' x ' + fRund(B.z1 - B.z0) + ' mm';
 }
+// Die Sollform von oben: fuer jeden Rasterpunkt die Hoehe, auf die gefraest
+// werden muss. Hell ist oben, dunkel ist tief; blaugrau heisst "hier steht
+// keine Flaeche" (Durchgangsbohrung oder Rand des Huellquaders).
+function fStepSollZeichnen(){
+  const cv = document.getElementById('stepCv');
+  if(!cv || !cv.getContext) return;
+  if(!STEP.feld && STEP.aus){ try{ STEP.feld = fStepSollfeld(STEP.aus); STEP.bild = null; }catch(e){ STEP.feld = null; } }
+  const F = STEP.feld;
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth || 700, h = cv.clientHeight || 320;
+  if(cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){ cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const c = cv.getContext('2d'); if(!c || !c.setTransform) return;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.fillStyle = '#e9edf1'; c.fillRect(0, 0, w, h);
+  if(!F){ c.fillStyle = '#5d646c'; c.font = '13px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('Kein Modell geladen.', w / 2, h / 2); return; }
+  const rand = 22, bw = F.nx * F.raster, bh = F.ny * F.raster;
+  const sc = Math.min((w - 2 * rand) / bw, (h - 2 * rand) / bh);
+  const ox = (w - bw * sc) / 2, oy = (h + bh * sc) / 2;
+  if(!STEP.bild){
+    const off = document.createElement('canvas'); off.width = F.nx; off.height = F.ny;
+    const oc = off.getContext('2d');
+    const img = (oc && oc.createImageData) ? oc.createImageData(F.nx, F.ny) : null;   // domstub liefert kein ImageData
+    if(img && img.data){
+      const d = img.data, tief = Math.max(0.01, F.oben - F.unten);
+      for(let j = 0; j < F.ny; j++) for(let i = 0; i < F.nx; i++){
+        const idx = j * F.nx + i, o = ((F.ny - 1 - j) * F.nx + i) * 4;                // Y nach oben
+        if(!F.quelle[idx]){ d[o] = 176; d[o + 1] = 186; d[o + 2] = 196; }             // keine Flaeche
+        else {
+          const q = Math.max(0, Math.min(1, (F.oben - F.h[idx]) / tief));
+          const g = Math.round(226 - 150 * q);
+          // geschaetzte Zellen (gekruemmte Flaechen) bekommen einen warmen Stich
+          if(F.quelle[idx] === 2){ d[o] = g + 18; d[o + 1] = g - 6; d[o + 2] = g - 24; }
+          else { d[o] = g - 14; d[o + 1] = g - 4; d[o + 2] = g; }
+        }
+        d[o + 3] = 255;
+      }
+      if(oc.putImageData) oc.putImageData(img, 0, 0);
+    }
+    STEP.bild = off;
+  }
+  try{ c.imageSmoothingEnabled = false; c.drawImage(STEP.bild, ox, oy - bh * sc, bw * sc, bh * sc); }catch(e){}
+  c.strokeStyle = '#3d5a73'; c.lineWidth = 1; c.strokeRect(ox, oy - bh * sc, bw * sc, bh * sc);
+  // Nullpunkt
+  const px = ox + (0 - F.x0) * sc, py = oy - (0 - F.y0) * sc;
+  c.save(); c.strokeStyle = '#111'; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(px - 7, py); c.lineTo(px + 7, py); c.moveTo(px, py - 7); c.lineTo(px, py + 7); c.stroke();
+  c.beginPath(); c.arc(px, py, 3.5, 0, Math.PI * 2); c.stroke(); c.restore();
+}
+function fStepAnsicht(a){
+  STEP.ansicht = a;
+  ['Draht', 'Soll'].forEach(k => { const b = document.getElementById('btnStep' + k); if(b) b.classList.toggle('primary', k.toLowerCase() === a); });
+  fStepZeichnen();
+}
 // Drahtbild: Drehung um Z (az) und Neigung (el), danach senkrechte Projektion.
 function fStepZeichnen(){
+  if(STEP.ansicht === 'soll'){ fStepSollZeichnen(); return; }
   const cv = document.getElementById('stepCv');
   if(!cv || !cv.getContext) return;
   const dpr = window.devicePixelRatio || 1;
@@ -9729,6 +9902,8 @@ function fStepRohUebernehmen(){
   });
   on('btnStepRoh', fStepRohUebernehmen);
   on('btnStepKonturen', fStepKonturenUebernehmen);
+  on('btnStepDraht', ()=>fStepAnsicht('draht'));
+  on('btnStepSoll', ()=>{ fStepAnsicht('soll'); fStepBericht(); });
   const sel = document.getElementById('stepEbene');
   if(sel && sel.addEventListener) sel.addEventListener('change', ()=>{ STEP.ebene = +sel.value; fStepZeichnen(); });
   const fi = document.getElementById('stepFile');
