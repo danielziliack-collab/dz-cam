@@ -1,6 +1,6 @@
 {
- "name": "Daniel Ziliack CAM",
- "short_name": "Ziliack CAM",
+ "name": "DZ CAM",
+ "short_name": "DZ CAM",
  "description": "CAM fuers Drehen: Kontur, Arbeitsplan, Simulation, Kalkulation, NC fuer Monforts MTC-K und EuroTurn.",
  "start_url": "./",
  "scope": "./",

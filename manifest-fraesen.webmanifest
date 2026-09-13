@@ -1,6 +1,6 @@
 {
- "name": "Daniel Ziliack CAM Fraesen",
- "short_name": "Ziliack Fraesen",
+ "name": "DZ CAM Fraesen",
+ "short_name": "DZ Fraesen",
  "description": "Werkstattprogrammierung Fraesen: Bohrbilder und Bohrzyklen als Heidenhain-Klartext (iTNC 530).",
  "start_url": "./fraesen.html",
  "scope": "./",
