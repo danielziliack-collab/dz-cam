@@ -7318,10 +7318,10 @@ function hbBildKontur(H, art, s){
   hbKoordXY(c, ax, ay + ah, k);
   hbDim(c, sx + sw + 3, sy0, sx + sw + 3, yGrund, 6 * k, hbTxt(art, s, 'tiefe'), 'tiefe');
   const nZ = +s.zust > 0 ? Math.max(2, Math.min(4, Math.ceil(Math.abs(+s.tiefe || 10) / (+s.zust || 1)))) : 1, dZ = sTief / nZ;
-  if(+s.zust > 0 || HB_FOKUS === 'zust'){ for(let i = 1; i < nZ; i++) hbLine(c, nx - 3, sy0 + dZ * i, sx + sw - 4, sy0 + dZ * i, HB_ON, 1, [2, 2]); hbLabel(c, hbTxt(art, s, 'zust'), (nx + sx + sw) / 2, sy0 + dZ + 4, HB_FOKUS === 'zust'); }
+  if(+s.zust > 0 || HB_FOKUS === 'zust'){ for(let i = 1; i < nZ; i++) hbLine(c, nx - 3, sy0 + dZ * i, sx + sw - 4, sy0 + dZ * i, HB_ON, 1, [2, 2]); hbLabel(c, hbTxt(art, s, 'zust'), nx + (sx + sw - nx) * 0.34, sy0 + sTief * 0.15, HB_FOKUS === 'zust'); }
   hbLine(c, nx + 4 * k, sy0, nx + 4 * k, yGrund, HB_FOKUS === 'aufSeite' ? HB_ON : HB_AXIS, 1, [3, 2]);
   hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + 6 * k, yGrund - 5, HB_FOKUS === 'aufSeite', 'left');
-  hbLabel(c, hbTxt(art, s, 'zustSchl'), nx + 6 * k, sy0 + sTief * 0.3, HB_FOKUS === 'zustSchl', 'left');   // oben an der Stufe: auf halber Hoehe lag die Pille am Handy auf der Z1-Pille des Tiefenmasses
+  hbLabel(c, hbTxt(art, s, 'zustSchl'), nx + 6 * k, sy0 + sTief * 0.35, HB_FOKUS === 'zustSchl', 'left');   // oben an der Stufe: auf halber Hoehe lag die Pille am Handy auf der Z1-Pille des Tiefenmasses
   hbLine(c, sx - 4, sy0 - 20 * k, sx + sw + 4, sy0 - 20 * k, HB_AXIS, 1, [5, 3]);
   hbLabel(c, hbTxt(art, s, 'sc'), sx + 4, sy0 - 23 * k, HB_FOKUS === 'sc', 'left');
   hbLabel(c, hbTxt(art, s, 'q203'), sx + 4, sy0 - 3, HB_FOKUS === 'q203', 'left');
