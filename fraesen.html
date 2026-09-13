@@ -7334,7 +7334,7 @@ function hbBildKontur(H, art, s){
   hbLine(c, nx + 4 * k, sy0, nx + 4 * k, yGrund, HB_FOKUS === 'aufSeite' ? HB_ON : HB_AXIS, 1, [3, 2]);
   hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + (sx + sw - nx) / 2, yGrund + 12 * k, HB_FOKUS === 'aufSeite');
   hbLabel(c, hbTxt(art, s, 'zustSchl'), nx - 6 * k, sy0 + sTief * 0.72, HB_FOKUS === 'zustSchl', 'right');
-  const ySC = sy0 - 13 * k;
+  const ySC = sy0 - 21 * k;   // Luft fuer die orange SC-Pille ueber der Z0-Marke (Bildbericht 14.09.2026)
   hbLine(c, sx - 4, ySC, sx + sw + 4, ySC, HB_AXIS, 1, [5, 3]);
   hbLabel(c, hbTxt(art, s, 'sc'), sx + sw + 2 * k, ySC - 3, HB_FOKUS === 'sc', 'right');
   hbLabel(c, hbTxt(art, s, 'q203'), sx + sw + 2 * k, sy0 - 4, HB_FOKUS === 'q203', 'right');
@@ -8031,9 +8031,33 @@ const HB_STIL = {
   // Werkzeug: im Original 44 % der Bildhoehe hoch UND 40 % der Breite breit —
   // also fast quadratisch im Umriss. Ein langer duenner Stift sieht im Bild
   // verloren aus (Daniels Befund). Laenge und Breite stehen deshalb hier.
-  teilOben:0.66, teilHoehe:0.21, wzLaenge:0.34, wzBreite:0.34, abtragTief:0.55
+  teilOben:0.66, teilHoehe:0.21, wzLaenge:0.34, wzBreite:0.34, abtragTief:0.55,
+  // Bohren: derselbe Aufbau, nur ein dickerer Block — die Bohrung geht tief,
+  // und Z1, D und der Spanbruch brauchen dort Hoehe. Unten bleibt derselbe
+  // Rand frei wie in den Fraesbildern.
+  teilObenBohr:0.55, teilHoeheBohr:0.33
 };
 let HB_FOKUS = null, HB_SKAL = 1, HB_W = 0, HB_H = 0, HB_SPAET = null;
+// Protokoll der Zeichnung (Paket H): je Element {art, x0, y0, x1, y1, txt}.
+// art: teil | abtrag | werkzeug | marke | pille. Wird bei jedem Bild neu
+// gefuellt; daran haengen die Regelpruefungen.
+let HB_PROT = [];
+// Rechteck eines Pfad-Bauers, ohne zu zeichnen: der Bauer bekommt einen
+// Aufzeichner statt des Canvas. Rein rechnerisch, laeuft auch im Ersatz-Browser.
+function hbBox(bau){
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  const P = (x, y) => { if(!isFinite(x) || !isFinite(y)) return; if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; };
+  const stift = {
+    beginPath:()=>{}, closePath:()=>{}, moveTo:P, lineTo:P,
+    rect:(x, y, b, hh)=>{ P(x, y); P(x + b, y + hh); },
+    arc:(x, y, r)=>{ P(x - r, y - r); P(x + r, y + r); },
+    quadraticCurveTo:(cx, cy, x, y)=>{ P(cx, cy); P(x, y); },
+    bezierCurveTo:(a, b, cc, d, x, y)=>{ P(a, b); P(cc, d); P(x, y); }
+  };
+  try{ bau(stift); }catch(e){ return null; }
+  return (x1 > -1e9) ? {x0:x0, y0:y0, x1:x1, y1:y1, b:x1 - x0, h:y1 - y0} : null;
+}
+function hbMerk(art, box, txt){ if(box) HB_PROT.push({art:art, x0:box.x0, y0:box.y0, x1:box.x1, y1:box.y1, b:box.b, h:box.h, txt:txt || ''}); }
 function hbCtx(canvasId){
   const cv = document.getElementById(canvasId);
   if(!cv || !cv.getContext) return null;
@@ -8042,7 +8066,7 @@ function hbCtx(canvasId){
   if(cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){ cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
   const c = cv.getContext('2d'); if(!c) return null;
   c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
-  HB_W = w; HB_H = h; HB_SKAL = (h >= 330) ? 1.35 : 1;
+  HB_W = w; HB_H = h; HB_SKAL = (h >= 330) ? 1.35 : 1; HB_PROT = [];
   // grauer Grund wie der TNC-Bildschirm
   c.fillStyle = HB_GRUND; c.fillRect(0, 0, w, h);
   return {c:c, w:w, h:h};
@@ -8069,11 +8093,15 @@ function hbLabel(c, txt, x, y, on, align){
     c.lineTo(px0 + r, py0 + ph); c.arc(px0 + r, py0 + r, r, Math.PI / 2, -Math.PI / 2); c.closePath();
     c.fillStyle = HB_ON; c.fill();
     c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(txt, cx, y);
+    hbMerk('pille', {x0:px0, y0:py0, x1:px0 + pw, y1:py0 + ph, b:pw, h:ph}, String(txt));
   } else {
     // Marke: schmaler Halo, damit sie auf Schraffur und Blau lesbar bleibt,
     // aber leiser als die Zeichnung selbst.
     c.lineWidth = 2.4; c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineJoin = 'round'; c.strokeText(txt, x, y);
     c.fillStyle = on ? HB_ON : HB_STIL.marke; c.fillText(txt, x, y);
+    const mh = HB_STIL.markeGross * HB_SKAL;
+    const mx0 = al === 'left' ? x : (al === 'right' ? x - tb : x - tb / 2);
+    hbMerk('marke', {x0:mx0, y0:y - mh * 0.8, x1:mx0 + tb, y1:y + mh * 0.22, b:tb, h:mh}, String(txt));
   }
   c.restore();
 }
@@ -8091,6 +8119,7 @@ function hbDim(c, x1, y1, x2, y2, off, label, feld, side){
   // Paket H: Masspfeile gibt es NUR beim angefassten Mass. Im Grundbild bleibt
   // die Zeichnung frei — die Lage des Parameters zeigt seine Marke.
   if(!on) return;
+  hbMerk('mass', {x0:Math.min(x1, x2), y0:Math.min(y1, y2), x1:Math.max(x1, x2), y1:Math.max(y1, y2), b:Math.abs(x2 - x1), h:Math.abs(y2 - y1)}, feld || '');
   const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
   const a1x = x1 + nx * off, a1y = y1 + ny * off, a2x = x2 + nx * off, a2y = y2 + ny * off;
   c.save(); c.strokeStyle = on ? HB_ON : HB_OFF; c.fillStyle = on ? HB_ON : HB_OFF; c.lineWidth = on ? 1.8 : 1;
@@ -8105,6 +8134,7 @@ function hbDim(c, x1, y1, x2, y2, off, label, feld, side){
 }
 // Werkstueck im Schnitt: weisser Block, schwarze 45-Grad-Schraffur, schwarzer Rand.
 function hbBlock(c, bau){
+  hbMerk('teil', hbBox(bau));
   c.save();
   c.fillStyle = '#ffffff'; c.beginPath(); bau(c); c.closePath(); c.fill();
   c.save(); c.beginPath(); bau(c); c.closePath(); c.clip();
@@ -8116,6 +8146,7 @@ function hbBlock(c, bau){
 }
 // Bearbeitungsvolumen: blau (hell oben, dunkel unten) mit dunkelblauem Rand.
 function hbBlau(c, bau, y1, y2){
+  hbMerk('abtrag', hbBox(bau));
   c.save();
   const g = c.createLinearGradient(0, y1 || 0, 0, y2 || HB_H);
   g.addColorStop(0, HB_BLAU1); g.addColorStop(1, HB_BLAU2);
@@ -8206,6 +8237,7 @@ function hbTeil(c, x0, y0, wd, ht, art){
 function hbPlatte(c, x0, y0, wd, ht){ c.fillStyle = '#f5d326'; c.strokeStyle = '#6b4d00'; c.lineWidth = 0.8; c.fillRect(x0, y0, wd, ht); c.strokeRect(x0, y0, wd, ht); }
 // Werkzeug im Schnitt: Spitze bei (x, yTip), Schaft nach oben bis yTop, Breite b.
 function hbBohrer(c, x, yTop, yTip, b, art){
+  hbMerk('werkzeug', {x0:x - b / 2, y0:yTop, x1:x + b / 2, y1:yTip, b:b, h:yTip - yTop});
   const r = b / 2, L = Math.max(10, yTip - yTop);
   c.save(); c.lineJoin = 'round';
   const kappe = (x0, wd) => { c.fillStyle = '#e9e9e9'; c.strokeStyle = '#5f5f5f'; c.lineWidth = 0.8; c.fillRect(x0 + 1, yTop - 2, wd - 2, 3); c.strokeRect(x0 + 1, yTop - 2, wd - 2, 3); };
@@ -8258,7 +8290,7 @@ function hbBildBohren(H, art, s){
   const zyk = F_ZYKLEN[art] || {};
   const hat = (f) => fZyklusFelder(art).indexOf(f) >= 0;
   const bw = Math.min(w * 0.56, 300 * k), bx = w * 0.5 - bw / 2 + 4 * k;            // Block; rechts brauchen Z1 und D ihre Masslinien
-  const y0 = Math.round(h * 0.47), yB = h - 10 * k;                                 // Oberflaeche, Unterkante
+  const y0 = Math.round(h * HB_STIL.teilObenBohr), yB = Math.round(y0 + h * HB_STIL.teilHoeheBohr);   // Oberflaeche, Unterkante (feste Buehne, Paket H)
   const b = Math.max(14, Math.min(30, bw * 0.09)) * k;                                // Werkzeugbreite
   const x = bx + bw * 0.5;                                                            // Bohrachse
   const senk = art === 'senkenRueck';
@@ -8376,9 +8408,12 @@ function hbBildForm(H, art, s){
   // Marken stehen NEBEN dem Abtrag auf der Schraffur, nie darauf: D links auf
   // der ersten Zustellung, UXY rechts der Wand, UZ unter dem Grund.
   if(+s.zust > 0 || HB_FOKUS === 'zust'){ for(let i = 1; i < nZ; i++) hbLine(c, nx - nb / 2 - 3, sy0 + dZ * i, nx + nb / 2 + 3, sy0 + dZ * i, HB_ON, 1, [2, 2]); hbLabel(c, hbTxt(art, s, 'zust'), nx - nb / 2 - 6 * k, sy0 + dZ + 3, HB_FOKUS === 'zust', 'right'); }
-  if(hat('aufSeite')) hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + nb / 2 + 6 * k, sy0 + sTief * 0.45, HB_FOKUS === 'aufSeite', 'left');
+  // UXY steht UNTER dem Block auf Hoehe der rechten Wand: links haelt D die
+  // Zustellung, rechts steht bei Fokus die Tiefen-Pille — dazwischen ist im
+  // flachen Schnitt kein Platz fuer eine dritte Marke (Bildbericht 14.09.2026).
+  if(hat('aufSeite')) hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + nb / 2, syB + 12 * k, HB_FOKUS === 'aufSeite');
   if(hat('aufTiefe') && !zapfen) hbLabel(c, hbTxt(art, s, 'aufTiefe'), nx, yGrund + 12 * k, HB_FOKUS === 'aufTiefe');
-  const ySC = sy0 - 13 * k;
+  const ySC = sy0 - 21 * k;   // Luft fuer die orange SC-Pille ueber der Z0-Marke (Bildbericht 14.09.2026)
   hbLine(c, sx - 4, ySC, sx + sw + 4, ySC, HB_AXIS, 1, [5, 3]);
   hbLabel(c, hbTxt(art, s, 'sc'), sx + sw + 2 * k, ySC - 3, HB_FOKUS === 'sc', 'right');
   hbLabel(c, hbTxt(art, s, 'q203'), sx + sw + 2 * k, sy0 - 4, HB_FOKUS === 'q203', 'right');
@@ -8393,7 +8428,7 @@ function hbBildForm(H, art, s){
 // ---- Bild 3: Planfraesen: Draufsicht mit Maeander + Schnitt --------------
 function hbBildPlan(H, art, s){
   const c = H.c, w = H.w, h = H.h, k = HB_SKAL;
-  const ax = 10 * k, ay = 12 * k, aw = w * 0.58 - 14 * k, ah = h - 46 * k;          // unten Platz fuer LX und den Startpunkt
+  const ax = 9 * k, ay = 9 * k, aw = w * 0.53 - 14 * k, ah = h * 0.60;              // Paket H: gleiche Aufteilung wie die uebrigen Bilder
   // Draufsicht: die ganze Flaeche wird bearbeitet -> blau, Maeander hell darauf
   hbBlau(c, cc => { cc.rect(ax, ay, aw, ah); }, ay, ay + ah);
   const strat = Math.round(+s.strategie || 0), n = 5, dy = ah / n;
@@ -8405,13 +8440,20 @@ function hbBildPlan(H, art, s){
   // Startpunkt links unten (Y nach oben)
   const px = ax, py = ay + ah;
   c.save(); c.strokeStyle = HB_FOKUS === 'px' || HB_FOKUS === 'py' ? HB_ON : HB_EDGE; c.lineWidth = 1.6; c.beginPath(); c.arc(px, py, 5, 0, Math.PI * 2); c.stroke(); c.restore();
-  hbLabel(c, 'X0 ' + hbWert(s.px) + ' / Y0 ' + hbWert(s.py), px + 8 * k, py + 7 * k, HB_FOKUS === 'px' || HB_FOKUS === 'py', 'left');
+  // Auch dieser Doppelname folgt der Regel aus Paket H: im Grundbild nur die
+  // Marke, Werte erst beim Anfassen (er wird von Hand gebaut und ging deshalb
+  // an hbTxt vorbei — im Bild gefunden, 14.09.2026).
+  const pxFok = HB_FOKUS === 'px' || HB_FOKUS === 'py';
+  hbLabel(c, pxFok ? ('X0 ' + hbWert(s.px) + ' / Y0 ' + hbWert(s.py)) : 'X0 / Y0', px + 8 * k, py + 7 * k, pxFok, 'left');
   hbDim(c, ax, ay + ah, ax + aw, ay + ah, 15 * k, hbTxt(art, s, 'l1'), 'l1');
   hbDim(c, ax + aw, ay + ah, ax + aw, ay, -10 * k, hbTxt(art, s, 'l2'), 'l2');
-  hbLabel(c, hbTxt(art, s, 'ueberl'), ax + aw / 2, ay - 2, HB_FOKUS === 'ueberl');
+  hbLabel(c, hbTxt(art, s, 'ueberl'), ax + aw / 2, ay + 14 * k, HB_FOKUS === 'ueberl');
   // Schnitt rechts: Block schraffiert, die Abtragschicht Z0 -> Z1 blau, in Zustellungen DZ
-  const sx = w * 0.62 + 6 * k, sw = w - sx - 8 * k, sy0 = ay + ah * 0.3, syB = ay + ah;
-  const abtrag = ah * 0.28;
+  const sx = w * 0.55 + 4 * k, sw = w - sx - 14 * k;
+  const sy0 = h * HB_STIL.teilOben, syB = sy0 + h * HB_STIL.teilHoehe;
+  // Planfraesen nimmt nur eine Schicht ab — im Original ist der Abtrag 13:1
+  // breit und rund ein Viertel der Blockhoehe tief.
+  const abtrag = (syB - sy0) * 0.26;
   hbBlock(c, cc => { cc.rect(sx, sy0 + abtrag, sw, syB - sy0 - abtrag); });
   hbBlau(c, cc => { cc.rect(sx, sy0, sw, abtrag); }, sy0, sy0 + abtrag);           // kein Koordinatensymbol: links steht das DZ-Mass, der Startpunkt traegt X0/Y0
   const n2 = Math.max(1, Math.min(4, Math.ceil(Math.abs((+s.pz || 0) - (+s.zEnd || -1)) / (+s.zust || 1))));
@@ -8419,10 +8461,11 @@ function hbBildPlan(H, art, s){
   hbLabel(c, hbTxt(art, s, 'pz'), sx + sw - 2, sy0 - 3, HB_FOKUS === 'pz', 'right');
   hbLabel(c, hbTxt(art, s, 'zEnd'), sx + sw - 2, sy0 + abtrag + 13 * k, HB_FOKUS === 'zEnd', 'right');
   hbDim(c, sx - 4, sy0, sx - 4, sy0 + abtrag / n2, -6 * k, hbTxt(art, s, 'zust'), 'zust');
-  hbLine(c, sx - 4, sy0 - 20 * k, sx + sw + 4, sy0 - 20 * k, HB_AXIS, 1, [5, 3]);
-  hbLabel(c, hbTxt(art, s, 'sc'), sx + 4, sy0 - 23 * k, HB_FOKUS === 'sc', 'left');
-  hbLabel(c, hbTxt(art, s, 'aufTiefe'), sx + sw / 2, sy0 + abtrag - 4, HB_FOKUS === 'aufTiefe');
-  const tx = sx + sw * 0.4, ySCf = sy0 - 20 * k, Lw = ySCf - ay - 4 * k, tb = Math.max(12, sw * 0.28);
+  const ySC = sy0 - 21 * k;   // Luft fuer die orange SC-Pille ueber der Z0-Marke (Bildbericht 14.09.2026)
+  hbLine(c, sx - 4, ySC, sx + sw + 4, ySC, HB_AXIS, 1, [5, 3]);
+  hbLabel(c, hbTxt(art, s, 'sc'), sx + sw + 2 * k, ySC - 3, HB_FOKUS === 'sc', 'right');
+  hbLabel(c, hbTxt(art, s, 'aufTiefe'), sx + sw / 2, syB + 12 * k, HB_FOKUS === 'aufTiefe');
+  const tx = sx + sw * 0.4, ySCf = ySC, Lw = h * HB_STIL.wzLaenge, tb = Math.max(12, Math.min(sw * HB_STIL.wzBreite, sw * 0.34));
   const tip = HB_FOKUS === 'zEnd' ? sy0 + abtrag : (HB_FOKUS === 'pz' ? sy0 : hbSpitze(HB_FOKUS, ySCf, sy0 + abtrag, sy0 + abtrag / n2, ySCf, sy0));
   hbBohrer(c, tx, tip - Lw, tip, tb, 'fraeser');
   hbFokusSymbol(c, art, tx, tip, tb, k);
