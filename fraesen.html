@@ -2835,7 +2835,10 @@ des Programmkopfs) Z-Ebene f&uuml;r Z-Ebene aus, bis nur noch das Modell samt Au
 <li><b>Z0</b> ist die Oberfl&auml;che, <b>Z1</b> die Tiefe (negativ, inkremental), <b>D</b> die Zustellung je Ebene. Die tiefste Ebene liegt um <b>UZ</b> &uuml;ber Z1.</li>
 <li><b>UXY</b> bleibt an jeder senkrechten Wand stehen, <b>UZ</b> auf jeder waagerechten Fl&auml;che &mdash; beides f&uuml;r das Schlichten.</li>
 <li>Gefahren wird <b>zeilenweise im Zickzack</b> mit einem Querdurchgang an den W&auml;nden; der Zeilenabstand ist die <b>Bahn&uuml;berlappung</b> mal Werkzeugradius.</li>
-<li>Eingetaucht wird <b>senkrecht</b> im Eintauchvorschub FZ &mdash; das Werkzeug muss &uuml;ber Mitte schneiden.</li>
+<li>Eingetaucht wird <b>senkrecht</b> im Eintauchvorschub FZ &mdash; das Werkzeug muss &uuml;ber Mitte schneiden. Wo nur ein
+senkrechter <b>Stich ohne Fr&auml;sweg</b> entst&uuml;nde, l&auml;sst die App ihn weg: ein Schaftfr&auml;ser soll nicht bohren. Was dort stehen bleibt,
+steht im Restmaterial (gemessen &uuml;ber Daniels Modelle: ein Viertel aller Z&uuml;ge waren solche Stiche, ihr Wegfall kostet 4&nbsp;% mehr Restmaterial
+und spart 24&nbsp;% der S&auml;tze).</li>
 </ul>
 <b>Es gibt daf&uuml;r keinen Steuerungszyklus.</b> Die iTNC kennt ihn nicht; die App schreibt immer ihre eigenen S&auml;tze, und der Programmkopf des Schritts sagt
 das im Klartext. Vor dem ersten Lauf geh&ouml;rt die Bahn in den Programm-Test und in den Einzelsatz.
@@ -2843,6 +2846,9 @@ das im Klartext. Vor dem ersten Lauf geh&ouml;rt die Bahn in den Programm-Test u
 die Stelle. Die Breite ist die Aussage: ein Saum in der Gr&ouml;&szlig;e des Arbeitsrasters ist Rechengenauigkeit, eine breitere Stelle erreicht dieses Werkzeug
 wirklich nicht &mdash; dort mit einem kleineren nachsetzen. <b>Genau dies ist der Unterschied zum Zyklus 22:</b> ein einziger zu kleiner Eckenradius l&auml;sst dort
 die ganze Tasche ausfallen; hier wird gefahren, was geht, und der Rest wird benannt.
+<br><b>Rohteil nicht vergessen:</b> <b>Als Rohteil &uuml;bernehmen</b> setzt die BLK FORM auf den <b>H&uuml;llquader des Modells</b> &mdash; ohne
+jedes Aufma&szlig;. Bei einem Teil, dessen Deckfl&auml;che oben liegt, steht dann nichts zum Abspanen da, und die App sagt das im Klartext, statt dem
+Werkzeug die Schuld zu geben. Trag das echte Rohteil ein oder setz Z0 h&ouml;her.
 <br><b>Die Sollform wird NICHT mit dem Programm gespeichert</b> &mdash; sie geh&ouml;rt zum geladenen Modell. Nach dem Neuladen der App also erst wieder Modell
 laden und <b>Sollform ans Programm</b> dr&uuml;cken, sonst meldet die Programmpr&uuml;fung einen roten Befund.</dd>
 <dt>Was die App NICHT tut</dt><dd>Aus einer <b>Kontur</b> entstehen keine Bahnen von selbst: sie wird erst durch einen Zyklus zur Bahn, und die Tiefe
@@ -6475,8 +6481,16 @@ function fBahnModell(s, tool, prog){
   // halbe Diagonale kommt deshalb als Zugabe dazu.
   const grenz = (rt + uXY) / r + Math.SQRT1_2, g2 = grenz * grenz;
   const verboten = new Uint8Array(n), d2 = new Float64Array(n);
+  // Steht ueberhaupt etwas ueber der Sollform? Wer "Als Rohteil uebernehmen"
+  // drueckt, bekommt den Huellquader des Modells — bei einer flachen Platte
+  // liegt die Deckflaeche dann genau auf der Rohteiloberkante. Dann fehlt das
+  // Aufmass am ROHTEIL, und die Meldung soll das sagen statt dem Werkzeug die
+  // Schuld zu geben (gemessen: sieben von Daniels Modellen).
+  let wegZellen = 0;
+  for(let q = 0; q < n; q++){ if(G.imRoh[q] && G.stand[q] > Math.max(G.soll[q] + uZ, zEnde) + 0.001) wegZellen++; }
+  if(!wegZellen) return nein('ueber der Sollform steht kein Material: Rohteil und Modell sind gleich hoch. Im Programmkopf ein groesseres Rohteil eintragen (oder Z0 hoeher setzen) — "Als Rohteil uebernehmen" nimmt genau den Huellquader des Modells, ohne Aufmass.');
   const B = [], sicher = fRund(zOben + sc2);
-  let x = null, y = null, ebenen = 0, zuege = 0;
+  let x = null, y = null, ebenen = 0, zuege = 0, stiche = 0;
   const eil = (o) => B.push(Object.assign({a:'eil'}, o));
   const vor = (o) => B.push(Object.assign({a:'vor'}, o));
 
@@ -6523,6 +6537,14 @@ function fBahnModell(s, tool, prog){
       if(!laeufe.length) return;
       if(richtung < 0) laeufe.reverse();
       laeufe.forEach(L => {
+        // Ein Lauf aus einer EINZIGEN Zelle hat keinen Fraesweg. Daraus
+        // wuerde im NC ein senkrechter Stich auf volle Ebenentiefe und
+        // sofort wieder heraus — ein Schaftfraeser, der bohrt. Der
+        // Schreiber laesst den Schnittsatz sogar weg, weil sich keine
+        // Achse aendert; im Programm steht dann nur Eintauchen/Rueckzug.
+        // Ausgelassen und GEZAEHLT; was dort stehen bleibt, nennt der
+        // Restmaterialbericht.
+        if(L[0] === L[1]){ stiche++; return; }
         let b0 = L[0], b1 = L[1];
         if(richtung < 0){ const t = b0; b0 = b1; b1 = t; }
         const xa = fRund(wx(a, b0)), ya = fRund(wy(a, b0)), xb = fRund(wx(a, b1)), yb = fRund(wy(a, b1));
@@ -6580,7 +6602,9 @@ function fBahnModell(s, tool, prog){
     if(inEbene) ebenen++;
     if(z <= zEnde + 1e-9) break;
   }
-  if(!zuege) return nein('das Werkzeug ⌀' + fRund(2 * rt) + ' kommt nirgends an das Material — kleineres Werkzeug, kleineres Aufmass oder eine tiefere Ebene');
+  if(!zuege) return nein(stiche
+    ? 'das Werkzeug ⌀' + fRund(2 * rt) + ' koennte hier an ' + stiche + ' Stelle(n) nur senkrecht eintauchen, ohne einen einzigen Fraesweg — dafuer ist es zu gross'
+    : 'das Werkzeug ⌀' + fRund(2 * rt) + ' kommt nirgends an das Material — kleineres Werkzeug, kleineres Aufmass oder eine tiefere Ebene');
   eil({z:sicher});
 
   // Was ist stehen geblieben? Alles im Rohteil, das hoeher steht, als Sollform
@@ -6629,7 +6653,8 @@ function fBahnModell(s, tool, prog){
   }
   const flaeche = fRund(restZellen * r * r);
   warn.push('Modell abspanen: ' + ebenen + ' Ebene(n) mit ' + zuege + ' Zuegen, Zeilenabstand ' + fRund(schritt * r)
-    + ' mm, Arbeitsraster ' + fRund(r) + ' mm. Zeilenweise im Zickzack mit Querdurchgang an den Waenden, SENKRECHT eingetaucht — das Werkzeug muss ueber Mitte schneiden.');
+    + ' mm, Arbeitsraster ' + fRund(r) + ' mm. Zeilenweise im Zickzack mit Querdurchgang an den Waenden, SENKRECHT eingetaucht — das Werkzeug muss ueber Mitte schneiden.'
+    + (stiche ? ' ' + stiche + ' Stelle(n) waeren nur ein senkrechter Stich ohne Fraesweg gewesen und sind ausgelassen — ein Schaftfraeser soll nicht bohren; was dort steht, ist im Restmaterial enthalten.' : ''));
   if(restZellen && !fertigN) warn.push('Stehen geblieben: ' + flaeche + ' mm2 (' + restZellen
     + ' Rasterstellen), bis ' + fRund(restMax) + ' mm hoch — NIRGENDS ist die Sollform samt Aufmass erreicht. ⌀'
     + fRund(2 * rt) + ' ist fuer dieses Teil zu gross, oder die Tiefe Z1 reicht nicht bis an die Sollform heran.');
@@ -6638,7 +6663,7 @@ function fBahnModell(s, tool, prog){
     + '. Ein Saum in der Groesse des Arbeitsrasters (' + fRund(r) + ' mm) ist die Rechengenauigkeit; breitere Stellen erreicht ⌀'
     + fRund(2 * rt) + ' nicht — dort mit einem kleineren Werkzeug nachsetzen.');
   else warn.push('Kein Restmaterial: das Werkzeug erreicht ueberall die Sollform samt Aufmass.');
-  return {ok:true, bahn:B, warn:warn, ebenen:ebenen, zuege:zuege, rest:restZellen,
+  return {ok:true, bahn:B, warn:warn, ebenen:ebenen, zuege:zuege, stiche:stiche, rest:restZellen,
     restMax:fRund(restMax), restBreit:fRund(breit), flaeche:flaeche, gitter:G};
 }
 
