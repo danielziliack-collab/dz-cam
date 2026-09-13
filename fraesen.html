@@ -3252,7 +3252,7 @@ window.__fehlerMelden = function(quelle, e){
 </script>
 <script>
 // =====================================================================
-// DANIEL ZILIACK CAM · FRAESEN — KERN (DOM-frei)
+// DZ CAM · FRAESEN — KERN (DOM-frei)
 // ---------------------------------------------------------------------
 // [Daniels Auftrag 12.09.2026, Stufe 1] Werkstattprogrammierung fuers
 // 2,5D-Fraesen auf der Heidenhain iTNC 530: Programmkopf, BLK FORM,
@@ -7519,7 +7519,7 @@ function fProgrammSchreiben(prog, opt){
   satz('BEGIN PGM ' + name + ' MM');
   satz('BLK FORM 0.1 ' + (k.achse || 'Z') + ' X' + klNum(k.x0) + ' Y' + klNum(k.y0) + ' Z' + klNum(k.z0));
   satz('BLK FORM 0.2 X' + klNum(k.x1) + ' Y' + klNum(k.y1) + ' Z' + klNum(k.z1));
-  satz('; DANIEL ZILIACK CAM FRAESEN ' + datum + ' - STUFE 1');
+  satz('; DZ CAM FRAESEN ' + datum + ' - STUFE 1');
   satz('; NACH HANDBUCH GEBAUT - PROGRAMM-TEST AN DER STEUERUNG VOR DEM ERSTEN LAUF');
 
   const schritte = (prog.schritte || []).filter(s => s && s.aktiv !== false);
@@ -8178,7 +8178,7 @@ function fMerkmale(profilId){
   ];
 }
 // =====================================================================
-// DANIEL ZILIACK CAM · FRAESEN — OBERFLAECHE (F20)
+// DZ CAM · FRAESEN — OBERFLAECHE (F20)
 // ---------------------------------------------------------------------
 // Haengt Felder, Knoepfe, Arbeitsplan und Draufsicht an den DOM-freien
 // Kern (F10). Die Bedienmuster sind die des Drehteils (Masken mit

@@ -28002,7 +28002,7 @@ function buildProgram(){
   // Programmnummer: O + 8-stellige Zahl (DV 610-0C Kap. 1.2, O00000000..O89999999)
   const O8 = String(parseInt(O,10)||0).padStart(8,'0');
   if(parseInt(O8,10) > 89999999) warnings.push('Programmnummer über O89999999 — dieser Bereich ist auf der MTC reserviert (Kap. 1.2).');
-  lines.push(`O${O8}      (DANIEL ZILIACK CAM ${new Date().toLocaleDateString('de-DE')})`);
+  lines.push(`O${O8}      (DZ CAM ${new Date().toLocaleDateString('de-DE')})`);
   // Kopfsatz: Modalzustaende explizit setzen (Basisdialekt, Arbeitspaket 13.1):
   // ZX-Ebene G38, metrisch G21, Absolutmass G90, Vorschub mm/U G95.
   lines.push(`${N()} (KOPF    ) G38 G21 G90 G95`); bump();
