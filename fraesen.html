@@ -2365,6 +2365,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     body.mode-arbeitsplan .sk.sk-zyk{min-height:40px;padding:1px 3px;gap:1px;}
     #maskKopf, #maskMuster, #maskKontur{width:min(860px,94vw) !important;}
     #maskSim{width:min(1180px,94vw) !important;height:88vh !important;}
+    #maskStep{width:min(1100px,94vw) !important;height:86vh !important;}
     #maskWerkzeuge, #maskProgramme{width:min(900px,94vw) !important;}
   }
   /* Paket H (14.09.2026): das Hilfebild steht auf FLACHEM Grund — kein
@@ -2373,6 +2374,14 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
      Die Klasse .mask-help teilt sich die Fraes-App mit dem Drehteil; deshalb
      gilt die Regel nur fuer dieses Canvas (ausserhalb der Breiten-Abfrage). */
   #zyHelp{background:#d6d9dc;border:1px solid hsl(var(--ton), 14%, 86%);border-radius:3px;box-shadow:none;}
+  /* Die Kopfzeile der STEP-Maske ist eine ZEILE, kein Raster: sie traegt einen
+     Ladeknopf, zwei Auswahlgruppen und zwei Knoepfe. Das gemeinsame
+     .gcode-head ist ein Dreispalter fuer die NC-Ausgabe — hier stapelten sich
+     dadurch die Knoepfe untereinander (Bild st-2-grundplatte, 14.09.2026).
+     Gilt auf beiden Geraeten, die Maske gibt es am Handy genauso. */
+  #maskStep .gcode-head{display:flex;flex-wrap:wrap;align-items:center;}
+  #maskStep .gcode-head .gcbtn{width:auto;min-height:32px;}
+  #maskStep .radiobtns button{min-height:30px;}
 </style>
 </head>
 <body class="mode-arbeitsplan">
@@ -2509,6 +2518,29 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
         </div>
       </div>
 
+      <!-- ===== STEP-MODELL (Paket S1, 14.09.2026) =====
+           Ein Modell laden, AUSRICHTEN (Werkzeugachse und Nullpunkt) und als
+           Drahtbild ansehen. Das Ausrichten steht bewusst vorn: Daniels Teile
+           liegen im Modell mit der Werkzeugachse in Y, nicht in Z — ohne diesen
+           Schritt waere jede Flaecheneinordnung falsch. -->
+      <div class="mask" id="maskStep" style="position:fixed;z-index:30;">
+        <div class="mask-head"><span class="mtitel">STEP-MODELL</span><span id="stepInfo" style="font-size:10.5px;color:var(--text-dim);font-weight:400;margin-left:8px;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span><button class="gcbtn" id="btnStepZu" style="margin-left:auto;min-width:40px;">✕</button></div>
+        <div class="gcode-head" style="gap:6px;flex-wrap:wrap;">
+          <label class="gcbtn primary" style="padding:8px 12px;cursor:pointer;" title="STEP-Datei (.stp oder .step) laden">&#x2B06; Modell laden<input type="file" id="stepFile" accept=".stp,.step,.STP,.STEP" style="display:none;"></label>
+          <span style="font-size:11px;color:var(--text-dim);">Werkzeugachse</span>
+          <span class="radiobtns" id="stepAchseBtns"><button data-v="+X">+X</button><button data-v="-X">-X</button><button data-v="+Y">+Y</button><button data-v="-Y">-Y</button><button data-v="+Z" class="sel">+Z</button><button data-v="-Z">-Z</button></span>
+          <button class="gcbtn" id="btnStepVorschlag" title="Die Achse waehlen, bei der die meisten Bohrungen laengs stehen und die meisten Flaechen waagerecht liegen">Achse vorschlagen</button>
+          <span style="font-size:11px;color:var(--text-dim);">Nullpunkt</span>
+          <span class="radiobtns" id="stepNullBtns"><button data-v="ecke" class="sel">Ecke, Oberkante</button><button data-v="mitte">Mitte, Oberkante</button></span>
+          <button class="gcbtn" id="btnStepRoh" title="Huellquader des Modells als BLK FORM in den Programmkopf">Als Rohteil übernehmen</button>
+        </div>
+        <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
+          <canvas id="stepCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;touch-action:none;cursor:grab;"></canvas>
+          <div class="small-hint" id="stepBericht" style="flex:0 0 auto;max-height:22vh;overflow-y:auto;"></div>
+          <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader. Stufe 1 zeigt das Modell und ordnet die Flächen ein; Bahnen entstehen daraus noch nicht.</div>
+        </div>
+      </div>
+
       <!-- ===== NC-AUSGABE ===== -->
       <div class="mask" id="maskGcode" style="position:fixed;z-index:30;">
         <div class="mask-head"><span class="mtitel">NC-AUSGABE (KLARTEXT .H)</span><span id="gcodeStat" style="font-size:10.5px;color:var(--text-dim);font-weight:400;margin-left:8px;"></span><button class="gcbtn" id="btnCloseGcode" style="margin-left:auto;min-width:40px;">✕</button></div>
@@ -2614,6 +2646,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     <div class="hsk" id="hskTools" title="Werkzeugtabelle"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8 L17 4 L20 8 L15 12 Z"/><line x1="2" y1="8" x2="12" y2="8"/></svg><span>Werkzeuge</span></div>
     <div class="hsk" id="hskProgs"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2.5" width="16" height="11" rx="1.5"/><line x1="6" y1="6" x2="16" y2="6"/><line x1="6" y1="9.5" x2="13" y2="9.5"/></svg><span>Programme</span></div>
     <div class="hsk" id="hskSim" title="Eigene Simulation der Bahnen"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3 L4 13 L14 8 Z"/><circle cx="17.5" cy="8" r="2.5"/></svg><span>Simulation</span></div>
+    <div class="hsk" id="hskStep" title="STEP-Modell laden, ausrichten und ansehen"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2 L19 6 L19 12 L11 15.5 L3 12 L3 6 Z"/><path d="M3 6 L11 9.5 L19 6"/><line x1="11" y1="9.5" x2="11" y2="15.5"/></svg><span>STEP</span></div>
     <div class="hsk primary" id="hskGcode" title="Klartext-Ausgabe"><svg class="hsk-ic" viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3 L2.5 8 L7 13"/><path d="M15 3 L19.5 8 L15 13"/></svg><span>NC-Ausgabe</span></div>
   </div>
 
@@ -2763,6 +2796,27 @@ die Draufsicht zeichnet die Kontur mit Startmarke S und zum angew&auml;hlten Kon
 anderem Fr&auml;ser braucht dann keine neue Kontur. Beim Steuerungszyklus &uuml;bernimmt die Steuerung den Versatz (RL/RR), bei Einzels&auml;tzen die
 App (Kap.&nbsp;6c) &mdash; beide fahren dieselbe Kante.</div>
 
+
+<h2 id="ba-fk05c">5c &nbsp;STEP-Modell (3D)</h2>
+<p>Der Softkey <b>STEP</b> in der Fu&szlig;leiste l&auml;dt ein 3D-Modell (<code>.stp</code> / <code>.step</code>, ISO&nbsp;10303-21, AP203 und AP214) und zeigt es als
+Drahtbild. Die App liest die Fl&auml;chen des Volumenmodells &mdash; <b>Ebene, Zylinder, Kegel, Torus</b> mit ihren Randkurven (Geraden und Kreisb&ouml;gen) &mdash; und
+ordnet jede Fl&auml;che nach ihrer Lage zur <b>Werkzeugachse</b> ein: waagerecht (Boden oder Decke), senkrecht (Wand), Schr&auml;ge mit ihrer Neigung, Bohrung
+l&auml;ngs der Achse oder quer.</p>
+<dl>
+<dt id="ba-fk05c-ausrichten">Ausrichten kommt zuerst</dt><dd>Ein CAD-Modell liegt fast nie in der Aufspannlage. In Daniels Teilen zeigt die Werkzeugachse im
+Modell nach <b>Y</b>, nicht nach Z: bei einer Grundplatte sind alle 182 Bohrungsachsen parallel zu Y. Ohne den richtigen Achsenwahl-Schritt w&auml;re jede
+Einordnung falsch (aus 28 B&ouml;den werden dann 7). Deshalb: <b>Werkzeugachse</b> w&auml;hlen, oder <b>Achse vorschlagen</b> dr&uuml;cken &mdash; die App nimmt dann
+die Achse, bei der die meisten Bohrungen l&auml;ngs stehen und die meisten Fl&auml;chen waagerecht liegen. Der <b>Nullpunkt</b> liegt wahlweise in der Ecke oder
+in der Mitte, die Oberkante des Teils immer auf Z0, so wie ein Fr&auml;steil aufgespannt wird.</dd>
+<dt>Als Rohteil &uuml;bernehmen</dt><dd>Schreibt den H&uuml;llquader des ausgerichteten Modells als <b>BLK FORM</b> in den Programmkopf. Aufma&szlig; f&uuml;r das echte
+Rohteil kommt danach von Hand dazu.</dd>
+<dt>Was Stufe 1 NICHT tut</dt><dd>Aus dem Modell entstehen noch <b>keine Bahnen und keine Konturen</b>. Das Modell dient zum Ansehen, Ausrichten und
+Rohteil setzen. <b>Freiformfl&auml;chen</b> werden nur als Kanten gezeichnet und ausdr&uuml;cklich gemeldet; Kanten, die weder Gerade noch Kreis sind, werden
+&uuml;ber ihre Kontrollpunkte gen&auml;hert. Baugruppen werden dort gelesen, wo die Teile im Modell liegen.</dd>
+<dt>Stand</dt><dd>Gemessen an 145 echten Dateien aus Daniels Bestand (14.09.2026): 143 mit Fl&auml;chen gelesen, keine Ausnahme, keine Fl&auml;che ohne Rand,
+die gr&ouml;&szlig;te Datei in 155&nbsp;ms. Die zwei ohne Fl&auml;chen sind FreeCAD-Skizzenexporte ohne Volumen. 89 der 145 sind rein prismatisch, 54 tragen
+Freiform.</dd>
+</dl>
 
 <h2 id="ba-fk06">6 &nbsp;Bohren und Gewinde &mdash; die Zyklen</h2>
 <div class="ba-merk"><b>Die Masken sind neutral (12.09.2026 abends, Daniels Ansage):</b> kein Q-Parameter und kein Steuerungsname
@@ -5654,6 +5708,338 @@ function fDxfKonturen(text, name){
   if(ignoriert.length) hinweise.push('Nicht gelesen: ' + ignoriert.map(k => k + ' x' + D.arten[k]).join(', ') + ' (Bemassung, Text, Schraffur, Ellipsen).');
   konturen.forEach(kt => { const K = fKonturSegmente(kt); if(K.fehler.length) hinweise.push('Kontur "' + kt.name + '": ' + K.fehler.join('; ')); });
   return {konturen:konturen, hinweise:hinweise, zuege:D.segs.length + D.kreise.length, ketten:ketten.length, einheit:D.unit};
+}
+
+// ---------------------------------------------------------------------
+// STEP-MODELL (Paket S1, 14.09.2026, Daniels Auftrag "dreiachsig nach einem
+// Stepmodell bearbeiten"): ein Austauschsatz nach ISO 10303-21 wird gelesen,
+// seine Flaechen werden nach ihrer Lage zur WERKZEUGACHSE sortiert (Boden,
+// Wand, Schraege, Bohrung) und als Drahtbild gezeichnet.
+//
+// GEMESSEN an Daniels 145 Dateien, bevor eine Zeile davon entstand:
+//   - Schemata AP214 und AP203, Einheiten Millimeter.
+//   - 89 rein prismatisch (nur Ebene, Zylinder, Kegel, Torus), 54 mit
+//     Freiformflaechen. Die werden gemeldet, nicht geraten.
+//   - 57 Baugruppen, aber KEINE mit echter Bauteillage: alle Teile liegen
+//     schon in Weltkoordinaten. Taucht doch eine Lage auf, sagt es der Leser.
+//   - DER BEFUND, der die Bedienung bestimmt: die Modelle liegen NICHT in der
+//     Aufspannlage. In Daniels Teilen zeigt die Werkzeugachse nach Y, nicht
+//     nach Z (alle 182 Bohrungsachsen einer Grundplatte sind parallel zu Y).
+//     Deshalb ist AUSRICHTEN der erste Schritt, nicht ein spaeteres Detail.
+// ---------------------------------------------------------------------
+
+// Saetze der Form "#12 = TYP(...);" einsammeln. Der Scanner achtet auf
+// Zeichenketten und Klammern, weil ein Semikolon auch in einem Namen stehen darf.
+function fStepSaetze(text){
+  const s = String(text || '');
+  const ab = s.indexOf('DATA;');
+  const d = ab >= 0 ? s.slice(ab + 5) : s;
+  const E = new Map();
+  const n = d.length;
+  let i = 0;
+  while(i < n){
+    while(i < n && d.charCodeAt(i) !== 35) i++;                 // '#'
+    if(i >= n) break;
+    let j = i + 1, id = '';
+    while(j < n && d[j] >= '0' && d[j] <= '9') id += d[j++];
+    if(!id){ i = j; continue; }
+    let k = j;
+    while(k < n && (d[k] === ' ' || d[k] === '\t' || d[k] === '\r' || d[k] === '\n')) k++;
+    if(d[k] !== '='){ i = j; continue; }
+    k++;
+    const start = k;
+    let str = false, tief = 0;
+    while(k < n){
+      const c = d[k];
+      if(str){ if(c === "'"){ if(d[k + 1] === "'") k++; else str = false; } }
+      else if(c === "'") str = true;
+      else if(c === '(') tief++;
+      else if(c === ')') tief--;
+      else if(c === ';' && tief <= 0) break;
+      k++;
+    }
+    const koerper = d.slice(start, k).trim();
+    const m = koerper.match(/^([A-Za-z0-9_]+)\s*\(([\s\S]*)\)$/);
+    E.set(+id, m ? {typ:m[1], arg:m[2]} : {typ:'', arg:koerper});
+    i = k + 1;
+  }
+  return E;
+}
+// Argumente auf oberster Ebene trennen (Klammern und Zeichenketten beachten).
+function fStepArgs(s){
+  const aus = []; let tief = 0, str = false, akt = '';
+  for(let i = 0; i < s.length; i++){
+    const c = s[i];
+    if(str){ akt += c; if(c === "'"){ if(s[i + 1] === "'") akt += s[++i]; else str = false; } continue; }
+    if(c === "'"){ str = true; akt += c; continue; }
+    if(c === '('){ tief++; akt += c; continue; }
+    if(c === ')'){ tief--; akt += c; continue; }
+    if(c === ',' && tief === 0){ aus.push(akt.trim()); akt = ''; continue; }
+    akt += c;
+  }
+  if(akt.trim() !== '') aus.push(akt.trim());
+  return aus;
+}
+const fStepRefs = (s) => (String(s).match(/#\d+/g) || []).map(v => +v.slice(1));
+const fStepZahl = (s) => { const m = String(s).match(/-?\d+\.?\d*(?:[eE][-+]?\d+)?/); return m ? +m[0] : NaN; };
+// Millimeter oder Zoll? Die Laengeneinheit steht als SI_UNIT(.MILLI.,.METRE.)
+// oder als CONVERSION_BASED_UNIT mit dem Namen INCH.
+function fStepEinheit(text){
+  const t = String(text || '');
+  if(/CONVERSION_BASED_UNIT\s*\(\s*'INCH'/i.test(t)) return 25.4;
+  if(/SI_UNIT\s*\(\s*\.MILLI\.\s*,\s*\.METRE\./i.test(t)) return 1;
+  if(/SI_UNIT\s*\(\s*\$\s*,\s*\.METRE\./i.test(t)) return 1000;
+  return 1;
+}
+
+// ---- Geometrie aufloesen (mit Gedaechtnis, die Punkte werden oft geteilt) ----
+function fStepGeo(E, einheit){
+  const merkP = new Map(), merkR = new Map(), merkL = new Map();
+  const G = {};
+  G.punkt = (id) => {
+    if(merkP.has(id)) return merkP.get(id);
+    const e = E.get(id); let p = null;
+    if(e && e.typ === 'CARTESIAN_POINT'){
+      const z = (fStepArgs(e.arg)[1] || '').match(/-?\d+\.?\d*(?:[eE][-+]?\d+)?/g) || [];
+      p = [(+z[0] || 0) * einheit, (+z[1] || 0) * einheit, (+z[2] || 0) * einheit];
+    }
+    merkP.set(id, p); return p;
+  };
+  G.richtung = (id) => {
+    if(merkR.has(id)) return merkR.get(id);
+    const e = E.get(id); let r = null;
+    if(e && e.typ === 'DIRECTION'){
+      const z = (fStepArgs(e.arg)[1] || '').match(/-?\d+\.?\d*(?:[eE][-+]?\d+)?/g) || [];
+      const v = [+z[0] || 0, +z[1] || 0, +z[2] || 0], L = Math.hypot(v[0], v[1], v[2]) || 1;
+      r = [v[0] / L, v[1] / L, v[2] / L];
+    }
+    merkR.set(id, r); return r;
+  };
+  // AXIS2_PLACEMENT_3D: Ursprung, Achse z, Bezugsrichtung x. Fehlen Richtungen,
+  // gelten die Vorgaben der Norm (z = 0/0/1, x = 1/0/0).
+  G.lage = (id) => {
+    if(merkL.has(id)) return merkL.get(id);
+    const e = E.get(id); let L = null;
+    if(e && /AXIS2_PLACEMENT_3D/.test(e.typ)){
+      const a = fStepArgs(e.arg);
+      const p = G.punkt(fStepRefs(a[1])[0]) || [0, 0, 0];
+      let z = (a[2] && a[2] !== '$') ? G.richtung(fStepRefs(a[2])[0]) : null;
+      let x = (a[3] && a[3] !== '$') ? G.richtung(fStepRefs(a[3])[0]) : null;
+      z = z || [0, 0, 1];
+      x = x || (Math.abs(z[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0]);
+      // x auf z senkrecht stellen
+      const d = x[0] * z[0] + x[1] * z[1] + x[2] * z[2];
+      let xx = [x[0] - d * z[0], x[1] - d * z[1], x[2] - d * z[2]];
+      const lx = Math.hypot(xx[0], xx[1], xx[2]);
+      xx = lx > 1e-9 ? [xx[0] / lx, xx[1] / lx, xx[2] / lx] : [1, 0, 0];
+      const y = [z[1] * xx[2] - z[2] * xx[1], z[2] * xx[0] - z[0] * xx[2], z[0] * xx[1] - z[1] * xx[0]];
+      L = {p:p, z:z, x:xx, y:y};
+    }
+    merkL.set(id, L); return L;
+  };
+  return G;
+}
+// Punkte einer Kante als Streckenzug. Gerade: zwei Punkte. Kreis: abgetastet,
+// die Richtung folgt dem Sinn der Kante (bei .T. laeuft der Winkel aufwaerts).
+function fStepKante(E, G, id, aus, einheit){
+  const e = E.get(id);
+  if(!e || e.typ !== 'EDGE_CURVE') return null;
+  const a = fStepArgs(e.arg);
+  const v1 = E.get(fStepRefs(a[1])[0]), v2 = E.get(fStepRefs(a[2])[0]);
+  const p1 = v1 ? G.punkt(fStepRefs(v1.arg)[0]) : null;
+  const p2 = v2 ? G.punkt(fStepRefs(v2.arg)[0]) : null;
+  const sinn = /\.T\./.test(a[4] || '');
+  const k = E.get(fStepRefs(a[3])[0]);
+  if(!k) return (p1 && p2) ? [p1, p2] : null;
+  if(k.typ === 'LINE'){ aus.linien++; return (p1 && p2) ? [p1, p2] : null; }
+  if(k.typ === 'CIRCLE' || k.typ === 'ELLIPSE'){
+    const ka = fStepArgs(k.arg), L = G.lage(fStepRefs(ka[1])[0]);
+    const r = fStepZahl(ka[2]) * einheit, r2 = k.typ === "ELLIPSE" ? fStepZahl(ka[3]) * einheit : r;
+    if(!L || !isFinite(r)) return (p1 && p2) ? [p1, p2] : null;
+    const wink = (p) => {
+      if(!p) return null;
+      const d = [p[0] - L.p[0], p[1] - L.p[1], p[2] - L.p[2]];
+      return Math.atan2(d[0] * L.y[0] + d[1] * L.y[1] + d[2] * L.y[2], d[0] * L.x[0] + d[1] * L.x[1] + d[2] * L.x[2]);
+    };
+    let a0 = wink(p1), a1 = wink(p2);
+    if(a0 == null || a1 == null){ a0 = 0; a1 = 2 * Math.PI; }
+    else {
+      let d = a1 - a0;
+      // Anfang gleich Ende heisst VOLLKREIS: die Schleife macht daraus von
+      // selbst einen ganzen Umlauf, weil 0 unter der Schwelle liegt. Eine
+      // eigene Abfrage dafuer war toter Code (von der Gegenprobe entlarvt).
+      if(sinn){ while(d <= 1e-9) d += 2 * Math.PI; }
+      else { while(d >= -1e-9) d -= 2 * Math.PI; }
+      a1 = a0 + d;
+    }
+    const n = Math.max(2, Math.min(64, Math.ceil(Math.abs(a1 - a0) / (Math.PI / 30))));
+    const pts = [];
+    for(let q = 0; q <= n; q++){
+      const w = a0 + (a1 - a0) * q / n, c = Math.cos(w), s = Math.sin(w);
+      pts.push([L.p[0] + r * c * L.x[0] + r2 * s * L.y[0],
+                L.p[1] + r * c * L.x[1] + r2 * s * L.y[1],
+                L.p[2] + r * c * L.x[2] + r2 * s * L.y[2]]);
+    }
+    aus.bogen++;
+    return pts;
+  }
+  // Alles andere (B-Spline und Verwandte): ueber die Kontrollpunkte genaehert.
+  const refs = fStepRefs(k.arg).map(q => G.punkt(q)).filter(q => q);
+  aus.frei++;
+  if(refs.length >= 2) return refs;
+  return (p1 && p2) ? [p1, p2] : null;
+}
+
+// Das ganze Modell: Flaechen mit Art, Achse und Randkurven, dazu ein Bericht.
+function fStepModell(text){
+  const E = fStepSaetze(text);
+  const einheit = fStepEinheit(text);
+  const G = fStepGeo(E, einheit);
+  const aus = {linien:0, bogen:0, frei:0};
+  const flaechen = [];
+  const zaehl = {ebene:0, zylinder:0, kegel:0, torus:0, frei:0};
+  E.forEach((e, id) => {
+    if(e.typ !== 'ADVANCED_FACE') return;
+    const a = fStepArgs(e.arg);
+    const fl = E.get(fStepRefs(a[2])[0]);
+    if(!fl) return;
+    let art = 'frei', achse = null, ort = null, r = 0;
+    if(fl.typ === 'PLANE'){ art = 'ebene'; }
+    else if(fl.typ === 'CYLINDRICAL_SURFACE'){ art = 'zylinder'; }
+    else if(fl.typ === 'CONICAL_SURFACE'){ art = 'kegel'; }
+    else if(fl.typ === 'TOROIDAL_SURFACE'){ art = 'torus'; }
+    if(art !== 'frei'){
+      const fa = fStepArgs(fl.arg), L = G.lage(fStepRefs(fa[1])[0]);
+      if(L){ achse = L.z; ort = L.p; }
+      if(fa[2] != null) r = (fStepZahl(fa[2]) || 0) * einheit;
+    }
+    zaehl[art]++;
+    // Randkurven aller Schleifen der Flaeche
+    const rand = [];
+    fStepRefs(a[1]).forEach(bid => {
+      const b = E.get(bid); if(!b) return;
+      const loop = E.get(fStepRefs(fStepArgs(b.arg)[1])[0]); if(!loop || loop.typ !== 'EDGE_LOOP') return;
+      fStepRefs(fStepArgs(loop.arg)[1]).forEach(oid => {
+        const oe = E.get(oid); if(!oe || oe.typ !== 'ORIENTED_EDGE') return;
+        const oa = fStepArgs(oe.arg);
+        const pts = fStepKante(E, G, fStepRefs(oa[3])[0], aus, einheit);
+        if(pts && pts.length > 1) rand.push(/\.F\./.test(oa[4] || '') ? pts.slice().reverse() : pts);
+      });
+    });
+    flaechen.push({id:id, art:art, achse:achse, ort:ort, r:r, rand:rand});
+  });
+  // Huellquader ueber alle Randpunkte
+  const box = {x0:Infinity, y0:Infinity, z0:Infinity, x1:-Infinity, y1:-Infinity, z1:-Infinity};
+  flaechen.forEach(f => f.rand.forEach(z => z.forEach(p => {
+    if(p[0] < box.x0) box.x0 = p[0]; if(p[0] > box.x1) box.x1 = p[0];
+    if(p[1] < box.y0) box.y0 = p[1]; if(p[1] > box.y1) box.y1 = p[1];
+    if(p[2] < box.z0) box.z0 = p[2]; if(p[2] > box.z1) box.z1 = p[2];
+  })));
+  const warnungen = [];
+  if(!flaechen.length) warnungen.push('Keine Flaechen gefunden — ist das ein Flaechen- oder Punktmodell statt eines Volumens?');
+  if(zaehl.frei) warnungen.push(zaehl.frei + ' Freiformflaeche(n): die App zeigt nur ihre Kanten und faehrt sie NICHT.');
+  if(aus.frei) warnungen.push(aus.frei + ' Kante(n) ueber Kontrollpunkte genaehert (kein Kreis, keine Gerade).');
+  if(einheit !== 1) warnungen.push('Zeichnungseinheit umgerechnet (Faktor ' + einheit + ').');
+  const teile = [...E.values()].filter(e => e.typ === 'NEXT_ASSEMBLY_USAGE_OCCURRENCE').length;
+  if(teile) warnungen.push('Baugruppe mit ' + teile + ' Verknuepfung(en): die Teile werden dort gelesen, wo sie im Modell liegen.');
+  return {flaechen:flaechen, box:box, einheit:einheit,
+    bericht:{saetze:E.size, flaechen:flaechen.length, ebenen:zaehl.ebene, zylinder:zaehl.zylinder,
+      kegel:zaehl.kegel, torus:zaehl.torus, frei:zaehl.frei, linien:aus.linien, bogen:aus.bogen,
+      freieKanten:aus.frei, teile:teile},
+    warnungen:warnungen};
+}
+
+// ---- Ausrichten: welche Modellachse ist die Werkzeugachse? ----
+// Liefert die Drehung, die die gewaehlte Achse auf +Z legt. Daniels Teile
+// liegen durchweg mit der Werkzeugachse in Y — ohne diesen Schritt waere jede
+// Flaecheneinordnung falsch (gemessen an vier Teilen, 14.09.2026).
+const F_STEP_ACHSEN = ['+X', '-X', '+Y', '-Y', '+Z', '-Z'];
+function fStepDrehung(achse){
+  switch(String(achse || '+Z')){
+    case '+X': return [[0, 0, -1], [0, 1, 0], [1, 0, 0]];
+    case '-X': return [[0, 0, 1], [0, 1, 0], [-1, 0, 0]];
+    case '+Y': return [[1, 0, 0], [0, 0, -1], [0, 1, 0]];
+    case '-Y': return [[1, 0, 0], [0, 0, 1], [0, -1, 0]];
+    case '-Z': return [[1, 0, 0], [0, -1, 0], [0, 0, -1]];
+    default:   return [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  }
+}
+const fStepDreh = (R, p) => [R[0][0] * p[0] + R[0][1] * p[1] + R[0][2] * p[2],
+                             R[1][0] * p[0] + R[1][1] * p[1] + R[1][2] * p[2],
+                             R[2][0] * p[0] + R[2][1] * p[1] + R[2][2] * p[2]];
+// Modell in die Aufspannlage drehen und die Flaechen einordnen.
+// Die Einordnung gilt gegen die Z-Achse NACH dem Drehen:
+//   Ebene waagerecht -> Boden (Blick von oben) bzw. Unterseite
+//   Ebene senkrecht  -> Wand
+//   dazwischen       -> Schraege, mit Neigung gegen die XY-Ebene
+//   Zylinder laengs der Achse -> Bohrung oder Zapfen
+function fStepAusrichten(modell, ausricht){
+  const a = ausricht || {};
+  const R = fStepDrehung(a.achse);
+  const flaechen = modell.flaechen.map(f => {
+    const rand = f.rand.map(z => z.map(p => fStepDreh(R, p)));
+    const n = f.achse ? fStepDreh(R, f.achse) : null;
+    let lage = 'frei', neigung = null;
+    if(f.art === 'ebene' && n){
+      const c = Math.abs(n[2]);
+      if(c > 0.9998) lage = 'waagerecht';
+      else if(c < 0.0002) lage = 'senkrecht';
+      else { lage = 'schraege'; neigung = Math.round(Math.acos(Math.min(1, c)) * 180 / Math.PI * 10) / 10; }
+    } else if((f.art === 'zylinder' || f.art === 'kegel') && n){
+      lage = Math.abs(n[2]) > 0.9998 ? 'laengs' : 'quer';
+    }
+    return {id:f.id, art:f.art, lage:lage, neigung:neigung, r:f.r, achse:n,
+      ort:f.ort ? fStepDreh(R, f.ort) : null, rand:rand};
+  });
+  const box = {x0:Infinity, y0:Infinity, z0:Infinity, x1:-Infinity, y1:-Infinity, z1:-Infinity};
+  flaechen.forEach(f => f.rand.forEach(z => z.forEach(p => {
+    if(p[0] < box.x0) box.x0 = p[0]; if(p[0] > box.x1) box.x1 = p[0];
+    if(p[1] < box.y0) box.y0 = p[1]; if(p[1] > box.y1) box.y1 = p[1];
+    if(p[2] < box.z0) box.z0 = p[2]; if(p[2] > box.z1) box.z1 = p[2];
+  })));
+  // Nullpunkt: vorgegebene Verschiebung, sonst Ecke links vorn unten und
+  // Oberkante auf Z0 (so, wie ein Fraesteil aufgespannt wird).
+  const vx = (a.x0 != null) ? +a.x0 : -box.x0;
+  const vy = (a.y0 != null) ? +a.y0 : -box.y0;
+  const vz = (a.z0 != null) ? +a.z0 : -box.z1;
+  flaechen.forEach(f => { f.rand.forEach(z => z.forEach(p => { p[0] += vx; p[1] += vy; p[2] += vz; })); if(f.ort){ f.ort[0] += vx; f.ort[1] += vy; f.ort[2] += vz; } });
+  const B = {x0:fRund(box.x0 + vx), y0:fRund(box.y0 + vy), z0:fRund(box.z0 + vz),
+             x1:fRund(box.x1 + vx), y1:fRund(box.y1 + vy), z1:fRund(box.z1 + vz)};
+  const z = {waagerecht:0, senkrecht:0, schraege:0, laengs:0, quer:0, frei:0};
+  const neigungen = [];
+  flaechen.forEach(f => {
+    if(f.art === 'ebene'){ if(f.lage === 'waagerecht') z.waagerecht++; else if(f.lage === 'senkrecht') z.senkrecht++; else { z.schraege++; if(f.neigung != null) neigungen.push(f.neigung); } }
+    else if(f.art === 'zylinder' || f.art === 'kegel'){ if(f.lage === 'laengs') z.laengs++; else z.quer++; }
+    else z.frei++;
+  });
+  return {flaechen:flaechen, box:B, zaehl:z, achse:a.achse || '+Z',
+    neigungen:[...new Set(neigungen)].sort((p, q) => p - q), versatz:[fRund(vx), fRund(vy), fRund(vz)]};
+}
+
+// Ein ausgerichtetes Modell in XY verschieben (Nullpunkt in die Mitte legen).
+function fStepVerschieben(A, dx, dy){
+  A.flaechen.forEach(f => {
+    f.rand.forEach(z => z.forEach(p => { p[0] += dx; p[1] += dy; }));
+    if(f.ort){ f.ort[0] += dx; f.ort[1] += dy; }
+  });
+  A.box.x0 = fRund(A.box.x0 + dx); A.box.x1 = fRund(A.box.x1 + dx);
+  A.box.y0 = fRund(A.box.y0 + dy); A.box.y1 = fRund(A.box.y1 + dy);
+  A.versatz[0] = fRund(A.versatz[0] + dx); A.versatz[1] = fRund(A.versatz[1] + dy);
+  return A;
+}
+// Welche Achse ist vermutlich die Werkzeugachse? Gezaehlt wird, was ein
+// Fraesteil ausmacht: Bohrungen laengs der Achse (doppelt) und waagerechte
+// Flaechen. An Daniels vier Testteilen trifft das jedes Mal die richtige
+// Achse — bei der Grundplatte +Y (212 Bohrungen laengs), bei der Platte
+// de_0038399 dagegen +Z (10 laengs).
+function fStepAchseVorschlag(modell){
+  let best = '+Z', wert = -1;
+  F_STEP_ACHSEN.forEach(a => {
+    const A = fStepAusrichten(modell, {achse:a});
+    const p = 2 * A.zaehl.laengs + A.zaehl.waagerecht;
+    if(p > wert){ wert = p; best = a; }
+  });
+  return best;
 }
 
 // ---------------------------------------------------------------------
@@ -9043,6 +9429,167 @@ function fSimOeffnen(){
   const sl = document.getElementById('simPos');
   if(sl && sl.addEventListener) sl.addEventListener('input', ()=>{ fSimPause(); const tZiel = (+sl.value / 1000) * SIM.gesamt; if(!SIM.liste) fSimAufbauen(); if(tZiel < SIM.t) fSimAufbauen(); fSimBis(tZiel); fSimZeichnen(); fSimInfo(); });
   try{ window.addEventListener('resize', ()=>{ const m = document.getElementById('maskSim'); if(m && m.classList.contains('show')) fSimZeichnen(); }); }catch(e){}
+}
+
+// =====================================================================
+// STEP-MODELL (Paket S1, 14.09.2026): laden, ausrichten, als Drahtbild
+// zeichnen. Das Bild ist bewusst ein Drahtbild — Stufe 1 soll zeigen, ob das
+// richtige Teil in der richtigen Lage steht, nicht huebsch aussehen.
+// =====================================================================
+const STEP = {modell:null, aus:null, name:'', achse:'+Z', nullp:'ecke',
+  az:-0.7, el:0.5, zoom:1, mitte:[0, 0, 0], zieh:null};
+const F_STEP_FARBE = {waagerecht:'#2f6fb2', senkrecht:'#7a8593', schraege:'#d08a2a',
+  laengs:'#2f9e5a', quer:'#9b6fd0', frei:'#c0392b'};
+function fStepFarbe(f){
+  if(f.art === 'ebene') return F_STEP_FARBE[f.lage] || F_STEP_FARBE.frei;
+  if(f.art === 'zylinder' || f.art === 'kegel') return F_STEP_FARBE[f.lage] || F_STEP_FARBE.quer;
+  if(f.art === 'torus') return F_STEP_FARBE.quer;
+  return F_STEP_FARBE.frei;
+}
+function fStepAusrichtenJetzt(){
+  if(!STEP.modell) return;
+  const A = fStepAusrichten(STEP.modell, {achse:STEP.achse});
+  if(STEP.nullp === 'mitte') fStepVerschieben(A, -(A.box.x0 + A.box.x1) / 2, -(A.box.y0 + A.box.y1) / 2);
+  STEP.aus = A;
+  STEP.mitte = [(A.box.x0 + A.box.x1) / 2, (A.box.y0 + A.box.y1) / 2, (A.box.z0 + A.box.z1) / 2];
+  fStepBericht(); fStepZeichnen();
+}
+function fStepBericht(){
+  const el = document.getElementById('stepBericht'), inf = document.getElementById('stepInfo');
+  const M = STEP.modell, A = STEP.aus;
+  if(!el) return;
+  if(!M){ el.innerHTML = 'Noch kein Modell geladen.'; if(inf) inf.textContent = ''; return; }
+  const b = M.bericht, z = A ? A.zaehl : null, B = A ? A.box : null;
+  const t = [];
+  t.push('<b>' + esc(STEP.name) + '</b> — ' + b.saetze + ' Saetze, ' + b.flaechen + ' Flaechen, '
+    + (b.linien + b.bogen + b.freieKanten) + ' Kanten.');
+  t.push('Flaechenarten: ' + b.ebenen + ' Ebene, ' + b.zylinder + ' Zylinder, ' + b.kegel + ' Kegel, '
+    + b.torus + ' Torus, ' + b.frei + ' Freiform.');
+  if(B) t.push('<b>Huellquader</b> (ausgerichtet auf ' + esc(A.achse) + '): '
+    + fRund(B.x1 - B.x0) + ' x ' + fRund(B.y1 - B.y0) + ' x ' + fRund(B.z1 - B.z0)
+    + ' mm &nbsp; X ' + B.x0 + '..' + B.x1 + ' &nbsp; Y ' + B.y0 + '..' + B.y1 + ' &nbsp; Z ' + B.z0 + '..' + B.z1);
+  if(z) t.push('<b>Einordnung:</b> ' + z.waagerecht + ' waagerecht, ' + z.senkrecht + ' senkrecht, '
+    + z.schraege + ' Schraege' + (A.neigungen.length ? ' (' + A.neigungen.join(', ') + ' Grad)' : '')
+    + ', ' + z.laengs + ' Bohrung/Zylinder laengs, ' + z.quer + ' quer, ' + z.frei + ' Freiform.');
+  M.warnungen.forEach(w => t.push('<span style="color:var(--amber,#b8860b);">' + esc(w) + '</span>'));
+  el.innerHTML = t.join('<br>');
+  if(inf && B) inf.textContent = esc(STEP.name) + ' — ' + fRund(B.x1 - B.x0) + ' x ' + fRund(B.y1 - B.y0) + ' x ' + fRund(B.z1 - B.z0) + ' mm';
+}
+// Drahtbild: Drehung um Z (az) und Neigung (el), danach senkrechte Projektion.
+function fStepZeichnen(){
+  const cv = document.getElementById('stepCv');
+  if(!cv || !cv.getContext) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth || 700, h = cv.clientHeight || 320;
+  if(cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){ cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const c = cv.getContext('2d'); if(!c || !c.setTransform) return;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.fillStyle = '#e9edf1'; c.fillRect(0, 0, w, h);
+  const A = STEP.aus;
+  if(!A){ c.fillStyle = '#5d646c'; c.font = '13px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('Kein Modell geladen — oben auf "Modell laden" tippen.', w / 2, h / 2); return; }
+  const ca = Math.cos(STEP.az), sa = Math.sin(STEP.az), ce = Math.cos(STEP.el), se = Math.sin(STEP.el);
+  const P = (p) => {
+    const x = p[0] - STEP.mitte[0], y = p[1] - STEP.mitte[1], zz = p[2] - STEP.mitte[2];
+    const x1 = x * ca - y * sa, y1 = x * sa + y * ca;
+    return [x1, zz * ce - y1 * se];
+  };
+  // Massstab aus den acht Ecken des Huellquaders
+  const B = A.box, ecken = [];
+  [B.x0, B.x1].forEach(x => [B.y0, B.y1].forEach(y => [B.z0, B.z1].forEach(z => ecken.push(P([x, y, z])))));
+  let ux = 1e-9, uy = 1e-9;
+  ecken.forEach(p => { ux = Math.max(ux, Math.abs(p[0])); uy = Math.max(uy, Math.abs(p[1])); });
+  const k = Math.min(w * 0.44 / ux, h * 0.44 / uy) * STEP.zoom;
+  const S = (p) => { const q = P(p); return [w / 2 + q[0] * k, h / 2 - q[1] * k]; };
+  // Huellquader gestrichelt
+  c.save(); c.strokeStyle = '#98a2ad'; c.lineWidth = 1; if(c.setLineDash) c.setLineDash([4, 3]);
+  const E = [[B.x0, B.y0, B.z0], [B.x1, B.y0, B.z0], [B.x1, B.y1, B.z0], [B.x0, B.y1, B.z0],
+             [B.x0, B.y0, B.z1], [B.x1, B.y0, B.z1], [B.x1, B.y1, B.z1], [B.x0, B.y1, B.z1]];
+  [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(q => {
+    const a = S(E[q[0]]), b = S(E[q[1]]);
+    c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+  });
+  c.restore();
+  // Flaechenkanten
+  c.save(); c.lineWidth = 1; if(c.setLineDash) c.setLineDash([]);
+  A.flaechen.forEach(f => {
+    c.strokeStyle = fStepFarbe(f);
+    f.rand.forEach(zug => {
+      if(zug.length < 2) return;
+      c.beginPath();
+      const p0 = S(zug[0]); c.moveTo(p0[0], p0[1]);
+      for(let i = 1; i < zug.length; i++){ const p = S(zug[i]); c.lineTo(p[0], p[1]); }
+      c.stroke();
+    });
+  });
+  c.restore();
+  // Nullpunkt
+  const o = S([0, 0, 0]);
+  c.save(); c.strokeStyle = '#111'; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(o[0] - 7, o[1]); c.lineTo(o[0] + 7, o[1]); c.moveTo(o[0], o[1] - 7); c.lineTo(o[0], o[1] + 7); c.stroke();
+  c.beginPath(); c.arc(o[0], o[1], 3.5, 0, Math.PI * 2); c.stroke(); c.restore();
+}
+function fStepLaden(text, name){
+  let M;
+  try{ M = fStepModell(text); }
+  catch(e){ melde('FEHLER beim Lesen der STEP-Datei: ' + e.message); return null; }
+  if(!M.flaechen.length){ melde('FEHLER: keine Flaechen im Modell — ist das ein Volumenmodell? (' + M.warnungen.join(' ') + ')'); }
+  STEP.modell = M; STEP.name = name || 'Modell';
+  STEP.achse = fStepAchseVorschlag(M);
+  const g = document.getElementById('stepAchseBtns');
+  if(g) [...g.querySelectorAll('button')].forEach(b => b.classList.toggle('sel', b.dataset.v === STEP.achse));
+  STEP.zoom = 1; STEP.az = -0.7; STEP.el = 0.5;
+  fStepAusrichtenJetzt();
+  melde('STEP ' + STEP.name + ': ' + M.bericht.flaechen + ' Flaechen gelesen, Werkzeugachse ' + STEP.achse
+    + ' vorgeschlagen.' + (M.warnungen.length ? ' ' + M.warnungen.join(' ') : ''));
+  return M;
+}
+function fStepRohUebernehmen(){
+  const A = STEP.aus;
+  if(!A){ melde('FEHLER: kein Modell geladen.'); return false; }
+  const B = A.box, k = fProg.kopf;
+  k.x0 = B.x0; k.x1 = B.x1; k.y0 = B.y0; k.y1 = B.y1; k.z0 = B.z0; k.z1 = B.z1;
+  fRender();
+  melde('Rohteil aus dem Modell: X ' + B.x0 + '..' + B.x1 + '  Y ' + B.y0 + '..' + B.y1 + '  Z ' + B.z0 + '..' + B.z1
+    + ' — Aufmass fuer das echte Rohteil von Hand dazugeben.');
+  return true;
+}
+{
+  const on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+  on('hskStep', ()=>{ maskZeigen('maskStep'); setTimeout(()=>{ try{ fStepBericht(); fStepZeichnen(); }catch(e){} }, 0); });
+  on('btnStepZu', ()=>maskZu('maskStep'));
+  wireRadioGroup('stepAchseBtns', (v)=>{ STEP.achse = v; fStepAusrichtenJetzt(); });
+  wireRadioGroup('stepNullBtns', (v)=>{ STEP.nullp = v; fStepAusrichtenJetzt(); });
+  on('btnStepVorschlag', ()=>{
+    if(!STEP.modell){ melde('Erst ein Modell laden.'); return; }
+    STEP.achse = fStepAchseVorschlag(STEP.modell);
+    const g = document.getElementById('stepAchseBtns');
+    if(g) [...g.querySelectorAll('button')].forEach(b => b.classList.toggle('sel', b.dataset.v === STEP.achse));
+    fStepAusrichtenJetzt();
+    melde('Werkzeugachse ' + STEP.achse + ' vorgeschlagen (die meisten Bohrungen stehen dort laengs).');
+  });
+  on('btnStepRoh', fStepRohUebernehmen);
+  const fi = document.getElementById('stepFile');
+  if(fi && fi.addEventListener) fi.addEventListener('change', ()=>{
+    const f = fi.files && fi.files[0]; if(!f) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{ fStepLaden(String(rd.result || ''), f.name); fi.value = ''; };
+    rd.readAsText(f);
+  });
+  // Ziehen = drehen, Rad = Zoom, Doppelklick = Ausgangslage
+  const cv = document.getElementById('stepCv');
+  if(cv && cv.addEventListener){
+    cv.addEventListener('pointerdown', (e)=>{ STEP.zieh = {x:e.clientX, y:e.clientY, az:STEP.az, el:STEP.el}; cv.style.cursor = 'grabbing'; });
+    document.addEventListener('pointermove', (e)=>{
+      if(!STEP.zieh) return;
+      STEP.az = STEP.zieh.az + (e.clientX - STEP.zieh.x) * 0.01;
+      STEP.el = Math.max(-1.5, Math.min(1.5, STEP.zieh.el + (e.clientY - STEP.zieh.y) * 0.01));
+      fStepZeichnen();
+    });
+    document.addEventListener('pointerup', ()=>{ STEP.zieh = null; cv.style.cursor = 'grab'; });
+    cv.addEventListener('wheel', (e)=>{ e.preventDefault(); STEP.zoom = Math.max(0.2, Math.min(12, STEP.zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12))); fStepZeichnen(); });
+    cv.addEventListener('dblclick', ()=>{ STEP.az = -0.7; STEP.el = 0.5; STEP.zoom = 1; fStepZeichnen(); });
+  }
+  try{ window.addEventListener('resize', ()=>{ const m = document.getElementById('maskStep'); if(m && m.classList.contains('show')) fStepZeichnen(); }); }catch(e){}
 }
 
 // =====================================================================
