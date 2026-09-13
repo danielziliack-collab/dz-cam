@@ -3407,7 +3407,9 @@ var F_FELDER = {
   inseln:     {name:'Inseln (Konturen XY)', typ:'konturen', ba:'ba-fk06c-sl'},
   q8:         {name:'R Rundungsradius an Innenecken', einheit:'mm', ba:'ba-fk06c-sl'},
   // Paket E: Gewindefraesen
-  q355:       {name:'Nachsetzen (0 = ein Gang, 1 = durchgehend, >1 Gänge je Bahn)', typ:'ganz', ba:'ba-fk06e'},
+  // Kurzer Name: der volle Satz wurde im Feld abgeschnitten (Bild 14.09.2026);
+  // was 0, 1 und mehr bedeuten, steht in der Anleitung Kap. 6e.
+  q355:       {name:'Nachsetzen (Gewindegänge je Bahn)', typ:'ganz', ba:'ba-fk06e'},
   q356:       {name:'Z2 Senk- bzw. Bohrtiefe (inkremental, negativ)', einheit:'mm', ba:'ba-fk06e'},
   q358:       {name:'Tiefe Senken stirnseitig (inkremental)', einheit:'mm', ba:'ba-fk06e'},
   q359:       {name:'Versatz Senken stirnseitig (inkremental)', einheit:'mm', ba:'ba-fk06e'},
@@ -3942,10 +3944,15 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
   // Nachsetzen 0 = ein Gang, Vorpositionieren 750, Anfahren 50, Senken 150);
   // Q358/Q359 = 0 heisst: kein stirnseitiges Senken.
   if(F_ZYKLEN[art] && F_ZYKLEN[art].gewf){
+    // NUR die Werte, die dieser Familie eigen sind. Soll-⌀, Vorhalteabstand,
+    // Spanbruchtiefe, Vorpositionier- und Senkvorschub setzt der gemeinsame
+    // Bohrzyklus-Block weiter unten — dort steht der Soll-⌀ als doppelter
+    // Werkzeug-⌀, und das ist fuer einen Gewindefraeser der bessere
+    // Vorschlag (⌀8 macht ueblicherweise M16).
     s.typ = 'bohren';
-    Object.assign(s, {q335:10, steigung:1.5, tiefe:-16, q355:0, q356:-20,
-      q358:0, q359:0, q360:0, fraesart:1, fVor:750, fAnfahr:50, fSenk:150,
-      f:t.f || 500, fTief:fRund((t.f || 500) * 0.3), zust:5, q258:0.2, q257:5, rzSpan:0.2, scSeite:0.2});
+    Object.assign(s, {steigung:1.5, tiefe:-16, q355:0, q356:-20,
+      q358:0, q359:0, q360:0, fraesart:1, fAnfahr:50,
+      f:t.f || 500, fTief:fRund((t.f || 500) * 0.3), zust:5, rzSpan:0.2, scSeite:0.2});
   }
   // Paket 3: Bohrzyklen 202/204/205/208/209/241 mit den Werten der
   // Handbuchbeispiele als Vorgabe.
@@ -8379,6 +8386,10 @@ function fHilfebild(fokus){
   try{
     if(ZY.art === 'planfraesen') hbBildPlan(H, ZY.art, s);
     else if((F_ZYKLEN[ZY.art] || {}).kontur) hbBildKontur(H, ZY.art, s);
+    // Paket E: die Gewindefraeszyklen tragen fraes:true (wegen Q206/Q207),
+    // sind aber KEINE Form — sie bohren bzw. fraesen in der Achse. Ohne diese
+    // Zeile stand in ihrer Maske das Taschenbild (eigener Fehler, 14.09.2026).
+    else if((F_ZYKLEN[ZY.art] || {}).gewf) hbBildBohren(H, ZY.art, s);
     else if((F_ZYKLEN[ZY.art] || {}).fraes) hbBildForm(H, ZY.art, s);
     else hbBildBohren(H, ZY.art, s);
   }catch(e){ try{ (window.__hbFehler = window.__hbFehler || []).push(ZY.art + ': ' + (e && e.message)); console.error('Hilfebild ' + ZY.art + ':', e && (e.stack || e.message)); }catch(_){} }
