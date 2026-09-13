@@ -2740,13 +2740,21 @@ gilt sie f&uuml;r die Ecke am Startpunkt. Zu gro&szlig;e Rundungen oder Fasen un
 letzte Element nicht dort endet &mdash; wie die Steuerung im Kontur-Unterprogramm. Eine <b>offene</b> Kontur ist ein Konturzug von Anfang bis Ende;
 dort sagt der Schritt, ob das Werkzeug links oder rechts der Laufrichtung f&auml;hrt.</dd>
 <dt id="ba-fk05b-dxf">DXF einlesen</dt><dd>Der Knopf <b>DXF einlesen</b> im Kontureditor (oder eine DXF-Datei auf die Seite ziehen) liest eine 2D-Zeichnung in der
-XY-Ebene: <code>LINE</code>, <code>ARC</code>, <code>CIRCLE</code>, <code>LWPOLYLINE</code> (mit Bogen-Bulge) und <code>SPLINE</code> (&uuml;ber die Fit-Punkte als Polygonzug,
-mit Hinweis); Zoll-Zeichnungen werden umgerechnet. Zusammenh&auml;ngende Z&uuml;ge (Endpunkt an Endpunkt, 0,01&nbsp;mm) werden zu Ketten verbunden, jede Kette wird eine
+XY-Ebene: <code>LINE</code>, <code>ARC</code>, <code>CIRCLE</code>, <code>LWPOLYLINE</code> und die alte <code>POLYLINE</code> (beide mit Bogen-Bulge) sowie
+<code>SPLINE</code> (&uuml;ber die Fit-Punkte als Polygonzug, mit Hinweis); Zoll-Zeichnungen werden umgerechnet.
+<b>Bl&ouml;cke werden aufgefaltet:</b> jedes <code>INSERT</code> holt den Blockinhalt an seinen Einf&uuml;gepunkt, mit Ma&szlig;stab, Drehung und Spiegelung, auch
+verschachtelt. Die Meldung sagt, wie viele Elemente aus Bl&ouml;cken kommen. Ein ungleichm&auml;&szlig;ig skalierter Kreis w&auml;re eine Ellipse und wird gemeldet
+statt falsch gezeichnet; Fl&auml;chen- und Netzmodelle sind keine Kontur. Zusammenh&auml;ngende Z&uuml;ge (Endpunkt an Endpunkt, 0,01&nbsp;mm) werden zu Ketten verbunden, jede Kette wird eine
 eigene Kontur im Arbeitsplan (die l&auml;ngste zuerst), ein Kreis eine Vollkreis-Kontur mit Start rechts; Reste unter 0,5&nbsp;mm (Bema&szlig;ungshilfen) fallen weg.
-<b>Nicht gelesen</b> werden Bema&szlig;ung, Texte, Bl&ouml;cke, Schraffuren, Ellipsen und die alte <code>POLYLINE</code> &mdash; die Meldung z&auml;hlt sie auf. Die Koordinaten bleiben
+<b>Nicht gelesen</b> werden Bema&szlig;ung, Texte, Schraffuren und Ellipsen &mdash; die Meldung z&auml;hlt sie auf. Die Koordinaten bleiben
 die der Zeichnung: liegt die Kontur au&szlig;erhalb der BLK FORM, sagt es die Pr&uuml;fung (Nullpunkt der Zeichnung oder Rohteil anpassen). Nach dem Einlesen steht die
 erste Kontur im Editor zur Kontrolle &mdash; Laufrichtung und Start kann man dort noch drehen, Rundungen und Fasen kommen aus der DXF als B&ouml;gen und Geraden.
-Gepr&uuml;ft ist der Leser an handgeschriebenen DXF-Dateien; echte CAD-Exporte (FreeCAD, Fusion, SolidWorks) sind noch nicht durchgelaufen.</dd>
+<b>Stand 14.09.2026:</b> der Leser ist &uuml;ber 102 echte Zeichnungen aus Daniels Bestand gelaufen (AutoCAD, Inventor, FreeCAD, hyperCAD) &mdash; keine
+Ausnahme, keine fehlerhafte Kontur, die langsamste Datei 273&nbsp;ms bei 16&nbsp;MB. In 88 davon trug <code>INSERT</code> echte Geometrie, in einzelnen bis zu
+83&nbsp;% aller Elemente; vorher stand die an den rohen Blockkoordinaten statt am Einf&uuml;gepunkt. <b>Ehrlich offen:</b> eine gespiegelte
+Extrusionsrichtung (Gruppencode 210/220/230) wertet der Leser nicht aus &mdash; in keiner der 102 Dateien kam sie vor, in einer fremden Zeichnung w&auml;re
+die Geometrie dann gespiegelt. Bei einer kompletten Zeichnung mit Rahmen und Schriftfeld werden auch deren Linien zu Konturen: das Bild aussuchen,
+nicht alles &uuml;bernehmen.</dd>
 <dt>Im Arbeitsplan</dt><dd>Konturen stehen wie die Bohrbilder oben im Arbeitsplan (&#x270E; &auml;ndern, &#x2715; l&ouml;schen; ein Schritt, der sie nutzt,
 verliert dann seine Kontur und meldet es rot). Der Schritt <b>Konturzug</b> (Softkey-Gruppe Kontur) w&auml;hlt die Kontur im Feld <b>Kontur (XY)</b>;
 die Draufsicht zeichnet die Kontur mit Startmarke S und zum angew&auml;hlten Konturschritt die Bahn der Werkzeugmitte gestrichelt.</dd>
@@ -5377,56 +5385,184 @@ function fSlDefs(s, tool, stand){
 // Derselbe Leseweg wie im Drehteil (parseDxf/dxfKetten), hier DOM-frei im
 // Kern, damit der Pruefstand ihn an handgeschriebenen Fixtures rechnet.
 // ---------------------------------------------------------------------
-function fDxfLesen(text){
-  const lines = String(text || '').split(/\r?\n/);
+// Ein DXF besteht aus Gruppenpaaren (Code, Wert) ueber je zwei Zeilen. Jeder
+// Satz beginnt mit Code 0 und seinem Namen; alles bis zum naechsten Code 0
+// gehoert dazu. Geometrie steht im Abschnitt ENTITIES, Bloecke werden in
+// BLOCKS definiert und per INSERT eingefuegt.
+function fDxfSaetze(text){
+  const z = String(text || '').split(/\r?\n/);
   const paare = [];
-  for(let i = 0; i + 1 < lines.length; i += 2) paare.push([lines[i].trim(), lines[i + 1].trim()]);
-  let unit = 1;
-  for(let i = 0; i < paare.length - 1; i++) if(paare[i][1] === '$INSUNITS' && paare[i + 1][0] === '70' && +paare[i + 1][1] === 1) unit = 25.4;
-  const segs = [], kreise = [], arten = {};
-  const num = (v) => parseFloat(v) * unit;
-  const zaehl = (k) => { arten[k] = (arten[k] || 0) + 1; };
-  const werte = (i) => { const w = {}; for(let j = i + 1; j < paare.length && paare[j][0] !== '0'; j++){ const c = paare[j][0]; if(!(c in w)) w[c] = paare[j][1]; } return w; };
+  for(let i = 0; i + 1 < z.length; i += 2) paare.push([z[i].trim(), z[i + 1].trim()]);
+  const saetze = [];
   for(let i = 0; i < paare.length; i++){
-    const [c, v] = paare[i]; if(c !== '0') continue;
-    if(v === 'LINE'){
-      const w = werte(i), x1 = num(w['10']), y1 = num(w['20']), x2 = num(w['11']), y2 = num(w['21']);
-      if([x1, y1, x2, y2].every(isFinite)){ segs.push({a:[x1, y1], b:[x2, y2], arc:null}); zaehl('LINE'); }
-    } else if(v === 'ARC'){
-      const w = werte(i), cx = num(w['10']), cy = num(w['20']), r = num(w['40']), a1 = parseFloat(w['50']) * Math.PI / 180, a2 = parseFloat(w['51']) * Math.PI / 180;
-      if([cx, cy, r, a1, a2].every(isFinite) && r > 0){ segs.push({a:[cx + r * Math.cos(a1), cy + r * Math.sin(a1)], b:[cx + r * Math.cos(a2), cy + r * Math.sin(a2)], arc:{cx:cx, cy:cy, r:r, ccw:true}}); zaehl('ARC'); }   // DXF-ARC laeuft gegen den Uhrzeigersinn
-    } else if(v === 'CIRCLE'){
-      const w = werte(i), cx = num(w['10']), cy = num(w['20']), r = num(w['40']);
-      if([cx, cy, r].every(isFinite) && r > 0){ kreise.push({cx:cx, cy:cy, r:r}); zaehl('CIRCLE'); }
-    } else if(v === 'LWPOLYLINE'){
-      const vx = [], vy = [], bulge = []; let closed = false;
-      for(let j = i + 1; j < paare.length && paare[j][0] !== '0'; j++){
-        const [cc, vv] = paare[j];
-        if(cc === '10'){ vx.push(num(vv)); bulge.push(0); } if(cc === '20') vy.push(num(vv));
-        if(cc === '42') bulge[bulge.length - 1] = parseFloat(vv);
-        if(cc === '70') closed = (+vv & 1) === 1;
-      }
-      const n = Math.min(vx.length, vy.length), lim = closed ? n : n - 1;
-      for(let k = 0; k < lim; k++){
-        const k2 = (k + 1) % n, A = [vx[k], vy[k]], B = [vx[k2], vy[k2]], bu = bulge[k] || 0;
-        if(Math.hypot(B[0] - A[0], B[1] - A[1]) < 1e-9) continue;
-        if(Math.abs(bu) < 1e-9){ segs.push({a:A, b:B, arc:null}); continue; }
-        // Bulge = tan(Winkel/4): eingeschlossener Winkel 4 atan(bulge), Mitte auf der Mittelsenkrechten
-        const th = 4 * Math.atan(bu), chord = Math.hypot(B[0] - A[0], B[1] - A[1]);
-        const r = chord / (2 * Math.sin(Math.abs(th) / 2));
-        const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, h = r * Math.cos(th / 2) * (bu > 0 ? 1 : -1);
-        const dx = (B[0] - A[0]) / chord, dy = (B[1] - A[1]) / chord;
-        segs.push({a:A, b:B, arc:{cx:mx - dy * h, cy:my + dx * h, r:r, ccw:bu > 0}});
-      }
-      if(n) zaehl('LWPOLYLINE');
-    } else if(v === 'SPLINE'){
-      const fx = [], fy = [];
-      for(let j = i + 1; j < paare.length && paare[j][0] !== '0'; j++){ const [cc, vv] = paare[j]; if(cc === '11') fx.push(num(vv)); if(cc === '21') fy.push(num(vv)); }
-      for(let k = 0; k + 1 < Math.min(fx.length, fy.length); k++) segs.push({a:[fx[k], fy[k]], b:[fx[k + 1], fy[k + 1]], arc:null, spline:true});
-      if(fx.length) zaehl('SPLINE');
-    } else if(/^(DIMENSION|TEXT|MTEXT|HATCH|INSERT|POINT|ELLIPSE|POLYLINE)$/.test(v)) zaehl(v);
+    if(paare[i][0] !== '0') continue;
+    const roh = [];
+    for(let j = i + 1; j < paare.length && paare[j][0] !== '0'; j++) roh.push(paare[j]);
+    saetze.push({typ:paare[i][1], roh:roh});
   }
-  return {segs:segs, kreise:kreise, unit:unit, arten:arten};
+  return saetze;
+}
+// Gruppenwerte eines Satzes als Nachschlagewerk (erster Wert je Code gewinnt).
+function fDxfWerte(s){ const w = {}; s.roh.forEach(p => { if(!(p[0] in w)) w[p[0]] = p[1]; }); return w; }
+// $INSUNITS 1 heisst Zoll. Die Kopfvariablen stehen als Code-9-Paare im
+// Abschnitt HEADER und gehoeren damit zum SECTION-Satz selbst.
+function fDxfEinheit(saetze){
+  const h = saetze.find(s => s.typ === 'SECTION' && (s.roh.find(p => p[0] === '2') || [])[1] === 'HEADER');
+  if(!h) return 1;
+  for(let i = 0; i + 1 < h.roh.length; i++)
+    if(h.roh[i][0] === '9' && h.roh[i][1] === '$INSUNITS' && h.roh[i + 1][0] === '70' && +h.roh[i + 1][1] === 1) return 25.4;
+  return 1;
+}
+// Saetze auf Zeichenbereich und Blockdefinitionen verteilen.
+function fDxfBloecke(saetze){
+  const blocks = {}, ents = [];
+  let abschnitt = '', ziel = null;
+  saetze.forEach(s => {
+    if(s.typ === 'SECTION'){ abschnitt = ((s.roh.find(p => p[0] === '2') || [])[1]) || ''; ziel = (abschnitt === 'ENTITIES') ? ents : null; return; }
+    if(s.typ === 'ENDSEC'){ abschnitt = ''; ziel = null; return; }
+    if(abschnitt === 'BLOCKS'){
+      if(s.typ === 'BLOCK'){
+        const w = fDxfWerte(s);
+        const b = {bx:parseFloat(w['10']) || 0, by:parseFloat(w['20']) || 0, ents:[]};
+        blocks[w['2'] || ''] = b; ziel = b.ents; return;
+      }
+      if(s.typ === 'ENDBLK'){ ziel = null; return; }
+      if(ziel) ziel.push(s);
+      return;
+    }
+    if(ziel) ziel.push(s);
+  });
+  return {blocks:blocks, ents:ents};
+}
+// Abbildung als 2x3-Matrix: X = a x + c y + e, Y = b x + d y + f.
+function fDxfMal(A, B){                                  // erst B anwenden, dann A
+  return {a:A.a * B.a + A.c * B.b, b:A.b * B.a + A.d * B.b,
+          c:A.a * B.c + A.c * B.d, d:A.b * B.c + A.d * B.d,
+          e:A.a * B.e + A.c * B.f + A.e, f:A.b * B.e + A.d * B.f + A.f};
+}
+function fDxfPkt(T, x, y){ return [T.a * x + T.c * y + T.e, T.b * x + T.d * y + T.f]; }
+// Massstab, Gleichmaessigkeit und Drehsinn einer Abbildung. Ein ungleichmaessig
+// skalierter Kreis ist eine Ellipse — die kann die Kontur nicht, also wird er
+// gemeldet statt falsch gezeichnet. Negative Determinante heisst gespiegelt,
+// dann kippt der Drehsinn jedes Bogens.
+function fDxfMass(T){
+  const s1 = Math.hypot(T.a, T.b), s2 = Math.hypot(T.c, T.d), det = T.a * T.d - T.b * T.c;
+  const gl = Math.abs(s1 - s2) <= 1e-6 * Math.max(s1, s2, 1) && Math.abs(T.a * T.c + T.b * T.d) <= 1e-6 * Math.max(s1 * s2, 1);
+  return {sk:Math.sqrt(Math.abs(det)) || s1, gleich:gl, spiegel:det < 0};
+}
+// Ein Bogen in Weltkoordinaten. Mitte und Endpunkte werden abgebildet, der
+// Radius mit dem Massstab, der Drehsinn kippt bei Spiegelung.
+function fDxfBogen(T, aus, cx, cy, r, ax, ay, bx, by, ccw){
+  const M = fDxfMass(T);
+  if(!M.gleich){ aus.verzerrt++; return; }
+  const p = fDxfPkt(T, cx, cy);
+  aus.segs.push({a:fDxfPkt(T, ax, ay), b:fDxfPkt(T, bx, by), arc:{cx:p[0], cy:p[1], r:r * M.sk, ccw:M.spiegel ? !ccw : ccw}});
+}
+// Ein Polygonzug mit Bulge-Werten (LWPOLYLINE und die alte POLYLINE teilen ihn).
+function fDxfZug(T, aus, vx, vy, bu, zu){
+  const nn = Math.min(vx.length, vy.length), lim = zu ? nn : nn - 1;
+  for(let k = 0; k < lim; k++){
+    const k2 = (k + 1) % nn, ax = vx[k], ay = vy[k], bx = vx[k2], by = vy[k2], b0 = bu[k] || 0;
+    const ch = Math.hypot(bx - ax, by - ay);
+    if(!isFinite(ch) || ch < 1e-9) continue;
+    if(Math.abs(b0) < 1e-9){ aus.segs.push({a:fDxfPkt(T, ax, ay), b:fDxfPkt(T, bx, by), arc:null}); continue; }
+    // Bulge = tan(Winkel/4): eingeschlossener Winkel 4 atan(bulge), Mitte auf der Mittelsenkrechten
+    const th = 4 * Math.atan(b0), r = ch / (2 * Math.sin(Math.abs(th) / 2));
+    const mx = (ax + bx) / 2, my = (ay + by) / 2, h = r * Math.cos(th / 2) * (b0 > 0 ? 1 : -1);
+    const dx = (bx - ax) / ch, dy = (by - ay) / ch;
+    fDxfBogen(T, aus, mx - dy * h, my + dx * h, r, ax, ay, bx, by, b0 > 0);
+  }
+}
+// Einen einzelnen Geometriesatz in Weltkoordinaten ablegen.
+function fDxfEntitaet(s, T, aus){
+  const w = fDxfWerte(s), n = (c) => parseFloat(w[c]);
+  const zaehl = (k) => { aus.arten[k] = (aus.arten[k] || 0) + 1; };
+  if(s.typ === 'LINE'){
+    const x1 = n('10'), y1 = n('20'), x2 = n('11'), y2 = n('21');
+    if([x1, y1, x2, y2].every(isFinite)){ aus.segs.push({a:fDxfPkt(T, x1, y1), b:fDxfPkt(T, x2, y2), arc:null}); zaehl('LINE'); }
+  } else if(s.typ === 'ARC'){
+    const cx = n('10'), cy = n('20'), r = n('40'), a1 = n('50') * Math.PI / 180, a2 = n('51') * Math.PI / 180;
+    if([cx, cy, r, a1, a2].every(isFinite) && r > 0){
+      fDxfBogen(T, aus, cx, cy, r, cx + r * Math.cos(a1), cy + r * Math.sin(a1), cx + r * Math.cos(a2), cy + r * Math.sin(a2), true);   // DXF-ARC laeuft gegen den Uhrzeigersinn
+      zaehl('ARC');
+    }
+  } else if(s.typ === 'CIRCLE'){
+    const cx = n('10'), cy = n('20'), r = n('40');
+    if([cx, cy, r].every(isFinite) && r > 0){
+      const M = fDxfMass(T);
+      if(!M.gleich) aus.verzerrt++;
+      else { const p = fDxfPkt(T, cx, cy); aus.kreise.push({cx:p[0], cy:p[1], r:r * M.sk}); zaehl('CIRCLE'); }
+    }
+  } else if(s.typ === 'LWPOLYLINE'){
+    const vx = [], vy = [], bu = []; let zu = false;
+    s.roh.forEach(p => {
+      if(p[0] === '10'){ vx.push(parseFloat(p[1])); bu.push(0); }
+      else if(p[0] === '20') vy.push(parseFloat(p[1]));
+      else if(p[0] === '42') bu[bu.length - 1] = parseFloat(p[1]);
+      else if(p[0] === '70') zu = (+p[1] & 1) === 1;
+    });
+    fDxfZug(T, aus, vx, vy, bu, zu);
+    if(vx.length) zaehl('LWPOLYLINE');
+  } else if(s.typ === 'SPLINE'){
+    const fx = [], fy = [];
+    s.roh.forEach(p => { if(p[0] === '11') fx.push(parseFloat(p[1])); else if(p[0] === '21') fy.push(parseFloat(p[1])); });
+    for(let k = 0; k + 1 < Math.min(fx.length, fy.length); k++)
+      aus.segs.push({a:fDxfPkt(T, fx[k], fy[k]), b:fDxfPkt(T, fx[k + 1], fy[k + 1]), arc:null, spline:true});
+    if(fx.length) zaehl('SPLINE');
+  } else if(/^(DIMENSION|TEXT|MTEXT|HATCH|POINT|ELLIPSE)$/.test(s.typ)) zaehl(s.typ);
+}
+// Zeichenbereich bzw. Blockinhalt abarbeiten und INSERT auffalten. Die alte
+// POLYLINE traegt ihre Punkte in eigenen VERTEX-Saetzen bis SEQEND, deshalb
+// laeuft die Schleife ueber den Index statt ueber forEach.
+function fDxfEntfalten(liste, blocks, T, aus, tiefe){
+  for(let i = 0; i < liste.length; i++){
+    const s = liste[i];
+    if(s.typ === 'VERTEX' || s.typ === 'SEQEND') continue;
+    if(s.typ === 'POLYLINE'){
+      const flag = +fDxfWerte(s)['70'] || 0;
+      const vx = [], vy = [], bu = [];
+      let j = i + 1;
+      for(; j < liste.length && liste[j].typ === 'VERTEX'; j++){
+        const v = fDxfWerte(liste[j]);
+        vx.push(parseFloat(v['10'])); vy.push(parseFloat(v['20'])); bu.push(parseFloat(v['42']) || 0);
+      }
+      if(j < liste.length && liste[j].typ === 'SEQEND') j++;
+      // Flaechen- und Netzmodelle (Bit 16 und 64) sind keine Konturen
+      if(!(flag & 16) && !(flag & 64) && vx.length > 1){
+        fDxfZug(T, aus, vx, vy, bu, (flag & 1) === 1);
+        aus.arten['POLYLINE'] = (aus.arten['POLYLINE'] || 0) + 1;
+      } else if(vx.length) aus.netze++;
+      i = j - 1;
+      continue;
+    }
+    if(s.typ === 'INSERT'){
+      const w = fDxfWerte(s), B = blocks[w['2'] || ''];
+      aus.arten['INSERT'] = (aus.arten['INSERT'] || 0) + 1;
+      if(!B || tiefe > 6){ aus.offen++; continue; }
+      const ix = parseFloat(w['10']) || 0, iy = parseFloat(w['20']) || 0;
+      const sx = ('41' in w) ? parseFloat(w['41']) : 1, sy = ('42' in w) ? parseFloat(w['42']) : 1;
+      const ro = (('50' in w) ? parseFloat(w['50']) : 0) * Math.PI / 180;
+      if(!isFinite(sx) || !isFinite(sy) || !sx || !sy || !isFinite(ro)){ aus.offen++; continue; }
+      const co = Math.cos(ro), si = Math.sin(ro);
+      const a = co * sx, b = si * sx, c = -si * sy, d = co * sy;
+      // Welt = Einfuegepunkt + Drehung x Massstab x (Punkt - Basispunkt des Blocks)
+      const Tin = {a:a, b:b, c:c, d:d, e:ix - (a * B.bx + c * B.by), f:iy - (b * B.bx + d * B.by)};
+      const vorher = aus.segs.length + aus.kreise.length;
+      fDxfEntfalten(B.ents, blocks, fDxfMal(T, Tin), aus, tiefe + 1);
+      aus.ausBlock += aus.segs.length + aus.kreise.length - vorher;
+      continue;
+    }
+    fDxfEntitaet(s, T, aus);
+  }
+}
+function fDxfLesen(text){
+  const saetze = fDxfSaetze(text);
+  const einheit = fDxfEinheit(saetze);
+  const B = fDxfBloecke(saetze);
+  const aus = {segs:[], kreise:[], arten:{}, ausBlock:0, offen:0, verzerrt:0, netze:0};
+  fDxfEntfalten(B.ents, B.blocks, {a:einheit, b:0, c:0, d:einheit, e:0, f:0}, aus, 0);
+  return {segs:aus.segs, kreise:aus.kreise, unit:einheit, arten:aus.arten,
+    ausBlock:aus.ausBlock, offeneInserts:aus.offen, verzerrt:aus.verzerrt, netze:aus.netze};
 }
 function fDxfSegUmkehren(s){ const f = {a:s.b, b:s.a, arc:null, spline:s.spline}; if(s.arc) f.arc = {cx:s.arc.cx, cy:s.arc.cy, r:s.arc.r, ccw:!s.arc.ccw}; return f; }
 // Segmente zu Ketten verbinden (Endpunkt an Endpunkt, 0,01 mm), laengste zuerst.
@@ -5465,7 +5601,7 @@ function fDxfKonturen(text, name){
   const basis = String(name || 'DXF').replace(/\.dxf$/i, '');
   if(D.unit !== 1) hinweise.push('DXF in Zoll ($INSUNITS 1) — in mm umgerechnet.');
   const ketten = fDxfKetten(D.segs);
-  let klein = 0, spline = false;
+  let klein = 0, spline = false, knapp = 0, halb = 0;
   ketten.forEach(k0 => {
     let k = k0;
     if(k.laenge < 0.5){ klein++; return; }
@@ -5477,22 +5613,45 @@ function fDxfKonturen(text, name){
       k = k.slice(best).concat(k.slice(0, best));
     }
     const s0 = k[0].a;
-    const el = k.map(s => {
+    // Die Elemente entstehen entlang der Kette, damit jedes seinen wirklichen
+    // Startpunkt kennt. Zwei Faelle aus Daniels 102 Zeichnungen (14.09.2026):
+    //  - Nach dem Runden auf 0,001 mm faellt ein Element gelegentlich auf einen
+    //    Punkt zusammen (die Kettenbildung klebt mit 0,01 mm Toleranz, gemessen
+    //    bis 0,0096 mm Nahtversatz). Ein Element ohne Laenge traegt nichts und
+    //    wird weggelassen, statt die Kontur als fehlerhaft zu melden.
+    //  - Beim HALBKREIS ist die Sehne genau 2r; jede Rundung drueckt den Radius
+    //    unter die halbe Sehne, und die Kontur gilt als unmoeglich. Der Radius
+    //    wird dann auf die halbe Sehne angehoben, hoechstens um einen
+    //    Rundungsschritt. Dieselbe Klemme wie beim Vollkreis im Kontur-LBL.
+    let px = fRund(s0[0]), py = fRund(s0[1]);
+    const el = [];
+    k.forEach(s => {
       if(s.spline) spline = true;
-      if(!s.arc) return {typ:'g', x:fRund(s.b[0]), y:fRund(s.b[1])};
+      const ex = fRund(s.b[0]), ey = fRund(s.b[1]), sehne = Math.hypot(ex - px, ey - py);
+      if(sehne < 1e-9){ knapp++; return; }
+      if(!s.arc){ el.push({typ:'g', x:ex, y:ey}); px = ex; py = ey; return; }
       const sw = fDxfBogenWinkel(s);
-      const o = {typ:'b', x:fRund(s.b[0]), y:fRund(s.b[1]), r:fRund(s.arc.r), dr:s.arc.ccw ? 1 : -1};
+      let r = fRund(s.arc.r);
+      if(r < sehne / 2){ r = Math.ceil(sehne / 2 * 1000) / 1000; halb++; }
+      const o = {typ:'b', x:ex, y:ey, r:r, dr:s.arc.ccw ? 1 : -1};
       if(Math.abs(sw) > Math.PI + 1e-9) o.gross = true;
-      return o;
+      el.push(o); px = ex; py = ey;
     });
+    if(!el.length) return;                       // die weggelassenen Elemente zaehlt schon knapp
     konturen.push({name:basis, geschlossen:geschlossen, x0:fRund(s0[0]), y0:fRund(s0[1]), elemente:el, dxf:{segmente:k.length, laenge:fRund(k.laenge)}});
   });
   D.kreise.forEach(c => { konturen.push({name:basis + ' Kreis ⌀' + fRund(2 * c.r), geschlossen:true, x0:fRund(c.cx + c.r), y0:fRund(c.cy), elemente:[{typ:'k', x:fRund(c.cx), y:fRund(c.cy), dr:1}], dxf:{segmente:1, laenge:fRund(2 * Math.PI * c.r)}}); });
   if(konturen.length > 1) konturen.forEach((kt, i) => { kt.name = basis + ' ' + (i + 1); });   // nummerieren nur, wenn mehrere uebrig bleiben
   if(klein) hinweise.push(klein + ' Kette(n) unter 0,5 mm uebergangen (Bemassungsreste, Zeichenhilfen).');
+  if(knapp) hinweise.push(knapp + ' Element(e) ohne Laenge weggelassen (nach dem Runden auf 0,001 mm derselbe Punkt).');
+  if(halb) hinweise.push(halb + ' Bogenradius/-radien um bis zu 0,001 mm angehoben (Halbkreis: die Sehne ist genau 2r).');
+  if(D.ausBlock) hinweise.push(D.ausBlock + ' von ' + (D.segs.length + D.kreise.length) + ' Elementen kommen aus BLOCK-Einfuegungen.');
+  if(D.offeneInserts) hinweise.push(D.offeneInserts + ' INSERT ohne passenden Block (oder zu tief verschachtelt) uebergangen.');
+  if(D.verzerrt) hinweise.push(D.verzerrt + ' Bogen/Kreis ungleichmaessig skaliert (waere eine Ellipse) — uebergangen.');
+  if(D.netze) hinweise.push(D.netze + ' Flaechen- oder Netzmodell(e) uebergangen (keine Kontur).');
   if(spline) hinweise.push('SPLINE-Zuege als Polygonzug ueber die Fit-Punkte genaehert — Kontur pruefen.');
-  const ignoriert = Object.keys(D.arten).filter(k => /^(DIMENSION|TEXT|MTEXT|HATCH|INSERT|POINT|ELLIPSE|POLYLINE)$/.test(k));
-  if(ignoriert.length) hinweise.push('Nicht gelesen: ' + ignoriert.map(k => k + ' x' + D.arten[k]).join(', ') + ' (Bemassung, Text, Bloecke, Schraffur, Ellipsen, alte POLYLINE).');
+  const ignoriert = Object.keys(D.arten).filter(k => /^(DIMENSION|TEXT|MTEXT|HATCH|POINT|ELLIPSE)$/.test(k));
+  if(ignoriert.length) hinweise.push('Nicht gelesen: ' + ignoriert.map(k => k + ' x' + D.arten[k]).join(', ') + ' (Bemassung, Text, Schraffur, Ellipsen).');
   konturen.forEach(kt => { const K = fKonturSegmente(kt); if(K.fehler.length) hinweise.push('Kontur "' + kt.name + '": ' + K.fehler.join('; ')); });
   return {konturen:konturen, hinweise:hinweise, zuege:D.segs.length + D.kreise.length, ketten:ketten.length, einheit:D.unit};
 }
