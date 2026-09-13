@@ -2816,12 +2816,22 @@ grauer Grund, das Werkst&uuml;ck als schraffierter Schnitt, das Bearbeitungsvolu
 goldenem Schneidteil (Fr&auml;ser dunkel mit gelben Platten), Koordinatensymbol am Block. Ein Bild je Familie: Bohrzyklen im
 Schnitt, Taschen/Nuten/Zapfen als Draufsicht plus Schnitt, Planfr&auml;sen als Draufsicht mit M&auml;ander plus Schnitt. Die Bilder
 sind eigene Zeichnungen der App &mdash; Heidenhains Bilder d&uuml;rfen nicht kopiert werden, der Stil ist frei.</p>
-<p><b>Ma&szlig;e mit Live-Werten.</b> Jedes Ma&szlig; steht als Pille mit dem aktuellen Feldwert am Bild (&bdquo;Z1 -10&ldquo;, &bdquo;SC 2&ldquo;).
-<b>Tippst Du ein Feld an, zeigt das Bild nur dieses Ma&szlig; in Orange</b> und stellt das Werkzeug dorthin, wo der Wert wirkt &mdash;
-wie die TNC beim Durchbl&auml;ttern der Zyklusparameter: Tiefe &rarr; Werkzeug am Grund, Zustellung &rarr; erste Zustellung, SC2 &rarr;
-R&uuml;ckzugsh&ouml;he, Z0 &rarr; Oberfl&auml;che. Ein Vorschubfeld zeigt gr&uuml;ne Pfeile neben dem Werkzeug, eine Verweilzeit eine Uhr an
-der Spitze. Verl&auml;sst Du das Feld, erscheinen wieder alle Ma&szlig;e. Die Bilder sind schematisch, nicht ma&szlig;st&auml;blich;
-die Zahlen an den Ma&szlig;en gelten.</p>
+<p><b>Das Grundbild tr&auml;gt keine Zahlen.</b> Solange kein Feld angetippt ist, steht an jeder Stelle nur ihr
+<b>Kurzzeichen</b> &mdash; klein und grau, als Orientierungsmarke: Z0 an der Oberfl&auml;che, SC &uuml;ber dem Werkst&uuml;ck,
+D an der ersten Zustellung, UXY an der Wand, UZ am Grund. So siehst Du auf einen Blick, wo ein Wert wirkt,
+ohne dass acht Ma&szlig;blasen das Bild zustellen. Marken, die nicht unmittelbar an ihrer Stelle stehen k&ouml;nnen &mdash;
+im flachen Schnitt ist daf&uuml;r kein Platz &mdash;, h&auml;ngen an einer haard&uuml;nnen <b>Anschlusslinie</b> mit Punkt,
+wie die Ma&szlig;hilfslinie einer Zeichnung.</p>
+<p><b>Der angefasste Parameter zeigt seinen Wert.</b> Tippst Du ein Feld an, wird aus seiner Marke eine orange
+Pille MIT dem aktuellen Wert (&bdquo;Z1 -10&ldquo;), und nur dann wird auch ein Ma&szlig;pfeil gezeichnet. Das Werkzeug wandert
+dorthin, wo der Wert wirkt &mdash; wie die TNC beim Durchbl&auml;ttern der Zyklusparameter: Tiefe &rarr; Werkzeug am Grund,
+Zustellung &rarr; erste Zustellung, SC2 &rarr; R&uuml;ckzugsh&ouml;he, Z0 &rarr; Oberfl&auml;che. Ein Vorschubfeld zeigt gr&uuml;ne
+Pfeile neben dem Werkzeug, eine Verweilzeit eine Uhr an der Spitze. Verl&auml;sst Du das Feld, ist das Bild wieder still.</p>
+<p><b>Proportionen.</b> Die Bilder sind <b>schematisch, nicht ma&szlig;st&auml;blich</b> &mdash; alle Zyklen stehen auf derselben
+B&uuml;hne: flaches breites Werkst&uuml;ck im unteren Drittel, die Tiefe als fester Anteil seiner H&ouml;he, das Werkzeug in fester
+Bildgr&ouml;&szlig;e dar&uuml;ber. Sonst w&uuml;rde aus 3 mm Tiefe ein Strich und aus 30 mm ein Schacht, und der Fr&auml;ser s&auml;he
+darin verloren aus. In der Draufsicht ist das Rohteil nur ein d&uuml;nner Umriss, der die Form mit gleichem Rand ringsum
+umschlie&szlig;t. <b>Es gelten die Zahlen in den Feldern, nicht das Bild.</b></p>
 
 <h2 id="ba-fk06b">6b &nbsp;Fr&auml;sen &mdash; Taschen, Nuten, Zapfen, Planfr&auml;sen (Zyklen 251&ndash;257, 232)</h2>
 <p>Gruppen <b>Taschen &middot; Zapfen</b> (Rechtecktasche, Kreistasche, Nut, Runde Nut, Rechteckzapfen, Kreiszapfen) und
@@ -7285,7 +7295,7 @@ function fKonturOeffnen(idx){
 function hbBildKontur(H, art, s){
   const c = H.c, w = H.w, h = H.h, k = HB_SKAL;
   const ax = 9 * k, aw = w * 0.53 - 14 * k, ay = 9 * k, ah = h * 0.60;
-  c.save(); c.fillStyle = HB_GRAU; c.strokeStyle = HB_EDGE; c.lineWidth = HB_STIL.randStrich; c.beginPath(); c.rect(ax, ay, aw, ah); c.fill(); c.stroke(); c.restore();
+  c.save(); c.strokeStyle = HB_EDGE; c.lineWidth = HB_STIL.randStrich; c.beginPath(); c.rect(ax, ay, aw, ah); c.stroke(); c.restore();
   let kt = (fProg.konturen || [])[s.kontur];
   if(!kt || !(kt.elemente || []).length) kt = {geschlossen:true, x0:0, y0:0, elemente:[{typ:'g', x:40, y:0}, {typ:'b', x:50, y:10, r:10, dr:1}, {typ:'g', x:50, y:30}, {typ:'g', x:0, y:30}]};
   const seg = fKonturSegmente(kt).seg;
@@ -7332,7 +7342,7 @@ function hbBildKontur(H, art, s){
   // Marken nebeneinander auf getrennten Hoehen, nie auf dem Abtrag (Paket H):
   // D links an der Stufe, DS darunter, UXY unter dem Grund, SC/Z0 rechts.
   hbLine(c, nx + 4 * k, sy0, nx + 4 * k, yGrund, HB_FOKUS === 'aufSeite' ? HB_ON : HB_AXIS, 1, [3, 2]);
-  hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + (sx + sw - nx) / 2, yGrund + 12 * k, HB_FOKUS === 'aufSeite');
+  hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + (sx + sw - nx) / 2, yGrund + 12 * k, HB_FOKUS === 'aufSeite', null, nx + 4 * k, sy0 + sTief * 0.5);
   hbLabel(c, hbTxt(art, s, 'zustSchl'), nx - 6 * k, sy0 + sTief * 0.72, HB_FOKUS === 'zustSchl', 'right');
   const ySC = sy0 - 21 * k;   // Luft fuer die orange SC-Pille ueber der Z0-Marke (Bildbericht 14.09.2026)
   hbLine(c, sx - 4, ySC, sx + sw + 4, ySC, HB_AXIS, 1, [5, 3]);
@@ -8076,8 +8086,8 @@ function hbCtx(canvasId){
 // wirkt. Erst das angefasste Feld wird zur orangen Pille MIT Wert. Welche der
 // beiden Formen es wird, entscheidet hbTxt: es liefert im Grundzustand nur das
 // Kurzzeichen, und ein Text ohne Ziffer ist per Regel eine Marke.
-function hbLabel(c, txt, x, y, on, align){
-  if(HB_SPAET){ HB_SPAET.push(()=>hbLabel(c, txt, x, y, on, align)); return; }
+function hbLabel(c, txt, x, y, on, align, zx, zy){
+  if(HB_SPAET){ HB_SPAET.push(()=>hbLabel(c, txt, x, y, on, align, zx, zy)); return; }
   c.save();
   c.font = (on ? 'bold ' + (11 * HB_SKAL).toFixed(1) + 'px ' : (HB_STIL.markeGross * HB_SKAL).toFixed(1) + 'px ') + 'Arial';
   c.textAlign = align || 'center'; c.textBaseline = 'alphabetic';
@@ -8093,7 +8103,9 @@ function hbLabel(c, txt, x, y, on, align){
     c.lineTo(px0 + r, py0 + ph); c.arc(px0 + r, py0 + r, r, Math.PI / 2, -Math.PI / 2); c.closePath();
     c.fillStyle = HB_ON; c.fill();
     c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(txt, cx, y);
-    hbMerk('pille', {x0:px0, y0:py0, x1:px0 + pw, y1:py0 + ph, b:pw, h:ph}, String(txt));
+    const kp = {x0:px0, y0:py0, x1:px0 + pw, y1:py0 + ph, b:pw, h:ph};
+    hbMerk('pille', kp, String(txt));
+    if(zx != null) hbFuehr(c, kp, zx, zy, true, txt);
   } else {
     // Marke: schmaler Halo, damit sie auf Schraffur und Blau lesbar bleibt,
     // aber leiser als die Zeichnung selbst.
@@ -8101,9 +8113,33 @@ function hbLabel(c, txt, x, y, on, align){
     c.fillStyle = on ? HB_ON : HB_STIL.marke; c.fillText(txt, x, y);
     const mh = HB_STIL.markeGross * HB_SKAL;
     const mx0 = al === 'left' ? x : (al === 'right' ? x - tb : x - tb / 2);
-    hbMerk('marke', {x0:mx0, y0:y - mh * 0.8, x1:mx0 + tb, y1:y + mh * 0.22, b:tb, h:mh}, String(txt));
+    const km = {x0:mx0, y0:y - mh * 0.8, x1:mx0 + tb, y1:y + mh * 0.22, b:tb, h:mh};
+    hbMerk('marke', km, String(txt));
+    if(zx != null) hbFuehr(c, km, zx, zy, !!on, txt);
   }
   c.restore();
+}
+// Anschlusslinie von einer Beschriftung zu der Stelle, die sie meint:
+// haarduenn vom Rand des Textes bis zu einem kleinen Punkt, wie die
+// Masshilfslinie einer Zeichnung. Ohne sie muss jede Marke dicht an ihrer
+// Stelle kleben — und genau daran wurde es im flachen Schnitt eng, weil
+// links die Zustellung und rechts die Tiefe stehen (Bildbericht 14.09.2026).
+function hbFuehr(c, box, zx, zy, on, txt){
+  const cx = (box.x0 + box.x1) / 2, cy = (box.y0 + box.y1) / 2;
+  const dx = zx - cx, dy = zy - cy, L = Math.hypot(dx, dy);
+  if(!isFinite(L) || L < 7) return;
+  // Anfang auf dem Rand des Textkastens: der Strahl wird auf die naehere der
+  // beiden Kastenkanten gekuerzt, sonst begaenne die Linie mitten im Wort.
+  const hx = box.b / 2 + 2.5, hy = box.h / 2 + 2;
+  const t = Math.min(Math.abs(dx) > 1e-6 ? hx / Math.abs(dx) : 1e9, Math.abs(dy) > 1e-6 ? hy / Math.abs(dy) : 1e9);
+  const sx = cx + dx * t, sy = cy + dy * t;
+  if(Math.hypot(zx - sx, zy - sy) < 6) return;   // ein 5-px-Strichlein sieht aus wie ein Zeichenfehler, nicht wie ein Bezug
+  HB_PROT.push({art:'fuehr', x0:Math.min(sx, zx), y0:Math.min(sy, zy), x1:Math.max(sx, zx), y1:Math.max(sy, zy),
+    b:Math.abs(zx - sx), h:Math.abs(zy - sy), txt:String(txt == null ? '' : txt), sx:sx, sy:sy, zx:zx, zy:zy});
+  c.save(); c.strokeStyle = on ? HB_ON : HB_STIL.marke; c.fillStyle = on ? HB_ON : HB_STIL.marke;
+  c.lineWidth = on ? 1.2 : 0.7;
+  c.beginPath(); c.moveTo(sx, sy); c.lineTo(zx, zy); c.stroke();
+  c.beginPath(); c.arc(zx, zy, on ? 2.2 : 1.6, 0, Math.PI * 2); c.fill(); c.restore();
 }
 function hbArrow(c, x, y, ang, on){
   const ah = (on ? 6.2 : 5) * HB_SKAL;
@@ -8344,27 +8380,40 @@ function hbBildForm(H, art, s){
   const c = H.c, w = H.w, h = H.h, k = HB_SKAL;
   const hat = (f) => fZyklusFelder(art).indexOf(f) >= 0;
   const zapfen = /^zapfen/.test(art);
-  // Draufsicht links OBEN (Paket H): das Rohteil fuellt nicht mehr die ganze
-  // Spalte, dafuer ist die Form gross. Darunter bleibt Raum frei — genau das
-  // macht die Ruhe der iTNC-Bilder aus.
-  const ax = 9 * k, aw = w * 0.53 - 14 * k, ay = 9 * k, ah = h * 0.60;
+  // Draufsicht links (Paket H Stufe 5): das Rohteil ist nur noch ein duenner
+  // Umriss — als graue Platte nahm es die halbe Bildflaeche und sagte nichts.
+  // Seine HOEHE folgt der Form, damit ringsum derselbe Rand bleibt; die erste
+  // Fassung liess oben und unten 69 px Luft und links und rechts 17, und der
+  // leere Umriss sah aus wie eine halbleere Kiste. Die Platte steht mittig in
+  // der Spalte, so wie rechts Werkzeug und Schnitt um die Bildmitte liegen.
+  const ax = 9 * k, aw = w * 0.53 - 14 * k;
+  const fw = aw * 0.84, fh = fw * 0.62, rand = (aw - fw) / 2;
+  const ah = Math.min(h * 0.60, fh + 2 * rand);
+  const ay = Math.max(9 * k, (h - ah) / 2);
   const cx = ax + aw / 2, cy = ay + ah / 2;
-  const fw = aw * 0.78, fh = Math.min(ah * 0.62, fw * 0.62);
-  c.save(); c.fillStyle = HB_GRAU; c.strokeStyle = HB_EDGE; c.lineWidth = 1.6; c.beginPath(); c.rect(ax, ay, aw, ah); c.fill(); c.stroke(); c.restore();
-  const rundRect = (x0, y0, W, Hh, r) => { const R = Math.max(0, Math.min(r, W / 2, Hh / 2)); c.beginPath(); c.moveTo(x0 + R, y0); c.lineTo(x0 + W - R, y0); c.arc(x0 + W - R, y0 + R, R, -Math.PI / 2, 0); c.lineTo(x0 + W, y0 + Hh - R); c.arc(x0 + W - R, y0 + Hh - R, R, 0, Math.PI / 2); c.lineTo(x0 + R, y0 + Hh); c.arc(x0 + R, y0 + Hh - R, R, Math.PI / 2, Math.PI); c.lineTo(x0, y0 + R); c.arc(x0 + R, y0 + R, R, Math.PI, Math.PI * 1.5); c.closePath(); };
+  // Der Stift kommt als Parameter: hbBlau laesst den Bauplan zuerst auf einem
+  // Aufzeichner laufen, um das Rechteck der Flaeche zu messen. Wer hier fest
+  // auf c zeichnet, meldet dem Protokoll gar nichts (Altbefund 14.09.2026).
+  const rundRect = (cc, x0, y0, W, Hh, r) => { const R = Math.max(0, Math.min(r, W / 2, Hh / 2)); cc.beginPath(); cc.moveTo(x0 + R, y0); cc.lineTo(x0 + W - R, y0); cc.arc(x0 + W - R, y0 + R, R, -Math.PI / 2, 0); cc.lineTo(x0 + W, y0 + Hh - R); cc.arc(x0 + W - R, y0 + Hh - R, R, 0, Math.PI / 2); cc.lineTo(x0 + R, y0 + Hh); cc.arc(x0 + R, y0 + Hh - R, R, Math.PI / 2, Math.PI); cc.lineTo(x0, y0 + R); cc.arc(x0 + R, y0 + R, R, Math.PI, Math.PI * 1.5); cc.closePath(); };
   const rPx = Math.min(fw, fh) * 0.18;
   // Rohteil des Zapfens = blaue Flaeche (das wird abgetragen), Zapfen bleibt grau
-  const rohX = cx - fw / 2 - 16 * k, rohY = cy - fh / 2 - 13 * k, rohW = fw + 32 * k, rohH = fh + 26 * k, rohR = fh / 2 + 14 * k;
+  // Beim Zapfen IST das blaue Rohteil die Platte — es bekommt deshalb keinen
+  // zweiten Umriss, sondern traegt seinen eigenen Rand. Sein Aufmass war vorher
+  // breiter als die Spalte und waere mit dem duennen Umriss sichtbar
+  // uebergelaufen; jetzt sitzt es in demselben Rand wie die Tasche.
+  const rohX = cx - fw / 2 - rand * 0.6, rohY = cy - fh / 2 - rand * 0.6, rohW = fw + rand * 1.2, rohH = fh + rand * 1.2, rohR = fh / 2 + rand * 0.7;
   if(zapfen){
     hbBlau(c, cc => { if(art === 'zapfenK') cc.arc(cx, cy, rohR, 0, Math.PI * 2); else cc.rect(rohX, rohY, rohW, rohH); }, ay, ay + ah);
     c.save(); c.fillStyle = HB_GRAU; c.strokeStyle = HB_EDGE; c.lineWidth = 1.8;
-    if(art === 'zapfenK'){ c.beginPath(); c.arc(cx, cy, fh / 2, 0, Math.PI * 2); } else rundRect(cx - fw / 2, cy - fh / 2, fw, fh, rPx);
+    if(art === 'zapfenK'){ c.beginPath(); c.arc(cx, cy, fh / 2, 0, Math.PI * 2); } else rundRect(c, cx - fw / 2, cy - fh / 2, fw, fh, rPx);
     c.fill(); c.stroke(); c.restore();
   } else {
+    hbMerk('platte', {x0:ax, y0:ay, x1:ax + aw, y1:ay + ah, b:aw, h:ah}, 'Rohteil');
+    c.save(); c.strokeStyle = HB_EDGE; c.lineWidth = HB_STIL.randStrich; c.beginPath(); c.rect(ax, ay, aw, ah); c.stroke(); c.restore();
     hbBlau(c, cc => {
-      if(art === 'tascheR') rundRect(cx - fw / 2, cy - fh / 2, fw, fh, rPx);
+      if(art === 'tascheR') rundRect(cc, cx - fw / 2, cy - fh / 2, fw, fh, rPx);
       else if(art === 'tascheK') cc.arc(cx, cy, fh / 2, 0, Math.PI * 2);
-      else if(art === 'nut') rundRect(cx - fw / 2, cy - fh * 0.22, fw, fh * 0.44, fh * 0.22);
+      else if(art === 'nut') rundRect(cc, cx - fw / 2, cy - fh * 0.22, fw, fh * 0.44, fh * 0.22);
       else if(art === 'nutR'){ const R = fh * 0.55, bb = fh * 0.24, a0 = Math.PI * 1.15, a1 = Math.PI * 1.85, my = cy + fh * 0.2; cc.arc(cx, my, R + bb / 2, a0, a1); cc.arc(cx + R * Math.cos(a1), my + R * Math.sin(a1), bb / 2, a1, a1 + Math.PI); cc.arc(cx, my, R - bb / 2, a1, a0, true); cc.arc(cx + R * Math.cos(a0), my + R * Math.sin(a0), bb / 2, a0 + Math.PI, a0 + 2 * Math.PI); }
     }, ay, ay + ah);
     if(art === 'nutR'){ const my = cy + fh * 0.2; hbLine(c, cx, my - 6, cx, my + 6, HB_EDGE, 1); hbLine(c, cx - 6, my, cx + 6, my, HB_EDGE, 1); }
@@ -8411,8 +8460,12 @@ function hbBildForm(H, art, s){
   // UXY steht UNTER dem Block auf Hoehe der rechten Wand: links haelt D die
   // Zustellung, rechts steht bei Fokus die Tiefen-Pille — dazwischen ist im
   // flachen Schnitt kein Platz fuer eine dritte Marke (Bildbericht 14.09.2026).
-  if(hat('aufSeite')) hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + nb / 2, syB + 12 * k, HB_FOKUS === 'aufSeite');
-  if(hat('aufTiefe') && !zapfen) hbLabel(c, hbTxt(art, s, 'aufTiefe'), nx, yGrund + 12 * k, HB_FOKUS === 'aufTiefe');
+  // Beide Marken stehen ausserhalb des Abtrags und bekommen deshalb eine
+  // Anschlusslinie zu der Flaeche, auf der ihr Aufmass sitzt: UXY an die Wand,
+  // UZ an den Grund. Beim Zapfen liegt die Wand um die Schulter weiter aussen.
+  if(hat('aufSeite')) hbLabel(c, hbTxt(art, s, 'aufSeite'), nx + nb / 2, syB + 12 * k, HB_FOKUS === 'aufSeite', null,
+    zapfen ? nx + nb / 2 + sh : nx + nb / 2, sy0 + sTief * 0.5);
+  if(hat('aufTiefe') && !zapfen) hbLabel(c, hbTxt(art, s, 'aufTiefe'), nx, yGrund + 12 * k, HB_FOKUS === 'aufTiefe', null, nx, yGrund);
   const ySC = sy0 - 21 * k;   // Luft fuer die orange SC-Pille ueber der Z0-Marke (Bildbericht 14.09.2026)
   hbLine(c, sx - 4, ySC, sx + sw + 4, ySC, HB_AXIS, 1, [5, 3]);
   hbLabel(c, hbTxt(art, s, 'sc'), sx + sw + 2 * k, ySC - 3, HB_FOKUS === 'sc', 'right');
