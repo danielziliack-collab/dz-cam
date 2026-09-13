@@ -2583,6 +2583,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
               <div class="mrow"><button class="gcbtn" id="btnDemoKonturFormen" style="width:100%;padding:10px;">DZ10 Konturzug: Rundung, Fase, tangentialer Bogen, Vollkreis</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoBohrfraes" style="width:100%;padding:10px;">DZ11 Einzels&auml;tze: Bohrfr&auml;sen 208 und Einlippen-Bohren 241</button></div>
               <div class="mrow"><button class="gcbtn" id="btnDemoSL" style="width:100%;padding:10px;">DZ12 SL-Zyklen 20&ndash;24: Konturtasche mit Insel</button></div>
+              <div class="mrow"><button class="gcbtn" id="btnDemoGewFr" style="width:100%;padding:10px;">DZ13 Gewindefr&auml;sen 262&ndash;267 (M20&times;2,5 mit Fr&auml;ser &empty;8)</button></div>
             </div>
           </div>
           <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
@@ -2902,6 +2903,10 @@ Vollkreis am Grund, zur&uuml;ck zur Mitte. Die Schraubenlinie steht in St&uuml;c
 sicher lesbar. Der <b>241</b> schaltet wie der Zyklus: Drehrichtung und Drehzahl Ein-/Ausfahren beim Anfahren, Bohrdrehzahl und K&uuml;hlung am Bohrsatz, K&uuml;hlung aus und
 Drehzahl zur&uuml;ck am R&uuml;ckzug. Die Drehzahlwechsel stehen als eigener <code>TOOL CALL S</code>-Satz (Werkzeug-Nummer und Spindelachse werden im Dialog mit NO&nbsp;ENT
 &uuml;bergangen), die M-Worte am jeweiligen Fahrsatz.</dd>
+<dt id="ba-fk06c-wechsel">Fr&auml;sart wechselnd (nur Konturzug)</dt><dd>Der Zyklus&nbsp;25 kennt als einziger eine dritte Stellung der Fr&auml;sart: <b>wechselnd je Zustellung</b> (Q15&nbsp;=&nbsp;0).
+Die Steuerung f&auml;hrt die erste Zustellung im Gleichlauf, die n&auml;chste im Gegenlauf und so weiter &mdash; das entlastet die Schneide bei tiefen Konturen. Die <b>eigene Bahn</b>
+macht dasselbe: sie kippt die Laufrichtung je Ebene und f&auml;hrt jede Ebene neu an, weil der Startpunkt dann am anderen Ende liegt. Die Bahn selbst ist Punkt f&uuml;r Punkt
+dieselbe, nur r&uuml;ckw&auml;rts.</dd>
 <dt id="ba-fk06c-kontur">Konturzug als eigene Bahn</dt><dd>Der Schritt <b>Konturzug</b> (Softkey-Gruppe Kontur) f&auml;hrt eine Kontur aus Kap.&nbsp;5b: als
 <b>Steuerungszyklus</b> schreibt die App <code>CYCL DEF 14.0 KONTUR</code>, <code>14.1 KONTURLABEL n</code>, <code>CYCL DEF 25 KONTUR-ZUG</code>
 (Q1 Tiefe, Q3 Aufma&szlig; Seite, Q5 Z0, Q7 sichere H&ouml;he = Z0 + SC2, Q10 Zustellung, Q11 FZ, Q12 F, Q15 Fr&auml;sart) und <code>CYCL CALL</code>; die Kontur
@@ -2926,6 +2931,27 @@ als Zyklus 14/25 und als eigene Bahn 0:53 min, DZ10 Rundung/Fase/tangentialer Bo
 Kreisb&ouml;gen: die Steuerung verlangt Start und Ende eines <code>C</code>-Satzes auf demselben Radius um <code>CC</code> (Maschinenparameter 7431, bis 0,0001&nbsp;mm) &mdash; die App legt die
 Mitte deshalb auf die Mittelsenkrechte der gerundeten S&auml;tze, mit vier Nachkommastellen, wo n&ouml;tig. Die Vorlage DZ6 (die Leiste als Einzels&auml;tze, eine Bohrung je
 Schritt &mdash; der Wandler des Programmierplatzes nimmt nur 100 S&auml;tze) ist das Testprogramm f&uuml;r den Programmierplatz.</div>
+
+<h2 id="ba-fk06e">6e &nbsp;Gewindefr&auml;sen (262&ndash;267)</h2>
+<p>Die Softkey-Gruppe <b>Gewinde</b> f&uuml;hrt neben den drei Gewindebohr-Zyklen f&uuml;nf Fr&auml;szyklen. Alle brauchen einen <b>Gewindefr&auml;ser</b>, der deutlich kleiner ist als das
+Gewinde &mdash; die Steuerung f&auml;hrt eine Schraubenlinie im Soll-Durchmesser und rechnet den Werkzeugradius aus der Tabelle heraus. Gemeinsam sind oben <b>D Soll-Durchmesser</b>,
+<b>P Steigung</b> und <b>Z1 Gewindetiefe</b>; die Fr&auml;sart entscheidet zwischen Gleich- und Gegenlauf.</p>
+<dl>
+<dt id="ba-fk06e-262">262 Gewindefr&auml;sen</dt><dd>Das Gewinde in eine <b>vorhandene Bohrung</b>. <b>Nachsetzen</b> sagt, wie die Steuerung die Gewindel&auml;nge aufteilt: 0 = eine
+Schraubenlinie um 360&deg; auf die Gewindetiefe, 1 = eine durchgehende Schraubenlinie &uuml;ber die ganze L&auml;nge, gr&ouml;&szlig;er als 1 = mehrere Bahnen mit An- und Abfahren, dazwischen
+versetzt die Steuerung um das Vielfache der Steigung.</dd>
+<dt id="ba-fk06e-263">263 Senkgewindefr&auml;sen</dt><dd>Senkt zuerst (<b>Z2 Senktiefe</b>, inkremental und negativ) und fr&auml;st dann das Gewinde. <b>SC seitlich</b> ist der Abstand zwischen
+Werkzeugschneide und Bohrungswand. Mit <b>Tiefe</b> und <b>Versatz Senken stirnseitig</b> senkt sie zus&auml;tzlich an der Stirnseite &mdash; beide 0 hei&szlig;t: kein Stirnsenken.</dd>
+<dt id="ba-fk06e-264">264 Bohrgewindefr&auml;sen</dt><dd>Bohrt (<b>Z2 Bohrtiefe</b>), r&auml;umt Sp&auml;ne wie ein Tiefbohrzyklus (Zustellung, Vorhalteabstand, Bohrtiefe bis Spanbruch,
+R&uuml;ckzug bei Spanbruch) und fr&auml;st danach das Gewinde &mdash; alles mit <b>einem</b> Werkzeug.</dd>
+<dt id="ba-fk06e-265">265 Helix-Bohrgewindefr&auml;sen</dt><dd>Bohrt die Bohrung selbst auf einer Schraubenlinie und fr&auml;st das Gewinde; <b>Senkvorgang</b> legt fest, ob stirnseitig vor oder
+nach der Bearbeitung gesenkt wird. Dieser Zyklus kennt keine Fr&auml;sart und keinen Anfahrvorschub.</dd>
+<dt id="ba-fk06e-267">267 Au&szlig;engewinde fr&auml;sen</dt><dd>Das Gewinde auf einem <b>vorhandenen Zapfen</b>; <b>D</b> ist dort der Zapfen-Durchmesser.</dd>
+</dl>
+<p><b>Was die App hier NICHT kann, ehrlich:</b> Es gibt f&uuml;r diese f&uuml;nf keine Einzelsatz-Ausgabe. Die An- und Abfahrb&ouml;gen und das Nachsetzen stehen im Handbuch nicht satzgenau;
+geraten w&auml;ren sie an der Maschine ein Risiko. Geschrieben wird also immer der Steuerungszyklus. In der <b>Simulation</b> erscheint die Bohrung bzw. der Zapfen im
+Soll-Durchmesser &uuml;ber die Gewindetiefe &mdash; die Gewindeflanken selbst liegen unter der Rasterweite des H&ouml;henfelds und werden bewusst nicht dargestellt; beim Au&szlig;engewinde
+nimmt das Bild gar nichts weg (die Steuerung f&auml;hrt dort sehr wohl ihre Bahn: steht kein Zapfen, fr&auml;st sie einen Ring). Die Meldung im Programm sagt das auch.</p>
 
 <h2 id="ba-fk06d">6d &nbsp;Simulation &mdash; die eigene Bahn im Bild</h2>
 <p>Der Knopf <b>Simulation</b> in der Fu&szlig;leiste f&auml;hrt die Bahnen der App &uuml;ber ein <b>H&ouml;henfeld</b> des Rohteils (Raster nach Rohteilgr&ouml;&szlig;e, 0,2 bis 1&nbsp;mm):
@@ -2961,7 +2987,7 @@ Tiefe zum Werkzeug passt. Das bleibt Handwerk am Teil.</div>
 
 <h2 id="ba-fk08">8 &nbsp;Was fehlt (ehrlich)</h2>
 <ul>
-<li>Gewindefr&auml;sen (262&ndash;267) und Zylindermantel (27/28/29) &mdash; die SL-Zyklen 20&ndash;24 mit Tasche und Inseln sind seit dem 13.09.2026 da (Kap.&nbsp;6c), ebenso der Konturzug 14/25 mit XY-Kontureditor (Kap.&nbsp;5b). Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
+<li>Zylindermantel (27/28/29, braucht eine Rundachse) und die Schwenkfunktion PLANE &mdash; Gewindefr&auml;sen 262&ndash;267 ist seit dem 14.09.2026 da (Kap.&nbsp;6e), die SL-Zyklen 20&ndash;24 mit Tasche und Inseln sind seit dem 13.09.2026 da (Kap.&nbsp;6c), ebenso der Konturzug 14/25 mit XY-Kontureditor (Kap.&nbsp;5b). Taschen, Nuten und Zapfen (251&ndash;257), Planfr&auml;sen 232 und die Bohrzyklen 202/204/205/208/209/241 sind seit dem 12.09.2026 drin (Kap.&nbsp;6 und 6b).</li>
 <li>Gewindefr&auml;sen 262&ndash;267, Zylindermantel 27&ndash;29/39, Abzeilen 230/231/233 &mdash; in dieser Reihenfolge danach.</li>
 <li>Eigene Bahnlogik: Bohrfamilie, Taschen, Nuten, Zapfen, Planfr&auml;sen und Konturzug schreiben seit dem 12./13.09.2026 Einzels&auml;tze (Kap.&nbsp;6c) &mdash; darauf der Siemens-Post.</li>
 <li>DXF-Import: gebaut (Kap.&nbsp;5b), aber nur an handgeschriebenen DXF-Dateien gepr&uuml;ft &mdash; echte CAD-Exporte von Daniel fehlen noch als Fixtures; Bema&szlig;ung, Bl&ouml;cke und Ellipsen liest er nicht.</li>
@@ -3151,6 +3177,7 @@ var F_PROFILE = {
       // App-Ausgabe).
       konturzug:'pgst',
       slRaeumen:'pgst', slVorbohren:'pgst',
+      gewFraesen:'pgst', gewSenk:'pgst', gewBohr:'pgst', gewHelix:'pgst', gewAussen:'pgst',
       // Paket 3: 12.09.2026 abends mit DZ5 im Programm-Test durchgelaufen
       // (5:01 min, alle acht Schritte in der Grafik). Der erste Lauf brach
       // beim 241 mit "Falsche Drehzahl" ab: Q427 25 aus dem Handbuchbeispiel
@@ -3226,7 +3253,12 @@ var F_Q = {
   Q2:'BAHN-UEBERLAPPUNG',    Q4:'AUFMASS TIEFE',          Q6:'SICHERHEITS-ABST.',
   Q8:'RUNDUNGSRADIUS',       Q9:'DREHSINN',               Q13:'AUSRAEUM-WERKZEUG',
   Q14:'AUFMASS SEITE',       Q18:'VORRAEUM-WERKZEUG',     Q19:'VORSCHUB PENDELN',
-  Q401:'VORSCHUBREDUZIERUNG', Q404:'NACHRAEUMSTRATEGIE'
+  Q401:'VORSCHUBREDUZIERUNG', Q404:'NACHRAEUMSTRATEGIE',
+  // Paket E (14.09.2026): Gewindefraesen 262-267, Beispielsaetze Kap. 8.
+  // Q201 heisst hier GEWINDETIEFE und Q239 STEIGUNG (beim Gewindebohren
+  // TIEFE bzw. GEWINDESTEIGUNG) — beides steht als qText am Zyklus.
+  Q355:'NACHSETZEN',         Q356:'SENKTIEFE',            Q358:'TIEFE STIRNSEITIG',
+  Q359:'VERSATZ STIRNSEITIG', Q360:'SENKVORGANG',         Q512:'VORSCHUB ANFAHREN'
 };
 
 // wort = Klartext fuer Meldungen, kurz = Arbeitsplanzeile (die lange Form
@@ -3300,6 +3332,27 @@ var F_ZYKLEN = {
   planfraesen:{nr:232, titel:'PLANFRAESEN', wort:'Planfraesen', kurz:'Planfraesen', fraes:true, eigenePosition:true,
     q:['Q389','Q225','Q226','Q227','Q386','Q218','Q219','Q202','Q369','Q370','Q207','Q385','Q253','Q200','Q357','Q204'],
     qText:{Q202:'MAX. ZUSTELL-TIEFE', Q370:'MAX. UEBERLAPPUNG'}},
+  // ---- Paket E (14.09.2026): Gewindefraesen 262-267. Alle CALL-aktiv, die
+  // Position kommt wie beim Bohren aus dem Bohrbild. gewf:true heisst: die
+  // Q206/Q207-Bedeutung der Fraeszyklen gilt (Q207 Fraesen, Q206 Tiefen-
+  // zustellung), aber es ist KEINE Form mit eigener Geometrie — deshalb
+  // laeuft der Schritt nicht in fBahnFormen und nicht durch die
+  // Formen-Pruefung. Die Ausgabe 02 kennt Q512 noch nicht.
+  gewFraesen:{nr:262, titel:'GEWINDEFRAESEN', wort:'Gewindefraesen', kurz:'Gewindefr.', fraes:true, gewf:true,
+    q:['Q335','Q239','Q201','Q355','Q253','Q351','Q200','Q203','Q204','Q207','Q512'], qStand02:{Q512:1},
+    qText:{Q201:'GEWINDETIEFE', Q239:'STEIGUNG'}},
+  gewSenk:   {nr:263, titel:'SENKGEWINDEFRAESEN', wort:'Senkgewindefraesen', kurz:'Senkgewindefr.', fraes:true, gewf:true,
+    q:['Q335','Q239','Q201','Q356','Q253','Q351','Q200','Q357','Q358','Q359','Q203','Q204','Q254','Q207','Q512'], qStand02:{Q512:1},
+    qText:{Q201:'GEWINDETIEFE', Q239:'STEIGUNG', Q356:'SENKTIEFE', Q357:'SI.-ABST. SEITE'}},
+  gewBohr:   {nr:264, titel:'BOHRGEWINDEFRAESEN', wort:'Bohrgewindefraesen', kurz:'Bohrgewindefr.', fraes:true, gewf:true,
+    q:['Q335','Q239','Q201','Q356','Q253','Q351','Q202','Q258','Q257','Q256','Q358','Q359','Q200','Q203','Q204','Q206','Q207','Q512'], qStand02:{Q512:1},
+    qText:{Q201:'GEWINDETIEFE', Q239:'STEIGUNG', Q356:'BOHRTIEFE', Q258:'VORHALTEABSTAND'}},
+  gewHelix:  {nr:265, titel:'HELIX-BOHRGEWINDEFR.', wort:'Helix-Bohrgewindefraesen', kurz:'Helix-Bohrgew.', fraes:true, gewf:true,
+    q:['Q335','Q239','Q201','Q253','Q358','Q359','Q360','Q200','Q203','Q204','Q254','Q207'],
+    qText:{Q201:'GEWINDETIEFE', Q239:'STEIGUNG'}},
+  gewAussen: {nr:267, titel:'AUSSENGEWINDE FR.', wort:'Aussengewinde fraesen', kurz:'Aussengewinde', fraes:true, gewf:true,
+    q:['Q335','Q239','Q201','Q355','Q253','Q351','Q200','Q358','Q359','Q203','Q204','Q254','Q207','Q512'], qStand02:{Q512:1},
+    qText:{Q201:'GEWINDETIEFE', Q239:'STEIGUNG'}},
   // Paket C3: Konturzug 25 auf einer XY-Kontur der App (Zyklus 14 KONTUR +
   // 25 KONTUR-ZUG + CYCL CALL, Kontur als LBL mit RL/RR). Q-Liste S. 208.
   konturzug: {nr:25, titel:'KONTUR-ZUG', wort:'Konturzug (Kontur fraesen)', kurz:'Konturzug', kontur:true,
@@ -3318,7 +3371,8 @@ var F_ZYKLEN = {
     qSigned:{Q1:1, Q3:1, Q4:1, Q5:1, Q7:1, Q9:1, Q10:1, Q14:1}}
 };
 var F_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen',
-  'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen','konturzug','slVorbohren','slRaeumen'];
+  'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen','konturzug','slVorbohren','slRaeumen',
+  'gewFraesen','gewSenk','gewBohr','gewHelix','gewAussen'];
 var F_FRAES_ARTEN = ['tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen'];
 var F_BOHR_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen'];
 
@@ -3352,12 +3406,20 @@ var F_FELDER = {
   // Tasche + hoechstens 11 Inseln).
   inseln:     {name:'Inseln (Konturen XY)', typ:'konturen', ba:'ba-fk06c-sl'},
   q8:         {name:'R Rundungsradius an Innenecken', einheit:'mm', ba:'ba-fk06c-sl'},
+  // Paket E: Gewindefraesen
+  q355:       {name:'Nachsetzen (0 = ein Gang, 1 = durchgehend, >1 Gänge je Bahn)', typ:'ganz', ba:'ba-fk06e'},
+  q356:       {name:'Z2 Senk- bzw. Bohrtiefe (inkremental, negativ)', einheit:'mm', ba:'ba-fk06e'},
+  q358:       {name:'Tiefe Senken stirnseitig (inkremental)', einheit:'mm', ba:'ba-fk06e'},
+  q359:       {name:'Versatz Senken stirnseitig (inkremental)', einheit:'mm', ba:'ba-fk06e'},
+  q360:       {name:'Senkvorgang', typ:'wahl', zahlWahl:true, wahl:[['0','vor der Bearbeitung'],['1','nach der Bearbeitung']], ba:'ba-fk06e'},
+  fAnfahr:    {name:'FA Vorschub Anfahren', einheit:'mm/min', ba:'ba-fk06e'},
   q13:        {name:'T Ausräum-Werkzeug (Nummer)', typ:'ganz', ba:'ba-fk06c-sl'},
   q14:        {name:'UXY Restaufmaß Seite (0 = fertig schlichten)', einheit:'mm', ba:'ba-fk06c-sl'},
   q18:        {name:'T Vorräum-Werkzeug (0 = nicht vorgeräumt)', typ:'ganz', ba:'ba-fk06c-sl'},
   fPendel:    {name:'FP Vorschub Pendeln (Eintauchen)', einheit:'mm/min', ba:'ba-fk06c-sl'},
   q401:       {name:'Vorschubreduzierung an Engstellen', einheit:'%', ba:'ba-fk06c-sl'},
-  q404:       {name:'Nachräumen: Weg zwischen den Bereichen', typ:'wahl', zahlWahl:true, wahl:[['0','auf Tiefe an der Kontur entlang'],['1','auf SC abheben']], ba:'ba-fk06c-sl'},
+  // Kurzer Name: der volle Satz lief bei 390 px aus der Zeile (gemessen 14.09.2026).
+  q404:       {name:'Nachräumen: Zwischenweg', typ:'wahl', zahlWahl:true, wahl:[['0','an der Kontur'],['1','auf SC abheben']], ba:'ba-fk06c-sl'},
   seiteZu:    {name:'Werkzeug zur Kontur', typ:'wahl', wahl:[['innen','innen (Tasche)'],['aussen','außen (Insel)']], nurWenn:(s, p)=>{ const kt = ((p && p.konturen) || [])[s.kontur]; return !kt || !!kt.geschlossen; }, ba:'ba-fk06c-kontur'},
   seiteAuf:   {name:'Werkzeug zur Kontur', typ:'wahl', wahl:[['links','links (RL)'],['rechts','rechts (RR)']], nurWenn:(s, p)=>{ const kt = ((p && p.konturen) || [])[s.kontur]; return !!kt && !kt.geschlossen; }, ba:'ba-fk06c-kontur'},
   s:          {name:'S Drehzahl', einheit:'U/min', ba:'ba-fk06-fs'},
@@ -3454,7 +3516,9 @@ var F_FELD_Q = {
   zustSchl:['Q338'], ueberl:['Q370','Q2'], eintauch:['Q366'], strategie:['Q389'], px:['Q225'], py:['Q226'], pz:['Q227'],
   zEnd:['Q386'], scSeite:['Q357'],
   // Paket D3: SL-Zyklen
-  q8:['Q8'], q13:['Q13'], q14:['Q14'], q18:['Q18'], fPendel:['Q19'], q401:['Q401'], q404:['Q404']
+  q8:['Q8'], q13:['Q13'], q14:['Q14'], q18:['Q18'], fPendel:['Q19'], q401:['Q401'], q404:['Q404'],
+  // Paket E: Gewindefraesen
+  q355:['Q355'], q356:['Q356'], q358:['Q358'], q359:['Q359'], q360:['Q360'], fAnfahr:['Q512']
 };
 // Feldlisten je Zyklus in Maskenreihenfolge. '#Titel' = Abschnitt,
 // '#!Titel' = aufklappbare Gruppe, die im einfachen Modus verborgen ist
@@ -3496,11 +3560,28 @@ var F_MASKE = {
                feldWahl:{lage:[['0','Mitte'],['1','links unten'],['2','rechts unten'],['3','rechts oben'],['4','links oben']]}},
   zapfenK:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','ausgabe','#Form','dm','dmRoh','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', dm:'⌀ Zapfen (Fertigmaß)'}},
+  // Paket E: Gewindefraesen. Gemeinsam sind Soll-⌀, Steigung und Gewindetiefe
+  // oben; was nur eine Familie fuehrt (Senktiefe, Bohrwerte, Stirnsenken),
+  // steht darunter. Die Werkzeugkorrektur macht die Steuerung ueber den
+  // Radius aus der Tabelle — es gibt kein Aufmass-Feld.
+  gewFraesen:{felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q355','#!Sicherheit','sc','q203','sc2'],
+              feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser'}},
+  gewSenk:   {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fSenk','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q356','#Senken','scSeite','q358','q359','#!Sicherheit','sc','q203','sc2'],
+              feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser', q356:'Z2 Senktiefe (inkremental, negativ)'}},
+  gewBohr:   {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fVor','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q356','#Bohren','zust','q258','q257','rzSpan','#Senken','q358','q359','#!Sicherheit','sc','q203','sc2'],
+              feldText:{f:'F Vorschub Fräsen', fTief:'FZ Vorschub Tiefenzustellung', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser', q356:'Z2 Bohrtiefe (inkremental, negativ)'}},
+  gewHelix:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fSenk','kuehl','#Gewinde','q335','steigung','tiefe','#Senken','q358','q359','q360','#!Sicherheit','sc','q203','sc2'],
+              feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser'}},
+  gewAussen: {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fSenk','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q355','#Senken','q358','q359','#!Sicherheit','sc','q203','sc2'],
+              feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Zapfen-Durchmesser'}},
   // Paket C3: Konturzug. Der Zyklus 25 kennt kein Q fuer Bearbeitungsumfang,
   // Schlichtvorschub, DS, SC und Werkzeugseite (die steckt im RL/RR des
   // Unterprogramms) — diese Felder gehoeren der eigenen Bahn (ohneQ).
   konturzug:  {felder:['#Werkzeug & Schnittwerte','t','kontur','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Kontur','seiteZu','seiteAuf','#Tiefe & Aufmaß','tiefe','zust','aufSeite','zustSchl','#!Sicherheit','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', sc2:'SC2 Sichere Höhe über Z0', zust:'D Zustellung', aufSeite:'UXY Aufmaß Seite (Schlichten holt es)'},
+               // Q15 kennt beim Zyklus 25 als einziger eine dritte Stellung:
+               // 0 = bei mehreren Zustellungen abwechselnd (S. 209).
+               feldWahl:{fraesart:[['1','Gleichlauf'],['-1','Gegenlauf'],['0','wechselnd je Zustellung']]},
                ohneQ:['umfang','fSchl','zustSchl','sc','seiteZu','seiteAuf']},
   // Paket D3: SL-Zyklen. Der Raeumschritt schreibt 20 + 22 [+ 23 + 24];
   // Bearbeitungsumfang, Schlichtvorschub und DS haben kein eigenes Q-Wort
@@ -3517,7 +3598,7 @@ var F_MASKE = {
 // Zapfen/Nuten, ...): ein Knopf je Zyklus, keine Auswahlreihe in der Maske.
 var F_ZYKLUS_GRUPPEN = [
   {id:'bohren',  name:'Bohren',            arten:['zentrieren','bohren','tief','tiefUni','reiben','ausdrehen','senkenRueck','bohrfraesen','einlippen']},
-  {id:'gewinde', name:'Gewinde',           arten:['gewinde','gewindeGS','gewindeSpan']},
+  {id:'gewinde', name:'Gewinde',           arten:['gewinde','gewindeGS','gewindeSpan','gewFraesen','gewSenk','gewBohr','gewHelix','gewAussen']},
   {id:'taschen', name:'Taschen · Zapfen',  arten:['tascheR','tascheK','nut','nutR','zapfenR','zapfenK']},
   {id:'flaechen', name:'Flächen',          arten:['planfraesen']},
   {id:'kontur',  name:'Kontur',            arten:['konturzug','slRaeumen','slVorbohren']}
@@ -3567,7 +3648,9 @@ function klNum(v){
 // Q374=+0 (Drehlage der Nut), Q376=+45 (Startwinkel der runden Nut).
 // Paket 3: Q249 (204, Senkung nach oben), Q227/Q386 (232, Hoehen absolut)
 // druckt das Handbuch mit Vorzeichen (Q249=+5, Q227=+2.5, Q386=-3).
-var F_Q_SIGNED = {Q201:1, Q203:1, Q216:1, Q217:1, Q225:1, Q226:1, Q237:1, Q238:1, Q224:1, Q245:1, Q246:1, Q247:1, Q239:1, Q351:1, Q374:1, Q376:1, Q249:1, Q227:1, Q386:1};
+// Paket E: Q356 (Senk-/Bohrtiefe), Q358 und Q359 druckt das Handbuch mit
+// Vorzeichen (Q356=-20, Q358=+0, Q359=+0).
+var F_Q_SIGNED = {Q201:1, Q203:1, Q216:1, Q217:1, Q225:1, Q226:1, Q237:1, Q238:1, Q224:1, Q245:1, Q246:1, Q247:1, Q239:1, Q351:1, Q374:1, Q376:1, Q249:1, Q227:1, Q386:1, Q356:1, Q358:1, Q359:1};
 function klQ(q, v, signiert){
   if(F_Q_SIGNED[q] || signiert) return q + '=' + klNum(v);
   let n = Math.round((+v || 0) * 1000) / 1000;
@@ -3855,6 +3938,15 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
         ueberl:1, q8:0, q13:0, q14:0, q18:0, fPendel:fRund(s.f * 0.3), fRueck:99999, q401:100, q404:0});
     }
   }
+  // Paket E: Gewindefraesen. Vorgaben nach den Beispielsaetzen (Steigung 1,5,
+  // Nachsetzen 0 = ein Gang, Vorpositionieren 750, Anfahren 50, Senken 150);
+  // Q358/Q359 = 0 heisst: kein stirnseitiges Senken.
+  if(F_ZYKLEN[art] && F_ZYKLEN[art].gewf){
+    s.typ = 'bohren';
+    Object.assign(s, {q335:10, steigung:1.5, tiefe:-16, q355:0, q356:-20,
+      q358:0, q359:0, q360:0, fraesart:1, fVor:750, fAnfahr:50, fSenk:150,
+      f:t.f || 500, fTief:fRund((t.f || 500) * 0.3), zust:5, q258:0.2, q257:5, rzSpan:0.2, scSeite:0.2});
+  }
   // Paket 3: Bohrzyklen 202/204/205/208/209/241 mit den Werten der
   // Handbuchbeispiele als Vorgabe.
   Object.assign(s, {
@@ -3933,9 +4025,21 @@ function fZyklusWerte(s, tool){
   // einem Zug (wie Q202); Q11 = FZ, Q12 = F, Q15 = Fraesart +1/-1.
   if(s.art === 'konturzug'){
     Object.assign(w, {Q1: tiefe, Q3: +s.aufSeite || 0, Q5: +s.q203 || 0, Q7: fRund((+s.q203 || 0) + Math.max(+s.sc2 || 0, +s.sc || 0)),
-      Q10: (+s.zust > 0) ? +s.zust : Math.abs(tiefe), Q11: (+s.fTief > 0) ? +s.fTief : (+s.f || 0), Q12: +s.f || 0, Q15: (+s.fraesart < 0) ? -1 : 1});
+      Q10: (+s.zust > 0) ? +s.zust : Math.abs(tiefe), Q11: (+s.fTief > 0) ? +s.fTief : (+s.f || 0), Q12: +s.f || 0,
+      Q15: (Math.round(+s.fraesart || 0) === 0) ? 0 : ((+s.fraesart < 0) ? -1 : 1)});
   }
   if(s.art === 'planfraesen'){ w.Q218 = +s.l1 || 0; w.Q219 = +s.l2 || 0; w.Q202 = +s.zust || 0; }
+  // Paket E: Gewindefraesen. Q201 ist die Gewindetiefe (negativ), Q356 die
+  // Senk- bzw. Bohrtiefe (inkremental, negativ), Q512 der Anfahrvorschub.
+  if(z && z.gewf){
+    Object.assign(w, {
+      Q335: +s.q335 || 0, Q239: +s.steigung || 0, Q201: tiefe, Q355: Math.round(+s.q355 || 0),
+      Q356: +s.q356 || 0, Q358: +s.q358 || 0, Q359: +s.q359 || 0, Q360: Math.round(+s.q360 || 0),
+      Q253: +s.fVor || 0, Q254: +s.fSenk || 0, Q512: +s.fAnfahr || 0, Q357: +s.scSeite || 0,
+      Q202: +s.zust || 0, Q258: +s.q258 || 0, Q257: +s.q257 || 0, Q256: +s.rzSpan || 0,
+      Q207: +s.f || 0, Q206: (+s.fTief > 0) ? +s.fTief : (+s.f || 0), Q351: (+s.fraesart < 0) ? -1 : 1
+    });
+  }
   // Paket D3: SL-Zyklen. Q7 ist die sichere Hoehe ABSOLUT (Z0 + SC2) wie
   // beim 25, Q6 der Sicherheitsabstand, Q208 der Rueckzugsvorschub (99999 =
   // FMAX, so druckt es das Handbuch). Q10s/Q12s sind die Schlichtwerte fuer
@@ -4056,7 +4160,7 @@ function fBahnSchritt(s, tool, prog, punkte){
   const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
   if(F_ZYKLEN[art] && F_ZYKLEN[art].sl) return fBahnSL(s, tool, prog);                   // Paket D3 (vor der Kontur-Weiche: die SL-Familien tragen kontur:true)
   if(F_ZYKLEN[art] && F_ZYKLEN[art].kontur) return fBahnKontur(s, tool, prog);           // Paket C3
-  if(F_ZYKLEN[art] && F_ZYKLEN[art].fraes) return fBahnFormen(s, tool, prog, punkte);   // Paket C2
+  if(F_ZYKLEN[art] && F_ZYKLEN[art].fraes && !F_ZYKLEN[art].gewf) return fBahnFormen(s, tool, prog, punkte);   // Paket C2 (Paket E: Gewindefraesen sind keine Form)
   if(art === 'bohrfraesen' || art === 'einlippen') return fBahnSimSonder(s, tool, prog, punkte);   // Paket D3: Helix bzw. Drehzahlfolge
   if(F_BAHN_ARTEN.indexOf(art) < 0) return nein('fuer ' + ((F_ZYKLEN[art] || {}).wort || art) + ' gibt es noch keine eigene Bahn');
   if(!punkte || !punkte.length) return nein('keine Position');
@@ -4932,8 +5036,13 @@ function fBahnKontur(s, tool, prog){
   const zT = fRund(z0 + tiefe);
   const uxy = Math.max(0, +s.aufSeite || 0), umfang = Math.round(+s.umfang || 0);
   let seg = K.seg, seite = fKonturSeite(s, kt, seg);
-  // Gleichlauf bei M3 = Werkzeug links (RL); sonst rueckwaerts laufen
-  const gleich = !(+s.fraesart < 0);
+  // Gleichlauf bei M3 = Werkzeug links (RL); sonst rueckwaerts laufen.
+  // Paket F: fraesart 0 heisst WECHSELND (Q15 = 0) — die erste Zustellung
+  // laeuft im Gleichlauf, jede weitere kippt. Die Werkzeugseite bleibt dabei
+  // dieselbe SEITE der Kontur; gekippt wird die LAUFRICHTUNG, und damit auch
+  // das Vorzeichen von seite (links der Fahrtrichtung wird rechts).
+  const wechseln = Math.round(+s.fraesart || 0) === 0;
+  const gleich = wechseln ? true : !(+s.fraesart < 0);
   if((seite > 0) !== gleich){ seg = fSegUmkehren(seg); seite = -seite; }
   const pos = {x:null, y:null, z:null};
   const gleichLage = (o) => ['x', 'y', 'z'].every(k => o[k] == null || (pos[k] != null && Math.abs(pos[k] - o[k]) < 1e-9));
@@ -4944,16 +5053,25 @@ function fBahnKontur(s, tool, prog){
   const ebenen = (schritt) => { const e = []; let z = z0; const st = (schritt > 0) ? schritt : (z0 - zT); while(z > zT + 1e-9){ z = Math.max(zT, fRund(z - st)); e.push(z); } if(!e.length) e.push(zT); return e; };
   const lauf = (d, fXY, zListe) => {
     const V = fKonturVersatz(seg, d, seite, !!kt.geschlossen); if(!V.ok) return V.grund;
-    const a0 = V.seg[0], start = {x:fRund(a0.x0), y:fRund(a0.y0)};
+    // Paket F: bei wechselnder Fraesart wird dieselbe Bahn auch rueckwaerts
+    // gebraucht — die versetzte Bahn wird EINMAL umgedreht, nicht neu
+    // gerechnet, damit beide Richtungen Punkt fuer Punkt dieselbe Bahn sind.
+    const VR = wechseln ? fSegUmkehren(V.seg) : null;
     zListe.forEach((z, i) => {
-      const anfang = (i === 0) || !kt.geschlossen;
+      const rueck = wechseln && (i % 2 === 1);
+      const bahn = rueck ? VR : V.seg;
+      const a0 = bahn[0], start = {x:fRund(a0.x0), y:fRund(a0.y0)};
+      // Bei wechselnder Richtung liegt der Startpunkt jeder zweiten Ebene am
+      // ANDEREN Ende — auch bei geschlossener Kontur muss deshalb neu
+      // angefahren werden.
+      const anfang = (i === 0) || !kt.geschlossen || wechseln;
       if(anfang){
         if(pos.z != null && pos.z < zSC - 1e-9) eil({z:zSC});
         eil({x:start.x, y:start.y});
         eil({z:zSC});
       }
       vor({z:z, f:fZ});
-      V.seg.forEach(o => {
+      bahn.forEach(o => {
         if(o.typ === 'g') vor({x:fRund(o.x1), y:fRund(o.y1), z:z, f:fXY});
         else kreis({x:fRund(o.x1), y:fRund(o.y1), z:z, cx:fRund(o.cx), cy:fRund(o.cy), dr:o.dr, f:fXY});
       });
@@ -4966,6 +5084,7 @@ function fBahnKontur(s, tool, prog){
     const g = lauf(rt, fS, ebenen(+s.zustSchl)); if(g) return nein(g);
   }
   if(umfang === 1 && uxy > 0) warn.push('Nur Schruppen: Aufmass ' + uxy + ' bleibt an der Kontur stehen.');
+  if(wechseln) warn.push('Fraesart wechselnd (Q15 = 0): die eigene Bahn kippt die Laufrichtung je Zustellung und faehrt jede Ebene neu an.');
   warn.push('Konturzug: Eintauchen senkrecht am Bahnanfang mit FZ ' + fZ + ' — wie Zyklus 25; Fraeser muss ueber Mitte schneiden.');
   eil({z:zSC}); eil({z:zSC2});
   return {ok:true, bahn:B, warn:warn, zT:zT};
@@ -5416,10 +5535,17 @@ function fSimBahnen(prog){
       try{ b = fBahnSchritt(Object.assign({}, s, {ausgabe:'einzel', eintauch:0}), tool2, prog, punkte); }catch(e){ b = {ok:false, grund:e.message, bahn:[]}; }
       if(b.ok) hinweise.push('Schritt ' + (si + 1) + ': Eintauchen als senkrecht simuliert (' + (F_ZYKLEN[s.art] || {}).wort + ' ohne ANGLE).');
     }
-    if(!b.ok && !z.fraes && !z.kontur){
-      // Zyklen ohne Einzelsatz-Ausgabe: Ablauf nach Handbuch (Paket D2)
+    if(!b.ok && (!z.fraes || z.gewf) && !z.kontur){
+      // Zyklen ohne Einzelsatz-Ausgabe: Ablauf nach Handbuch (Paket D2/E)
       let sb = null; try{ sb = fBahnSimSonder(s, tool2, prog, punkte); }catch(e){ sb = {ok:false, grund:e.message, bahn:[]}; }
-      if(sb && sb.ok){ b = sb; hinweise.push('Schritt ' + (si + 1) + ' (' + (z.wort || s.art) + '): Ablauf nach Zyklenhandbuch simuliert' + (s.art === 'senkenRueck' ? ' — die Senkung liegt an der UNTERSEITE (2D violett, 3D von unten)' : '') + '.'); }
+      if(sb && sb.ok){
+        b = sb;
+        hinweise.push('Schritt ' + (si + 1) + ' (' + (z.wort || s.art) + '): Ablauf nach Zyklenhandbuch simuliert' + (s.art === 'senkenRueck' ? ' — die Senkung liegt an der UNTERSEITE (2D violett, 3D von unten)' : '') + '.');
+        // Was der Ablauf selbst zu sagen hat, gehoert in die Hinweisliste der
+        // Simulation — sonst steht z. B. beim Gewindefraesen nirgends, dass die
+        // Gewindeflanken bewusst nicht dargestellt werden (Befund 14.09.2026).
+        (sb.warn || []).forEach(w => hinweise.push('Schritt ' + (si + 1) + ': ' + w));
+      }
     }
     if(!b.ok){
       if(z.fraes || z.kontur){ hinweise.push('Schritt ' + (si + 1) + ' (' + (z.wort || s.art) + '): keine Bahn — ' + b.grund + ' — uebersprungen.'); return; }
@@ -5450,7 +5576,8 @@ function fSimBahnen(prog){
 function fBahnSimSonder(s, tool, prog, punkte){
   const art = s.art, B = [], warn = [];
   const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
-  const kann = {gewindeGS:1, gewindeSpan:1, senkenRueck:1, bohrfraesen:1, einlippen:1, ausdrehen:1};
+  const kann = {gewindeGS:1, gewindeSpan:1, senkenRueck:1, bohrfraesen:1, einlippen:1, ausdrehen:1,
+    gewFraesen:1, gewSenk:1, gewBohr:1, gewHelix:1, gewAussen:1};
   if(!kann[art]) return nein('kein Handbuch-Ablauf fuer ' + art);
   if(!punkte || !punkte.length) return nein('keine Position');
   const z0 = +s.q203 || 0, sc = +s.sc || 0, sc2 = Math.max(+s.sc2 || 0, sc);
@@ -5516,6 +5643,39 @@ function fBahnSimSonder(s, tool, prog, punkte){
       vor({x:fRund(px + 0.2 * d[0]), y:fRund(py + 0.2 * d[1]), f:fR, ohneAbtrag:true});
       vor({z:zSC, f:fR, ohneAbtrag:true});
       eil({x:px, y:py}); eil({z:zSC2});
+    } else if(art === 'gewFraesen' || art === 'gewSenk' || art === 'gewBohr' || art === 'gewHelix' || art === 'gewAussen'){
+      // Gewindefraesen 262-267 (Kap. 8). Was die Simulation ZEIGT, ist das
+      // Loch bzw. der Zapfen im Soll-Durchmesser ueber die Gewindetiefe —
+      // die Gewindeflanken selbst liegen weit unter der Rasterweite des
+      // Hoehenfelds und werden EHRLICH nicht dargestellt (Hinweis). Beim
+      // Bohrgewindefraesen 264 und beim Senkgewindefraesen 263 geht die
+      // Senk- bzw. Bohrtiefe Q356 tiefer als das Gewinde; das
+      // Aussengewinde 267 fraest an einem vorhandenen Zapfen und nimmt im
+      // Bild nichts weg.
+      const f = +s.f; if(!(f > 0)){ warn.push('Vorschub fehlt'); return; }
+      const fV = (+s.fVor > 0) ? +s.fVor : f;
+      const dSoll = +s.q335 || 0;
+      warn.push('Gewindefraesen ' + (F_ZYKLEN[art] || {}).nr + ': die Simulation zeigt Bohrung bzw. Zapfen im Soll-Durchmesser — die Gewindeflanken liegen unter der Rasterweite und werden nicht dargestellt.');
+      if(art === 'gewAussen'){ eil({z:zSC2}); return; }
+      if(!(dSoll > 0)){ warn.push('Soll-Durchmesser fehlt'); return; }
+      const zGew = fRund(z0 + tiefe);
+      const zTief = (art === 'gewSenk' || art === 'gewBohr') ? fRund(z0 + Math.min(tiefe, +s.q356 || 0)) : zGew;
+      // erst auf Tiefe (Bohren bzw. Senken), dann die Wand auf den
+      // Soll-Durchmesser aufweiten: ein Umlauf je 0,8 mm Radiusschritt
+      const rZ = Math.max(0, dSoll / 2 - rt);
+      vor({z:zTief, f:fV});
+      if(rZ > 0.01){
+        const n = Math.max(1, Math.ceil(rZ / 0.8));
+        for(let i = 1; i <= n; i++){
+          const r = fRund(rZ * i / n);
+          vor({x:fRund(px + r), y:py, f:f});
+          B.push({a:'kreis', x:fRund(px - r), y:py, cx:px, cy:py, dr:1, f:f, z:(i === n) ? zGew : zTief});
+          B.push({a:'kreis', x:fRund(px + r), y:py, cx:px, cy:py, dr:1, f:f});
+        }
+        vor({x:px, y:py, f:f});
+      }
+      eil({z:zSC}); eil({z:zSC2});
+      zT = zTief;
     } else if(art === 'bohrfraesen'){
       // 208: Rundungskreis vom Mittelpunkt auf den Helixradius, Schraubenlinie
       // mit Q334 je Umlauf bis zur Tiefe, Vollkreis am Grund, zurueck zur
@@ -6069,7 +6229,21 @@ function fPruefen(prog){
     // Rohteilmass der Zapfen muss ueber dem Fertigmass liegen (S. 166);
     // Helix/Pendeln brauchen ANGLE in der Werkzeugtabelle der Maschine.
     const z = F_ZYKLEN[s.art];
-    if(z && z.fraes){
+    if(z && z.gewf){
+      // Paket E: Gewindefraesen. Der Fraeser muss kleiner sein als das
+      // Gewinde (sonst kommt er nicht hinein), die Steigung muss stehen, und
+      // die Gewindetiefe darf nicht tiefer sein als die Bohr-/Senktiefe.
+      if(tool && tool.art !== 'fraeser') gelb.push(nr + 'T' + s.t + ' ist kein Fraeser (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ') — ein Gewindefraeser steht in der TOOL.T als MILL.');
+      if(!(+s.q335 > 0)) rot.push(nr + 'Soll-Durchmesser fehlt.');
+      if(!(+s.steigung > 0)) rot.push(nr + 'Steigung fehlt.');
+      if(!(+s.tiefe < 0) && s.art !== 'gewHelix') rot.push(nr + 'Gewindetiefe muss negativ sein.');
+      if(tool && +tool.d > 0 && +s.q335 > 0 && s.art !== 'gewAussen'){
+        if(+tool.d >= +s.q335) rot.push(nr + 'Werkzeug ⌀' + tool.d + ' ist nicht kleiner als der Soll-⌀ ' + s.q335 + ' — der Fraeser kommt nicht in die Bohrung.');
+        else if(+tool.d < +s.q335 / 3) gelb.push(nr + 'Werkzeug ⌀' + tool.d + ' ist sehr klein gegen den Soll-⌀ ' + s.q335 + ' (unter einem Drittel) — viele Umlaeufe, lange Laufzeit.');
+      }
+      if((s.art === 'gewSenk' || s.art === 'gewBohr') && !(+s.q356 < +s.tiefe)) gelb.push(nr + (s.art === 'gewBohr' ? 'Bohrtiefe' : 'Senktiefe') + ' Q356 liegt nicht unter der Gewindetiefe — die Steuerung fraest das Gewinde bis in den Grund.');
+      if(+s.steigung > 0 && +s.q335 > 0 && +s.steigung > +s.q335 / 2) gelb.push(nr + 'Steigung ' + s.steigung + ' gegen Soll-⌀ ' + s.q335 + ' ist unueblich gross — Werte pruefen.');
+    } else if(z && z.fraes){
       const stand = String(k.stand || '07');
       if(z.abStand && stand < z.abStand) rot.push(nr + 'Zyklus ' + z.nr + ' gibt es erst ab Software-Stand 340 49x-' + z.abStand + ' — der Programmkopf steht auf Stand ' + stand + '.');
       if(tool && tool.art !== 'fraeser') gelb.push(nr + 'T' + s.t + ' ist kein Fraeser (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
@@ -6356,6 +6530,38 @@ function fDemoSL(){
   p.schritte = [v, z, e];
   return p;
 }
+// DZ13 (Paket E, 14.09.2026): die fuenf Gewindefraeszyklen 262-267 an einem
+// Teil, je eine Position. M20 x 2,5 mit einem Gewindefraeser ⌀8 (T4 traegt in
+// der TOOL.T des Programmierplatzes ⌀8). Der 262 setzt eine vorhandene
+// Bohrung voraus — deshalb steht davor ein Bohrschritt; der 267 fraest an
+// einem Zapfen, den das Rohteil hier nicht hat: die APP zeigt dort nichts
+// (sie stellt das Aussengewinde nicht dar), die STEUERUNG faehrt im
+// Programm-Test sehr wohl ihre Bahn und fraest an der Stelle einen Ring in
+// die Kante — so gesehen am 14.09.2026 (programmtest-DZ13.png).
+// Unter 100 Saetzen.
+function fDemoGewindeFraesen(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ13';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-30, x1:150, y1:60, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [
+    {nr:4, name:'Gewindefraeser 8', art:'fraeser', d:8, s:2000, f:500},
+    {nr:1, name:'Bohrer 17', art:'bohrer', d:17, spitze:118, s:900, f:120}
+  ];
+  p.muster = [
+    {name:'Vorbohrung + Gewinde 262', typ:'punkte', punkte:[{x:25, y:30}], ausgabe:'punkte'},
+    {name:'Senkgewinde 263', typ:'punkte', punkte:[{x:55, y:30}], ausgabe:'punkte'},
+    {name:'Bohrgewinde 264', typ:'punkte', punkte:[{x:85, y:30}], ausgabe:'punkte'},
+    {name:'Helix-Bohrgewinde 265', typ:'punkte', punkte:[{x:115, y:30}], ausgabe:'punkte'},
+    {name:'Aussengewinde 267', typ:'punkte', punkte:[{x:140, y:30}], ausgabe:'punkte'}
+  ];
+  const bo = fSchrittNeu(p, 'bohren', 1, 0); Object.assign(bo, {tiefe:-22, zust:0, f:120, s:900});
+  const g1 = fSchrittNeu(p, 'gewFraesen', 4, 0); Object.assign(g1, {q335:20, steigung:2.5, tiefe:-20, q355:0, f:500, s:2000, fVor:750, fAnfahr:50, fraesart:1});
+  const g2 = fSchrittNeu(p, 'gewSenk', 4, 1); Object.assign(g2, {q335:20, steigung:2.5, tiefe:-16, q356:-20, scSeite:0.2, q358:0, q359:0, f:500, s:2000, fVor:750, fSenk:150, fAnfahr:50, fraesart:1});
+  const g3 = fSchrittNeu(p, 'gewBohr', 4, 2); Object.assign(g3, {q335:20, steigung:2.5, tiefe:-16, q356:-20, zust:5, q258:0.2, q257:5, rzSpan:0.2, q358:0, q359:0, f:500, fTief:150, s:2000, fVor:750, fAnfahr:50, fraesart:1});
+  const g4 = fSchrittNeu(p, 'gewHelix', 4, 3); Object.assign(g4, {q335:20, steigung:2.5, tiefe:-16, q358:0, q359:0, q360:0, f:500, s:2000, fVor:750, fSenk:150});
+  const g5 = fSchrittNeu(p, 'gewAussen', 4, 4); Object.assign(g5, {q335:20, steigung:2.5, tiefe:-20, q355:0, q358:0, q359:0, f:500, s:2000, fVor:750, fSenk:150, fAnfahr:50, fraesart:1});
+  p.schritte = [bo, g1, g2, g3, g4, g5];
+  return p;
+}
 var F_DEMOS = [
   {id:'flansch', name:'Flanschplatte (Lochkreis + M8-Ecken)', lade:fDemoFlansch},
   {id:'leiste',  name:'Leiste (Tieflochbohren + Reiben)',    lade:fDemoLeiste},
@@ -6368,7 +6574,8 @@ var F_DEMOS = [
   {id:'kontur',  name:'Konturzug: Insel als Zyklus 14/25 und als eigene Bahn', lade:fDemoKonturEinzel},
   {id:'konturformen', name:'Konturzug: Rundung, Fase, tangentialer Bogen, Vollkreis', lade:fDemoKonturFormen},
   {id:'bohrfraes', name:'Einzelsaetze: Bohrfraesen 208 und Einlippen-Bohren 241', lade:fDemoBohrfraesEinzel},
-  {id:'sl',      name:'SL-Zyklen 20-24: Konturtasche mit Insel, Vorbohren und Raeumen', lade:fDemoSL}
+  {id:'sl',      name:'SL-Zyklen 20-24: Konturtasche mit Insel, Vorbohren und Raeumen', lade:fDemoSL},
+  {id:'gewfr',   name:'Gewindefraesen 262-267 (M20 x 2,5 mit einem Fraeser ⌀8)', lade:fDemoGewindeFraesen}
 ];
 
 // Merkmale der Fraesausgabe fuer die NC-Ansicht: Status je Zyklusfamilie.
@@ -6388,7 +6595,12 @@ function fMerkmale(profilId){
     z('nutR',       'Runde Nut — Zyklus 254 (Q375 Teilkreis, Q216/Q217 Mitte, Q376 Start, Q248 Oeffnung, Q378/Q377 Wiederholung)'),
     z('zapfenR',    'Rechteckzapfen — Zyklus 256 (Q424/Q425 Rohteilmasse; erst ab Stand 340 49x-06)'),
     z('zapfenK',    'Kreiszapfen — Zyklus 257 (Q222 Rohteil-Durchmesser; erst ab Stand 340 49x-06)'),
-    z('konturzug',  'Konturzug — Zyklus 14 KONTUR + 25 KONTUR-ZUG auf einer XY-Kontur der App (Geraden, Kreisboegen CR, tangentiale Boegen CT, Vollkreis, Rundung RND, Fase CHF als native Saetze im LBL mit RL/RR; Q1 Q3 Q5 Q7 Q10 Q11 Q12 Q15; CYCL CALL)'),
+    z('konturzug',  'Konturzug — Zyklus 14 KONTUR + 25 KONTUR-ZUG auf einer XY-Kontur der App (Geraden, Kreisboegen CR, tangentiale Boegen CT, Vollkreis, Rundung RND, Fase CHF als native Saetze im LBL mit RL/RR; Q1 Q3 Q5 Q7 Q10 Q11 Q12 Q15; CYCL CALL); Q15 = 0 fraest bei mehreren Zustellungen abwechselnd im Gleich- und Gegenlauf, die eigene Bahn kippt dafuer die Laufrichtung je Ebene'),
+    z('gewFraesen', 'Gewindefraesen — Zyklus 262 (Q335 Soll-⌀, Q239 Steigung, Q201 Gewindetiefe, Q355 Nachsetzen, Q253/Q512 Vorschuebe, Q351 Fraesart)'),
+    z('gewSenk',    'Senkgewindefraesen — Zyklus 263 (Q356 Senktiefe, Q357 SC seitlich, Q358/Q359 Senken stirnseitig, Q254 Vorschub Senken)'),
+    z('gewBohr',    'Bohrgewindefraesen — Zyklus 264 (Q356 Bohrtiefe, Q202 Zustellung, Q258 Vorhalteabstand, Q257/Q256 Spanbruch, Q206 Vorschub Tiefenzustellung)'),
+    z('gewHelix',   'Helix-Bohrgewindefraesen — Zyklus 265 (Q360 Senkvorgang vor/nach der Bearbeitung; kein Q351 und kein Q512)'),
+    z('gewAussen',  'Aussengewinde fraesen — Zyklus 267 (Gewinde am Zapfen; Q358/Q359 Senken stirnseitig)'),
     z('slRaeumen',  'SL Raeumen — Zyklus 14 KONTUR mit Tasche und bis zu 11 Inseln + 20 KONTUR-DATEN + 22 RAEUMEN [+ 23 SCHLICHTEN TIEFE + 24 SCHLICHTEN SEITE], je mit CYCL CALL (Q1-Q9 im 20, Q10 Q11 Q12 Q18 Q19 Q208 Q401 Q404 im 22, Q14 im 24); als Einzelsaetze eine eigene Zeilenbahn mit Randumlaeufen'),
     z('slVorbohren', 'SL Vorbohren — Zyklus 14 + 20 + 21 VORBOHREN + CYCL CALL (Q10 Q11 Q13); als Einzelsaetze eine Bohrleiter an den Eintauchpunkten des Raeumens, gerechnet mit dem Radius des Ausraeum-Werkzeugs Q13'),
     z('planfraesen', 'Planfraesen — Zyklus 232 (Q389 Strategie, Startpunkt Q225-Q227, Endhoehe Q386, Q218/Q219 Laengen, Q357 SC Seite; CYCL CALL ohne Bohrbild)'),
@@ -7227,6 +7439,13 @@ const ZY = {art:null, felder:[], komplett:[]};   // Zustand der offenen Maske
 // der hsk-Icons; Heidenhains Bilder darf die App nicht uebernehmen).
 const F_ICON_KOPF = '<svg viewBox="0 0 22 16" width="22" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
 const F_ICONS = {
+  // Paket E: Gewindefraesen — Bohrung bzw. Zapfen mit Gewindeflanken; der
+  // Senk- und der Bohrzyklus zeigen zusaetzlich die Senkung bzw. die Spitze.
+  gewFraesen:'<path d="M9 7h14v18H9z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 11h10M11 15h10M11 19h10" stroke="currentColor" stroke-width="1.6"/>',
+  gewSenk:'<path d="M7 7h18l-4 5v13H11V12z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 15h8M12 19h8" stroke="currentColor" stroke-width="1.6"/>',
+  gewBohr:'<path d="M9 7h14v13l-7 6-7-6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 11h10M11 15h10" stroke="currentColor" stroke-width="1.6"/>',
+  gewHelix:'<path d="M9 7h14v13l-7 6-7-6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 10c4 3 8 3 12 0M10 16c4 3 8 3 12 0" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  gewAussen:'<path d="M11 6h10v20H11z" fill="currentColor" opacity=".35"/><path d="M11 6h10v20H11z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11h16M8 16h16M8 21h16" stroke="currentColor" stroke-width="1.4"/>',
   // Paket D3: SL-Zyklen — Tasche mit Insel (Raeumen) bzw. Tasche mit
   // Einstichpunkten (Vorbohren).
   slRaeumen:'<rect x="4" y="6" width="24" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="4.5" fill="currentColor" opacity=".55"/>',
@@ -7750,6 +7969,7 @@ function fProgListe(){
   on('btnDemoFormen', ()=>{ fProgrammSetzen(fDemoFormenEinzel(), 'DZ7 geladen: Kreistasche, Nut und Kreiszapfen als eigene Bahn (Einzelsaetze mit Kreisboegen).'); maskZu('maskProgramme'); });
   on('btnDemoPlan', ()=>{ fProgrammSetzen(fDemoPlanEinzel(), 'DZ8 geladen: Planfraesen als Maeander und Rechtecktasche mit Helix-Eintauchen als Einzelsaetze.'); maskZu('maskProgramme'); });
   on('btnDemoKonturFormen', ()=>{ fProgrammSetzen(fDemoKonturFormen(), 'DZ10 geladen: Insel mit Rundung, Fase, tangentialem Bogen und Kreisinsel als Vollkreis — Zyklus 14/25 und eigene Bahn.'); maskZu('maskProgramme'); });
+  on('btnDemoGewFr', ()=>{ fProgrammSetzen(fDemoGewindeFraesen(), 'DZ13 geladen: die fuenf Gewindefraeszyklen 262-267 (M20 x 2,5 mit einem Fraeser ⌀8).'); maskZu('maskProgramme'); });
   on('btnDemoBohrfraes', ()=>{ fProgrammSetzen(fDemoBohrfraesEinzel(), 'DZ11 geladen: Bohrfraesen 208 und Einlippen-Bohren 241 als Einzelsaetze — Helix in Stuecken, TOOL CALL S fuer die Drehzahlwechsel.'); maskZu('maskProgramme'); });
   on('btnDemoSL', ()=>{ fProgrammSetzen(fDemoSL(), 'DZ12 geladen: Konturtasche mit Kreisinsel — Vorbohren 21, SL-Zyklen 20/22/23/24 und dieselbe Tasche als eigene Bahn.'); maskZu('maskProgramme'); });
   on('btnDemoKontur', ()=>{ fProgrammSetzen(fDemoKonturEinzel(), 'DZ9 geladen: Insel mit Nut als XY-Kontur — Schritt 1 Zyklus 14/25 der Steuerung, Schritt 2 dieselbe Kontur als eigene Bahn.'); maskZu('maskProgramme'); });
