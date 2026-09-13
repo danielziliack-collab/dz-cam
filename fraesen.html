@@ -2533,7 +2533,9 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <span style="font-size:11px;color:var(--text-dim);">Nullpunkt</span>
           <span class="radiobtns" id="stepNullBtns"><button data-v="ecke" class="sel">Ecke, Oberkante</button><button data-v="mitte">Mitte, Oberkante</button></span>
           <button class="gcbtn" id="btnStepRoh" title="Huellquader des Modells als BLK FORM in den Programmkopf">Als Rohteil übernehmen</button>
-          <button class="gcbtn" id="btnStepFeld" title="Die Sollform an das Programm geben — danach rechnet der Zyklus Modell abspanen damit">Sollform ans Programm</button>
+          <button class="gcbtn" id="btnStepFeld" title="Die Sollform an das Programm geben — danach rechnen die Zyklen Modell abspanen und Schrägen schlichten damit">Sollform ans Programm</button>
+          <span style="font-size:11px;color:var(--text-dim);">Raster</span>
+          <input type="number" id="stepRaster" step="any" placeholder="auto" title="Rasterweite der Sollform in mm. Leer = automatisch nach Teilgröße (0,3 bis 2 mm). Feiner rechnen kostet Zeit und Speicher, ist aber nötig, wenn die Rautiefe einen kleineren Bahnabstand verlangt, als das Raster hergibt." style="width:62px;font-size:11px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--text);">
           <span style="font-size:11px;color:var(--text-dim);">Z-Ebene</span>
           <select id="stepEbene" style="font-size:11px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--text);max-width:210px;"></select>
           <button class="gcbtn" id="btnStepKonturen" title="Die Schleifen dieser Ebene als XY-Konturen in den Arbeitsplan legen">Konturen übernehmen</button>
@@ -2542,7 +2544,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
         <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
           <canvas id="stepCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;touch-action:none;cursor:grab;"></canvas>
           <div class="small-hint" id="stepBericht" style="flex:0 0 auto;max-height:22vh;overflow-y:auto;"></div>
-          <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader, kräftig orange die gewählte Z-Ebene. Aus ihr werden mit <b>Konturen übernehmen</b> XY-Konturen für die Zyklen; Bahnen entstehen daraus erst über einen Zyklus. <b>Sollform</b> zeigt das Teil von oben mit der Höhe, auf die gefräst werden muss: hell ist oben, dunkel ist tief, blaugrau heißt "hier steht keine Fläche". Mit <b>Sollform ans Programm</b> bekommt der Zyklus <b>Modell abspanen</b> dieses Höhenfeld — er räumt damit das Rohteil Z-Ebene für Z-Ebene aus, so weit das Werkzeug hinkommt. Die Sollform hängt am geladenen Modell und wird NICHT mit dem Programm gespeichert.</div>
+          <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader, kräftig orange die gewählte Z-Ebene. Aus ihr werden mit <b>Konturen übernehmen</b> XY-Konturen für die Zyklen; Bahnen entstehen daraus erst über einen Zyklus. <b>Sollform</b> zeigt das Teil von oben mit der Höhe, auf die gefräst werden muss: hell ist oben, dunkel ist tief, blaugrau heißt "hier steht keine Fläche". Mit <b>Sollform ans Programm</b> bekommen die Schritte <b>Modell abspanen</b> (Z-konstant schruppen) und <b>Schrägen schlichten</b> (über die Rautiefe) dieses Höhenfeld. Das Feld <b>Raster</b> ist die Rasterweite in mm (leer = automatisch nach Teilgröße): der Bahnabstand des Schlichtens kann nur ein Vielfaches davon sein — verlangt die Rautiefe weniger, sagt die App es und hier stellt man feiner. Die Sollform hängt am geladenen Modell und wird NICHT mit dem Programm gespeichert.</div>
         </div>
       </div>
 
@@ -2851,9 +2853,36 @@ jedes Aufma&szlig;. Bei einem Teil, dessen Deckfl&auml;che oben liegt, steht dan
 Werkzeug die Schuld zu geben. Trag das echte Rohteil ein oder setz Z0 h&ouml;her.
 <br><b>Die Sollform wird NICHT mit dem Programm gespeichert</b> &mdash; sie geh&ouml;rt zum geladenen Modell. Nach dem Neuladen der App also erst wieder Modell
 laden und <b>Sollform ans Programm</b> dr&uuml;cken, sonst meldet die Programmpr&uuml;fung einen roten Befund.</dd>
+<dt id="ba-fk05d-schlichten">Schr&auml;gen schlichten &mdash; &uuml;ber die Rautiefe</dt><dd>Der zweite Schritt auf derselben Sollform, mit dem
+<b>Kugelfr&auml;ser</b>. Nicht die Zustellung ist hier das Mass, sondern die <b>Rautiefe Rz</b>: zwischen zwei Bahnen bleibt ein Kamm stehen, und
+seine H&ouml;he ist <b>Rz = s&sup2; / (8&nbsp;r)</b> &mdash; daraus rechnet die App den Bahnabstand <b>s = &radic;(8&nbsp;r&nbsp;Rz)</b> r&uuml;ckw&auml;rts. Bei
+Kugelradius 4 und Rz 0,01&nbsp;mm sind das 0,57&nbsp;mm l&auml;ngs der Fl&auml;che.
+<ul>
+<li><b>Die H&ouml;he der Bahn ist die Kugel-Versatzfl&auml;che</b>: die Mitte des Fr&auml;sers l&auml;uft dort, wo die Kugel die Sollform gerade
+ber&uuml;hrt. Das ist exakt gerechnet (eine Dilatation des H&ouml;henfelds mit der Kugelkappe), nicht gen&auml;hert &mdash; deshalb kann die Bahn auch an
+einer Kante nicht ins Teil schneiden.</li>
+<li><b>&alpha;0 und &alpha;1</b> grenzen das Winkelband ein. Gearbeitet wird nur, was dazwischen liegt. Steileres bleibt stehen (es geh&ouml;rt der
+Z-konstanten Bahn), flacheres auch &mdash; eine waagerechte Fl&auml;che geh&ouml;rt dem Schaft- oder Messerkopf, nicht der Kugel. Beides wird
+<b>gez&auml;hlt und gemeldet</b>, nichts f&auml;llt stillschweigend aus. &alpha;0 = 0 schlichtet auch die Ebenen mit.</li>
+<li><b>Z0 und Z1</b> w&auml;hlen den H&ouml;henbereich aus, in dem geschlichtet wird &mdash; sie sagen NICHT, wie tief gefahren wird; die H&ouml;he
+kommt aus dem Modell.</li>
+<li><b>T Sehnentoleranz</b> d&uuml;nnt die Punktfolge aus (Douglas-Peucker im Raum). Ohne sie w&auml;re jede Rasterzelle ein Satz; gemessen bleiben
+5 bis 10&nbsp;% der Punkte &uuml;brig. Sie ist ein <b>zweiter Formfehler</b> und kommt zur Rautiefe dazu &mdash; deshalb deutlich kleiner w&auml;hlen
+(Vorgabe 0,005 gegen Rz 0,01).</li>
+<li><b>R2 des Werkzeugs ist Pflicht.</b> Die Rautiefenformel gilt f&uuml;r den Kugelfr&auml;ser; ein Schaftfr&auml;ser (R2&nbsp;=&nbsp;0) wird
+abgelehnt, ein Eckenradiusfr&auml;ser (R2 kleiner als der Radius) angemeckert.</li>
+<li><b>Zwischen zwei Zeilen</b> f&auml;hrt das Werkzeug kurz &uuml;ber die Versatzfl&auml;che hinweg statt jedes Mal auf die sichere H&ouml;he zu
+ziehen; nur bei einem gr&ouml;&szlig;eren Sprung geht es hoch (dort k&ouml;nnte Material vom Schruppen stehen).</li>
+</ul>
+<b>Raster:</b> der Bahnabstand kann nur ein Vielfaches der Rasterweite der Sollform sein. Ist schon eine Rasterweite zu gro&szlig;, ist die
+bestellte Rautiefe nicht zu halten &mdash; die App sagt das mit der Zahl, die wirklich gefahren wird, und im STEP-Fenster stellt man das
+Raster feiner.
+<br><b>Auch hier gibt es keinen Steuerungszyklus</b>, und gepr&uuml;ft wird <b>nur die Kugel</b> &mdash; nicht der Schaft und nicht der Halter. An
+einer hohen steilen Wand kann der Schaft anstehen, ohne dass die App es sagt: vor dem ersten Lauf Programm-Test und Einzelsatz.</dd>
 <dt>Was die App NICHT tut</dt><dd>Aus einer <b>Kontur</b> entstehen keine Bahnen von selbst: sie wird erst durch einen Zyklus zur Bahn, und die Tiefe
-tr&auml;gt der Zyklus, nicht das Modell. Eine <b>Bahn aus dem Modell</b> gibt es nur beim Schritt <b>Modell abspanen</b> (siehe oben), und der schruppt
-Z-konstant &mdash; das Schlichten von Schr&auml;gen und Rundungen &uuml;ber die Rautiefe ist noch nicht gebaut. <b>Freiformfl&auml;chen</b> werden nur als Kanten gezeichnet und ausdr&uuml;cklich gemeldet; Kanten, die weder Gerade
+tr&auml;gt der Zyklus, nicht das Modell. Eine <b>Bahn aus dem Modell</b> gibt es bei zwei Schritten: <b>Modell abspanen</b> schruppt Z-konstant,
+<b>Schr&auml;gen schlichten</b> f&auml;hrt der Fl&auml;che nach (beide oben). Was beiden fehlt: eine <b>Z-konstante Schlichtbahn</b> f&uuml;r steile Flanken
+&uuml;ber dem Grenzwinkel &mdash; die steht noch aus und wird von der Bahn ausdr&uuml;cklich gemeldet. <b>Freiformfl&auml;chen</b> werden nur als Kanten gezeichnet und ausdr&uuml;cklich gemeldet; Kanten, die weder Gerade
 noch Kreis sind, stehen als Streckenzug in der Kontur. Baugruppen werden dort gelesen, wo die Teile im Modell liegen.</dd>
 <dt>Stand</dt><dd>Gemessen an 145 echten Dateien aus Daniels Bestand (14.09.2026): 143 mit Fl&auml;chen gelesen, keine Ausnahme, keine Fl&auml;che ohne Rand.
 Aus ihren 811 Z-Ebenen entstanden <b>2452 Konturen mit 10088 Elementen</b> (2025 B&ouml;gen, 286 Vollkreise) &mdash; <b>keine einzige</b> davon lehnt die
@@ -3316,10 +3345,10 @@ var F_PROFILE = {
       // durchgelaufen (T241A); Q426 5 brach mit "Undefinierter
       // Programmstart" ab (T241B). Beides gelb in fPruefen.
       ausdrehen:'pgst', senkenRueck:'pgst', tiefUni:'pgst', bohrfraesen:'pgst', gewindeSpan:'pgst', einlippen:'pgst', planfraesen:'pgst',
-      modellSchruppen:'eigenbahn'
+      modellSchruppen:'eigenbahn', modellSchlichten:'eigenbahn'
     },
     termine:'Programmierplatz 12.09.2026 (Demo 606 424, NC-SW 606 42x): DZ1, DZ2, DZ3 (Bohren, Muster), DZ4 (Taschen, Nuten, Zapfen 251-257) und DZ5 (Planfraesen 232, Bohrzyklen 202/204/205/208/209/241) im Programm-Test ohne Meldung durchgelaufen, Rueckexport Satz fuer Satz gleich; abends DZ6 (Einzelsaetze der eigenen Bahn, Paket C: 240/203/200/201 ohne Zyklus, 3:06 min) ebenso, nachts DZ7 (Kreistasche, Nut, Kreiszapfen als Ringbahnen mit CC/C, 1:55 min) und DZ8 (Planfraesen-Maeander, Rechtecktasche mit Helix CP IPA/IZ, 2:32 min), am 13.09.2026 DZ9 (Insel mit Nut als XY-Kontur: Zyklus 14/25 und dieselbe Kontur als eigene Bahn mit CC/C-Eckenboegen, 0:53 min) und DZ10 (Rundung, Fase, tangentialer Bogen, Vollkreis: natives LBL mit RND/CHF/CT und eigene Bahn, 1:00 min — erster Lauf fiel mit Kreis-Endpunkt falsch, MP7431: CC-Mitten seither auf der Mittelsenkrechten mit 0,0001); alles am selben Tag gebaut und an den Handbuechern 340 49x-02/-06/-07 geprueft. Befund 241: Q427 unter der Mindestdrehzahl der Demo (50 U/min) gibt Falsche Drehzahl, Q426 = 5 Undefinierter Programmstart',
-    offen:'Modell abspanen: erster Lauf am Teil (senkrechtes Eintauchen, Restmaterial an den Waenden nachmessen). Lauf an einer der drei Maschinen (Stand 340 49x): Softwarestand je Maschine (MOD), M13/M9 an der PLC, Option Synchron-Gewindebohren (207); danach Daniels eigene .H-Programme als Fixtures'
+    offen:'Modell abspanen: erster Lauf am Teil (senkrechtes Eintauchen, Restmaterial an den Waenden nachmessen). Schraegen schlichten: Programmierplatz-Lauf (DZ15) und erster Lauf am Teil — geprueft wird nur die Kugel, nicht Schaft und Halter; die Z-konstante Bahn fuer steile Flanken fehlt noch. Lauf an einer der drei Maschinen (Stand 340 49x): Softwarestand je Maschine (MOD), M13/M9 an der PLC, Option Synchron-Gewindebohren (207); danach Daniels eigene .H-Programme als Fixtures'
   }
 };
 
@@ -3471,6 +3500,12 @@ var F_ZYKLEN = {
   // aus dem Modell nimmt und nicht aus einem Bohrbild.
   modellSchruppen:{nr:null, titel:'MODELL ABSPANEN', wort:'Modell abspanen', kurz:'Modell abspanen',
     fraes:true, modell:true, nurEinzel:true, eigenePosition:true, q:[]},
+  // ---- Stufe 4 (14.09.2026): die Schraegen ueber die RAUTIEFE schlichten.
+  // Ebenfalls ohne Steuerungszyklus. schlicht:true trennt sie vom Abspanen —
+  // dieselbe Sollform, aber die Bahn folgt der Flaeche statt Z-konstant zu
+  // bleiben, und das Mass ist die Rautiefe, nicht die Zustellung.
+  modellSchlichten:{nr:null, titel:'SCHRAEGEN SCHLICHTEN', wort:'Schraegen schlichten', kurz:'Schraegen schlichten',
+    fraes:true, modell:true, schlicht:true, nurEinzel:true, eigenePosition:true, q:[]},
   // ---- Paket E (14.09.2026): Gewindefraesen 262-267. Alle CALL-aktiv, die
   // Position kommt wie beim Bohren aus dem Bohrbild. gewf:true heisst: die
   // Q206/Q207-Bedeutung der Fraeszyklen gilt (Q207 Fraesen, Q206 Tiefen-
@@ -3511,7 +3546,7 @@ var F_ZYKLEN = {
 };
 var F_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen',
   'tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen','konturzug','slVorbohren','slRaeumen',
-  'gewFraesen','gewSenk','gewBohr','gewHelix','gewAussen','modellSchruppen'];
+  'gewFraesen','gewSenk','gewBohr','gewHelix','gewAussen','modellSchruppen','modellSchlichten'];
 var F_FRAES_ARTEN = ['tascheR','tascheK','nut','nutR','zapfenR','zapfenK','planfraesen'];
 var F_BOHR_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS','ausdrehen','senkenRueck','tiefUni','bohrfraesen','gewindeSpan','einlippen'];
 
@@ -3637,7 +3672,16 @@ var F_FELDER = {
   py:         {name:'Y0 Startpunkt', einheit:'mm', ba:'ba-fk06b-232'},
   pz:         {name:'Z0 Startpunkt (Oberkante)', einheit:'mm', ba:'ba-fk06b-232'},
   zEnd:       {name:'Z1 Endpunkt (fertige Höhe)', einheit:'mm', ba:'ba-fk06b-232'},
-  scSeite:    {name:'SC Sicherheitsabstand seitlich', einheit:'mm', ba:'ba-fk06b-232'}
+  scSeite:    {name:'SC Sicherheitsabstand seitlich', einheit:'mm', ba:'ba-fk06b-232'},
+  // Stufe 4: das Mass des Schlichtens ist die RAUTIEFE. Aus ihr folgt der
+  // Bahnabstand (h = s²/(8r) beim Kugelfraeser), nicht umgekehrt — deshalb
+  // gibt es kein Feld "Bahnabstand". Die Sehnentoleranz ist ein zweiter,
+  // unabhaengiger Formfehler: sie sagt, wie stark die Punktfolge ausgeduennt
+  // werden darf; ohne sie wuerde jede Rasterzelle ein NC-Satz.
+  rautiefe:   {name:'Rz Rautiefe (Sollwert)', einheit:'mm', ba:'ba-fk05d-schlichten'},
+  tolBahn:    {name:'T Sehnentoleranz der Bahn', einheit:'mm', ba:'ba-fk05d-schlichten'},
+  winkelMin:  {name:'α0 flachste Neigung (0 = auch Ebenen)', einheit:'°', mit:'winkel', ba:'ba-fk05d-schlichten'},
+  winkel:     {name:'α1 steilste Neigung', einheit:'°', ba:'ba-fk05d-schlichten'}
 };
 // Q-Kandidaten je Feld fuer den Zusatz in der Maske und die Vollstaendig-
 // keitspruefung: der erste Kandidat, den die Q-Liste des Zyklus fuehrt,
@@ -3740,7 +3784,15 @@ var F_MASKE = {
                feldText:{f:'F Vorschub Fräsen', fTief:'FZ Vorschub Eintauchen', zust:'D Zustellung in Z',
                  aufSeite:'UXY Aufmaß an der Wand', aufTiefe:'UZ Aufmaß nach unten', ueberl:'Bahnüberlappung (× Werkzeugradius)',
                  sc2:'SC2 Rückzug über Z0'},
-               ohneQ:['t','s','f','fTief','kuehl','q203','tiefe','zust','aufSeite','aufTiefe','ueberl','sc','sc2']}
+               ohneQ:['t','s','f','fTief','kuehl','q203','tiefe','zust','aufSeite','aufTiefe','ueberl','sc','sc2']},
+  // Stufe 4: wie beim Abspanen traegt kein Feld ein Q-Wort. Der Bereich
+  // Z0..Z1 waehlt aus, WELCHE Flaechen geschlichtet werden — nicht wie tief
+  // gefahren wird; die Hoehe kommt aus dem Modell.
+  modellSchlichten:{felder:['#Werkzeug & Schnittwerte','t','s','f','fTief','kuehl','#Bereich','q203','tiefe','winkelMin','winkel','#Mass','rautiefe','tolBahn','strategie','#!Sicherheit','sc','sc2'],
+               feldText:{f:'F Vorschub Schlichten', fTief:'FZ Vorschub Zustellen', tiefe:'Z1 unterste Höhe (Bereich)',
+                 q203:'Z0 oberste Höhe (Bereich)', strategie:'Zeilenrichtung', sc2:'SC2 Rückzug über Z0'},
+               feldWahl:{strategie:[['0','Zeilen in X'],['1','Zeilen in Y']]},
+               ohneQ:['t','s','f','fTief','kuehl','q203','tiefe','winkelMin','winkel','rautiefe','tolBahn','strategie','sc','sc2']}
 };
 // Softkey-Gruppen wie an der TNC (CYCL DEF -> Bohren/Gewinde, Taschen/
 // Zapfen/Nuten, ...): ein Knopf je Zyklus, keine Auswahlreihe in der Maske.
@@ -3749,7 +3801,7 @@ var F_ZYKLUS_GRUPPEN = [
   {id:'gewinde', name:'Gewinde',           arten:['gewinde','gewindeGS','gewindeSpan','gewFraesen','gewSenk','gewBohr','gewHelix','gewAussen']},
   {id:'taschen', name:'Taschen · Zapfen',  arten:['tascheR','tascheK','nut','nutR','zapfenR','zapfenK']},
   {id:'flaechen', name:'Flächen',          arten:['planfraesen']},
-  {id:'modell',  name:'STEP-Modell',        arten:['modellSchruppen']},
+  {id:'modell',  name:'STEP-Modell',        arten:['modellSchruppen','modellSchlichten']},
   {id:'kontur',  name:'Kontur',            arten:['konturzug','slRaeumen','slVorbohren']}
 ];
 // Feldliste eines Zyklus ohne Abschnittsmarken.
@@ -4068,6 +4120,16 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
       Object.assign(s, {q203:+k.z1 || 0, tiefe:-Math.max(1, fRund((+k.z1 || 0) - (+k.z0 || 0))),
         zust:2, aufSeite:0.5, aufTiefe:0.2, ueberl:0.8, fTief:fRund(s.f * 0.3), ausgabe:'einzel'});
     }
+    if(art === 'modellSchlichten'){
+      // Stufe 4: Rautiefe 0,01 mm ist ein ueblicher Schlichtwert (bei einem
+      // Kugelradius 4 sind das 0,57 mm Bahnabstand). Die Sehnentoleranz 0,005
+      // duennt gemessen 90 bis 95 % der Punkte weg und bleibt deutlich unter
+      // der Rautiefe. Grenzwinkel 45 Grad: steiler wird eine Zeilenbahn
+      // ungenau, dort gehoert die Z-konstante Bahn hin (noch nicht gebaut).
+      Object.assign(s, {q203:+k.z1 || 0, tiefe:-Math.max(1, fRund((+k.z1 || 0) - (+k.z0 || 0))),
+        rautiefe:0.01, tolBahn:0.005, winkelMin:5, winkel:45, strategie:0,
+        f:t.f || 600, fTief:fRund((t.f || 600) * 0.3), ausgabe:'einzel'});
+    }
     if(art === 'planfraesen'){
       // Planfraesen deckt als Vorgabe die ganze BLK FORM ab: Startpunkt an
       // der MIN-Ecke auf der Oberflaeche, Endhoehe 1 mm tiefer, Laengen =
@@ -4322,6 +4384,7 @@ function fBahnSchritt(s, tool, prog, punkte){
   const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
   if(F_ZYKLEN[art] && F_ZYKLEN[art].sl) return fBahnSL(s, tool, prog);                   // Paket D3 (vor der Kontur-Weiche: die SL-Familien tragen kontur:true)
   if(F_ZYKLEN[art] && F_ZYKLEN[art].kontur) return fBahnKontur(s, tool, prog);           // Paket C3
+  if(F_ZYKLEN[art] && F_ZYKLEN[art].schlicht) return fBahnSchlichten(s, tool, prog);     // Stufe 4: ueber die Rautiefe, die Bahn folgt der Flaeche
   if(F_ZYKLEN[art] && F_ZYKLEN[art].modell) return fBahnModell(s, tool, prog);          // Stufe 3 Teil B: gegen die Sollform, keine Form mit Massen
   if(F_ZYKLEN[art] && F_ZYKLEN[art].fraes && !F_ZYKLEN[art].gewf && !F_ZYKLEN[art].modell) return fBahnFormen(s, tool, prog, punkte);   // Paket C2 (Paket E: Gewindefraesen sind keine Form)
   if(art === 'bohrfraesen' || art === 'einlippen') return fBahnSimSonder(s, tool, prog, punkte);   // Paket D3: Helix bzw. Drehzahlfolge
@@ -6668,6 +6731,263 @@ function fBahnModell(s, tool, prog){
 }
 
 // ---------------------------------------------------------------------
+// STUFE 4: DIE SCHRAEGEN UEBER DIE RAUTIEFE SCHLICHTEN
+// ---------------------------------------------------------------------
+// Die Flaeche, auf der die MITTE des Kugelfraesers laeuft. Der Kugelkopf
+// beruehrt die Sollform; seine Mitte liegt um den Kugelradius versetzt. Im
+// Hoehenfeld ist das eine Dilatation mit der Kugelkappe — exakt, keine
+// Naeherung: wo die Kappe irgendwo aufsitzt, gewinnt die hoechste Stelle.
+// Damit kann die Bahn nicht ins Teil schneiden, auch nicht an einer Kante.
+// nur = Maske der Zellen, fuer die die Versatzflaeche gebraucht wird
+// (null = alle). Die Kappe tastet immer das ganze Hoehenfeld ab — nur die
+// ERGEBNISZELLEN sind eingeschraenkt, die Flaeche bleibt also dieselbe.
+function fBallFeld(F, r, nur){
+  const rr = F.raster, k = Math.max(1, Math.round(r / rr));
+  const di = [], dj = [], dh = [];
+  for(let b = -k; b <= k; b++) for(let a = -k; a <= k; a++){
+    const d2 = (a * a + b * b) * rr * rr;
+    if(d2 > r * r) continue;
+    di.push(a); dj.push(b); dh.push(Math.sqrt(r * r - d2));
+  }
+  const n = di.length, B = new Float32Array(F.nx * F.ny);
+  if(nur) B.fill(-Infinity);
+  for(let j = 0; j < F.ny; j++){
+    for(let q = 0; q < F.nx; q++){
+      if(nur && !nur[j * F.nx + q]) continue;
+      let m = -Infinity;
+      for(let t = 0; t < n; t++){
+        const ii = q + di[t], jj = j + dj[t];
+        if(ii < 0 || jj < 0 || ii >= F.nx || jj >= F.ny) continue;
+        const v = F.h[jj * F.nx + ii] + dh[t];
+        if(v > m) m = v;
+      }
+      B[j * F.nx + q] = m;
+    }
+  }
+  return B;
+}
+// Toleranz auf den Grenzwinkel in Grad. Sie faengt das Rauschen der
+// Float32-Hoehen ab (auf einer 45-Grad-Flaeche gemessen: +-0,00002 Grad),
+// ist als Bearbeitungsgrenze aber bedeutungslos.
+var F_WINKEL_TOL = 0.1;
+// Neigung der Sollform je Zelle in GRAD, aus dem Gefaelle der Nachbarn.
+// Sie entscheidet, was eine Schraege ist und was eine waagerechte Flaeche
+// oder eine Wand.
+function fNeigFeld(F){
+  const N = new Float32Array(F.nx * F.ny), r = F.raster, nx = F.nx, ny = F.ny;
+  // Nur Zellen mit Flaeche zaehlen. Wo keine liegt, steht im Feld die
+  // Unterkante des Teils — sie als Nachbarhoehe zu nehmen macht aus dem Rand
+  // jedes Modells eine senkrechte Wand.
+  const gefaelle = (c, cA, cB, w) => {
+    const a = F.quelle[cA], b = F.quelle[cB];
+    if(a && b) return (F.h[cB] - F.h[cA]) / w;
+    if(a) return (F.h[c] - F.h[cA]) / (w / 2);
+    if(b) return (F.h[cB] - F.h[c]) / (w / 2);
+    return 0;
+  };
+  for(let j = 0; j < ny; j++) for(let q = 0; q < nx; q++){
+    const c = j * nx + q;
+    const q0 = Math.max(0, q - 1), q1 = Math.min(nx - 1, q + 1);
+    const j0 = Math.max(0, j - 1), j1 = Math.min(ny - 1, j + 1);
+    const gx = gefaelle(c, j * nx + q0, j * nx + q1, (q1 - q0) * r);
+    const gy = gefaelle(c, j0 * nx + q, j1 * nx + q, (j1 - j0) * r);
+    N[c] = Math.atan(Math.hypot(gx, gy)) * 180 / Math.PI;
+  }
+  return N;
+}
+// Maske um k Zellen aufweiten, getrennt in X und Y — das genuegt: eine
+// Verbindungsfahrt laeuft zwischen zwei Schlichtzellen, also innerhalb des
+// aufgeweiteten Gebiets.
+function fMaskeWeiten(M, nx, ny, k){
+  if(k < 1) return M;
+  const A = new Uint8Array(nx * ny), B = new Uint8Array(nx * ny);
+  for(let j = 0; j < ny; j++) for(let q = 0; q < nx; q++){
+    if(!M[j * nx + q]) continue;
+    const a = Math.max(0, q - k), b = Math.min(nx - 1, q + k);
+    for(let i = a; i <= b; i++) A[j * nx + i] = 1;
+  }
+  for(let j = 0; j < ny; j++) for(let q = 0; q < nx; q++){
+    if(!A[j * nx + q]) continue;
+    const a = Math.max(0, j - k), b = Math.min(ny - 1, j + k);
+    for(let i = a; i <= b; i++) B[i * nx + q] = 1;
+  }
+  return B;
+}
+// Douglas-Peucker im RAUM. Ohne ihn wird jede Rasterzelle ein NC-Satz:
+// gemessen 13400 Punkte je Zeilenbahn, mit 0,005 mm Sehnentoleranz noch 804.
+// Die Toleranz ist ein FORMFEHLER und kommt zur Rautiefe dazu — deshalb
+// steht sie als eigenes Feld in der Maske und nicht fest im Code.
+function fZugDuennen(P, tol){
+  if(P.length < 3) return P.slice();
+  const halt = new Uint8Array(P.length); halt[0] = halt[P.length - 1] = 1;
+  const stapel = [[0, P.length - 1]];
+  while(stapel.length){
+    const ab = stapel.pop(), a = ab[0], b = ab[1];
+    if(b - a < 2) continue;
+    const A = P[a], E = P[b];
+    const dx = E[0] - A[0], dy = E[1] - A[1], dz = E[2] - A[2];
+    const L2 = dx * dx + dy * dy + dz * dz;
+    let best = -1, bd = tol;
+    for(let q = a + 1; q < b; q++){
+      const px = P[q][0] - A[0], py = P[q][1] - A[1], pz = P[q][2] - A[2];
+      let t = L2 > 1e-12 ? (px * dx + py * dy + pz * dz) / L2 : 0;
+      if(t < 0) t = 0; else if(t > 1) t = 1;
+      const ex = px - dx * t, ey = py - dy * t, ez = pz - dz * t;
+      const d = Math.sqrt(ex * ex + ey * ey + ez * ez);
+      if(d > bd){ bd = d; best = q; }
+    }
+    if(best > 0){ halt[best] = 1; stapel.push([a, best], [best, b]); }
+  }
+  const R = []; for(let q = 0; q < P.length; q++) if(halt[q]) R.push(P[q]);
+  return R;
+}
+// Hoechster Wert der Kugel-Versatzflaeche laengs einer Strecke. Weil die
+// Versatzflaeche die Flaeche ist, auf der die Kugelmitte ueberall frei steht,
+// ist ihr Hoechstwert plus SC die sichere Hoehe fuer eine Verbindungsfahrt.
+function fBallMax(BF, F, x0, y0, x1, y1){
+  const r = F.raster, L = Math.hypot(x1 - x0, y1 - y0);
+  const nS = Math.max(1, Math.ceil(L / (r * 0.5)));
+  let m = -Infinity;
+  for(let k = 0; k <= nS; k++){
+    const t = k / nS, x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t;
+    const i = Math.floor((x - F.x0) / r), j = Math.floor((y - F.y0) / r);
+    if(i < 0 || j < 0 || i >= F.nx || j >= F.ny) continue;
+    const v = BF[j * F.nx + i];
+    if(v > m) m = v;
+  }
+  return isFinite(m) ? m : Infinity;
+}
+// Die Bahn: Zeilen ueber die Sollform, die Hoehe folgt der Kugel-Versatzflaeche.
+function fBahnSchlichten(s, tool, prog){
+  const warn = [];
+  const nein = (g) => ({ok:false, grund:g, bahn:[], warn:warn});
+  const F = F_SOLLFELD;
+  if(!F) return nein('keine Sollform geladen — im STEP-Fenster ein Modell laden und "Sollform ans Programm" druecken');
+  // Der Kugelradius steht in der Werkzeugtabelle als R2 (Eckenradius der
+  // TOOL.T). Beim Vollradiusfraeser ist R2 gleich dem Werkzeugradius; ein
+  // Schaftfraeser mit R2 = 0 taugt fuer diese Bahn nicht — er wuerde mit der
+  // Ecke schneiden, und die Rautiefenformel gilt fuer ihn nicht.
+  const rt = (tool && +tool.d > 0) ? +tool.d / 2 : 0;
+  const rk = (tool && +tool.r2 > 0) ? +tool.r2 : 0;
+  if(!(rt > 0)) return nein('Werkzeug-Durchmesser fehlt (Werkzeugtabelle)');
+  if(!(rk > 0)) return nein('T' + s.t + ' hat keinen Eckenradius R2 — die Rautiefe gilt fuer den KUGELFRAESER; in der Werkzeugtabelle R2 eintragen');
+  if(rk > rt + 1e-9) return nein('Eckenradius R2 ' + fRund(rk) + ' ist groesser als der Werkzeugradius ' + fRund(rt));
+  const rz = +s.rautiefe || 0;
+  if(!(rz > 0)) return nein('Rautiefe fehlt — sie ist das Mass dieser Bahn');
+  const tol = (+s.tolBahn > 0) ? +s.tolBahn : 0.005;
+  const grenz = (+s.winkel > 0) ? Math.min(89, +s.winkel) : 45;
+  const grenzU = Math.max(0, Math.min(grenz, +s.winkelMin || 0));
+  const zOben = +s.q203 || 0;
+  const tiefe = +s.tiefe || 0; if(!(tiefe < 0)) return nein('Tiefe fehlt');
+  const zTief = fRund(zOben + tiefe);
+  const sc = +s.sc || 0; if(!(sc > 0)) return nein('Sicherheitsabstand fehlt');
+  const sc2 = Math.max(+s.sc2 || 0, sc);
+  const f = +s.f || 0; if(!(f > 0)) return nein('Vorschub fehlt');
+  const quer = Math.round(+s.strategie || 0) === 1;        // 0 = Zeilen in X, 1 = in Y
+
+  const NF = fNeigFeld(F);
+  const nx = F.nx, ny = F.ny, r = F.raster;
+  // Welche Zellen gehoeren zu dieser Bahn? Eine Flaeche muss dort sein
+  // (sonst steht im Feld nur die Unterkante), die Sollhoehe muss im Bereich
+  // Z1..Z0 liegen, und die Neigung darf den Grenzwinkel nicht ueberschreiten
+  // — steilere Stellen gehoeren der Z-konstanten Bahn und werden GEMELDET.
+  // Die Toleranz auf den Grenzwinkel ist kein Schoenheitsfehler: das
+  // Hoehenfeld ist ein Float32Array, und auf einer Flaeche von genau 45 Grad
+  // liest das Gefaelle abwechselnd 45,000019 und 44,999973 Grad. Ohne
+  // Toleranz faellt jede zweite Zelle einer solchen Flaeche heraus.
+  const gut = new Uint8Array(nx * ny);
+  let nGut = 0, nSteil = 0, nFlach = 0, aMax = 0;
+  for(let q = 0; q < nx * ny; q++){
+    if(!F.quelle[q]) continue;
+    const h = F.h[q];
+    if(h > zOben + 1e-6 || h < zTief - 1e-6) continue;
+    if(NF[q] > grenz + F_WINKEL_TOL){ nSteil++; continue; }
+    if(grenzU > 0 && NF[q] < grenzU - F_WINKEL_TOL){ nFlach++; continue; }
+    gut[q] = 1; nGut++;
+    if(NF[q] > aMax) aMax = NF[q];
+  }
+  if(!nGut) return nein(nSteil || nFlach
+    ? 'in Z1..Z0 liegt keine Flaeche im Winkelband ' + fRund(grenzU) + ' bis ' + fRund(grenz) + ' Grad ('
+      + nSteil + ' Rasterstellen sind steiler, ' + nFlach + ' flacher) — Band weiter stellen oder Z-konstant schlichten'
+    : 'in Z1..Z0 liegt keine Flaeche der Sollform');
+  // Bahnabstand aus der Rautiefe: h = s²/(8r) beim Kugelfraeser, also
+  // s = wurzel(8 r h) LAENGS der Flaeche. Waagerecht gemessen ist der
+  // Abstand auf einer Schraege um cos alpha kleiner — gerechnet wird mit der
+  // steilsten wirklich bearbeiteten Stelle, damit die Rautiefe ueberall haelt.
+  // Die Versatzflaeche erst JETZT, und nur wo sie gebraucht wird.
+  const BF = fBallFeld(F, rk, fMaskeWeiten(gut, nx, ny, Math.max(2, Math.ceil(3 * Math.sqrt(8 * rk * rz) / r))));
+  const sFlaeche = Math.sqrt(8 * rk * rz);
+  const schrittMm = sFlaeche * Math.cos(aMax * Math.PI / 180);
+  // ABRUNDEN, nie runden: eine Rasterweite zu viel heisst ein groesserer
+  // Bahnabstand als erlaubt, und damit eine groessere Rautiefe als bestellt.
+  const schritt = Math.max(1, Math.floor(schrittMm / r + 1e-9));
+  // Was wirklich gefahren wird — der Abstand kann nur ein Vielfaches der
+  // Rasterweite sein. Ist schon EINE Rasterweite zu gross, ist die Rautiefe
+  // nicht zu halten; das sagt die App, statt stumm groeber zu fahren.
+  const istMm = schritt * r;
+  const istFlaeche = istMm / Math.max(0.05, Math.cos(aMax * Math.PI / 180));
+  const istRz = istFlaeche * istFlaeche / (8 * rk);
+  const nAus = quer ? nx : ny, nIn = quer ? ny : nx;
+  const zelle = (a, b) => quer ? (b * nx + a) : (a * nx + b);
+  const wx = (a, b) => F.x0 + ((quer ? a : b) + 0.5) * r;
+  const wy = (a, b) => F.y0 + ((quer ? b : a) + 0.5) * r;
+  const B = [], sicher = fRund(zOben + sc2);
+  const eil = (o) => B.push(Object.assign({a:'eil'}, o));
+  const vor = (o) => B.push(Object.assign({a:'vor'}, o));
+  let zuege = 0, punkte = 0, roh = 0, richtung = 1, letzt = null, spruenge = 0;
+  for(let a = 0; a < nAus; a += schritt){
+    const stuecke = []; let P = null;
+    for(let b = 0; b < nIn; b++){
+      const c = zelle(a, b);
+      if(gut[c] && isFinite(BF[c])){
+        if(!P){ P = []; stuecke.push(P); }
+        P.push([fRund(wx(a, b)), fRund(wy(a, b)), fRund(BF[c])]);
+      } else P = null;
+    }
+    if(!stuecke.length) continue;
+    if(richtung < 0) stuecke.reverse();
+    stuecke.forEach(Z => {
+      if(Z.length < 2) return;                  // ein einzelner Punkt ist kein Zug
+      if(richtung < 0) Z.reverse();
+      roh += Z.length;
+      const D2 = fZugDuennen(Z, tol);
+      const A0 = D2[0];
+      // Verbindung zum naechsten Stueck. NAH (bis drei Bahnabstaende — das ist
+      // der Zickzack von Zeile zu Zeile): ueber die Versatzflaeche hinweg,
+      // ihr Hoechstwert plus SC ist beweisbar frei. WEIT: auf die sichere
+      // Hoehe, denn dazwischen kann Material stehen, das das Schruppen
+      // gelassen hat (UXY/UZ) — das steht UEBER der Sollform.
+      if(!letzt){ eil({x:A0[0], y:A0[1], z:sicher}); }
+      else if(Math.hypot(A0[0] - letzt[0], A0[1] - letzt[1]) <= 3 * istMm + 1e-9){
+        eil({z:fRund(Math.min(sicher, Math.max(fBallMax(BF, F, letzt[0], letzt[1], A0[0], A0[1]), letzt[2], A0[2]) + sc))});
+        eil({x:A0[0], y:A0[1]});
+      } else { spruenge++; eil({z:sicher}); eil({x:A0[0], y:A0[1]}); }
+      eil({z:fRund(A0[2] + sc)});
+      vor({z:A0[2], f:(+s.fTief > 0) ? +s.fTief : f});
+      for(let q = 1; q < D2.length; q++) vor({x:D2[q][0], y:D2[q][1], z:D2[q][2], f:f});
+      punkte += D2.length; zuege++; letzt = D2[D2.length - 1];
+    });
+    richtung = -richtung;
+  }
+  if(!zuege) return nein('aus den Flaechen in Z1..Z0 entsteht kein Zug — Grenzwinkel oder Bereich pruefen');
+  eil({z:sicher});
+  warn.push('Schraegen schlichten: ' + zuege + ' Zug/Zuege, ' + punkte + ' Punkte (roh ' + roh
+    + ', mit Sehnentoleranz ' + fRund(tol) + ' mm ausgeduennt). Bahnabstand ' + fRund(istMm)
+    + ' mm aus Rautiefe ' + fRund(rz) + ' und Kugelradius ' + fRund(rk)
+    + ' (erlaubt waeren ' + fRund(schrittMm) + ' mm bei der steilsten bearbeiteten Stelle '
+    + fRund(aMax) + ' Grad; gefahrene Rautiefe ' + fRund(istRz) + ' mm).');
+  if(istRz > rz + 1e-9) warn.push('Die Rautiefe ' + fRund(rz) + ' mm ist mit diesem Raster NICHT zu halten: der Bahnabstand kann nur ein Vielfaches der Rasterweite ' + fRund(r) + ' mm sein, gefahren wird ' + fRund(istMm) + ' mm und damit ' + fRund(istRz) + ' mm Rautiefe. Kleineres Modell-Raster waehlen oder groesseren Kugelradius.');
+  if(nSteil) warn.push(nSteil + ' Rasterstelle(n) sind steiler als der Grenzwinkel ' + fRund(grenz)
+    + ' Grad und bleiben hier UNBEARBEITET — sie gehoeren der Z-konstanten Bahn (noch nicht gebaut).');
+  if(nFlach) warn.push(nFlach + ' Rasterstelle(n) sind flacher als ' + fRund(grenzU)
+    + ' Grad und bleiben hier UNBEARBEITET — waagerechte Flaechen gehoeren dem Schaft- oder Messerkopf, nicht der Kugel.');
+  warn.push('Geprueft wird nur die KUGEL, nicht der Schaft und nicht der Halter: an einer hohen steilen Wand kann der Schaft anstehen, ohne dass die App es sagt. Vor dem ersten Lauf Programm-Test und Einzelsatz.');
+  return {ok:true, bahn:B, warn:warn, zuege:zuege, punkte:punkte, roh:roh,
+    schritt:fRund(istMm), soll:fRund(schrittMm), rz:fRund(istRz), spruenge:spruenge,
+    steil:nSteil, flach:nFlach, aMax:fRund(aMax), ball:BF, neig:NF, gut:gut};
+}
+
+// ---------------------------------------------------------------------
 // EIGENE SIMULATION (Paket D, 13.09.2026, Daniels "eine eigene Simulation
 // waere super"; Paket D2 am selben Tag: "das volle Paket — 3D, Bohrerspitze,
 // die einzelnen Zyklen"): faehrt die Bahnen der App (eil/vor/kreis/helix/
@@ -7446,6 +7766,22 @@ function fPruefen(prog){
       }
       if((s.art === 'gewSenk' || s.art === 'gewBohr') && !(+s.q356 < +s.tiefe)) gelb.push(nr + (s.art === 'gewBohr' ? 'Bohrtiefe' : 'Senktiefe') + ' Q356 liegt nicht unter der Gewindetiefe — die Steuerung fraest das Gewinde bis in den Grund.');
       if(+s.steigung > 0 && +s.q335 > 0 && +s.steigung > +s.q335 / 2) gelb.push(nr + 'Steigung ' + s.steigung + ' gegen Soll-⌀ ' + s.q335 + ' ist unueblich gross — Werte pruefen.');
+    } else if(z && z.schlicht){
+      // Stufe 4. Die Rautiefe gilt fuer den KUGELFRAESER — deshalb ist R2 des
+      // Werkzeugs hier Pflicht und nicht nur ein Hinweis: mit einem
+      // Schaftfraeser (R2 = 0) schneidet die Ecke, und die Formel h = s²/(8r)
+      // gilt fuer ihn gar nicht.
+      if(tool && tool.art !== 'fraeser') gelb.push(nr + 'T' + s.t + ' ist kein Fraeser (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
+      if(!fStepFeldHolen()) rot.push(nr + 'keine Sollform geladen — im STEP-Fenster ein Modell laden und "Sollform ans Programm" druecken.');
+      if(tool && !(+tool.r2 > 0)) rot.push(nr + 'T' + s.t + ' hat keinen Eckenradius R2 — die Rautiefe gilt fuer den KUGELFRAESER; in der Werkzeugtabelle R2 eintragen.');
+      if(tool && +tool.r2 > 0 && +tool.d > 0 && +tool.r2 < +tool.d / 2 - 1e-9) gelb.push(nr + 'T' + s.t + ' ist ein Eckenradiusfraeser (R2 ' + tool.r2 + ' bei ⌀' + tool.d + '), kein Vollradiusfraeser — die Bahn rechnet mit R2, der flache Teil der Stirn schneidet auf einer Schraege frueher.');
+      if(!(+s.rautiefe > 0)) rot.push(nr + 'Rautiefe fehlt — sie ist das Mass dieser Bahn.');
+      if(!(+s.tiefe < 0)) rot.push(nr + 'Z1 muss NEGATIV sein (unterste Höhe des Bereichs), steht auf ' + s.tiefe + '.');
+      if(+s.tolBahn > 0 && +s.rautiefe > 0 && +s.tolBahn > +s.rautiefe) gelb.push(nr + 'Sehnentoleranz ' + s.tolBahn + ' ist groesser als die Rautiefe ' + s.rautiefe + ' — dann bestimmt die Ausduennung die Form, nicht die Rautiefe.');
+      if(!(+s.winkel > 0 && +s.winkel < 90)) rot.push(nr + 'Steilste Neigung α1 muss zwischen 0 und 90 Grad liegen.');
+      if(+s.winkelMin < 0 || +s.winkelMin >= +s.winkel) rot.push(nr + 'Flachste Neigung α0 muss unter der steilsten liegen.');
+      if(!(+s.winkelMin > 0)) gelb.push(nr + 'α0 steht auf 0 — dann schlichtet die Kugel auch die WAAGERECHTEN Flaechen; die gehoeren ueblicherweise dem Schaft- oder Messerkopf.');
+      gelb.push(nr + 'Schraegen schlichten ist die eigene Bahn der App (kein Steuerungszyklus). Geprueft wird nur die KUGEL, nicht Schaft und Halter — vor dem ersten Lauf Programm-Test und Einzelsatz.');
     } else if(z && z.modell){
       // Stufe 3 Teil B. Die schwere Frage ("kommt das Werkzeug ueberall
       // hin?") beantwortet die Bahn selbst samt Restmaterialbericht — hier
@@ -8217,6 +8553,7 @@ function fFormText(s){
     case 'zapfenR': return 'Zapfen ' + s.l1 + '×' + s.l2 + ' R' + s.r + ' (Roh ' + s.roh1 + '×' + s.roh2 + ')';
     case 'zapfenK': return 'Kreiszapfen ⌀' + s.dm + ' (Roh ⌀' + s.dmRoh + ')';
     case 'planfraesen': return 'Fläche ' + s.l1 + '×' + s.l2 + ' ab X' + s.px + ' Y' + s.py + ' · Z' + s.pz + ' → Z' + s.zEnd + ' · Strategie ' + (s.strategie || 0);
+    case 'modellSchlichten': return 'Schrägen schlichten ' + fRund(+s.winkelMin || 0) + '–' + fRund(+s.winkel || 45) + '° · Rz ' + fRund(+s.rautiefe || 0) + ' · Zeilen in ' + (Math.round(+s.strategie || 0) === 1 ? 'Y' : 'X') + (fStepFeldHolen() ? '' : ' · KEINE SOLLFORM');
     case 'modellSchruppen': return 'Modell abspanen Z' + fRund(+s.q203 || 0) + ' → Z' + fRund((+s.q203 || 0) + (+s.tiefe || 0)) + ' · D ' + s.zust + ' · UXY ' + s.aufSeite + ' / UZ ' + s.aufTiefe + (fStepFeldHolen() ? '' : ' · KEINE SOLLFORM');
   }
   return '';
@@ -8232,7 +8569,7 @@ function fFormText(s){
 function fDraufsichtForm(ctx, s, m, X, Y, sc, aktiv, dunkel){
   ctx.strokeStyle = aktiv ? '#e07020' : (dunkel ? '#8fd0a0' : '#1d7a3a'); ctx.lineWidth = aktiv ? 2.2 : 1.2;
   ctx.fillStyle = aktiv ? 'rgba(224,112,32,.18)' : (dunkel ? 'rgba(143,208,160,.18)' : 'rgba(29,122,58,.13)');
-  if(s.art === 'modellSchruppen'){
+  if(s.art === 'modellSchruppen' || s.art === 'modellSchlichten'){
     // Stufe 3 Teil B: geraeumt wird das ganze Rohteil gegen die Sollform. Das
     // Schema zeigt den Huellbereich der Sollform gestrichelt — die Bahn selbst
     // entsteht erst beim Erzeugen und haette hier hunderte Zuege.
@@ -8713,6 +9050,7 @@ const F_ICONS = {
   // Stufe 3 Teil B: Rohteil gestrichelt, das Modell als Stufenkoerper darin,
   // die Z-Ebenen als waagerechte Striche.
   modellSchruppen:'<rect x="2" y="1.5" width="18" height="12" rx="1" stroke-dasharray="1.8 1.4"/><path d="M4 13h4V9h4V5.5h5"/><path d="M2 9h4M2 5.5h6" stroke-dasharray="1.4 1.2"/>',
+  modellSchlichten:'<rect x="2" y="1.5" width="18" height="12" rx="1" stroke-dasharray="1.8 1.4"/><path d="M3 13l7-7h9"/><circle cx="8.5" cy="6.2" r="2.1"/><path d="M4.6 10.6l1.1 1.1M6.6 8.6l1.1 1.1M11 6h1.6M14 6h1.6" stroke-dasharray="0"/>',
   grp_modell:'<rect x="2" y="1.5" width="18" height="12" rx="1" stroke-dasharray="1.8 1.4"/><path d="M4 13h4V9h4V5.5h5"/>'
 };
 function fIcon(key){ return F_ICON_KOPF + (F_ICONS[key] || '') + '</svg>'; }
@@ -9796,6 +10134,83 @@ function hbBildModell(H, art, s){
   hbBohrer(c, tx, tip - Lw, tip, tb, 'fraeser');
   hbFokusSymbol(c, art, tx, tip, tb, k);
 }
+// Stufe 4: die Schraege mit dem Kugelfraeser. Links die Draufsicht mit den
+// Zeilen quer ueber die Schraege, rechts der Schnitt: der Kugelkopf sitzt auf
+// der Schraege, der Bahnabstand ist als Reihe von Kugelstellungen gezeigt, und
+// zwischen zwei Stellungen steht der Restkamm — das ist die Rautiefe.
+function hbBildSchlicht(H, art, s){
+  const c = H.c, w = H.w, h = H.h, k = HB_SKAL;
+  // --- Draufsicht: Platte mit einer schraegen Flaeche, Zeilen darauf ---
+  const ax = 9 * k, aw = w * 0.53 - 14 * k;
+  const fw = aw * 0.84, fh = fw * 0.62, rand = (aw - fw) / 2;
+  const ah = Math.min(h * 0.60, fh + 2 * rand);
+  const ay = Math.max(9 * k, (h - ah) / 2);
+  const cx = ax + aw / 2, cy = ay + ah / 2;
+  hbMerk('platte', {x0:ax, y0:ay, x1:ax + aw, y1:ay + ah, b:aw, h:ah}, 'Rohteil');
+  c.save(); c.strokeStyle = HB_EDGE; c.lineWidth = HB_STIL.randStrich; c.beginPath(); c.rect(ax, ay, aw, ah); c.stroke(); c.restore();
+  // das bearbeitete Band ist die Schraege
+  const bw = fw * 0.52;
+  hbBlau(c, cc => { cc.rect(cx - bw / 2, cy - fh / 2, bw, fh); }, ay, ay + ah);
+  const quer = Math.round(+s.strategie || 0) === 1;
+  const nz = 7;
+  c.save(); c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.3 * k; c.beginPath();
+  for(let i = 0; i < nz; i++){
+    const t = (i + 0.5) / nz;
+    if(quer){ const xx = cx - bw / 2 + bw * t; c.moveTo(xx, cy - fh / 2 + 3); c.lineTo(xx, cy + fh / 2 - 3); }
+    else { const yy = cy - fh / 2 + fh * t; c.moveTo(cx - bw / 2 + 3, yy); c.lineTo(cx + bw / 2 - 3, yy); }
+  }
+  c.stroke(); c.restore();
+  hbLabel(c, hbTxt(art, s, 'strategie'), cx, ay + ah - 5 * k, HB_FOKUS === 'strategie');
+  hbKoordXY(c, ax, ay + ah, k);
+  // --- Schnitt rechts: die Schraege mit der Kugel ---
+  const sx = w * 0.55 + 4 * k, sw = w - sx - 14 * k;
+  const sy0 = h * HB_STIL.teilOben, teilH = h * HB_STIL.teilHoehe, syB = sy0 + teilH;
+  const sTief = teilH * HB_STIL.abtragTief;
+  const yGrund = sy0 + sTief;
+  const rx0 = sx + sw * 0.20, rx1 = sx + sw * 0.72;    // Anfang und Ende der Schraege
+  hbBlock(c, cc => {
+    cc.moveTo(sx, yGrund); cc.lineTo(rx0, yGrund); cc.lineTo(rx1, sy0);
+    cc.lineTo(sx + sw, sy0); cc.lineTo(sx + sw, syB); cc.lineTo(sx, syB);
+  });
+  // Das Aufmass, das hier weggeht: ein duennes Band ueber der Schraege.
+  hbBlau(c, cc => {
+    const d = 5 * k;
+    cc.moveTo(sx, yGrund - d); cc.lineTo(rx0, yGrund - d); cc.lineTo(rx1, sy0 - d);
+    cc.lineTo(sx + sw, sy0 - d); cc.lineTo(sx + sw, sy0); cc.lineTo(rx1, sy0);
+    cc.lineTo(rx0, yGrund); cc.lineTo(sx, yGrund);
+  }, sy0 - 5 * k, yGrund);
+  // Kugelstellungen auf der Schraege — ihr Abstand IST der Bahnabstand,
+  // der Zwickel dazwischen die Rautiefe.
+  const rk = Math.max(6, sw * 0.055), nk = 4;
+  c.save();
+  for(let i = 0; i < nk; i++){
+    const t = 0.16 + i * 0.20;
+    const px = rx0 + (rx1 - rx0) * t, py = yGrund + (sy0 - yGrund) * t;
+    // Mitte senkrecht zur Flaeche um rk versetzt
+    const dx = rx1 - rx0, dy = sy0 - yGrund, L = Math.hypot(dx, dy) || 1;
+    const mx = px - dy / L * rk * -1, my = py + dx / L * rk * -1;
+    c.beginPath(); c.arc(mx, my, rk, 0, Math.PI * 2);
+    c.strokeStyle = (i === 1) ? HB_ON : HB_EDGE; c.lineWidth = (i === 1 ? 1.8 : 1.1) * k;
+    c.fillStyle = 'rgba(255,255,255,0.55)'; c.fill(); c.stroke();
+    if(i === 1){ c.beginPath(); c.arc(mx, my, 1.6 * k, 0, Math.PI * 2); c.fillStyle = HB_ON; c.fill(); }
+  }
+  c.restore();
+  hbLabel(c, hbTxt(art, s, 'rautiefe'), (rx0 + rx1) / 2, sy0 - 13 * k, HB_FOKUS === 'rautiefe', null, (rx0 + rx1) / 2, (sy0 + yGrund) / 2);
+  hbLabel(c, hbTxt(art, s, 'winkel'), rx0 + (rx1 - rx0) * 0.12, yGrund - 4 * k, HB_FOKUS === 'winkel', 'left');
+  hbLabel(c, hbTxt(art, s, 'winkelMin'), sx + sw * 0.86, sy0 - 5 * k, HB_FOKUS === 'winkelMin', 'right');
+  hbLabel(c, hbTxt(art, s, 'tolBahn'), sx + 2 * k, syB + 12 * k, HB_FOKUS === 'tolBahn', 'left');
+  hbDim(c, sx + sw + 3, sy0, sx + sw + 3, yGrund, 6 * k, hbTxt(art, s, 'tiefe'), 'tiefe');
+  const ySC = sy0 - 21 * k;
+  hbLine(c, sx - 4, ySC, sx + sw + 4, ySC, HB_AXIS, 1, [5, 3]);
+  hbLabel(c, hbTxt(art, s, 'sc'), sx + sw + 2 * k, ySC - 3, HB_FOKUS === 'sc', 'right');
+  hbLabel(c, hbTxt(art, s, 'q203'), sx + sw + 2 * k, sy0 - 4, HB_FOKUS === 'q203', 'right');
+  // Werkzeug: Kugelfraeser ueber der markierten Stelle
+  const tx = sx + sw * 0.10, Lw = h * HB_STIL.wzLaenge;
+  const tip = hbSpitze(HB_FOKUS, ySC, yGrund, sy0, ySC, sy0);
+  const tb = Math.max(12, Math.min(sw * HB_STIL.wzBreite, rk * 2));
+  hbBohrer(c, tx, tip - Lw, tip, tb, 'fraeser');
+  hbFokusSymbol(c, art, tx, tip, tb, k);
+}
 // Einstieg: Bild fuer den offenen Zyklus mit den aktuellen Feldwerten.
 function fHilfebild(fokus){
   if(!ZY.art) return;
@@ -9804,7 +10219,8 @@ function fHilfebild(fokus){
   let s; try{ s = fZyklusLesen(fEditSchritt >= 0 ? fProg.schritte[fEditSchritt] : null); }catch(e){ s = fSchrittNeu(fProg, ZY.art, 1, 0); }
   HB_SPAET = [];
   try{
-    if((F_ZYKLEN[ZY.art] || {}).modell) hbBildModell(H, ZY.art, s);
+    if((F_ZYKLEN[ZY.art] || {}).schlicht) hbBildSchlicht(H, ZY.art, s);
+    else if((F_ZYKLEN[ZY.art] || {}).modell) hbBildModell(H, ZY.art, s);
     else if(ZY.art === 'planfraesen') hbBildPlan(H, ZY.art, s);
     else if((F_ZYKLEN[ZY.art] || {}).kontur) hbBildKontur(H, ZY.art, s);
     // Paket E: die Gewindefraeszyklen tragen fraes:true (wegen Q206/Q207),
@@ -10167,7 +10583,10 @@ function fSimOeffnen(){
 // =====================================================================
 const STEP = {modell:null, aus:null, name:'', achse:'+Z', nullp:'ecke',
   az:-0.7, el:0.5, zoom:1, mitte:[0, 0, 0], zieh:null, ebenen:[], ebene:-1,
-  ansicht:'draht', feld:null, bild:null};
+  // raster 0 = automatisch nach Teilgroesse (0,3 bis 2 mm). Von Hand feiner
+  // gestellt wird es fuers Schlichten: der Bahnabstand kann nur ein Vielfaches
+  // der Rasterweite sein, und die Rautiefe haengt am Bahnabstand.
+  ansicht:'draht', feld:null, bild:null, raster:0};
 const F_STEP_FARBE = {waagerecht:'#2f6fb2', senkrecht:'#7a8593', schraege:'#d08a2a',
   laengs:'#2f9e5a', quer:'#9b6fd0', frei:'#c0392b'};
 function fStepFarbe(f){
@@ -10252,7 +10671,7 @@ function fStepBericht(){
 function fStepSollZeichnen(){
   const cv = document.getElementById('stepCv');
   if(!cv || !cv.getContext) return;
-  if(!STEP.feld && STEP.aus){ try{ STEP.feld = fStepSollfeld(STEP.aus); STEP.bild = null; }catch(e){ STEP.feld = null; } }
+  if(!STEP.feld && STEP.aus){ try{ STEP.feld = fStepSollfeld(STEP.aus, STEP.raster || 0); STEP.bild = null; }catch(e){ STEP.feld = null; } }
   const F = STEP.feld;
   const dpr = window.devicePixelRatio || 1;
   const w = cv.clientWidth || 700, h = cv.clientHeight || 320;
@@ -10388,7 +10807,7 @@ function fStepLaden(text, name){
 // sagt es im Klartext, wenn sie fehlt.
 function fStepFeldUebernehmen(){
   if(!STEP.aus){ melde('FEHLER: kein Modell geladen.'); return false; }
-  if(!STEP.feld){ try{ STEP.feld = fStepSollfeld(STEP.aus); STEP.bild = null; }catch(e){ STEP.feld = null; } }
+  if(!STEP.feld){ try{ STEP.feld = fStepSollfeld(STEP.aus, STEP.raster || 0); STEP.bild = null; }catch(e){ STEP.feld = null; } }
   if(!STEP.feld){ melde('FEHLER: die Sollform liess sich nicht rechnen.'); return false; }
   fStepFeldSetzen(STEP.feld);
   const F = STEP.feld;
@@ -10423,6 +10842,27 @@ function fStepRohUebernehmen(){
   });
   on('btnStepRoh', fStepRohUebernehmen);
   on('btnStepFeld', fStepFeldUebernehmen);
+  // Rasterweite der Sollform. Leer = automatisch nach Teilgroesse. Feiner
+  // rechnen kostet Zeit und Speicher (die Zellzahl waechst quadratisch),
+  // bringt aber beim Schlichten die Rautiefe, die man bestellt hat: der
+  // Bahnabstand kann nur ein Vielfaches der Rasterweite sein.
+  {
+    const el = document.getElementById('stepRaster');
+    if(el) el.onchange = () => {
+      const v = parseFloat(String(el.value).replace(',', '.'));
+      STEP.raster = (isFinite(v) && v > 0) ? Math.max(0.05, Math.min(5, v)) : 0;
+      el.value = STEP.raster ? String(STEP.raster) : '';
+      STEP.feld = null; STEP.bild = null;
+      if(STEP.aus){
+        try{ STEP.feld = fStepSollfeld(STEP.aus, STEP.raster || 0); }catch(e){ STEP.feld = null; }
+        if(STEP.feld && fStepFeldHolen()) fStepFeldSetzen(STEP.feld);   // schon uebergeben: mitziehen
+      }
+      fStepBericht(); fStepZeichnen();
+      melde(STEP.feld ? ('Sollform-Raster ' + fRund(STEP.feld.raster) + ' mm: ' + STEP.feld.nx + ' x ' + STEP.feld.ny
+        + ' Rasterstellen' + (fStepFeldHolen() ? ' — ans Programm uebergeben.' : ' — mit "Sollform ans Programm" uebergeben.'))
+        : 'Raster gesetzt.');
+    };
+  }
   on('btnStepKonturen', fStepKonturenUebernehmen);
   on('btnStepDraht', ()=>fStepAnsicht('draht'));
   on('btnStepSoll', ()=>{ fStepAnsicht('soll'); fStepBericht(); });
