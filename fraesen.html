@@ -2878,7 +2878,11 @@ ziehen; nur bei einem gr&ouml;&szlig;eren Sprung geht es hoch (dort k&ouml;nnte 
 bestellte Rautiefe nicht zu halten &mdash; die App sagt das mit der Zahl, die wirklich gefahren wird, und im STEP-Fenster stellt man das
 Raster feiner.
 <br><b>Auch hier gibt es keinen Steuerungszyklus</b>, und gepr&uuml;ft wird <b>nur die Kugel</b> &mdash; nicht der Schaft und nicht der Halter. An
-einer hohen steilen Wand kann der Schaft anstehen, ohne dass die App es sagt: vor dem ersten Lauf Programm-Test und Einzelsatz.</dd>
+einer hohen steilen Wand kann der Schaft anstehen, ohne dass die App es sagt: vor dem ersten Lauf Programm-Test und Einzelsatz.
+<br><b>Beleg:</b> das Testprogramm <b>DZ15</b> (Rohteil 30&times;8&times;10, Rampe von genau 45&deg;, Kugelfr&auml;ser &empty;10, Rz 0,1) ist am
+14.09.2026 im Programm-Test des iTNC-530-Programmierplatzes <b>ohne Meldung durchgelaufen</b> &mdash; die Schr&auml;ge ist in der Grafik
+geschlichtet, das Plateau bleibt stehen (es liegt unter dem Winkelband). Die Steuerung nimmt die S&auml;tze also an.
+<b>An einer Maschine ist noch nichts gefahren.</b></dd>
 <dt>Was die App NICHT tut</dt><dd>Aus einer <b>Kontur</b> entstehen keine Bahnen von selbst: sie wird erst durch einen Zyklus zur Bahn, und die Tiefe
 tr&auml;gt der Zyklus, nicht das Modell. Eine <b>Bahn aus dem Modell</b> gibt es bei zwei Schritten: <b>Modell abspanen</b> schruppt Z-konstant,
 <b>Schr&auml;gen schlichten</b> f&auml;hrt der Fl&auml;che nach (beide oben). Was beiden fehlt: eine <b>Z-konstante Schlichtbahn</b> f&uuml;r steile Flanken
@@ -3301,7 +3305,7 @@ var F_STATUS = {
   // Stufe 3 Teil B: fuer "Modell gegen Rohteil abspanen" gibt es an der
   // iTNC keinen Zyklus. Die App schreibt ihre eigenen Saetze — kein Handbuch
   // kann das belegen, nur ein Lauf.
-  eigenbahn: {txt:'eigene Bahn der App — fuer diese Bearbeitung hat die Steuerung keinen Zyklus; im Programm-Test des Programmierplatzes durchgelaufen (DZ14, 14.09.2026), an der Maschine noch nicht', cls:'ann', grp:'offen'},
+  eigenbahn: {txt:'eigene Bahn der App — fuer diese Bearbeitung hat die Steuerung keinen Zyklus; im Programm-Test des Programmierplatzes durchgelaufen (Abspanen DZ14, Schlichten DZ15, 14.09.2026), an der Maschine noch nicht', cls:'ann', grp:'offen'},
   gesperrt : {txt:'nicht gebaut', cls:'sperr', grp:'offen'}
 };
 
