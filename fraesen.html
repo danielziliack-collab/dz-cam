@@ -2533,11 +2533,14 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <span style="font-size:11px;color:var(--text-dim);">Nullpunkt</span>
           <span class="radiobtns" id="stepNullBtns"><button data-v="ecke" class="sel">Ecke, Oberkante</button><button data-v="mitte">Mitte, Oberkante</button></span>
           <button class="gcbtn" id="btnStepRoh" title="Huellquader des Modells als BLK FORM in den Programmkopf">Als Rohteil übernehmen</button>
+          <span style="font-size:11px;color:var(--text-dim);">Z-Ebene</span>
+          <select id="stepEbene" style="font-size:11px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--text);max-width:210px;"></select>
+          <button class="gcbtn" id="btnStepKonturen" title="Die Schleifen dieser Ebene als XY-Konturen in den Arbeitsplan legen">Konturen übernehmen</button>
         </div>
         <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
           <canvas id="stepCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;touch-action:none;cursor:grab;"></canvas>
           <div class="small-hint" id="stepBericht" style="flex:0 0 auto;max-height:22vh;overflow-y:auto;"></div>
-          <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader. Stufe 1 zeigt das Modell und ordnet die Flächen ein; Bahnen entstehen daraus noch nicht.</div>
+          <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader, kräftig orange die gewählte Z-Ebene. Aus ihr werden mit <b>Konturen übernehmen</b> XY-Konturen für die Zyklen; Bahnen entstehen daraus erst über einen Zyklus.</div>
         </div>
       </div>
 
@@ -2810,10 +2813,18 @@ die Achse, bei der die meisten Bohrungen l&auml;ngs stehen und die meisten Fl&au
 in der Mitte, die Oberkante des Teils immer auf Z0, so wie ein Fr&auml;steil aufgespannt wird.</dd>
 <dt>Als Rohteil &uuml;bernehmen</dt><dd>Schreibt den H&uuml;llquader des ausgerichteten Modells als <b>BLK FORM</b> in den Programmkopf. Aufma&szlig; f&uuml;r das echte
 Rohteil kommt danach von Hand dazu.</dd>
-<dt>Was Stufe 1 NICHT tut</dt><dd>Aus dem Modell entstehen noch <b>keine Bahnen und keine Konturen</b>. Das Modell dient zum Ansehen, Ausrichten und
-Rohteil setzen. <b>Freiformfl&auml;chen</b> werden nur als Kanten gezeichnet und ausdr&uuml;cklich gemeldet; Kanten, die weder Gerade noch Kreis sind, werden
-&uuml;ber ihre Kontrollpunkte gen&auml;hert. Baugruppen werden dort gelesen, wo die Teile im Modell liegen.</dd>
-<dt>Stand</dt><dd>Gemessen an 145 echten Dateien aus Daniels Bestand (14.09.2026): 143 mit Fl&auml;chen gelesen, keine Ausnahme, keine Fl&auml;che ohne Rand,
+<dt id="ba-fk05c-ebenen">Z-Ebenen und Konturen</dt><dd>Jede <b>waagerechte</b> Fl&auml;che des Modells liegt auf einer H&ouml;he, auf der gefr&auml;st wird:
+die Oberfl&auml;che, ein Taschenboden, eine Absatzfl&auml;che. Die App sammelt sie zu <b>Z-Ebenen</b> (Toleranz 0,01&nbsp;mm) und listet sie von oben nach
+unten. Die gew&auml;hlte Ebene steht im Drahtbild kr&auml;ftig orange. <b>Konturen &uuml;bernehmen</b> legt ihre Schleifen als XY-Konturen in den Arbeitsplan:
+die &auml;u&szlig;ere Schleife ist der Rand der Fl&auml;che, jede weitere ein Loch darin. Geraden bleiben Geraden, <b>Kreisb&ouml;gen bleiben B&ouml;gen</b>
+(Radius und Drehsinn aus dem Modell), ein voller Kreis wird ein Vollkreis-Element. Danach l&auml;uft jeder Zyklus darauf, der eine Kontur nimmt &mdash;
+Konturzug, SL-Zyklen, Taschen.</dd>
+<dt>Was die App NICHT tut</dt><dd>Aus dem Modell entstehen <b>keine Bahnen von selbst</b>: eine Kontur wird erst durch einen Zyklus zur Bahn, und die Tiefe
+tr&auml;gt der Zyklus, nicht das Modell. <b>Freiformfl&auml;chen</b> werden nur als Kanten gezeichnet und ausdr&uuml;cklich gemeldet; Kanten, die weder Gerade
+noch Kreis sind, stehen als Streckenzug in der Kontur. Baugruppen werden dort gelesen, wo die Teile im Modell liegen.</dd>
+<dt>Stand</dt><dd>Gemessen an 145 echten Dateien aus Daniels Bestand (14.09.2026): 143 mit Fl&auml;chen gelesen, keine Ausnahme, keine Fl&auml;che ohne Rand.
+Aus ihren 811 Z-Ebenen entstanden <b>2452 Konturen mit 10088 Elementen</b> (2025 B&ouml;gen, 286 Vollkreise) &mdash; <b>keine einzige</b> davon lehnt die
+Konturpr&uuml;fung der App ab. Weiter:
 die gr&ouml;&szlig;te Datei in 155&nbsp;ms. Die zwei ohne Fl&auml;chen sind FreeCAD-Skizzenexporte ohne Volumen. 89 der 145 sind rein prismatisch, 54 tragen
 Freiform.</dd>
 </dl>
@@ -5839,8 +5850,11 @@ function fStepGeo(E, einheit){
   };
   return G;
 }
-// Punkte einer Kante als Streckenzug. Gerade: zwei Punkte. Kreis: abgetastet,
-// die Richtung folgt dem Sinn der Kante (bei .T. laeuft der Winkel aufwaerts).
+// Eine Kante als Streckenzug PLUS ihrer Art. Gerade: zwei Punkte. Kreis:
+// abgetastet, die Richtung folgt dem Sinn der Kante (bei .T. laeuft der Winkel
+// aufwaerts). Die Bogendaten (Mitte, Radius, Achse) bleiben erhalten — ohne sie
+// wuerde aus jedem Radius spaeter ein Vieleck.
+// Rueckgabe: {p:[Punkte], art:'gerade'|'bogen'|'frei', b:{c, r, achse}|null}
 function fStepKante(E, G, id, aus, einheit){
   const e = E.get(id);
   if(!e || e.typ !== 'EDGE_CURVE') return null;
@@ -5850,12 +5864,13 @@ function fStepKante(E, G, id, aus, einheit){
   const p2 = v2 ? G.punkt(fStepRefs(v2.arg)[0]) : null;
   const sinn = /\.T\./.test(a[4] || '');
   const k = E.get(fStepRefs(a[3])[0]);
-  if(!k) return (p1 && p2) ? [p1, p2] : null;
-  if(k.typ === 'LINE'){ aus.linien++; return (p1 && p2) ? [p1, p2] : null; }
+  const gerade = () => (p1 && p2) ? {p:[p1, p2], art:'gerade', b:null} : null;
+  if(!k) return gerade();
+  if(k.typ === 'LINE'){ aus.linien++; return gerade(); }
   if(k.typ === 'CIRCLE' || k.typ === 'ELLIPSE'){
     const ka = fStepArgs(k.arg), L = G.lage(fStepRefs(ka[1])[0]);
     const r = fStepZahl(ka[2]) * einheit, r2 = k.typ === "ELLIPSE" ? fStepZahl(ka[3]) * einheit : r;
-    if(!L || !isFinite(r)) return (p1 && p2) ? [p1, p2] : null;
+    if(!L || !isFinite(r)) return gerade();
     const wink = (p) => {
       if(!p) return null;
       const d = [p[0] - L.p[0], p[1] - L.p[1], p[2] - L.p[2]];
@@ -5881,13 +5896,16 @@ function fStepKante(E, G, id, aus, einheit){
                 L.p[2] + r * c * L.x[2] + r2 * s * L.y[2]]);
     }
     aus.bogen++;
-    return pts;
+    // Die Ellipse behaelt ihre Punkte, gilt aber nicht als Bogen (ein Bogen
+    // der Kontur hat EINEN Radius).
+    return {p:pts, art:(k.typ === 'CIRCLE' && Math.abs(r - r2) < 1e-9) ? 'bogen' : 'frei',
+      b:(k.typ === 'CIRCLE') ? {c:[L.p[0], L.p[1], L.p[2]], r:r, achse:[L.z[0], L.z[1], L.z[2]]} : null};
   }
   // Alles andere (B-Spline und Verwandte): ueber die Kontrollpunkte genaehert.
   const refs = fStepRefs(k.arg).map(q => G.punkt(q)).filter(q => q);
   aus.frei++;
-  if(refs.length >= 2) return refs;
-  return (p1 && p2) ? [p1, p2] : null;
+  if(refs.length >= 2) return {p:refs, art:'frei', b:null};
+  return gerade();
 }
 
 // Das ganze Modell: Flaechen mit Art, Achse und Randkurven, dazu ein Bericht.
@@ -5914,27 +5932,33 @@ function fStepModell(text){
       if(fa[2] != null) r = (fStepZahl(fa[2]) || 0) * einheit;
     }
     zaehl[art]++;
-    // Randkurven aller Schleifen der Flaeche
+    // Randkurven, nach SCHLEIFEN getrennt: die aeussere umschliesst die
+    // Flaeche, jede weitere ist ein Loch darin. Fuer Konturen ist das der
+    // Unterschied zwischen Tasche und Insel.
     const rand = [];
     fStepRefs(a[1]).forEach(bid => {
       const b = E.get(bid); if(!b) return;
+      const aussen = /FACE_OUTER_BOUND/.test(b.typ);
       const loop = E.get(fStepRefs(fStepArgs(b.arg)[1])[0]); if(!loop || loop.typ !== 'EDGE_LOOP') return;
+      const kanten = [];
       fStepRefs(fStepArgs(loop.arg)[1]).forEach(oid => {
         const oe = E.get(oid); if(!oe || oe.typ !== 'ORIENTED_EDGE') return;
         const oa = fStepArgs(oe.arg);
-        const pts = fStepKante(E, G, fStepRefs(oa[3])[0], aus, einheit);
-        if(pts && pts.length > 1) rand.push(/\.F\./.test(oa[4] || '') ? pts.slice().reverse() : pts);
+        const kk = fStepKante(E, G, fStepRefs(oa[3])[0], aus, einheit);
+        if(!kk || kk.p.length < 2) return;
+        kanten.push(/\.F\./.test(oa[4] || '') ? {p:kk.p.slice().reverse(), art:kk.art, b:kk.b} : kk);
       });
+      if(kanten.length) rand.push({aussen:aussen, kanten:kanten});
     });
     flaechen.push({id:id, art:art, achse:achse, ort:ort, r:r, rand:rand});
   });
   // Huellquader ueber alle Randpunkte
   const box = {x0:Infinity, y0:Infinity, z0:Infinity, x1:-Infinity, y1:-Infinity, z1:-Infinity};
-  flaechen.forEach(f => f.rand.forEach(z => z.forEach(p => {
+  flaechen.forEach(f => f.rand.forEach(lo => lo.kanten.forEach(k => k.p.forEach(p => {
     if(p[0] < box.x0) box.x0 = p[0]; if(p[0] > box.x1) box.x1 = p[0];
     if(p[1] < box.y0) box.y0 = p[1]; if(p[1] > box.y1) box.y1 = p[1];
     if(p[2] < box.z0) box.z0 = p[2]; if(p[2] > box.z1) box.z1 = p[2];
-  })));
+  }))));
   const warnungen = [];
   if(!flaechen.length) warnungen.push('Keine Flaechen gefunden — ist das ein Flaechen- oder Punktmodell statt eines Volumens?');
   if(zaehl.frei) warnungen.push(zaehl.frei + ' Freiformflaeche(n): die App zeigt nur ihre Kanten und faehrt sie NICHT.');
@@ -5977,7 +6001,10 @@ function fStepAusrichten(modell, ausricht){
   const a = ausricht || {};
   const R = fStepDrehung(a.achse);
   const flaechen = modell.flaechen.map(f => {
-    const rand = f.rand.map(z => z.map(p => fStepDreh(R, p)));
+    const rand = f.rand.map(lo => ({aussen:lo.aussen, kanten:lo.kanten.map(k => ({
+      p:k.p.map(p => fStepDreh(R, p)), art:k.art,
+      b:k.b ? {c:fStepDreh(R, k.b.c), r:k.b.r, achse:fStepDreh(R, k.b.achse)} : null
+    }))}));
     const n = f.achse ? fStepDreh(R, f.achse) : null;
     let lage = 'frei', neigung = null;
     if(f.art === 'ebene' && n){
@@ -5992,17 +6019,23 @@ function fStepAusrichten(modell, ausricht){
       ort:f.ort ? fStepDreh(R, f.ort) : null, rand:rand};
   });
   const box = {x0:Infinity, y0:Infinity, z0:Infinity, x1:-Infinity, y1:-Infinity, z1:-Infinity};
-  flaechen.forEach(f => f.rand.forEach(z => z.forEach(p => {
+  flaechen.forEach(f => f.rand.forEach(lo => lo.kanten.forEach(k => k.p.forEach(p => {
     if(p[0] < box.x0) box.x0 = p[0]; if(p[0] > box.x1) box.x1 = p[0];
     if(p[1] < box.y0) box.y0 = p[1]; if(p[1] > box.y1) box.y1 = p[1];
     if(p[2] < box.z0) box.z0 = p[2]; if(p[2] > box.z1) box.z1 = p[2];
-  })));
+  }))));
   // Nullpunkt: vorgegebene Verschiebung, sonst Ecke links vorn unten und
   // Oberkante auf Z0 (so, wie ein Fraesteil aufgespannt wird).
   const vx = (a.x0 != null) ? +a.x0 : -box.x0;
   const vy = (a.y0 != null) ? +a.y0 : -box.y0;
   const vz = (a.z0 != null) ? +a.z0 : -box.z1;
-  flaechen.forEach(f => { f.rand.forEach(z => z.forEach(p => { p[0] += vx; p[1] += vy; p[2] += vz; })); if(f.ort){ f.ort[0] += vx; f.ort[1] += vy; f.ort[2] += vz; } });
+  flaechen.forEach(f => {
+    f.rand.forEach(lo => lo.kanten.forEach(k => {
+      k.p.forEach(p => { p[0] += vx; p[1] += vy; p[2] += vz; });
+      if(k.b){ k.b.c[0] += vx; k.b.c[1] += vy; k.b.c[2] += vz; }
+    }));
+    if(f.ort){ f.ort[0] += vx; f.ort[1] += vy; f.ort[2] += vz; }
+  });
   const B = {x0:fRund(box.x0 + vx), y0:fRund(box.y0 + vy), z0:fRund(box.z0 + vz),
              x1:fRund(box.x1 + vx), y1:fRund(box.y1 + vy), z1:fRund(box.z1 + vz)};
   const z = {waagerecht:0, senkrecht:0, schraege:0, laengs:0, quer:0, frei:0};
@@ -6019,7 +6052,10 @@ function fStepAusrichten(modell, ausricht){
 // Ein ausgerichtetes Modell in XY verschieben (Nullpunkt in die Mitte legen).
 function fStepVerschieben(A, dx, dy){
   A.flaechen.forEach(f => {
-    f.rand.forEach(z => z.forEach(p => { p[0] += dx; p[1] += dy; }));
+    f.rand.forEach(lo => lo.kanten.forEach(k => {
+      k.p.forEach(p => { p[0] += dx; p[1] += dy; });
+      if(k.b){ k.b.c[0] += dx; k.b.c[1] += dy; }
+    }));
     if(f.ort){ f.ort[0] += dx; f.ort[1] += dy; }
   });
   A.box.x0 = fRund(A.box.x0 + dx); A.box.x1 = fRund(A.box.x1 + dx);
@@ -6040,6 +6076,81 @@ function fStepAchseVorschlag(modell){
     if(p > wert){ wert = p; best = a; }
   });
   return best;
+}
+
+// ---- Stufe 2: waagerechte Flaechen als Z-Ebenen, Schleifen als Konturen ----
+// Jede waagerechte Ebene des Modells ist eine Hoehe, auf der gefraest wird:
+// die Oberflaeche, ein Taschenboden, eine Absatzflaeche. Ihre aeussere Schleife
+// ist der Rand der Flaeche, jede weitere ein Loch darin.
+function fStepEbenen(A, tol){
+  const t = tol || 0.01, ebenen = [];
+  A.flaechen.forEach(f => {
+    if(f.art !== 'ebene' || f.lage !== 'waagerecht') return;
+    let z = f.ort ? f.ort[2] : null;
+    if(z == null && f.rand[0] && f.rand[0].kanten[0]) z = f.rand[0].kanten[0].p[0][2];
+    if(z == null) return;
+    let e = null;
+    for(let q = 0; q < ebenen.length; q++) if(Math.abs(ebenen[q].z - z) <= t){ e = ebenen[q]; break; }
+    if(!e){ e = {z:fRund(z), flaechen:[], schleifen:0}; ebenen.push(e); }
+    e.flaechen.push(f); e.schleifen += f.rand.length;
+  });
+  ebenen.sort((a, b) => b.z - a.z);                    // von oben nach unten
+  return ebenen;
+}
+// Eine Schleife wird zur XY-Kontur. DIESELBEN ZWEI KLEMMEN wie beim
+// DXF-Leser (14.09.2026, an 102 echten Zeichnungen gefunden): ein Element ohne
+// Laenge faellt weg, und beim Halbkreis wird der Radius auf die halbe Sehne
+// angehoben — sonst gilt die Kontur als unmoeglich.
+function fStepKontur(loop, name){
+  const el = []; let px = null, py = null, x0 = 0, y0 = 0, knapp = 0, halb = 0, frei = 0;
+  loop.kanten.forEach(k => {
+    const pts = k.p;
+    if(px === null){ x0 = fRund(pts[0][0]); y0 = fRund(pts[0][1]); px = x0; py = y0; }
+    const istBogen = (k.art === 'bogen' && k.b && Math.abs(k.b.achse[2]) > 0.999);
+    if(istBogen){
+      const ex = fRund(pts[pts.length - 1][0]), ey = fRund(pts[pts.length - 1][1]);
+      // Drehsinn und ueberstrichener Winkel aus den abgetasteten Punkten —
+      // das ist unabhaengig davon, wie das Modell gedreht wurde.
+      let sw = 0;
+      for(let i = 1; i < pts.length; i++){
+        const a0 = Math.atan2(pts[i - 1][1] - k.b.c[1], pts[i - 1][0] - k.b.c[0]);
+        const a1 = Math.atan2(pts[i][1] - k.b.c[1], pts[i][0] - k.b.c[0]);
+        let d = a1 - a0; while(d > Math.PI) d -= 2 * Math.PI; while(d < -Math.PI) d += 2 * Math.PI;
+        sw += d;
+      }
+      const sehne = Math.hypot(ex - px, ey - py);
+      if(sehne < 1e-9){ el.push({typ:'k', x:fRund(k.b.c[0]), y:fRund(k.b.c[1]), dr:sw >= 0 ? 1 : -1}); return; }
+      let r = fRund(k.b.r);
+      if(r < sehne / 2){ r = Math.ceil(sehne / 2 * 1000) / 1000; halb++; }
+      const o = {typ:'b', x:ex, y:ey, r:r, dr:sw >= 0 ? 1 : -1};
+      if(Math.abs(sw) > Math.PI + 1e-9) o.gross = true;
+      el.push(o); px = ex; py = ey; return;
+    }
+    if(k.art === 'frei') frei++;
+    for(let i = 1; i < pts.length; i++){
+      const ex = fRund(pts[i][0]), ey = fRund(pts[i][1]);
+      if(Math.hypot(ex - px, ey - py) < 1e-9){ knapp++; continue; }
+      el.push({typ:'g', x:ex, y:ey}); px = ex; py = ey;
+    }
+  });
+  if(!el.length) return null;
+  return {kontur:{name:name, geschlossen:true, x0:x0, y0:y0, elemente:el}, knapp:knapp, halb:halb, frei:frei};
+}
+// Alle Konturen einer Z-Ebene, mit ehrlichem Bericht.
+function fStepEbeneKonturen(ebene, basis){
+  const konturen = [], hinweise = [];
+  let knapp = 0, halb = 0, frei = 0, n = 0;
+  ebene.flaechen.forEach(f => f.rand.forEach(lo => {
+    n++;
+    const r = fStepKontur(lo, (basis || 'STEP') + ' Z' + fRund(ebene.z) + ' ' + n);
+    if(!r) return;
+    knapp += r.knapp; halb += r.halb; frei += r.frei;
+    konturen.push(r.kontur);
+  }));
+  if(knapp) hinweise.push(knapp + ' Element(e) ohne Laenge weggelassen (nach dem Runden auf 0,001 mm derselbe Punkt).');
+  if(halb) hinweise.push(halb + ' Bogenradius/-radien um bis zu 0,001 mm angehoben (Halbkreis: die Sehne ist genau 2r).');
+  if(frei) hinweise.push(frei + ' Kante(n) waren weder Gerade noch Kreis und stehen als Streckenzug in der Kontur.');
+  return {konturen:konturen, hinweise:hinweise};
 }
 
 // ---------------------------------------------------------------------
@@ -9437,7 +9548,7 @@ function fSimOeffnen(){
 // richtige Teil in der richtigen Lage steht, nicht huebsch aussehen.
 // =====================================================================
 const STEP = {modell:null, aus:null, name:'', achse:'+Z', nullp:'ecke',
-  az:-0.7, el:0.5, zoom:1, mitte:[0, 0, 0], zieh:null};
+  az:-0.7, el:0.5, zoom:1, mitte:[0, 0, 0], zieh:null, ebenen:[], ebene:-1};
 const F_STEP_FARBE = {waagerecht:'#2f6fb2', senkrecht:'#7a8593', schraege:'#d08a2a',
   laengs:'#2f9e5a', quer:'#9b6fd0', frei:'#c0392b'};
 function fStepFarbe(f){
@@ -9452,7 +9563,40 @@ function fStepAusrichtenJetzt(){
   if(STEP.nullp === 'mitte') fStepVerschieben(A, -(A.box.x0 + A.box.x1) / 2, -(A.box.y0 + A.box.y1) / 2);
   STEP.aus = A;
   STEP.mitte = [(A.box.x0 + A.box.x1) / 2, (A.box.y0 + A.box.y1) / 2, (A.box.z0 + A.box.z1) / 2];
+  STEP.ebenen = fStepEbenen(A);
+  STEP.ebene = STEP.ebenen.length ? 0 : -1;
+  fStepEbenenFuellen();
   fStepBericht(); fStepZeichnen();
+}
+// Die Auswahlliste der Z-Ebenen, von oben nach unten.
+function fStepEbenenFuellen(){
+  const s = document.getElementById('stepEbene');
+  if(!s) return;
+  s.innerHTML = STEP.ebenen.map((e, i) => '<option value="' + i + '">Z ' + fRund(e.z) + '  ·  '
+    + e.schleifen + ' Kontur' + (e.schleifen === 1 ? '' : 'en') + '</option>').join('')
+    || '<option value="-1">keine waagerechte Flaeche</option>';
+  s.value = String(STEP.ebene);
+}
+// Die Konturen der gewaehlten Ebene in den Arbeitsplan legen.
+function fStepKonturenUebernehmen(){
+  const A = STEP.aus, e = STEP.ebenen[STEP.ebene];
+  if(!A || !e){ melde('FEHLER: keine Z-Ebene gewaehlt.'); return null; }
+  const basis = String(STEP.name || 'STEP').replace(/\.(stp|step)$/i, '');
+  const r = fStepEbeneKonturen(e, basis);
+  if(!r.konturen.length){ melde('FEHLER: aus dieser Ebene entsteht keine Kontur.' + (r.hinweise.length ? ' ' + r.hinweise.join(' ') : '')); return r; }
+  if(!Array.isArray(fProg.konturen)) fProg.konturen = [];
+  const ab = fProg.konturen.length;
+  r.konturen.forEach(kt => fProg.konturen.push(kt));
+  // Ehrlich pruefen, was angekommen ist — eine unmoegliche Kontur waere sonst
+  // erst im Zyklus aufgefallen.
+  const kaputt = r.konturen.filter(kt => fKonturSegmente(kt).fehler.length);
+  fSel = {typ:'kontur', idx:ab};
+  fRender();
+  melde('STEP Z ' + fRund(e.z) + ': ' + r.konturen.length + ' Kontur' + (r.konturen.length === 1 ? '' : 'en')
+    + ' angelegt (' + r.konturen.map(k => k.elemente.length + ' El.').join(', ') + ').'
+    + (kaputt.length ? ' ACHTUNG: ' + kaputt.length + ' davon meldet die Konturpruefung als fehlerhaft.' : '')
+    + (r.hinweise.length ? ' ' + r.hinweise.join(' ') : ''));
+  return r;
 }
 function fStepBericht(){
   const el = document.getElementById('stepBericht'), inf = document.getElementById('stepInfo');
@@ -9468,6 +9612,8 @@ function fStepBericht(){
   if(B) t.push('<b>Huellquader</b> (ausgerichtet auf ' + esc(A.achse) + '): '
     + fRund(B.x1 - B.x0) + ' x ' + fRund(B.y1 - B.y0) + ' x ' + fRund(B.z1 - B.z0)
     + ' mm &nbsp; X ' + B.x0 + '..' + B.x1 + ' &nbsp; Y ' + B.y0 + '..' + B.y1 + ' &nbsp; Z ' + B.z0 + '..' + B.z1);
+  if(STEP.ebenen.length) t.push('<b>Z-Ebenen:</b> ' + STEP.ebenen.length + ' waagerechte Hoehe(n), zusammen '
+    + STEP.ebenen.reduce((s, e) => s + e.schleifen, 0) + ' Konturen — oben in der Liste waehlen und uebernehmen.');
   if(z) t.push('<b>Einordnung:</b> ' + z.waagerecht + ' waagerecht, ' + z.senkrecht + ' senkrecht, '
     + z.schraege + ' Schraege' + (A.neigungen.length ? ' (' + A.neigungen.join(', ') + ' Grad)' : '')
     + ', ' + z.laengs + ' Bohrung/Zylinder laengs, ' + z.quer + ' quer, ' + z.frei + ' Freiform.');
@@ -9513,15 +9659,29 @@ function fStepZeichnen(){
   c.save(); c.lineWidth = 1; if(c.setLineDash) c.setLineDash([]);
   A.flaechen.forEach(f => {
     c.strokeStyle = fStepFarbe(f);
-    f.rand.forEach(zug => {
+    f.rand.forEach(lo => lo.kanten.forEach(kk => {
+      const zug = kk.p;
       if(zug.length < 2) return;
       c.beginPath();
       const p0 = S(zug[0]); c.moveTo(p0[0], p0[1]);
       for(let i = 1; i < zug.length; i++){ const p = S(zug[i]); c.lineTo(p[0], p[1]); }
       c.stroke();
-    });
+    }));
   });
   c.restore();
+  // Die gewaehlte Z-Ebene kraeftig darueber, damit man sieht, was man nimmt
+  const eb = STEP.ebenen[STEP.ebene];
+  if(eb){
+    c.save(); c.strokeStyle = '#e07b1a'; c.lineWidth = 2.4; if(c.setLineDash) c.setLineDash([]);
+    eb.flaechen.forEach(f => f.rand.forEach(lo => lo.kanten.forEach(kk => {
+      if(kk.p.length < 2) return;
+      c.beginPath();
+      const p0 = S(kk.p[0]); c.moveTo(p0[0], p0[1]);
+      for(let i = 1; i < kk.p.length; i++){ const p = S(kk.p[i]); c.lineTo(p[0], p[1]); }
+      c.stroke();
+    })));
+    c.restore();
+  }
   // Nullpunkt
   const o = S([0, 0, 0]);
   c.save(); c.strokeStyle = '#111'; c.lineWidth = 1.4;
@@ -9568,6 +9728,9 @@ function fStepRohUebernehmen(){
     melde('Werkzeugachse ' + STEP.achse + ' vorgeschlagen (die meisten Bohrungen stehen dort laengs).');
   });
   on('btnStepRoh', fStepRohUebernehmen);
+  on('btnStepKonturen', fStepKonturenUebernehmen);
+  const sel = document.getElementById('stepEbene');
+  if(sel && sel.addEventListener) sel.addEventListener('change', ()=>{ STEP.ebene = +sel.value; fStepZeichnen(); });
   const fi = document.getElementById('stepFile');
   if(fi && fi.addEventListener) fi.addEventListener('change', ()=>{
     const f = fi.files && fi.files[0]; if(!f) return;
