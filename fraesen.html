@@ -2291,6 +2291,34 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     .mask:not(.kachelpilot) .mrow .radiobtns.fwrap:not(.kopfschalter):not(.selfeld){flex-wrap:wrap;}
   }
   body.dunkel .fdrauf{background:#1a2027;}
+  /* ===== HANDYANSICHT DER HAUPTMASKE (14.09.2026, Daniels Befund) ========
+     Beides gilt NUR unter 900 px und NUR hier — das gemeinsame Stylesheet
+     bleibt unberuehrt, damit die Handyansicht des Drehteils gleich bleibt. */
+  @media(max-width:899px){
+    /* (1) Das Meldebanner stand auf der Zyklusleiste. Die gemeinsame Regel
+       haelt 104 px frei — die Fussleiste des Drehteils. Die Fraes-App hat
+       darueber die waagerechte Zyklusleiste (61 px: .sk min-height 44 plus
+       Polster und Rand). Gemessen bei 390x844: Banner 698..740 auf Leiste
+       679..740, also 69 % verdeckt und fuenf Knoepfe unerreichbar, und das
+       7 Sekunden nach jeder Meldung. env() dazu, weil die Fussleiste auf
+       einem iPhone um den unteren Sicherheitsrand hoeher ist — am Geraet
+       nicht nachgemessen, aber die sichere Richtung. */
+    #meldeBanner{bottom:calc(165px + env(safe-area-inset-bottom, 0px));}
+    /* (2) Aktionsknoepfe auch bei Bohrbild- und Konturzeilen nur am
+       ANGEWAEHLTEN Satz — wie bei den Zykluszeilen im gemeinsamen
+       Stylesheet. Dort sind Kontur- und Kopfzeile ausgenommen, weil ihr
+       Antippen im Drehteil in eine andere Ansicht springt; in der Fraes-App
+       waehlt jeder Tipp nur an (fSel typ kopf/muster/kontur), die Ausnahme
+       traegt hier also nicht. Ohne die Regel sass das ✕ je nach Textlaenge
+       mal in Zeile 1 rechts, mal in Zeile 2 links — ein Loeschknopf, der
+       wandert, wird irgendwann falsch getroffen (dieselbe Begruendung wie
+       im Drehteil). Die Kopfzeile behaelt ihr ✎: ein einzelner Knopf kann
+       nicht wandern. */
+    .ap-row[data-m] .ap-edit,.ap-row[data-m] .ap-del,
+    .ap-row[data-kt] .ap-edit,.ap-row[data-kt] .ap-del{display:none;}
+    .ap-row[data-m].sel .ap-edit,.ap-row[data-m].sel .ap-del,
+    .ap-row[data-kt].sel .ap-edit,.ap-row[data-kt].sel .ap-del{display:inline-block;}
+  }
   /* Werkzeug- und Positionstabellen: Eingaben in Zellen */
   .pointlist td input{width:64px;font-size:13px;padding:3px 4px;border:1px solid var(--line);border-radius:3px;}
   .pointlist td button{font-size:11px;padding:2px 7px;}
@@ -2697,6 +2725,13 @@ dann der Zyklus &mdash; jede Kachel &ouml;ffnet genau eine Maske mit den Feldern
 <li><b>NC-Ausgabe</b>: Erzeugen, Pr&uuml;fen, als <code>NAME.H</code> sichern. An der Steuerung: Datei laden,
 <b>Programm-Test</b> laufen lassen, jede Meldung fotografieren.</li>
 </ol>
+<p><b>Am Handy</b> ist der Arbeitsplan eine schmale Liste, und die Knopfsymbole
+&#9998; (&Auml;ndern) und &#10005; (L&ouml;schen) stehen nur an der Zeile, die gerade
+<b>angew&auml;hlt</b> ist &mdash; ein Tipp w&auml;hlt an, dann sind sie da. Das ist Absicht: erscheinen
+sie an jeder Zeile, rutscht der L&ouml;schknopf je nach L&auml;nge des Zeilentextes mal in die erste,
+mal in die zweite Zeile, und ein wandernder L&ouml;schknopf wird irgendwann falsch getroffen. Die
+Zeile <b>Programmkopf</b> beh&auml;lt ihren Stift dauerhaft &mdash; ein einzelner Knopf kann nicht
+wandern. Am Laptop steht wie bisher alles an jeder Zeile.</p>
 
 <h2 id="ba-fk03">3 &nbsp;Programmkopf</h2>
 <dl>
