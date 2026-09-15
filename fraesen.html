@@ -10,6 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
+<script>window.__DZ_STAND="15.09.2026 21:40 (113468df)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2791,7 +2792,9 @@ sp&auml;ter Taschen und Konturen, geschrieben als <b>Heidenhain-Klartext</b> f&u
 Er ist kein CAM f&uuml;r Freiformfl&auml;chen &mdash; daf&uuml;r bleibt hyperMILL zust&auml;ndig. Der Gewinn liegt
 beim einfachen Teil: Programm am Handy oder Laptop anlegen, als .H-Datei auf den Stick, an der
 Steuerung Programm-Test, fertig.</p>
-<div class="ba-merk"><b>Stand Stufe 1 (12.09.2026): nach Handbuch gebaut, am iTNC-530-Programmierplatz im Programm-Test durchgelaufen, an der Maschine noch NICHT gefahren.</b>
+<div class="ba-merk"><b>BELEGSTAND der Zyklen &mdash; nicht die Fassung dieser App:</b> welche Fassung Du gerade vor Dir hast, steht oben im Kopf dieser
+Anleitung (&bdquo;Stand &hellip;&ldquo;). Hier geht es darum, <i>wie weit die Zyklen belegt sind</i>.
+<br><b>Stufe 1 (12.09.2026): nach Handbuch gebaut, am iTNC-530-Programmierplatz im Programm-Test durchgelaufen, an der Maschine noch NICHT gefahren.</b>
 Die Q-Listen, Zyklustitel und die Schreibweise der Werte sind an den Beispiels&auml;tzen der Heidenhain-Handb&uuml;cher
 (Klartext-Dialog 670&nbsp;387 und Zyklenprogrammierung 670&nbsp;388, Software-St&auml;nde 340&nbsp;49x-02, -06 und -07)
 gepr&uuml;ft &mdash; f&uuml;r die Zyklen 240, 200, 201, 203, 206, 207, 220 und 221 schreiben alle drei St&auml;nde dieselben
@@ -11929,6 +11932,9 @@ function fStandPruefen(){
     }).catch(()=>{});
   }catch(e){}
 }
+// Noch einmal beim load-Ereignis: wer die Datei anders einbindet, hat
+// den Stempel vielleicht erst spaeter gesetzt.
+try{ window.addEventListener('load', fStandMalen); }catch(e){}
 try{ setTimeout(fStandPruefen, 1200); }catch(e){}
 
 function fStepBericht(){
@@ -12359,7 +12365,6 @@ fRender();
 setVal('pmSaveName', fProg.kopf.name);
 </script>
 <script>
-window.__DZ_STAND="15.09.2026 21:31 (98a0cf50)";
 // PWA-Offline [pwa-bauen.js]: nur wenn ueber einen Server geladen —
 // Datei-Doppelklick und Artefakt bleiben unberuehrt.
 if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){
