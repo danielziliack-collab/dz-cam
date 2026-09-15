@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="16.09.2026 00:43 (1e82c61f)";</script>
+<script>window.__DZ_STAND="16.09.2026 00:57 (bb393336)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -9187,7 +9187,10 @@ function fSpannPunkt(x, y, z, teile, B, luft){
       nah = true;
       // Der Koerper beginnt bei z+von. Liegt sein UNTERES Ende ueber der
       // Backenoberkante, steht er frei - dann zaehlt nur die Naehe.
-      if(z + p.von > B.zOben + luft) continue;
+      // GENAU auf der Grenze zaehlt als frei: wer die geforderte Luft hat,
+      // hat sie. Ohne dieses Tausendstel widerspricht die Pruefung dem
+      // eigenen Vorschlag (gemessen an 139 von 145 echten Modellen).
+      if(z + p.von > B.zOben + luft - 1e-3) continue;
       const tief = fRund(Math.max(luft - frei, 0));
       arten[p.name] = (arten[p.name] || 0) + 1;
       if(!schlimm || tief > schlimm.tief) schlimm = {teil:p.name, backe:bk.name, tief:tief, frei:fRund(frei), x:fRund(x), y:fRund(y), z:fRund(z), von:p.von};
@@ -9293,7 +9296,10 @@ function fSpannVorschlag(prog, befund){
   // Rohteiloberkante gefahren wird.
   const nah = (R.zNah !== null && R.zNah !== undefined) ? (R.zNah - luft) : zO;
   const eng = nah < zO - 1e-9;
-  const backeZ = fRund(Math.min(nah, zO));
+  // ABWAERTS runden, nicht kaufmaennisch: ein aufgerundeter Tausendstel
+  // hiebe die Luft wieder an, und der Vorschlag waere schon beim Setzen
+  // knapp zu hoch.
+  const backeZ = Math.floor(Math.min(nah, zO) * 1000) / 1000;
   const einspann = fRund(backeZ - zU);
   const frei = fRund(zO - backeZ);
   if(!eng) hinweise.push('Keine Bahn kommt den Backen seitlich nahe - die Bearbeitung begrenzt die Spannhoehe nicht. Die Backenoberkante richtet sich dann allein nach dem Teil (tiefste Bearbeitung Z' + tief + ').');
