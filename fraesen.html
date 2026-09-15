@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="15.09.2026 21:51 (3e9ff51c)";</script>
+<script>window.__DZ_STAND="15.09.2026 21:56 (ece18e50)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11937,9 +11937,14 @@ try{ fStandMalen(); }catch(e){}
 // ALTE Kopie aus dem Offline-Speicher - und das muss man sehen: Daniel
 // hat am 15.09.2026 eine Woche lang mit dem Stand vom 12.09. gearbeitet,
 // ohne dass die App ein Wort gesagt haette.
-var F_STAND_ALT = false;   // diese Kopie ist nachweislich nicht die neueste
+var F_STAND_ALT = false;    // diese Kopie ist nachweislich nicht die neueste
+var F_STAND_BEREIT = false; // die neue Fassung liegt im Geraet bereit
+var F_STAND_ZULETZT = 0;    // wann zuletzt nachgesehen wurde
 function fStandPruefen(){
   if(!window.__DZ_STAND || !window.fetch) return;            // Arbeitskopie
+  const jetzt = Date.now();
+  if(jetzt - F_STAND_ZULETZT < 30000) return;                // nicht bei jedem Antippen
+  F_STAND_ZULETZT = jetzt;
   try{
     fetch('stand.txt', {cache:'no-store'}).then(r => r && r.ok ? r.text() : null).then(t => {
       const server = String(t || '').trim();
@@ -11972,13 +11977,29 @@ try{ window.addEventListener('load', fStandMalen); }catch(e){}
 // Sitzungsspeicher): liegt auf dem Server selbst ein alter Stand, liefe
 // es sonst im Kreis.
 function fStandNeuLaden(){
+  F_STAND_BEREIT = true;                         // die neue Fassung liegt bereit
   if(!F_STAND_ALT) return;                       // nur die alte Kopie laedt neu
+  // NICHT MITTEN IN EINER EINGABE: eine offene Maske haelt halb getippte
+  // Werte, die kein Speicher kennt. Das Programm selbst ist sicher
+  // (fSpeicherAkt laeuft nach jeder Aenderung); beim naechsten Zurueck-
+  // kommen wird nachgeholt.
+  try{ if(document.querySelector('.mask.show')) return; }catch(e){}
   try{ if(sessionStorage.getItem('dzf_neugeladen')) return;
        sessionStorage.setItem('dzf_neugeladen', '1'); }catch(e){}
   try{ location.reload(); }catch(e){}
 }
 try{
   if(navigator.serviceWorker) navigator.serviceWorker.addEventListener('controllerchange', fStandNeuLaden);
+}catch(e){}
+// UND WENN DIE APP AUS DEM HINTERGRUND ZURUECKKOMMT: nachsehen. Am iPhone
+// wird eine Home-Bildschirm-App oft nur FORTGESETZT, nicht neu geladen -
+// dann laeuft beim Oeffnen kein einziger Abruf, und ohne diese Stelle
+// merkt die App bis zum naechsten echten Start nichts.
+try{
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) return;
+    if(F_STAND_BEREIT) fStandNeuLaden(); else fStandPruefen();
+  });
 }catch(e){}
 try{ setTimeout(fStandPruefen, 1200); }catch(e){}
 
