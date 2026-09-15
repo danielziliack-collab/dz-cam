@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="16.09.2026 00:20 (ca266b95)";</script>
+<script>window.__DZ_STAND="16.09.2026 00:43 (1e82c61f)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2675,7 +2675,8 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <span style="font-size:11px;color:var(--text-dim);">Z-Ebene</span>
           <select id="stepEbene" style="font-size:11px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--text);max-width:210px;"></select>
           <button class="gcbtn" id="btnStepKonturen" title="Die Schleifen dieser Ebene als XY-Konturen in den Arbeitsplan legen">Konturen übernehmen</button>
-          <button class="gcbtn" id="btnStepFlaechen" title="Planen, Modell abspanen und Schr&auml;gen schlichten aus dem Modell ableiten &mdash; die Schritte stehen danach VOR den Bohrungen">Fl&auml;chen übernehmen</button>
+          <button class="gcbtn primary" id="btnStepPlan" title="Der ganze Vorschlag in einem Zug: planen, schruppen, bohren, schlichten &mdash; in dieser Reihenfolge und mit so wenig Werkzeugwechseln wie m&ouml;glich">Programm vorschlagen</button>
+          <button class="gcbtn" id="btnStepFlaechen" title="Nur die Fl&auml;chen: planen, Modell abspanen, Schr&auml;gen schlichten &mdash; die Schritte stehen danach VOR den Bohrungen">Fl&auml;chen übernehmen</button>
           <button class="gcbtn" id="btnStepBohren" title="Die Bohrungen des Modells als Bohrbilder und Schritte anlegen: ein Zentrierschritt über alle Stellen, danach je Durchmesser einer — größter zuerst">Bohrungen übernehmen</button>
           <span style="display:inline-flex;gap:2px;"><button class="gcbtn primary" id="btnStepDraht" title="Drahtbild des Modells">Drahtbild</button><button class="gcbtn" id="btnStepSoll" title="Sollform von oben: die Höhe, auf die gefräst werden muss">Sollform</button></span>
         </div>
@@ -2893,7 +2894,7 @@ Werkzeugwechsel. Muss &uuml;ber der Rohteil-Oberkante liegen &mdash; sonst sperr
 nichts. Mit <b>Schraubstock</b> stehen zwei Backen an den Rohteilkanten: Du sagst, in welcher Richtung sie spannen
 (Y = vorn und hinten, X = links und rechts), wo ihre <b>Oberkante</b> liegt (absolut in Z), wie weit eine Backe
 &uuml;ber die Teilkante hinausragt und wie lang sie ist. Alles unterhalb der Backenoberkante innerhalb dieser Rechtecke
-gilt als Backe. Die Draufsicht zeichnet sie schraffiert mit.
+gilt als Backe. Die Draufsicht des Arbeitsplans zeichnet sie schraffiert mit, und seit dem 16.09.2026 auch die <b>Simulation</b> &mdash; flach im 2D-Bild, als Kl&ouml;tze im 3D-Bild. Dort sieht man beim Fahren, ob man an sie kommt.
 <br><br><b>Aufspanntiefe vorschlagen</b> beantwortet Daniels Frage mit einer Zahl: die App rechnet alle Bahnen des
 Programms, nimmt die <b>tiefste Stelle</b>, setzt die Backenoberkante um die eingetragene <b>Luft</b> darunter und sagt,
 wieviel vom Rohteil dann noch im Griff steckt. Bleibt das unter der <b>Mindest-Einspanntiefe</b> (Daumenwert, &auml;nderbar),
@@ -3032,6 +3033,21 @@ waagerechten Fl&auml;chen). Der <b>Nullpunkt</b> liegt wahlweise in der Ecke ode
 in der Mitte, die Oberkante des Teils immer auf Z0, so wie ein Fr&auml;steil aufgespannt wird.</dd>
 <dt>Als Rohteil &uuml;bernehmen</dt><dd>Schreibt den H&uuml;llquader des ausgerichteten Modells als <b>BLK FORM</b> in den Programmkopf. Aufma&szlig; f&uuml;r das echte
 Rohteil kommt danach von Hand dazu.</dd>
+<dt id="ba-fk05c-reihenfolge">Programm vorschlagen &mdash; die Reihenfolge</dt><dd>Der Knopf macht in einem Zug, was die beiden Knöpfe daneben
+einzeln tun, und bringt es in die <b>Reihenfolge, in der man f&auml;hrt</b>. Vier Phasen, jede mit ihrem Grund:
+<br><b>1 Planen</b> &mdash; die Oberfl&auml;che zuerst; erst dann stimmen alle Tiefen, und ein Bohrer wandert nicht auf der S&auml;gehaut.
+<br><b>2 Schruppen</b> &mdash; das Grobe weg, mit dem gr&ouml;&szlig;ten Werkzeug, das hineinkommt; das Restmaterial gleich danach mit dem kleineren.
+<br><b>3 Bohren</b> &mdash; zentrieren, bohren, senken, Gewinde; in die FERTIG geplante Fl&auml;che, und <i>vor</i> dem Schlichten: wer erst schlichtet
+und dann bohrt, dr&uuml;ckt den <b>Grat</b> in die fertige Fl&auml;che.
+<br><b>4 Schlichten</b> &mdash; zuletzt, damit nichts mehr dar&uuml;ber f&auml;hrt.
+<br><br>Innerhalb einer Phase bleibt die Ordnung, die der jeweilige Planer gebaut hat &mdash; die Bohrkette ist selbst schon nach
+Werkzeugwechseln geordnet und wird nicht umsortiert. Die Meldung nennt die <b>Zahl der Werkzeugwechsel</b>; wird ein Werkzeug zweimal
+eingewechselt, steht auch das da (das ist der Preis der Reihenfolge, kein Fehler).
+<br><br><b>Ein vorhandenes Programm wird ERSETZT</b> &mdash; aber erst beim zweiten Druck, und die Meldung sagt es vorher. Die zwei
+Einzelknöpfe bleiben f&uuml;r den Fall, dass Du nur die Bohrungen oder nur die Fl&auml;chen willst.
+<br><br><b>Was der Planer nicht tut</b> (und in jeder Meldung sagt): Taschen, Nuten und Zapfen als eigene Zyklen &mdash; das Modell wird als
+Ganzes abgespant &mdash;, Gewindefr&auml;sen, Senkungen ohne Gewinde und die <b>zweite Aufspannung</b>. Der Vorschlag ist ein
+<b>Vorschlag</b>: durchsehen, die Schnittwerte pr&uuml;fen, simulieren.</dd>
 <dt id="ba-fk05c-flaechen">Fl&auml;chen &mdash; planen, abspanen, schlichten</dt><dd>Der Knopf <b>Fl&auml;chen &uuml;bernehmen</b> leitet aus dem Modell ab, was am
 Werkst&uuml;ck fl&auml;chig zu tun ist, und legt es <b>vor den Bohrungen</b> an &mdash; in eine ungeplante Fl&auml;che zu bohren hie&szlig;e schr&auml;g anbohren, und wer
 erst bohrt und dann abspant, f&auml;hrt mit dem Fr&auml;ser durch die fertigen L&ouml;cher. Die Reihenfolge ist Daniels: vom Groben zum Feinen.
@@ -7378,6 +7394,89 @@ function fPlanBohrAnlegen(prog, plan){
   return plan.schritte.length;
 }
 
+// ---- Der Planer, Stufe 3: die Reihenfolge ---------------------------
+// Daniels Regel: vom Groben zum Feinen, mit wenig Werkzeugwechsel. Fuers
+// Fraesen heisst das vier Phasen, und jede hat ihren fachlichen Grund:
+//   1 PLANEN     die Oberflaeche zuerst - erst dann stimmen alle Tiefen,
+//                und ein Bohrer wandert nicht auf der Sagehaut.
+//   2 SCHRUPPEN  das Grobe weg, mit dem groessten Werkzeug, das hineinkommt;
+//                das Restmaterial gleich danach mit dem kleineren.
+//   3 BOHREN     zentrieren, bohren, senken, Gewinde - in die FERTIG
+//                geplante Flaeche, und bevor geschlichtet wird: wer erst
+//                schlichtet und dann bohrt, drueckt den Grat in die
+//                fertige Flaeche.
+//   4 SCHLICHTEN zuletzt, damit nichts mehr darueber faehrt.
+const F_PLAN_PHASEN = [
+  {nr:1, name:'Planen'}, {nr:2, name:'Schruppen'}, {nr:3, name:'Bohren'}, {nr:4, name:'Schlichten'}];
+function fPlanPhase(art){
+  if(art === 'planfraesen') return 1;
+  if(art === 'modellSchruppen') return 2;
+  if(art === 'modellSchlichten') return 4;
+  const z = F_ZYKLEN[art] || {};
+  if(z.fraes && !z.gewf) return 2;                 // Taschen, Nuten, Zapfen
+  return 3;                                        // alles Bohrende
+}
+
+// Der ganze Vorschlag: Flaechen und Bohrungen in EINER Liste, in Daniels
+// Reihenfolge. Die Bohrkette behaelt ihre eigene Ordnung (zentrieren,
+// Durchmesser gross nach klein, senken, Gewinde) - sie ist selbst schon
+// nach Werkzeugwechseln geordnet und darf nicht gedreht werden.
+function fPlanProgramm(prog, A, F){
+  const fl = fPlanFlaechen(prog, A, F);
+  const bo = fPlanBohrSchritte(prog, A, F);
+  const hinweise = fl.hinweise.concat(bo.hinweise);
+  const roh = fl.schritte.map(sp => Object.assign({}, sp, {phase:fPlanPhase(sp.art), muster:null}))
+    .concat(bo.schritte.map(sp => Object.assign({}, sp, {phase:fPlanPhase(sp.art)})));
+  // Stabil nach Phase: innerhalb einer Phase bleibt die Reihenfolge, in
+  // der die beiden Planer sie geliefert haben.
+  const schritte = [];
+  F_PLAN_PHASEN.forEach(ph => roh.forEach(sp => { if(sp.phase === ph.nr) schritte.push(sp); }));
+  // Die Werkzeugwechsel zaehlen - das ist die Zahl, an der Daniels
+  // "moeglichst effizient" haengt.
+  let wechsel = 0, letzt = null;
+  schritte.forEach(sp => { if(sp.t !== letzt){ wechsel++; letzt = sp.t; } });
+  // Ein Werkzeug, das ZWEIMAL in den Wechselplan kommt, kostet einen
+  // Wechsel zuviel - das laesst sich nicht immer vermeiden (ein Fraeser
+  // schruppt und schlichtet), aber es gehoert gesagt.
+  const einwechsel = {}; let vor2 = null;
+  schritte.forEach(sp => { if(sp.t !== vor2){ einwechsel[sp.t] = (einwechsel[sp.t] || 0) + 1; vor2 = sp.t; } });
+  const mehrfach = Object.keys(einwechsel).filter(t => einwechsel[t] > 1).map(Number);
+  if(mehrfach.length) hinweise.push('Diese Werkzeuge werden zweimal eingewechselt: ' +
+    mehrfach.map(t => 'T' + t).join(', ') + ' — das ist der Preis der Reihenfolge (erst alles Grobe, dann alles Feine) und kein Fehler.');
+  if(!schritte.length) hinweise.unshift('Aus diesem Modell laesst sich kein Schritt ableiten.');
+  // Was der Planer NICHT kann, gehoert in dieselbe Meldung - sonst haelt
+  // man das Programm fuer vollstaendig.
+  hinweise.push('NICHT geplant: Taschen, Nuten und Zapfen als eigene Zyklen (das Modell wird als Ganzes abgespant), Gewindefraesen, Senkungen ohne Gewinde und die ZWEITE Aufspannung.');
+  return {schritte:schritte, muster:bo.muster, hinweise:hinweise, wechsel:wechsel,
+          mehrfach:mehrfach, flaechen:fl.schritte.length, bohrungen:bo.schritte.length,
+          phasen:F_PLAN_PHASEN.map(ph => ({nr:ph.nr, name:ph.name, n:schritte.filter(x => x.phase === ph.nr).length}))};
+}
+
+// Den ganzen Vorschlag schreiben. ersetzen = die vorhandenen Schritte und
+// Bohrbilder werden VORHER geloescht (der Aufrufer fragt).
+function fPlanProgrammAnlegen(prog, plan, F, ersetzen){
+  if(!prog || !plan || !plan.schritte.length) return 0;
+  if(ersetzen){ prog.schritte = []; prog.muster = []; }
+  if(F && plan.schritte.some(sp => sp.art === 'modellSchruppen' || sp.art === 'modellSchlichten')) fStepFeldSetzen(F);
+  const m0 = (prog.muster || []).length;
+  prog.muster = (prog.muster || []).concat((plan.muster || []).map(m => ({name:m.name, typ:'punkte', punkte:m.punkte.slice()})));
+  prog.schritte = prog.schritte || [];
+  plan.schritte.forEach(sp => {
+    const s2 = fSchrittNeu(prog, sp.art, sp.t, (sp.muster == null) ? null : (m0 + sp.muster));
+    Object.assign(s2, sp.werte);
+    prog.schritte.push(s2);
+  });
+  return plan.schritte.length;
+}
+
+// Der Bericht in Worten - eine Quelle fuer Panel und Pruefstand.
+function fPlanProgrammText(plan){
+  if(!plan) return '';
+  if(!plan.schritte.length) return 'Kein Schritt ableitbar.';
+  return plan.schritte.length + ' Schritte in ' + plan.wechsel + ' Werkzeugwechseln: ' +
+    plan.phasen.filter(p => p.n).map(p => p.name + ' ' + p.n).join(', ') + '.';
+}
+
 // ---- Stufe 2: waagerechte Flaechen als Z-Ebenen, Schleifen als Konturen ----
 // Jede waagerechte Ebene des Modells ist eine Hoehe, auf der gefraest wird:
 // die Oberflaeche, ein Taschenboden, eine Absatzflaeche. Ihre aeussere Schleife
@@ -8759,6 +8858,23 @@ function fSim3dRand(F){
 // Werkzeugkoerper: Spitze im Ursprung, Kegel (kegel = cot des halben
 // Spitzenwinkels, 0 = flach) bis zum Radius rt, darueber Zylinder der Laenge
 // laenge. Dreiecke mit Normalen (6 Zahlen je Punkt).
+// Ein Quader als Dreiecke (x,y,z, nx,ny,nz) - fuer die Spannbacken im
+// 3D-Bild. Sechs Flaechen, Normalen nach aussen.
+function fSim3dQuader(x0, y0, z0, x1, y1, z1){
+  const st = [];
+  const p = (x, y, z, n) => st.push(x, y, z, n[0], n[1], n[2]);
+  const flaeche = (a, b, c, d, n) => { p(a[0], a[1], a[2], n); p(b[0], b[1], b[2], n); p(c[0], c[1], c[2], n);
+                                       p(a[0], a[1], a[2], n); p(c[0], c[1], c[2], n); p(d[0], d[1], d[2], n); };
+  const P000 = [x0, y0, z0], P100 = [x1, y0, z0], P110 = [x1, y1, z0], P010 = [x0, y1, z0];
+  const P001 = [x0, y0, z1], P101 = [x1, y0, z1], P111 = [x1, y1, z1], P011 = [x0, y1, z1];
+  flaeche(P001, P101, P111, P011, [0, 0, 1]);
+  flaeche(P010, P110, P100, P000, [0, 0, -1]);
+  flaeche(P000, P100, P101, P001, [0, -1, 0]);
+  flaeche(P110, P010, P011, P111, [0, 1, 0]);
+  flaeche(P010, P000, P001, P011, [-1, 0, 0]);
+  flaeche(P100, P110, P111, P101, [1, 0, 0]);
+  return new Float32Array(st);
+}
 function fSim3dWerkzeug(rt, kegel, laenge, segs){
   segs = segs || 28; const st = []; const hK = (kegel > 0) ? rt * kegel : 0, L = Math.max(laenge || 0, hK + 1);
   const p = (x, y, z, n) => st.push(x, y, z, n[0], n[1], n[2]);
@@ -12464,6 +12580,25 @@ function fSimZeichnen2D(){
   }
   try{ ctx.imageSmoothingEnabled = false; ctx.drawImage(SIM.bild.cv, X(F.x0), Y(F.y0 + bh), bw * sc, bh * sc); }catch(e){}
   ctx.strokeStyle = dunkel ? '#9fb3c4' : '#3d5a73'; ctx.lineWidth = 1; ctx.strokeRect(X(F.x0), Y(F.y0 + bh), bw * sc, bh * sc);
+  // SPANNBACKEN: dieselbe Schraffur wie in der Draufsicht, damit man sie
+  // wiedererkennt. Sie liegen ausserhalb des Feldes - das Bild zeigt
+  // ohnehin nur den Rohteilbereich, also ist nur der Rand zu sehen; das
+  // genuegt, um die Lage zu erkennen.
+  const spSim = fSpannBacken(fProg);
+  if(spSim){
+    ctx.save();
+    ctx.fillStyle = dunkel ? 'rgba(200,120,60,.22)' : 'rgba(150,110,80,.18)';
+    ctx.strokeStyle = dunkel ? '#c08a5a' : '#8a6a4a'; ctx.lineWidth = 1.2;
+    spSim.backen.forEach(b2 => {
+      const px = X(b2.x0), py = Y(b2.y1), pw = (b2.x1 - b2.x0) * sc, ph = (b2.y1 - b2.y0) * sc;
+      ctx.fillRect(px, py, pw, ph); ctx.strokeRect(px, py, pw, ph);
+      ctx.save(); ctx.beginPath(); ctx.rect(px, py, pw, ph); ctx.clip();
+      ctx.lineWidth = 0.6; ctx.beginPath();
+      for(let q = -ph; q < pw + ph; q += 7){ ctx.moveTo(px + q, py + ph); ctx.lineTo(px + q + ph, py); }
+      ctx.stroke(); ctx.restore();
+    });
+    ctx.restore();
+  }
   // Bahnspur: Eilgang rot gestrichelt, Vorschub gruen
   const spurZeichnen = () => {
     let prev = null;
@@ -12493,7 +12628,7 @@ function fSimZeichnen2D(){
 // Wunsch da ("ich moechte eigentlich nicht durchschauen koennen durch das
 // Bauteil, das verfaelscht mir die Konturen von den Elementen")  Vorgabe aus,
 // Haken simKanten, Slot dzf_simkanten, und auch eingeschaltet mit Tiefentest.
-const SIM3D = {gl:null, cv:null, ok:false, versucht:false, pT:null, pS:null, az:-0.62, el:0.55, dist:0.8, drag:null, kanten:false, feldKey:'', gen:-1, netzN:0, idxTyp:0, randN:0, spurN:-1, spurV:0, spurE:0, wz:null, wzKey:'', wzN:0, restKey:'', b:{}};
+const SIM3D = {gl:null, cv:null, ok:false, versucht:false, pT:null, pS:null, az:-0.62, el:0.55, dist:0.8, drag:null, kanten:false, feldKey:'', gen:-1, netzN:0, idxTyp:0, randN:0, spurN:-1, spurV:0, spurE:0, wz:null, wzKey:'', wzN:0, restKey:'', backKey:'', backN:0, b:{}};
 function fSim3dShader(gl, typ, src){ const sh = gl.createShader(typ); gl.shaderSource(sh, src); gl.compileShader(sh); if(!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error('Shader: ' + gl.getShaderInfoLog(sh)); return sh; }
 function fSim3dProgramm(gl, vs, fs, attr){
   const p = gl.createProgram(); gl.attachShader(p, fSim3dShader(gl, gl.VERTEX_SHADER, vs)); gl.attachShader(p, fSim3dShader(gl, gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
@@ -12530,7 +12665,7 @@ function fSim3dInit(cv){
       'void main(){ v_n = a_nrm; gl_Position = u_mvp * vec4(a_pos + u_off, 1.0); }',
       'precision mediump float; varying vec3 v_n; ' + licht + ' uniform vec4 u_col; uniform float u_lit;' +
       'void main(){ float l = mix(1.0, 0.45 + 0.55 * max(0.0, dot(normalize(v_n), u_licht)), u_lit); gl_FragColor = vec4(u_col.rgb * l, u_col.a); }', ['a_pos', 'a_nrm']);
-    const b = SIM3D.b; ['xy', 'zn', 'znU', 'rest', 'idx', 'rand', 'wz', 'spurV', 'spurE', 'lin', 'koll'].forEach(n => { b[n] = gl.createBuffer(); });
+    const b = SIM3D.b; ['xy', 'zn', 'znU', 'rest', 'idx', 'rand', 'wz', 'backen', 'spurV', 'spurE', 'lin', 'koll'].forEach(n => { b[n] = gl.createBuffer(); });
     gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
     SIM3D.gl = gl; SIM3D.ok = true; SIM3D.feldKey = ''; SIM3D.gen = -1; SIM3D.spurN = -1; SIM3D.wzKey = '';
     fSim3dBedienung(cv);
@@ -12639,6 +12774,27 @@ function fSim3dZeichnen(){
     gl.drawArrays(gl.LINES, 0, arr.length / 3);
   };
   koerper(b.rand, SIM3D.randN, [0.56, 0.60, 0.64, 1], 1);
+  // SPANNBACKEN: zwei Quader von der Backenoberkante abwaerts bis zur
+  // Rohteil-Unterkante. Tiefer zu zeichnen brachte nichts - das Bild
+  // endet dort ohnehin, und ein Klotz, der aus dem Bild laeuft, nimmt nur
+  // Platz weg. DECKEND: der Zeichner schaltet das Mischen nirgends ein,
+  // ein Alpha-Wert waere also eine Absicht ohne Wirkung - und verdeckt
+  // wird ohnehin fast nie etwas, die Backen liegen neben dem Teil.
+  {
+    const B3 = fSpannBacken(fProg);
+    if(B3){
+      const tief = Math.min(F.unten, B3.zOben) - Math.max(2, (F.oben - F.unten) * 0.25);
+      const key3 = [B3.zOben, B3.richtung, B3.backen.map(x => [x.x0, x.x1, x.y0, x.y1].join(',')).join('|'), tief].join('/');
+      if(SIM3D.backKey !== key3){
+        const st = [];
+        B3.backen.forEach(x => { const m = fSim3dQuader(x.x0, x.y0, tief, x.x1, x.y1, B3.zOben); for(let q = 0; q < m.length; q++) st.push(m[q]); });
+        const arr = new Float32Array(st);
+        gl.bindBuffer(gl.ARRAY_BUFFER, b.backen); gl.bufferData(gl.ARRAY_BUFFER, arr, gl.DYNAMIC_DRAW);
+        SIM3D.backN = arr.length / 6; SIM3D.backKey = key3;
+      }
+      koerper(b.backen, SIM3D.backN, [0.62, 0.48, 0.34, 1], 1);
+    }
+  }
   gl.disable(gl.POLYGON_OFFSET_FILL);
   // Kanten des Rohteils NUR mit Haken, und dann MIT Tiefentest: verdeckte
   // Kanten bleiben verdeckt. Vorher lagen sie halbdurchsichtig ohne
@@ -13176,6 +13332,38 @@ function fStepBohrUebernehmen(){
 // VOR den Bohrungen. Die Sollform wird dabei gebraucht und, wenn sie hier
 // schon steht, gleich ans Programm gegeben: ohne sie haetten die beiden
 // Modellzyklen nichts zu rechnen.
+// DER GANZE VORSCHLAG (Planer Stufe 3). Sind schon Schritte da, braucht
+// es einen ZWEITEN Klick - im Artefakt ist confirm() stumm, und ein
+// Programm stillschweigend zu ersetzen waere eine Falle.
+var STEP_PLAN_FRAGE = 0;
+function fStepProgrammVorschlagen(){
+  const A = STEP.aus;
+  if(!A){ melde('FEHLER: kein Modell geladen.'); return false; }
+  if(!STEP.feld){ try{ STEP.feld = fStepSollfeld(A, STEP.raster || 0); STEP.bild = null; }catch(e){ STEP.feld = null; } }
+  const hatte = (fProg.schritte || []).length;
+  const jetzt = Date.now();
+  if(hatte && (jetzt - STEP_PLAN_FRAGE > 4000)){
+    STEP_PLAN_FRAGE = jetzt;
+    melde('Das Programm hat schon ' + hatte + ' Schritt(e). Noch einmal druecken, dann werden sie durch den Vorschlag ERSETZT.');
+    return false;
+  }
+  STEP_PLAN_FRAGE = 0;
+  let plan = null;
+  try{ plan = fPlanProgramm(fProg, A, STEP.feld || null); }
+  catch(e){ melde('FEHLER beim Rechnen des Vorschlags: ' + e.message); return false; }
+  if(!plan.schritte.length){ melde('Kein Schritt ableitbar. ' + plan.hinweise.join(' ')); return false; }
+  const k = fProg.kopf, B = A.box;
+  // Seitlich und unten muss das Rohteil zum Modell passen; OBEN darf es
+  // hoeher sein - genau das ist das Aufmass, das geplant wird.
+  const passt = ['x0', 'x1', 'y0', 'y1', 'z0'].every(q => Math.abs((+k[q] || 0) - B[q]) < 0.01)
+             && (+k.z1 || 0) >= B.z1 - 0.01;
+  const n = fPlanProgrammAnlegen(fProg, plan, STEP.feld || null, hatte > 0);
+  fRender();
+  melde('Vorschlag: ' + fPlanProgrammText(plan) + ' ' + plan.schritte.map((sp, i) => (i + 1) + '. ' + (sp.text || sp.art)).join('; ') + '.'
+    + (passt ? '' : ' ACHTUNG: das Rohteil im Programmkopf passt nicht zum Modell — erst "Als Rohteil uebernehmen" druecken.')
+    + (plan.hinweise.length ? ' ' + plan.hinweise.join(' ') : ''));
+  return n > 0;
+}
 function fStepFlaechenUebernehmen(){
   const A = STEP.aus;
   if(!A){ melde('FEHLER: kein Modell geladen.'); return false; }
@@ -13240,6 +13428,7 @@ function fStepRohUebernehmen(){
   }
   on('btnStepRoh', fStepRohUebernehmen);
   on('btnStepFeld', fStepFeldUebernehmen);
+  on('btnStepPlan', fStepProgrammVorschlagen);
   on('btnStepBohren', fStepBohrUebernehmen);
   on('btnStepFlaechen', fStepFlaechenUebernehmen);
   // Rasterweite der Sollform. Leer = automatisch nach Teilgroesse. Feiner
