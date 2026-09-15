@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="16.09.2026 00:57 (bb393336)";</script>
+<script>window.__DZ_STAND="16.09.2026 01:18 (ae7313be)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -7077,28 +7077,59 @@ function fPlanBohrSchritte(prog, A, F){
   machbar.forEach(q => q.g.punkte.forEach(p => alle.push(p)));
   alle.sort((p, q) => (p.y - q.y) || (p.x - q.x));
 
-  if(zentrierer && alle.length){
-    muster.push({name:'Alle Bohrungen', typ:'punkte', punkte:alle.slice()});
-    // Auf DURCHMESSER zentrieren gibt zugleich die Anfasung der Bohrung -
-    // aber nur, wenn der Zentrierer gross genug ist. Sonst auf Tiefe.
-    const dMin = Math.min.apply(null, machbar.map(q => q.g.d));
-    const aufD = (+zentrierer.d || 0) >= dMin * 1.1;
-    schritte.push({art:'zentrieren', t:zentrierer.nr, muster:0,
-      werte:aufD ? {zAuswahl:1, zDurchm:fRund(dMin), tiefe:-2, q203:fRund(B.gruppen[0].zOben)}
-                 : {zAuswahl:0, tiefe:-1.5, q203:fRund(B.gruppen[0].zOben)},
-      text:'Zentrieren, ' + alle.length + ' Stellen' + (aufD ? ', auf ⌀' + fRund(dMin) : ', 1,5 mm tief')});
-    if(!aufD) hinweise.push('Zentriert wird 1,5 mm tief: der Zentrierbohrer ⌀' + fRund(zentrierer.d) +
-      ' ist zu klein, um auf den Bohrungsdurchmesser anzusenken.');
-  } else if(alle.length) hinweise.push('Kein Zentrierbohrer in der Werkzeugtabelle — es wird ohne Zentrieren gebohrt.');
-
+  // Was gar nicht gebohrt werden kann, steht in keiner Ebene - die
+  // Meldung dazu kommt deshalb vorweg.
   B.gruppen.forEach(g => {
     const W = fPlanBohrWerkzeug(prog, g.d);
-    if(!W.art){
-      hinweise.push(W.grund === 'tasche'
-        ? ('⌀' + g.d + ' (' + g.punkte.length + 'x): zu gross zum Bohren und zum Wendeln — das ist eine runde TASCHE und gehoert zu den Fraesbahnen, nicht in den Bohrplan.')
-        : ('⌀' + g.d + ' (' + g.punkte.length + 'x): kein Bohrer dieses Durchmessers und kein Fraeser mit Eintauchwinkel, der hineinpasst — dieser Schritt fehlt.'));
-      return;
-    }
+    if(W.art) return;
+    hinweise.push(W.grund === 'tasche'
+      ? ('⌀' + g.d + ' (' + g.punkte.length + 'x): zu gross zum Bohren und zum Wendeln — das ist eine runde TASCHE und gehoert zu den Fraesbahnen, nicht in den Bohrplan.')
+      : ('⌀' + g.d + ' (' + g.punkte.length + 'x): kein Bohrer dieses Durchmessers und kein Fraeser mit Eintauchwinkel, der hineinpasst — dieser Schritt fehlt.'));
+  });
+
+  // VON OBEN NACH UNTEN (Befund 16.09.2026 an Daniels echten Teilen):
+  // eine Bohrung in einer tieferliegenden Flaeche ist erst erreichbar,
+  // wenn darueber geoeffnet ist - sonst faehrt das Werkzeug im Eilgang
+  // durch stehendes Material. Die Bezugsflaechen werden deshalb einzeln
+  // und absteigend abgearbeitet, und JEDE bekommt ihren eigenen
+  // Zentrierschritt: ein q203 fuer alle Stellen setzte den Koerner sonst
+  // um die ganze Teilhoehe daneben.
+  const ebenen = [];
+  machbar.forEach(q => {
+    const z = fRund(q.g.zOben);
+    let e = null;
+    for(let i = 0; i < ebenen.length; i++) if(Math.abs(ebenen[i].z - z) < 0.01){ e = ebenen[i]; break; }
+    if(!e){ e = {z:z, gruppen:[], punkte:[]}; ebenen.push(e); }
+    e.gruppen.push(q.g); q.g.punkte.forEach(p => e.punkte.push(p));
+  });
+  ebenen.sort((a, b) => b.z - a.z);
+  ebenen.forEach(e => {
+    e.gruppen.sort((a, b) => (b.d - a.d));           // je Ebene der groesste zuerst
+    e.punkte.sort((p, q) => (p.y - q.y) || (p.x - q.x));
+  });
+  if(ebenen.length > 1) hinweise.push('Die Bohrungen liegen in ' + ebenen.length +
+    ' verschiedenen Bezugsflaechen (Z ' + ebenen.map(e => e.z).join(', ') + '). Gearbeitet wird von OBEN nach unten, und jede Flaeche wird eigens zentriert — sonst faehrt das Werkzeug im Eilgang durch noch stehendes Material.');
+
+  ebenen.forEach((e, ei) => {
+   if(zentrierer && e.punkte.length){
+    const mz = muster.length;
+    muster.push({name:(ebenen.length > 1) ? ('Bohrungen Z' + e.z) : 'Alle Bohrungen', typ:'punkte', punkte:e.punkte.slice()});
+    // Auf DURCHMESSER zentrieren gibt zugleich die Anfasung der Bohrung -
+    // aber nur, wenn der Zentrierer gross genug ist. Sonst auf Tiefe.
+    const dMin = Math.min.apply(null, e.gruppen.map(g => g.d));
+    const aufD = (+zentrierer.d || 0) >= dMin * 1.1;
+    schritte.push({art:'zentrieren', t:zentrierer.nr, muster:mz,
+      werte:aufD ? {zAuswahl:1, zDurchm:fRund(dMin), tiefe:-2, q203:e.z}
+                 : {zAuswahl:0, tiefe:-1.5, q203:e.z},
+      text:'Zentrieren, ' + e.punkte.length + ' Stellen' + (aufD ? ', auf ⌀' + fRund(dMin) : ', 1,5 mm tief')
+           + ((ebenen.length > 1) ? (' (Flaeche Z' + e.z + ')') : '')});
+    if(!aufD && ei === 0) hinweise.push('Zentriert wird 1,5 mm tief: der Zentrierbohrer ⌀' + fRund(zentrierer.d) +
+      ' ist zu klein, um auf den Bohrungsdurchmesser anzusenken.');
+   } else if(e.punkte.length && ei === 0) hinweise.push('Kein Zentrierbohrer in der Werkzeugtabelle — es wird ohne Zentrieren gebohrt.');
+
+   e.gruppen.forEach(g => {
+    const W = fPlanBohrWerkzeug(prog, g.d);
+    if(!W.art) return;                               // schon vorweg gemeldet
     const mi = muster.length;
     muster.push({name:'⌀' + g.d + (g.durch ? ' durch' : ' ' + fRund(g.tiefe) + ' tief'), typ:'punkte', punkte:g.punkte.slice()});
     // Spitzenlaenge 0,3 x ⌀ gilt fuer den 118-Grad-Standardbohrer; steht in
@@ -7116,6 +7147,7 @@ function fPlanBohrSchritte(prog, A, F){
            (g.durch ? 'durch (' + Math.abs(tiefe) + ' mm mit Spitze und Ueberlauf)' : fRund(g.tiefe) + ' mm tief')});
     if(W.art === 'bohrfraesen') hinweise.push('⌀' + g.d + ': kein Bohrer dieses Durchmessers — die Bohrung wird mit dem Fraeser ⌀' + fRund(W.wz.d) + ' wendelnd ausgefraest (Zyklus 208).');
     if(g.senkung) hinweise.push('⌀' + g.d + ': am oberen Ende sitzt eine Senkung ⌀' + g.senkung.d + ' aus dem Modell — die App legt sie NICHT an, dafuer fehlt ihr das Werkzeugmass.');
+   });
   });
 
   // --- Senken und Gewinde (Daniels Regel: Senkung = Nenn + 0,6) -------
@@ -7123,7 +7155,8 @@ function fPlanBohrSchritte(prog, A, F){
   // der Maschine (die Senkung fuehrt den Gewindebohrer und bricht die
   // Kante) und zugleich die mit den wenigsten Wechseln.
   const gew = [];
-  B.gruppen.forEach(g => {
+  // Auch hier von oben nach unten - aus demselben Grund.
+  B.gruppen.slice().sort((a, b) => (b.zOben - a.zOben) || (b.d - a.d)).forEach(g => {
     const G = fGewindeZuKern(g.d);
     if(!G) return;                                   // kein Kernlochmass
     if(!fPlanBohrWerkzeug(prog, g.d).art) return;    // wird gar nicht gebohrt
@@ -7425,8 +7458,31 @@ function fPlanProgramm(prog, A, F){
   const fl = fPlanFlaechen(prog, A, F);
   const bo = fPlanBohrSchritte(prog, A, F);
   const hinweise = fl.hinweise.concat(bo.hinweise);
+  // WAS IN DIESER AUFSPANNUNG GAR NICHT ERREICHBAR IST, wird nicht
+  // geplant. Die Flaechenbearbeitung oeffnet das Teil bis zu einer
+  // bestimmten Tiefe; eine Bohrung, deren BEZUGSFLAECHE darunter liegt,
+  // kann das Werkzeug nicht anfahren - der Eilgang fuehre durch stehendes
+  // Material. (Gefunden an einem echten Teil: Bohrflaeche Z-68, geoeffnet
+  // wird nur bis Z-60,4.)
+  let zOffen = null;
+  fl.schritte.forEach(sp => {
+    if(sp.art !== 'modellSchruppen' && sp.art !== 'planfraesen') return;
+    const z = (+(sp.werte || {}).q203 || 0) + (+(sp.werte || {}).tiefe || 0);
+    if(zOffen === null || z < zOffen) zOffen = z;
+  });
+  let weg = 0, wegZ = null;
+  const bohrOk = bo.schritte.filter(sp => {
+    if(zOffen === null) return true;
+    const z = +(sp.werte || {}).q203;
+    if(!isFinite(z) || z >= zOffen - 1e-6) return true;
+    weg++; if(wegZ === null || z < wegZ) wegZ = z;
+    return false;
+  });
+  if(weg) hinweise.push(weg + ' Bohrschritt(e) mit einer Bezugsflaeche bis Z' + fRund(wegZ) +
+    ' sind NICHT geplant: in dieser Aufspannung wird nur bis Z' + fRund(zOffen) +
+    ' geoeffnet, das Werkzeug kaeme dort gar nicht hin. Das gehoert in die ZWEITE Aufspannung.');
   const roh = fl.schritte.map(sp => Object.assign({}, sp, {phase:fPlanPhase(sp.art), muster:null}))
-    .concat(bo.schritte.map(sp => Object.assign({}, sp, {phase:fPlanPhase(sp.art)})));
+    .concat(bohrOk.map(sp => Object.assign({}, sp, {phase:fPlanPhase(sp.art)})));
   // Stabil nach Phase: innerhalb einer Phase bleibt die Reihenfolge, in
   // der die beiden Planer sie geliefert haben.
   const schritte = [];
@@ -8711,6 +8767,14 @@ function fSimFeld(prog, raster){
 // (cot des halben Spitzenwinkels) liegt die Grenze im Abstand rho um
 // rho x kegel hoeher (Bohrerspitze). Liefert true, wenn unter dem Werkzeug
 // Material UEBER der Grenze stand (Eilgangpruefung mit nurPruefen).
+// Wieviel Hoehenunterschied zaehlt ueberhaupt? Ein Zehntel Mikrometer.
+// Darunter gibt es keine Kollision, die jemanden interessiert - und
+// darueber liegt die Ungenauigkeit des Float32-Hoehenfelds: -75,78 wird
+// dort als -75,7799987792969 abgelegt, also 1,2 Tausendstel-Mikrometer zu
+// hoch. Mit der alten Schwelle von 1e-6 meldete die Simulation deshalb
+// jeden Rueckzug aus der eigenen frisch gefraesten Stelle als Kollision
+// (gemessen an Daniels Bauteil-2: 107 Meldungen, alle falsch).
+const F_SIM_EPS = 1e-4;
 function fSimStempel(F, x, y, z, r, nurPruefen, kegel){
   const i0 = Math.max(0, Math.floor((x - r - F.x0) / F.raster)), i1 = Math.min(F.nx - 1, Math.ceil((x + r - F.x0) / F.raster));
   const j0 = Math.max(0, Math.floor((y - r - F.y0) / F.raster)), j1 = Math.min(F.ny - 1, Math.ceil((y + r - F.y0) / F.raster));
@@ -8725,7 +8789,7 @@ function fSimStempel(F, x, y, z, r, nurPruefen, kegel){
       const zc = (kg < 0) ? z + r - Math.sqrt(Math.max(0, r2 - d2)) : (kg ? z + Math.sqrt(d2) * kg : z);
       const idx = j * F.nx + i;
       // Pruefung: eine Zelle unter der Unterkante ist kein Material mehr (Durchgangsbohrung mit Kegelspitze)
-      if(F.h[idx] > zc + 1e-6 && (!nurPruefen || F.h[idx] > F.unten + 1e-6)){ traf = true; if(nurPruefen) return true; F.h[idx] = zc; }
+      if(F.h[idx] > zc + F_SIM_EPS && (!nurPruefen || F.h[idx] > F.unten + F_SIM_EPS)){ traf = true; if(nurPruefen) return true; F.h[idx] = zc; }
     }
   }
   if(traf && !nurPruefen) F.gen++;
