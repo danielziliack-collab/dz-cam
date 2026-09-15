@@ -2343,6 +2343,63 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
      Maske bleibt und das Q nur die Bruecke zum TNC-Dialog ist. */
   .mrow label .qz{font-size:9.5px;font-weight:600;color:hsl(var(--ton), 12%, 58%);letter-spacing:.03em;margin-left:3px;}
   .mask.kachelpilot .mrow label .qz{display:block;margin-left:0;}
+
+  /* ---- Das Zyklus-Blatt: Kategorien als Ueberschrift, Zyklen als
+     Kacheln. Kein Wischstreifen - die Kacheln brechen um. */
+  #maskZyklusWahl .zwgrp{margin:10px 0 4px;padding:4px 2px 4px 9px;font-size:11px;
+    font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+    color:hsl(var(--ton), 100%, 27.5%);border-left:4px solid hsl(var(--ton), 100%, 27.5%);
+    background:rgba(47,111,175,.09);border-radius:0 5px 5px 0;}
+  #maskZyklusWahl .zwgrp:first-child{margin-top:0;}
+  #maskZyklusWahl .zwreihe{display:flex;flex-wrap:wrap;gap:6px;}
+  #maskZyklusWahl .zwk{display:flex;align-items:center;gap:8px;flex:1 1 210px;
+    min-height:46px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;
+    background:#fff;cursor:pointer;}
+  #maskZyklusWahl .zwk:active{background:hsl(28, 90%, 96%);border-color:hsl(28, 92%, 45%);}
+  #maskZyklusWahl .zwk .ic{flex:0 0 auto;width:26px;text-align:center;color:var(--akzent);}
+  #maskZyklusWahl .zwk .nm{font-size:14px;font-weight:600;}
+  /* ---- Die Vorlagen als Kacheln mit Draufsicht ---------------------- */
+  #pmVorlagen .vlgrp{margin:10px 0 5px;padding:4px 2px 4px 9px;font-size:11px;
+    font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+    color:hsl(var(--ton), 100%, 27.5%);border-left:4px solid hsl(var(--ton), 100%, 27.5%);
+    background:rgba(47,111,175,.09);border-radius:0 5px 5px 0;}
+  #pmVorlagen .vlgrp:first-child{margin-top:0;}
+  #pmVorlagen .vlreihe{display:flex;flex-wrap:wrap;gap:8px;}
+  #pmVorlagen .vlk{display:flex;gap:10px;align-items:center;flex:1 1 320px;
+    padding:7px 10px;border:1px solid var(--line);border-radius:8px;
+    background:#fff;cursor:pointer;}
+  #pmVorlagen .vlk:active{background:hsl(28, 90%, 96%);border-color:hsl(28, 92%, 45%);}
+  #pmVorlagen .vlcv{flex:0 0 auto;width:74px;height:48px;display:block;
+    border:1px solid var(--line);border-radius:4px;background:#fff;}
+  #pmVorlagen .vltxt{min-width:0;}
+  #pmVorlagen .vlnr{font-size:10.5px;font-weight:700;letter-spacing:.5px;
+    color:var(--text-dim);font-variant-numeric:tabular-nums;}
+  #pmVorlagen .vlname{font-size:14px;font-weight:600;line-height:1.2;}
+  #pmVorlagen .vlwas{font-size:11.5px;color:var(--text-dim);line-height:1.25;}
+  body.dunkel #pmVorlagen .vlk{background:#1b2733;}
+  body.dunkel #pmVorlagen .vlcv{background:#16202a;}
+
+  #maskZyklusWahl .zwk .nr{margin-left:auto;font-size:11px;color:var(--text-dim);
+    font-variant-numeric:tabular-nums;}
+
+  /* ---- Die Zyklusmaske am Laptop: kompakter, aber klarer gegliedert
+     Gemessen vor dem Eingriff: Rechtecktasche 1032 px Inhalt auf 623 px
+     Platz, vier Abschnittskoepfe von je 21 px, die zwischen den Kacheln
+     fast untergingen (die gemeinsame Kachelregel stutzt sie auf
+     margin:2px 0 0). Jetzt: flachere Kacheln, engerer Abstand - und
+     Abschnittskoepfe, die man als Trennung SIEHT.
+     NUR die Zyklusmaske der Fraes-App, nur ab 900 px. */
+  @media (min-width: 900px){
+    #maskZyklus.kachelpilot .mask-body{gap:5px;padding-top:6px;}
+    #maskZyklus.kachelpilot .mrow{min-height:44px;padding:3px 8px 4px;}
+    #maskZyklus.kachelpilot .msec{
+      margin:9px 0 1px;padding:4px 2px 4px 9px;font-size:11px;
+      border-left-width:4px;background:rgba(47,111,175,.09);
+      border-radius:0 5px 5px 0;
+    }
+    /* Der erste Abschnitt braucht oben keine Luft. */
+    #maskZyklus.kachelpilot .msec:first-child{margin-top:0;}
+  }
   /* Kontureditor (Paket C3): die Elementtabelle (acht Spalten), die Knopfzeile und die
      Vorschau nehmen im Kachelraster die volle Breite — als halbe Kachel war die Tabelle
      bei 860 px auf 540 px beschnitten (R, DR und der Loeschknopf lagen im Scrollbereich). */
@@ -2410,6 +2467,33 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
   #maskStep .gcode-head{display:flex;flex-wrap:wrap;align-items:center;}
   #maskStep .gcode-head .gcbtn{width:auto;min-height:32px;}
   #maskStep .radiobtns button{min-height:30px;}
+  /* Der Planer, Stufe 1 (15.09.2026): die Aufspannungs-Tafel unter dem Bild
+     der STEP-Maske. Sechs Zeilen, eine je Lage - kein Schmuck, sondern die
+     Zahlen, aus denen der Vorschlag entsteht. Die gewaehlte Zeile bekommt ein
+     neutrales Grau statt einer Tonfarbe, damit sie im Dunkelmodus genauso
+     liegt wie im hellen. */
+  #stepPlan{flex:0 0 auto;font-size:11px;color:var(--text);}
+  #stepPlan:empty{display:none;}
+  #stepPlan .aufspkopf{padding:1px 0 4px 0;}
+  #stepPlan .aufspwarn{color:#b35c00;padding:1px 0 2px 0;}
+  #stepPlan .aufsphint{color:var(--text-dim);padding:3px 0 0 0;}
+  #stepPlan table{border-collapse:collapse;width:100%;}
+  #stepPlan th{font-weight:600;color:var(--text-dim);text-align:right;padding:2px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  #stepPlan td{text-align:right;padding:2px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  #stepPlan th:first-child, #stepPlan td:first-child{text-align:left;}
+  #stepPlan tr[data-achse]{cursor:pointer;}
+  #stepPlan tr.sel td{background:rgba(127,127,127,.16);}
+  #stepPlan .aufspv{color:#2f9e5a;font-weight:600;}
+  /* Am Handy ist die Tafel breiter als die Maske. Sie scrollt in ihrem
+     eigenen Kasten (so wie Tabellen es ueberall tun), und die zwei
+     Spalten, die am wenigsten entscheiden, fallen weg - Bohrungen laengs
+     und Hoehe. Uebrig bleibt Daniels Reihenfolge: satt aufliegen, dann
+     viel fertig bekommen. */
+  @media(max-width:899px){
+    #stepPlan{overflow-x:auto;}
+    #stepPlan th:nth-child(6), #stepPlan td:nth-child(6),
+    #stepPlan th:nth-child(7), #stepPlan td:nth-child(7){display:none;}
+  }
 </style>
 </head>
 <body class="mode-arbeitsplan">
@@ -2494,6 +2578,17 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
         </div>
       </div>
 
+      <!-- ===== ZYKLUS WAEHLEN (15.09.2026): am Handy war die Leiste mit
+           aufgeklappter Gruppe 1442 px breit - fuenf von achtzehn Knoepfen
+           sichtbar, fast vier Bildschirmbreiten Wischweg. Hier stehen die
+           Zyklen einer Kategorie als Kacheln, gross genug zum Treffen. ===== -->
+      <div class="mask" id="maskZyklusWahl">
+        <div class="mask-head"><span class="mtitel" id="zwTitel">Zyklus wählen</span>
+          <button class="ansichtBtn" id="zwAlle" style="font-size:11px;padding:3px 7px;white-space:nowrap;" title="alle Kategorien zeigen">alle</button></div>
+        <div class="mask-body" id="zwBody"></div>
+        <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnZwZu" style="width:100%;padding:10px;">&#x2715; Schließen</button></div>
+      </div>
+
       <!-- ===== KONTUR (Paket C3, 13.09.2026): XY-Kontur aus Geraden und
            Kreisboegen, Startpunkt + Elementtabelle, Vorschau mit Rohteil.
            Modell und Geometrie in F10 (fKonturSegmente), Editor in F20. ===== -->
@@ -2557,7 +2652,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <label class="gcbtn primary" style="padding:8px 12px;cursor:pointer;" title="STEP-Datei (.stp oder .step) laden">&#x2B06; Modell laden<input type="file" id="stepFile" accept=".stp,.step,.STP,.STEP" style="display:none;"></label>
           <span style="font-size:11px;color:var(--text-dim);">Werkzeugachse</span>
           <span class="radiobtns" id="stepAchseBtns"><button data-v="+X">+X</button><button data-v="-X">-X</button><button data-v="+Y">+Y</button><button data-v="-Y">-Y</button><button data-v="+Z" class="sel">+Z</button><button data-v="-Z">-Z</button></span>
-          <button class="gcbtn" id="btnStepVorschlag" title="Die Achse waehlen, bei der die meisten Bohrungen laengs stehen und die meisten Flaechen waagerecht liegen">Achse vorschlagen</button>
+          <button class="gcbtn" id="btnStepVorschlag" title="Alle sechs Aufspannlagen bewerten: gr&ouml;&szlig;te Auflage nach unten, dann m&ouml;glichst viel in dieser Aufspannung fertig">Aufspannung vorschlagen</button>
           <span style="font-size:11px;color:var(--text-dim);">Nullpunkt</span>
           <span class="radiobtns" id="stepNullBtns"><button data-v="ecke" class="sel">Ecke, Oberkante</button><button data-v="mitte">Mitte, Oberkante</button></span>
           <button class="gcbtn" id="btnStepRoh" title="Huellquader des Modells als BLK FORM in den Programmkopf">Als Rohteil übernehmen</button>
@@ -2571,6 +2666,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
         </div>
         <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
           <canvas id="stepCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;touch-action:none;cursor:grab;"></canvas>
+          <div id="stepPlan"></div>
           <div class="small-hint" id="stepBericht" style="flex:0 0 auto;max-height:22vh;overflow-y:auto;"></div>
           <div class="small-hint" style="flex:0 0 auto;">Ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage. Farben: <b style="color:#2f6fb2;">waagerecht</b> (Boden oder Decke), <b style="color:#7a8593;">senkrecht</b> (Wand), <b style="color:#d08a2a;">Schräge</b>, <b style="color:#2f9e5a;">Bohrung längs der Achse</b>, <b style="color:#9b6fd0;">quer</b>, <b style="color:#c0392b;">Freiform</b>. Gestrichelt der Hüllquader, kräftig orange die gewählte Z-Ebene. Aus ihr werden mit <b>Konturen übernehmen</b> XY-Konturen für die Zyklen; Bahnen entstehen daraus erst über einen Zyklus. <b>Sollform</b> zeigt das Teil von oben mit der Höhe, auf die gefräst werden muss: hell ist oben, dunkel ist tief, blaugrau heißt "hier steht keine Fläche". Mit <b>Sollform ans Programm</b> bekommen die Schritte <b>Modell abspanen</b> (Z-konstant schruppen) und <b>Schrägen schlichten</b> (über die Rautiefe) dieses Höhenfeld. Das Feld <b>Raster</b> ist die Rasterweite in mm (leer = automatisch nach Teilgröße): der Bahnabstand des Schlichtens kann nur ein Vielfaches davon sein — verlangt die Rautiefe weniger, sagt die App es und hier stellt man feiner. Die Sollform hängt am geladenen Modell und wird NICHT mit dem Programm gespeichert.</div>
         </div>
@@ -2644,19 +2740,12 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <div class="mgroup" id="pmGrpVorlagen">
             <div class="mgroup-head"><span class="pfeil">&#x25B6;&#xFE0E;</span><span class="titel">Testvorlagen</span><span class="zus">ersetzen das aktuelle Programm</span></div>
             <div class="mgroup-body">
-              <div class="mrow"><button class="gcbtn" id="btnDemoFlansch" style="width:100%;padding:10px;">DZ1 Flanschplatte: Lochkreis 6× + M8 in den Ecken</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoLeiste" style="width:100%;padding:10px;">DZ2 Leiste: Reihe Tieflochbohren + Reiben H7</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoMuster" style="width:100%;padding:10px;">DZ3 Musterzyklen 220/221 + Gewinde GS</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoTaschen" style="width:100%;padding:10px;">DZ4 Taschen, Nuten, Zapfen (251&ndash;257)</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoBohren2" style="width:100%;padding:10px;">DZ5 Planfr&auml;sen 232 + Bohrzyklen 202/204/205/208/209/241</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoEinzel" style="width:100%;padding:10px;">DZ6 Einzels&auml;tze: eigene Bahn ohne Zyklen (eine Bohrung je Schritt)</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoFormen" style="width:100%;padding:10px;">DZ7 Einzels&auml;tze: Kreistasche, Nut, Kreiszapfen als eigene Bahn</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoPlan" style="width:100%;padding:10px;">DZ8 Einzels&auml;tze: Planfr&auml;sen + Rechtecktasche mit Helix</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoKontur" style="width:100%;padding:10px;">DZ9 Konturzug: Insel als Zyklus 14/25 und als eigene Bahn</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoKonturFormen" style="width:100%;padding:10px;">DZ10 Konturzug: Rundung, Fase, tangentialer Bogen, Vollkreis</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoBohrfraes" style="width:100%;padding:10px;">DZ11 Einzels&auml;tze: Bohrfr&auml;sen 208 und Einlippen-Bohren 241</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoSL" style="width:100%;padding:10px;">DZ12 SL-Zyklen 20&ndash;24: Konturtasche mit Insel</button></div>
-              <div class="mrow"><button class="gcbtn" id="btnDemoGewFr" style="width:100%;padding:10px;">DZ13 Gewindefr&auml;sen 262&ndash;267 (M20&times;2,5 mit Fr&auml;ser &empty;8)</button></div>
+              <!-- Die Vorlagen entstehen aus F_DEMOS (F20
+                   fVorlagenListe): Kachel mit Draufsicht, Nummer,
+                   Name und einem Satz. Vorher standen hier 13 fest
+                   verdrahtete Knoepfe - jede neue Vorlage kostete
+                   einen Knopf, einen Listener und einen Eintrag. -->
+              <div id="pmVorlagen"></div>
             </div>
           </div>
           <div class="mrow" style="margin-top:8px;"><button class="gcbtn" id="btnCloseProgs" style="width:100%;padding:10px;">&#x2713; Fertig</button></div>
@@ -2668,7 +2757,10 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
     <div class="softkeys" id="softkeyCol">
       <div class="sk" id="skKopf"><span class="ic">P</span>Programm-<br>kopf</div>
       <div class="sk" id="skMuster"><span class="ic">⁘</span>Positionen</div>
-      <div class="sk" id="skKontur" title="XY-Kontur aus Geraden und Kreisbögen (Paket C3)"><span class="ic">⌒</span>Kontur</div>
+      <!-- "Kontur zeichnen", nicht "Kontur": daneben steht die Kategorie
+           mit den KonturZYKLEN, und zweimal derselbe Name in einer Leiste
+           ist eine Falle (Aufnahme 15.09.2026). -->
+      <div class="sk" id="skKontur" title="XY-Kontur aus Geraden und Kreisbögen zeichnen (Paket C3)"><span class="ic">⌒</span>Kontur<br>zeichnen</div>
       <!-- Zyklusgruppen wie an der TNC (Bohren, Gewinde, Taschen/Zapfen,
            Flaechen): F20 fSoftkeysBauen fuellt den Behaelter, ein Knopf je
            Zyklus, die offene Gruppe zeigt ihre Zyklen (Paket A, 12.09.2026). -->
@@ -2845,10 +2937,28 @@ Drahtbild. Die App liest die Fl&auml;chen des Volumenmodells &mdash; <b>Ebene, Z
 ordnet jede Fl&auml;che nach ihrer Lage zur <b>Werkzeugachse</b> ein: waagerecht (Boden oder Decke), senkrecht (Wand), Schr&auml;ge mit ihrer Neigung, Bohrung
 l&auml;ngs der Achse oder quer.</p>
 <dl>
+<dt id="ba-fk05c-aufspannung">Aufspannung &mdash; welche Seite nach unten</dt><dd>Beim Drehen gibt es zwei Lagen, beim Fr&auml;sen sechs. Die App bewertet alle
+sechs, sobald ein Modell geladen ist, und zeigt sie als Tafel unter dem Bild. Die Regel dahinter ist die aus der Werkstatt: <b>die gr&ouml;&szlig;te ebene Fl&auml;che
+zeigt nach unten</b>, damit das Teil satt aufliegt und nicht federt &mdash; und in dieser ersten Aufspannung soll m&ouml;glichst viel fertig werden. Die Spalten
+sind die Zahlen, aus denen der Vorschlag entsteht: <b>Auflage</b> die gr&ouml;&szlig;te ebene Fl&auml;che ganz unten (nicht die Summe aller unteren Fl&auml;chen &mdash;
+zwei F&uuml;&szlig;e an den Enden tragen anders als eine durchgehende Platte), <b>satt</b> ihr Anteil an der Grundfl&auml;che, <b>erreichbar</b> der Anteil der
+Teilfl&auml;chen, die in dieser Aufspannung drankommen, <b>abzutragen</b> das Material &uuml;ber der Sollform, <b>Bohrungen l&auml;ngs</b> und die <b>H&ouml;he</b>,
+in der das Teil dann steht. Die beste Lage steht oben; eine Zeile antippen stellt die Werkzeugachse darauf um.
+<br><b>Der Abtrag ist Auskunft, kein Pluspunkt.</b> Viel abzutragen hei&szlig;t oft nur, da&szlig; der H&uuml;llquader schlecht zur Lage pa&szlig;t: am Testblock mit
+Rampe w&auml;ren hochkant 72&nbsp;cm&sup3; wegzunehmen gegen 8,1&nbsp;cm&sup3; liegend &mdash; trotzdem ist liegend richtig. Gez&auml;hlt wird, was man in der
+Aufspannung fertig bekommt.
+<br><b>Wenn der Vorschlag selbst zweifelt, sagt er es.</b> Unter 25&nbsp;% Auflage liegt das Teil in keiner Lage satt und braucht eine Vorrichtung,
+Spannpratzen oder einen Sauger; sind zwei Lagen fast gleichwertig, entscheidet, was in der zweiten Aufspannung noch drankommt; unter 60&nbsp;% erreichbar
+wird es auf jeden Fall eine zweite geben. An 94 echten Modellen gemessen liegt der Vorschlag im Median auf 70&nbsp;% der Grundfl&auml;che, und kein Teil
+bleibt ganz ohne Auflage.
+<br><b>Ehrliche Grenze:</b> gemessen wird die <i>Richtung</i> der Fl&auml;chen, nicht ihr Schatten. Eine nach oben zeigende Fl&auml;che tief in einer engen Tasche
+z&auml;hlt als erreichbar, obwohl kein Fr&auml;ser hineinkommt &mdash; das entscheidet erst die Bahn mit einem konkreten Werkzeug. Und die App w&auml;hlt die Lage,
+nicht das Spannmittel: Schraubstock, Pratzen oder Vorrichtung bleiben Sache des Bedieners.</dd>
 <dt id="ba-fk05c-ausrichten">Ausrichten kommt zuerst</dt><dd>Ein CAD-Modell liegt fast nie in der Aufspannlage. In Daniels Teilen zeigt die Werkzeugachse im
 Modell nach <b>Y</b>, nicht nach Z: bei einer Grundplatte sind alle 182 Bohrungsachsen parallel zu Y. Ohne den richtigen Achsenwahl-Schritt w&auml;re jede
-Einordnung falsch (aus 28 B&ouml;den werden dann 7). Deshalb: <b>Werkzeugachse</b> w&auml;hlen, oder <b>Achse vorschlagen</b> dr&uuml;cken &mdash; die App nimmt dann
-die Achse, bei der die meisten Bohrungen l&auml;ngs stehen und die meisten Fl&auml;chen waagerecht liegen. Der <b>Nullpunkt</b> liegt wahlweise in der Ecke oder
+Einordnung falsch (aus 28 B&ouml;den werden dann 7). Deshalb: <b>Werkzeugachse</b> w&auml;hlen, eine Zeile der Aufspannungs-Tafel antippen oder <b>Aufspannung vorschlagen</b> dr&uuml;cken. Scheitert die
+Aufspannungsrechnung an einem Modell, f&auml;llt die App auf die alte Z&auml;hlung zur&uuml;ck (die Achse mit den meisten Bohrungen l&auml;ngs und den meisten
+waagerechten Fl&auml;chen). Der <b>Nullpunkt</b> liegt wahlweise in der Ecke oder
 in der Mitte, die Oberkante des Teils immer auf Z0, so wie ein Fr&auml;steil aufgespannt wird.</dd>
 <dt>Als Rohteil &uuml;bernehmen</dt><dd>Schreibt den H&uuml;llquader des ausgerichteten Modells als <b>BLK FORM</b> in den Programmkopf. Aufma&szlig; f&uuml;r das echte
 Rohteil kommt danach von Hand dazu.</dd>
@@ -3609,7 +3719,22 @@ var F_BOHR_ARTEN = ['zentrieren','bohren','tief','reiben','gewinde','gewindeGS',
 //   ba       Anker in der Anleitung (Label-Tipp)
 var F_FELDER = {
   t:          {name:'T Werkzeug', typ:'werkzeug', ba:'ba-fk04'},
-  muster:     {name:'Positionen (Bohrbild)', typ:'muster', ba:'ba-fk05'},
+  // DIE POSITION: ein Punkt im Zyklus oder ein Bohrbild. Fuer eine
+  // Bohrreihe ist das Bohrbild richtig, fuer eine einzelne Tasche war es
+  // eine Huerde - man musste ein 'Bohrbild' anlegen, um eine Tasche zu
+  // setzen, sonst gab es kein Programm.
+  posArt:     {name:'Position', typ:'wahl',
+               wahl:[['xy','eigene Position X/Y'],['muster','Bohrbild (mehrere Stellen)']],
+               ba:'ba-fk05'},
+  // posX/posY heissen nicht px/py: DIE gibt es schon als Startpunkt des
+  // Planfraesens (Q225/Q226), und im Objektliteral gewinnt der letzte
+  // Eintrag - der erste Bau hat sie still ueberschrieben.
+  posX:       {name:'X / Y Position', einheit:'mm', mit:'posY',
+               nurWenn:(s)=>fPosArt(s) === 'xy', ba:'ba-fk05'},
+  posY:       {name:'Y Position', einheit:'mm',
+               nurWenn:(s)=>fPosArt(s) === 'xy', ba:'ba-fk05'},
+  muster:     {name:'Positionen (Bohrbild)', typ:'muster',
+               nurWenn:(s)=>fPosArt(s) === 'muster', ba:'ba-fk05'},
   // Paket C3: XY-Kontur statt Bohrbild; die Werkzeugseite haengt an der Kontur —
   // geschlossen: innen (Tasche) / aussen (Insel), offen: links / rechts der
   // gezeichneten Laufrichtung (RL / RR). nurWenn blendet das jeweils andere aus.
@@ -3750,53 +3875,53 @@ var F_FELD_Q = {
 // automatisch wieder). feldText/feldWahl: Namen und Auswahlen, die je
 // Zyklus anders heissen (Nutlaenge, Bezugspunkt der runden Nut).
 var F_MASKE = {
-  zentrieren: {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Zentrierung','sc','zAuswahl','tiefe','zDurchm','q203','sc2','#!Verweilzeit','vUnten']},
-  bohren:     {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#!Verweilzeiten','vOben','vUnten']},
-  tief:       {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','spanbrueche','minZust','rzSpan','#!Verweilzeiten & Rückzug','vOben','vUnten','fRueck']},
-  reiben:     {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#!Verweilzeit & Rückzug','vUnten','fRueck']},
+  zentrieren: {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Zentrierung','sc','zAuswahl','tiefe','zDurchm','q203','sc2','#!Verweilzeit','vUnten']},
+  bohren:     {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#!Verweilzeiten','vOben','vUnten']},
+  tief:       {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','spanbrueche','minZust','rzSpan','#!Verweilzeiten & Rückzug','vOben','vUnten','fRueck']},
+  reiben:     {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#!Verweilzeit & Rückzug','vUnten','fRueck']},
   // 206 schreibt die Steigung nicht als Q-Wort — sie steckt im Vorschub
   // F = P x S; das Feld bleibt in der Maske (ohneQ), damit die Kopplung
   // rechnen kann.
-  gewinde:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Gewinde','steigung','sc','tiefe','q203','sc2','#!Verweilzeit','vUnten'],
+  gewinde:    {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Gewinde','steigung','sc','tiefe','q203','sc2','#!Verweilzeit','vUnten'],
                feldText:{f:'F Vorschub = P × S (Ausgleichsfutter)'}, ohneQ:['steigung']},
-  gewindeGS:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','kuehl','#Gewinde','steigung','sc','tiefe','q203','sc2']},
-  gewindeSpan:{felder:['#Werkzeug & Schnittwerte','t','muster','s','kuehl','#Gewinde','steigung','q403','sc','tiefe','q203','sc2','#Spanbruch','q257','rzSpan','#!Spindel','spWinkel'],
+  gewindeGS:  {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','kuehl','#Gewinde','steigung','sc','tiefe','q203','sc2']},
+  gewindeSpan:{felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','kuehl','#Gewinde','steigung','q403','sc','tiefe','q203','sc2','#Spanbruch','q257','rzSpan','#!Spindel','spWinkel'],
                feldText:{spWinkel:'Spindelwinkel vor dem Gewinde'}},
-  ausdrehen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#Freifahren am Grund','freifahr','spWinkel','#!Verweilzeit & Rückzug','vUnten','fRueck']},
-  senkenRueck:{felder:['#Werkzeug & Schnittwerte','t','muster','s','kuehl','#Senkung von unten','sc','q249','q250','q251','q252','q203','sc2','#Vorschübe & Verweilzeit','fVor','fSenk','vSenk','#Freifahren','freifahr','spWinkel']},
-  tiefUni:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','minZust','q257','rzSpan','q258','q259','#!Verweilzeit & Vorposition','vUnten','q379','fVor']},
-  bohrfraesen:{felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fraesart','kuehl','ausgabe','#Bohrung','sc','tiefe','q335','q342','q334','q203','sc2']},
-  einlippen:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#Spindel & Kühlung','q426','q427','q428','q429','q430','#!Vorposition, Rückzug & Verweilen','q379','fVor','fRueck','vUnten','q435']},
-  tascheR:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','l1','l2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
+  ausdrehen:  {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#Freifahren am Grund','freifahr','spWinkel','#!Verweilzeit & Rückzug','vUnten','fRueck']},
+  senkenRueck:{felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','kuehl','#Senkung von unten','sc','q249','q250','q251','q252','q203','sc2','#Vorschübe & Verweilzeit','fVor','fSenk','vSenk','#Freifahren','freifahr','spWinkel']},
+  tiefUni:    {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','zust','q203','sc2','#Spanbruch & Entspanen','abnahme','minZust','q257','rzSpan','q258','q259','#!Verweilzeit & Vorposition','vUnten','q379','fVor']},
+  bohrfraesen:{felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','fraesart','kuehl','ausgabe','#Bohrung','sc','tiefe','q335','q342','q334','q203','sc2']},
+  einlippen:  {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','kuehl','ausgabe','#Bohrung','sc','tiefe','q203','sc2','#Spindel & Kühlung','q426','q427','q428','q429','q430','#!Vorposition, Rückzug & Verweilen','q379','fVor','fRueck','vUnten','q435']},
+  tascheR:    {felder:['#Werkzeug & Position','t','posArt','posX','muster','umfang','#Form','l1','l2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#Schnittwerte','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'L 1. Seitenlänge', l2:'W 2. Seitenlänge', lage:'Bezugspunkt der Tasche'},
                feldWahl:{lage:[['0','Mitte'],['1','links unten'],['2','rechts unten'],['3','rechts oben'],['4','links oben']]}},
-  tascheK:    {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','dm','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
+  tascheK:    {felder:['#Werkzeug & Position','t','posArt','posX','muster','umfang','#Form','dm','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#Schnittwerte','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#!Bahn, Eintauchen & Sicherheit','ueberl','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', dm:'⌀ Kreistasche'}},
-  nut:        {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','l1','l2','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
+  nut:        {felder:['#Werkzeug & Position','t','posArt','posX','muster','umfang','#Form','l1','l2','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#Schnittwerte','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'L Nutlänge', l2:'W Nutbreite', lage:'Bezugspunkt der Nut'},
                feldWahl:{lage:[['0','Mitte'],['1','linkes Nutende'],['2','rechtes Nutende']]}},
-  nutR:       {felder:['#Werkzeug & Schnittwerte','t','muster','umfang','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#Form','l2','teilkreis','lage','xm','start','oeffnung','wschritt','anzahl','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
+  nutR:       {felder:['#Werkzeug & Position','t','posArt','posX','muster','umfang','#Form','l2','teilkreis','lage','xm','start','oeffnung','wschritt','anzahl','#Tiefe & Aufmaß','tiefe','zust','aufSeite','aufTiefe','zustSchl','#Schnittwerte','s','f','fTief','fSchl','fraesart','kuehl','ausgabe','#!Eintauchen & Sicherheit','eintauch','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l2:'W Nutbreite', lage:'Bezugspunkt der runden Nut', anzahl:'N Anzahl Nuten'},
                feldWahl:{lage:[['0','Teilkreis-Mitte (XM/YM)'],['1','linker Nutkreis'],['2','Mittelachse'],['3','rechter Nutkreis']]},
                nurWenn:{xm:(s)=>Math.round(+s.lage || 0) === 0}},
-  zapfenR:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','ausgabe','#Form','l1','roh1','l2','roh2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
+  zapfenR:    {felder:['#Werkzeug & Position','t','posArt','posX','muster','#Form','l1','roh1','l2','roh2','r','dreh','lage','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#Schnittwerte','s','f','fTief','fraesart','kuehl','ausgabe','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', l1:'L 1. Seitenlänge', l2:'W 2. Seitenlänge', lage:'Bezugspunkt des Zapfens'},
                feldWahl:{lage:[['0','Mitte'],['1','links unten'],['2','rechts unten'],['3','rechts oben'],['4','links oben']]}},
-  zapfenK:    {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fraesart','kuehl','ausgabe','#Form','dm','dmRoh','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
+  zapfenK:    {felder:['#Werkzeug & Position','t','posArt','posX','muster','#Form','dm','dmRoh','#Tiefe & Aufmaß','tiefe','zust','aufSeite','#Schnittwerte','s','f','fTief','fraesart','kuehl','ausgabe','#!Bahn & Sicherheit','ueberl','sc','q203','sc2'],
                feldText:{f:'F Vorschub Fräsen', dm:'⌀ Zapfen (Fertigmaß)'}},
   // Paket E: Gewindefraesen. Gemeinsam sind Soll-⌀, Steigung und Gewindetiefe
   // oben; was nur eine Familie fuehrt (Senktiefe, Bohrwerte, Stirnsenken),
   // steht darunter. Die Werkzeugkorrektur macht die Steuerung ueber den
   // Radius aus der Tabelle — es gibt kein Aufmass-Feld.
-  gewFraesen:{felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q355','#!Sicherheit','sc','q203','sc2'],
+  gewFraesen:{felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','fVor','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q355','#!Sicherheit','sc','q203','sc2'],
               feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser'}},
-  gewSenk:   {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fSenk','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q356','#Senken','scSeite','q358','q359','#!Sicherheit','sc','q203','sc2'],
+  gewSenk:   {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','fVor','fSenk','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q356','#Senken','scSeite','q358','q359','#!Sicherheit','sc','q203','sc2'],
               feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser', q356:'Z2 Senktiefe (inkremental, negativ)'}},
-  gewBohr:   {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fTief','fVor','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q356','#Bohren','zust','q258','q257','rzSpan','#Senken','q358','q359','#!Sicherheit','sc','q203','sc2'],
+  gewBohr:   {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','fTief','fVor','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q356','#Bohren','zust','q258','q257','rzSpan','#Senken','q358','q359','#!Sicherheit','sc','q203','sc2'],
               feldText:{f:'F Vorschub Fräsen', fTief:'FZ Vorschub Tiefenzustellung', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser', q356:'Z2 Bohrtiefe (inkremental, negativ)'}},
-  gewHelix:  {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fSenk','kuehl','#Gewinde','q335','steigung','tiefe','#Senken','q358','q359','q360','#!Sicherheit','sc','q203','sc2'],
+  gewHelix:  {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','fVor','fSenk','kuehl','#Gewinde','q335','steigung','tiefe','#Senken','q358','q359','q360','#!Sicherheit','sc','q203','sc2'],
               feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Soll-Durchmesser'}},
-  gewAussen: {felder:['#Werkzeug & Schnittwerte','t','muster','s','f','fVor','fSenk','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q355','#Senken','q358','q359','#!Sicherheit','sc','q203','sc2'],
+  gewAussen: {felder:['#Werkzeug & Schnittwerte','t','posArt','posX','muster','s','f','fVor','fSenk','fAnfahr','fraesart','kuehl','#Gewinde','q335','steigung','tiefe','q355','#Senken','q358','q359','#!Sicherheit','sc','q203','sc2'],
               feldText:{f:'F Vorschub Fräsen', tiefe:'Z1 Gewindetiefe', q335:'D Zapfen-Durchmesser'}},
   // Paket C3: Konturzug. Der Zyklus 25 kennt kein Q fuer Bearbeitungsumfang,
   // Schlichtvorschub, DS, SC und Werkzeugseite (die steckt im RL/RR des
@@ -3835,13 +3960,18 @@ var F_MASKE = {
 };
 // Softkey-Gruppen wie an der TNC (CYCL DEF -> Bohren/Gewinde, Taschen/
 // Zapfen/Nuten, ...): ein Knopf je Zyklus, keine Auswahlreihe in der Maske.
+// DIE REIHENFOLGE IST DIE BEARBEITUNGSFOLGE eines Fraesteils, vom
+// Groben zum Feinen (Daniels Ablauf, 15.09.2026): erst die Flaeche
+// planen, dann Konturen und Taschen ausraeumen, dann die Loecher,
+// zuletzt Gewinde. Vorher stand Bohren an erster Stelle - das ist die
+// Reihenfolge der Zyklusnummern, nicht die der Arbeit.
 var F_ZYKLUS_GRUPPEN = [
+  {id:'flaechen', name:'Flächen',          arten:['planfraesen']},
+  {id:'kontur',  name:'Kontur',            arten:['konturzug','slRaeumen','slVorbohren']},
+  {id:'taschen', name:'Taschen · Zapfen',  arten:['tascheR','tascheK','nut','nutR','zapfenR','zapfenK']},
   {id:'bohren',  name:'Bohren',            arten:['zentrieren','bohren','tief','tiefUni','reiben','ausdrehen','senkenRueck','bohrfraesen','einlippen']},
   {id:'gewinde', name:'Gewinde',           arten:['gewinde','gewindeGS','gewindeSpan','gewFraesen','gewSenk','gewBohr','gewHelix','gewAussen']},
-  {id:'taschen', name:'Taschen · Zapfen',  arten:['tascheR','tascheK','nut','nutR','zapfenR','zapfenK']},
-  {id:'flaechen', name:'Flächen',          arten:['planfraesen']},
-  {id:'modell',  name:'STEP-Modell',        arten:['modellSchruppen','modellSchlichten']},
-  {id:'kontur',  name:'Kontur',            arten:['konturzug','slRaeumen','slVorbohren']}
+  {id:'modell',  name:'STEP-Modell',        arten:['modellSchruppen','modellSchlichten']}
 ];
 // Feldliste eines Zyklus ohne Abschnittsmarken.
 function fZyklusFelder(art){ return ((F_MASKE[art] || {}).felder || []).filter(x => x[0] !== '#'); }
@@ -3965,7 +4095,12 @@ function fMusterText(m){
 // Werkzeugtabelle (Vorgabe). Daniel ersetzt sie durch seine echte —
 // die Nummern sind die TOOL-CALL-Nummern der Maschine.
 // ---------------------------------------------------------------------
-function fWerkzeugeVorgabe(){
+// DIE TABELLE DER TESTVORLAGEN. Sie bleibt, wie sie ist: die 19
+// Vorlagen sind Belege vom Programmierplatz, und ihre T-Nummern zeigen
+// auf dessen Demo-TOOL.T (T4/T5 = Fraeser D8/D10, T35 = BALL_MILL_D10).
+// Haengen sie an der Werkstatt-Tabelle, kippt jede Baseline, sobald
+// jemand dort ein Werkzeug anlegt.
+function fWerkzeugeDemo(){
   return [
     {nr:1, name:'NC-Anbohrer 90°',    art:'zentrierer', d:10,   spitze:90,  s:2500, f:150},
     {nr:2, name:'Bohrer 5',           art:'bohrer',     d:5,    spitze:118, s:2200, f:120},
@@ -3977,6 +4112,58 @@ function fWerkzeugeVorgabe(){
     {nr:8, name:'Gewindebohrer M10',  art:'gewindebohrer', d:10, steigung:1.5, s:350, f:525},
     {nr:9, name:'Reibahle 12 H7',     art:'reibahle',   d:12,   s:300,  f:90},
     {nr:10, name:'Schaftfraeser 10',  art:'fraeser',    d:10,   s:3000, f:600}
+  ];
+}
+
+// DIE WERKSTATT-TABELLE, nach der BEARBEITUNGSFOLGE eines Fraesteils
+// gelegt (Daniels Ablauf): 1-9 planen und ecken, 10-19 Schaftfraeser
+// fuer Taschen, Konturen und Nuten, 20-29 bohren, 30-39 reiben und
+// Gewinde, 40-49 anfasen. Die Zehnerbloecke lassen Platz zum Wachsen.
+//
+// lcuts ist die SCHNEIDENLAENGE (LCUTS der TOOL.T) - daran haengt die
+// Warnung, wenn ein Zyklus tiefer geht, als das Werkzeug schneidet.
+// angle ist der EINTAUCHWINKEL (ANGLE): ohne ihn lehnt die App Helix
+// und Pendeln ab, und der Zyklus taucht nur senkrecht ein. 3 Grad fuer
+// Schaftfraeser (Daniels Angabe), 0 fuer Messerkoepfe und Fasenfraeser
+// - die tauchen nicht rampend ein.
+//
+// Schnittwerte sind BRANCHENUEBLICHE PLATZHALTER, aus vc und fz
+// gerechnet: vc 200 m/min fuer die WSP-Koepfe, 120 fuer VHM in Stahl,
+// fz 0,2 bzw. 0,03 bis 0,09 mm je Schneide nach Durchmesser. Wer seine
+// Werte kennt, traegt sie ein.
+function fWerkzeugeVorgabe(){
+  return [
+    // --- Planen und ecken: Messerkoepfe mit Wendeschneidplatten -------
+    {nr:1,  name:'Planfraeser 80 (WSP)',   art:'fraeser', d:80, lcuts:6,  angle:0, s:800,  f:950},
+    {nr:2,  name:'Planfraeser 63 (WSP)',   art:'fraeser', d:63, lcuts:6,  angle:0, s:1000, f:1000},
+    {nr:3,  name:'Planfraeser 52 (WSP)',   art:'fraeser', d:52, lcuts:6,  angle:0, s:1200, f:980},
+    {nr:4,  name:'Eckfraeser 40 (WSP 90°)',art:'fraeser', d:40, lcuts:10, angle:0, s:1400, f:860},
+    // --- Schaftfraeser: Taschen, Konturen, Nuten ----------------------
+    {nr:10, name:'Schaftfraeser 6',   art:'fraeser', d:6,  lcuts:13, angle:3, s:6000, f:550},
+    {nr:11, name:'Schaftfraeser 8',   art:'fraeser', d:8,  lcuts:19, angle:3, s:4800, f:570},
+    {nr:12, name:'Schaftfraeser 10',  art:'fraeser', d:10, lcuts:22, angle:3, s:3800, f:570},
+    {nr:13, name:'Schaftfraeser 12',  art:'fraeser', d:12, lcuts:26, angle:3, s:3200, f:570},
+    {nr:14, name:'Schaftfraeser 14',  art:'fraeser', d:14, lcuts:26, angle:3, s:2700, f:570},
+    {nr:15, name:'Schaftfraeser 16',  art:'fraeser', d:16, lcuts:32, angle:3, s:2400, f:570},
+    {nr:16, name:'Schaftfraeser 20',  art:'fraeser', d:20, lcuts:38, angle:3, s:1900, f:520},
+    // Kugelfraeser: fuer das Schlichten von Schraegen ueber die
+    // Rautiefe. r2 ist der Eckenradius - beim Kugelfraeser der halbe
+    // Durchmesser, daran haengt die ganze Rautiefen-Rechnung.
+    {nr:17, name:'Kugelfraeser 8',    art:'fraeser', d:8,  r2:4, lcuts:16, angle:3, s:4800, f:600},
+    {nr:18, name:'Kugelfraeser 10',   art:'fraeser', d:10, r2:5, lcuts:20, angle:3, s:3800, f:600},
+    // --- Bohren: zentrieren, dann die Loecher -------------------------
+    {nr:20, name:'NC-Anbohrer 90°',   art:'zentrierer', d:10,  lcuts:10, spitze:90,  s:2500, f:150},
+    {nr:21, name:'Bohrer 5',          art:'bohrer', d:5,    lcuts:52, spitze:118, s:2200, f:120},
+    {nr:22, name:'Bohrer 6.8 (M8)',   art:'bohrer', d:6.8,  lcuts:69, spitze:118, s:1800, f:150},
+    {nr:23, name:'Bohrer 8.5 (M10)',  art:'bohrer', d:8.5,  lcuts:75, spitze:118, s:1500, f:150},
+    {nr:24, name:'Bohrer 9',          art:'bohrer', d:9,    lcuts:81, spitze:118, s:1400, f:150},
+    {nr:25, name:'Bohrer 11.8',       art:'bohrer', d:11.8, lcuts:94, spitze:118, s:1100, f:150},
+    // --- Reiben und Gewinde -------------------------------------------
+    {nr:30, name:'Reibahle 12 H7',    art:'reibahle', d:12, lcuts:26, s:300, f:90},
+    {nr:31, name:'Gewindebohrer M8',  art:'gewindebohrer', d:8,  lcuts:20, steigung:1.25, s:400, f:500},
+    {nr:32, name:'Gewindebohrer M10', art:'gewindebohrer', d:10, lcuts:22, steigung:1.5,  s:350, f:525},
+    // --- Zuletzt: Kanten brechen ---------------------------------------
+    {nr:40, name:'Fasenfraeser 90° 12', art:'fraeser', d:12, lcuts:6, angle:0, s:3000, f:400}
   ];
 }
 var F_WERKZEUGARTEN = {zentrierer:'NC-Anbohrer / Zentrierer', bohrer:'Bohrer', gewindebohrer:'Gewindebohrer', reibahle:'Reibahle', fraeser:'Fraeser'};
@@ -4080,8 +4267,29 @@ function fToolTSchreiben(werkzeuge, opt){
   const vz = (n) => klNum(n);
   const glatt = (n) => { const r = Math.round((+n || 0) * 1000) / 1000; return String(Math.abs(r) < 1e-9 ? 0 : r); };
   const zeilen = ['BEGIN TOOL   .T MM ', F_TOOLT_KOPF];
-  werkzeuge.slice().sort((a, b) => a.nr - b.nr).forEach(w => {
+  // LUECKENLOS von T0 bis zur hoechsten Nummer: eine TOOL.T ist eine
+  // Tabelle, ihre Zeilen laufen durch. Wo kein Werkzeug sitzt, steht
+  // ein leerer Platz (Name leer, R 0) - so schreibt es die Steuerung,
+  // und fToolTLesen ueberspringt sie beim Zurueckholen. Mit Luecken
+  // stuerzte der Wandler des Programmierplatzes ab.
+  const sortiert = werkzeuge.slice().sort((a, b) => a.nr - b.nr);
+  const hoechste = sortiert.length ? Math.max(0, +sortiert[sortiert.length - 1].nr || 0) : 0;
+  const voll = [];
+  for(let i = 0; i <= hoechste; i++){
+    const w = sortiert.filter(x => Math.round(+x.nr) === i)[0];
+    voll.push(w || {nr:i, name:'', art:'', d:0, leer:true});
+  }
+  voll.forEach(w => {
     let z = F_TOOLT_MUSTER;
+    if(w.leer){
+      // Leerer Platz: nur die Nummer, kein Name, kein Radius, kein TYP.
+      z = setz(z, 'T', w.nr); z = setz(z, 'NAME', ''); z = setz(z, 'L', vz(0));
+      z = setz(z, 'R', vz(0)); z = setz(z, 'R2', vz(0)); z = setz(z, 'DL', vz(0));
+      z = setz(z, 'DR', vz(0)); z = setz(z, 'DR2', vz(0)); z = setz(z, 'DOC', '');
+      z = setz(z, 'LCUTS', '0'); z = setz(z, 'ANGLE', '0'); z = setz(z, 'TYP', '');
+      z = setz(z, 'T-ANGLE', vz(0)); z = setz(z, 'PITCH', vz(0));
+      zeilen.push(z); return;
+    }
     z = setz(z, 'T', w.nr); z = setz(z, 'NAME', String(w.name || '').toUpperCase().replace(/[^A-Z0-9_\-.]/g, '_').slice(0, 32));
     z = setz(z, 'L', vz(w.l || 0)); z = setz(z, 'R', vz((+w.d || 0) / 2)); z = setz(z, 'R2', vz(w.r2 || 0));
     z = setz(z, 'DL', vz(w.dl || 0)); z = setz(z, 'DR', vz(w.dr || 0)); z = setz(z, 'DR2', vz(0));
@@ -4096,6 +4304,16 @@ function fToolTSchreiben(werkzeuge, opt){
 }
 
 // Leeres Programm mit sicheren Kopfwerten.
+// ---- Die Position eines Schritts ------------------------------------
+// EINE Quelle fuer alle Leser: Schreiber, Pruefung, Bahn, Simulation und
+// Draufsicht. Ein Schritt OHNE posArt gilt als 'muster' - so bleiben
+// gespeicherte Programme und alle Vorlagen unveraendert.
+function fPosArt(s){ return (s && s.posArt === 'xy') ? 'xy' : 'muster'; }
+function fPunkte(s, prog){
+  if(fPosArt(s) === 'xy') return [{x:fRund(+s.posX || 0), y:fRund(+s.posY || 0)}];
+  return fMusterPunkte(((prog && prog.muster) || [])[s && s.muster]);
+}
+
 function fProgrammNeu(){
   return {
     kopf:{
@@ -4120,8 +4338,20 @@ function fProgrammNeu(){
 // Vorbelegung eines Bohrschritts aus Kopf und Werkzeug.
 function fSchrittNeu(prog, art, tNr, musterIdx){
   const k = prog.kopf, t = (prog.werkzeuge || []).find(w => w.nr === tNr) || {};
+  const z0 = F_ZYKLEN[art || 'bohren'] || {};
+  // DIE POSITION: ein Fraeszyklus (Tasche, Nut, Zapfen) startet mit der
+  // eigenen Position in der Mitte des Rohteils - dort liegt die Form,
+  // und ein Bohrbild waere fuer eine einzelne Tasche der falsche Weg.
+  // Bohren und Gewindefraesen starten am Bohrbild, wenn es eines gibt:
+  // dort sitzen mehrere gleiche Stellen, und genau dafuer ist es da.
+  const fraesForm = !!(z0.fraes && !z0.gewf && !z0.eigenePosition && !z0.kontur && !z0.modell);
+  const hatMuster = ((prog.muster || []).length > 0);
   const s = {
     typ:'bohren', art:art || 'bohren', t:tNr || (t.nr || 0), muster:(musterIdx == null ? 0 : musterIdx), aktiv:true,
+    // Wer ausdruecklich ein Bohrbild uebergibt, meint es auch - so legen
+    // die 19 Vorlagen ihre Schritte an, und sie bleiben bitgenau.
+    posArt:(musterIdx != null) ? 'muster' : ((fraesForm || !hatMuster) ? 'xy' : 'muster'),
+    posX:fRund(((+k.x0 || 0) + (+k.x1 || 0)) / 2), posY:fRund(((+k.y0 || 0) + (+k.y1 || 0)) / 2),
     s:t.s || 1000, f:t.f || 100, kuehl:'an', ausgabe:'zyklus',
     sc:k.sc, sc2:k.sc2, q203:k.oberflaeche,
     tiefe:-10, zust:0, vOben:0, vUnten:0,
@@ -4773,7 +5003,19 @@ function fBahnFormen(s, tool, prog, punkte){
     // Startpunkt der innersten Kontur (Tasche) / aeussersten (Zapfen)
     const erste = ring(versaetze[0]);
     const startP = W(erste[erste.length - 1]);
-    const eintauchStart = zapfen ? startP : m;
+    // EINTAUCHPUNKT. Bei Tasche und Kreistasche ist die FORMMITTE richtig:
+    // dort muss das Material ohnehin weg, und die Gerade von dort zum
+    // Konturanfang liegt ganz im spaeteren Hohlraum.
+    // Bei der RUNDEN NUT gilt das nicht. Ihr lokaler Ursprung ist der
+    // Mittelpunkt des TEILKREISES und liegt weit ausserhalb der Nut im
+    // Vollen; und selbst von der Nutmitte aus waere die Anfahrt die SEHNE
+    // des Bogens, an DZ17 nachgerechnet 4,5 mm neben der Mittellinie einer
+    // Nut, die nur 1 mm Spiel fuer die Werkzeugmitte hat. Sie taucht
+    // deshalb am ANFANG DER KONTUR ein — wie der Zapfen. Dann gibt es
+    // keine Anfahrt, die irgendwo hindurchlaufen koennte.
+    const lokEin = (art === 'nutR') ? erste[erste.length - 1] : {x:0, y:0};
+    const mEin = W(lokEin);
+    const eintauchStart = zapfen ? startP : mEin;
     eil({x:eintauchStart.x, y:eintauchStart.y});
     eil({z:zSC});
     let zAkt = zSC;
@@ -4787,17 +5029,26 @@ function fBahnFormen(s, tool, prog, punkte){
         if(!(rh > 0.2)){ vor({z:zNeu, f:fZ}); zAkt = zNeu; warn.push('Helix-Radius unter 0,2 mm — senkrecht eingetaucht.'); return; }
         const steig = 2 * Math.PI * rh * Math.tan(angle * Math.PI / 180);
         const turns = Math.max(1, Math.ceil(dz / steig));
-        const st = W2({x:rh, y:0});
+        // Die Helix dreht sich um den EINTAUCHPUNKT. Bei der runden Nut ist
+        // das nicht die Formmitte (s. lokEin) — sonst schraubte sie sich im
+        // Teilkreismittelpunkt ins volle Material.
+        const lok = lokEin;
+        const st = W2({x:lok.x + rh, y:lok.y});
         vor({x:st.x, y:st.y, f:fZ});
-        B.push({a:'helix', cx:m.x, cy:m.y, r:rh, dr:ccw ? 1 : -1, dz:-fRund(dz), turns:turns, z:zNeu, f:fZ}); pos.z = zNeu;
+        B.push({a:'helix', cx:mEin.x, cy:mEin.y, r:rh, dr:ccw ? 1 : -1, dz:-fRund(dz), turns:turns, z:zNeu, f:fZ}); pos.z = zNeu;
         // Vollkreis auf der Tiefe (zwei Halbkreise), damit der Grund der Helix eben ist
-        const gg = W2({x:-rh, y:0});
-        kreis({x:gg.x, y:gg.y, z:zNeu, cx:m.x, cy:m.y, dr:ccw ? 1 : -1, f:fZ});
-        kreis({x:st.x, y:st.y, z:zNeu, cx:m.x, cy:m.y, dr:ccw ? 1 : -1, f:fZ});
+        const gg = W2({x:lok.x - rh, y:lok.y});
+        kreis({x:gg.x, y:gg.y, z:zNeu, cx:mEin.x, cy:mEin.y, dr:ccw ? 1 : -1, f:fZ});
+        kreis({x:st.x, y:st.y, z:zNeu, cx:mEin.x, cy:mEin.y, dr:ccw ? 1 : -1, f:fZ});
         zAkt = zNeu; return;
       }
       // Pendelnd: Rampe auf der Laengsachse hin und her
+      // Gependelt wird auf der LAENGSACHSE der Form. Die runde Nut hat keine
+      // gerade Laengsachse (ihr Verlauf ist ein Bogen) — dort waere jedes
+      // Pendeln eine Bahn quer zur Nut. Sie taucht deshalb senkrecht ein,
+      // und die App sagt es mit dem Grund statt mit "Pendelweg zu kurz".
       const L = (art === 'tascheK' || art === 'zapfenK') ? (innenMax - dRoh) : ((art === 'nutR') ? 0 : (((+s.l1 || 0) / 2) - dRoh));
+      if(art === 'nutR'){ vor({z:zNeu, f:fZ}); zAkt = zNeu; warn.push('Runde Nut: gependelt wird auf einer geraden Laengsachse, die es hier nicht gibt — senkrecht in der Nutmitte eingetaucht.'); return; }
       if(!(L > 0.5)){ vor({z:zNeu, f:fZ}); zAkt = zNeu; warn.push('Pendelweg zu kurz — senkrecht eingetaucht.'); return; }
       const dzJe = 2 * L * Math.tan(angle * Math.PI / 180);
       let z = zAkt, ende = 1;
@@ -4813,7 +5064,7 @@ function fBahnFormen(s, tool, prog, punkte){
     if(umfang !== 2){
       ebenen.forEach((z, ei) => {
         // zurueck zum Eintauchpunkt: im Vorschub, das Werkzeug steht auf Tiefe im geraeumten Bereich
-        if(ei > 0){ const st = zapfen ? startP : m; vor({x:st.x, y:st.y, f:f}); }
+        if(ei > 0){ const st = zapfen ? startP : mEin; vor({x:st.x, y:st.y, f:f}); }
         runter(z, W);
         versaetze.forEach(d => { const kon = ring(d); if(kon) fahreKontur(kon, W, z, f); });
       });
@@ -4821,7 +5072,7 @@ function fBahnFormen(s, tool, prog, punkte){
     if(umfang !== 1){
       // Schlichten auf Endtiefe: Boden (Ringmuster, nur bei UZ > 0), dann Seite
       if(umfang === 2){ vor({z:zT, f:fZ}); zAkt = zT; }
-      else if(uz > 0){ const st = zapfen ? startP : m; vor({x:st.x, y:st.y, f:f}); runter(zT, W); versaetze.forEach(d => { const kon = ring(d); if(kon) fahreKontur(kon, W, zT, fS); }); }
+      else if(uz > 0){ const st = zapfen ? startP : mEin; vor({x:st.x, y:st.y, f:f}); runter(zT, W); versaetze.forEach(d => { const kon = ring(d); if(kon) fahreKontur(kon, W, zT, fS); }); }
       const ds = (+s.zustSchl > 0) ? +s.zustSchl : 0;
       const zSeiten = [];
       if(ds > 0){ let z = z0; while(z > zT + 1e-9){ z = Math.max(zT, fRund(z - ds)); zSeiten.push(z); } } else zSeiten.push(zT);
@@ -6247,6 +6498,164 @@ function fStepAchseVorschlag(modell){
   return best;
 }
 
+// ---- Der Planer, Stufe 1: die Aufspannung ---------------------------
+// Siehe den Block ueber fPlanAufspannung: erst satt aufspannen, dann
+// viel zerspanen.
+
+// Flaecheninhalt eines XY-Polygons (Gauss). Die Schleifen einer Flaeche
+// kommen als flache Punktlisten aus fStepFlaechePoly; die erste ist der
+// Rand, jede weitere ein Loch - deshalb der Betrag je Schleife und die
+// groesste als Rand.
+function fPolyFlaeche(P){
+  let a = 0;
+  for(let i = 0; i + 1 < P.length; i += 2){
+    const j = (i + 2) % P.length;
+    a += P[i] * P[j + 1] - P[j] * P[i + 1];
+  }
+  return Math.abs(a / 2);
+}
+
+// Die AUFLAGE einer Lage: die groesste waagerechte Ebene ganz unten.
+// Nicht die Summe aller unteren Flaechen - zwei Fuesse an den Enden
+// tragen anders als eine durchgehende Platte, und was zaehlt, ist die
+// Flaeche, auf der das Teil wirklich steht.
+function fPlanAuflage(A, tol){
+  const t = tol || 0.05;
+  const unten = A.box.z0;
+  let best = 0, ganz = 0;
+  A.flaechen.forEach(f => {
+    if(f.art !== 'ebene' || f.lage !== 'waagerecht') return;
+    const G = fStepFlaechePoly(f);
+    if(!G || !G.polys || !G.polys.length) return;
+    // Liegt sie unten? Die Flaeche ist waagerecht, ihr z steht in den
+    // Randpunkten.
+    const z = f.rand[0] && f.rand[0].kanten[0] ? f.rand[0].kanten[0].p[0][2] : null;
+    if(z == null || Math.abs(z - unten) > t) return;
+    const rand = fPolyFlaeche(G.polys[0]);
+    let loch = 0;
+    for(let i = 1; i < G.polys.length; i++) loch += fPolyFlaeche(G.polys[i]);
+    const netto = Math.max(0, rand - loch);
+    ganz += netto;
+    if(netto > best) best = netto;
+  });
+  return {groesste:best, gesamt:ganz};
+}
+
+// Das ABTRAGSVOLUMEN von oben: Rohteil minus Teil, Zelle fuer Zelle
+// ueber die Sollform. Was unter einem Hinterschnitt liegt, zaehlt
+// NICHT mit - die Sollform kennt nur, was von oben sichtbar ist, und
+// genau das kann der Fraeser in dieser Aufspannung erreichen.
+function fPlanAbtrag(A, F){
+  const feld = F || fStepSollfeld(A);
+  const z1 = A.box.z1, fl = feld.raster * feld.raster;
+  let v = 0;
+  for(let i = 0; i < feld.h.length; i++){
+    const d = z1 - feld.h[i];
+    if(d > 0) v += d * fl;
+  }
+  return {cm3:Math.round(v / 1000 * 10) / 10, feld:feld};
+}
+
+// WAS IN DIESER AUFSPANNUNG FERTIG WIRD: die Flaeche, die der Fraeser
+// erreicht. Nach oben zeigende Flaechen fraest er von oben, senkrechte
+// von der Seite; was nach unten zeigt, liegt auf dem Tisch und braucht
+// die zweite Aufspannung.
+//
+// EHRLICHE GRENZE: gemessen wird die RICHTUNG der Flaeche, nicht ihr
+// Schatten. Eine nach oben zeigende Flaeche tief in einer engen Tasche
+// zaehlt hier mit, obwohl kein Fraeser hineinkommt - das entscheidet
+// erst die Bahn mit einem konkreten Werkzeug.
+function fPlanErreichbar(A){
+  let erreichbar = 0, gesamt = 0, unten = 0;
+  A.flaechen.forEach(f => {
+    const G = fStepFlaechePoly(f);
+    if(!G || !G.polys || !G.polys.length) return;
+    let fl = fPolyFlaeche(G.polys[0]);
+    for(let i = 1; i < G.polys.length; i++) fl -= fPolyFlaeche(G.polys[i]);
+    fl = Math.max(0, fl);
+    // Senkrechte Flaechen haben in der Draufsicht keine Ausdehnung -
+    // ihre Groesse steckt in Hoehe mal Laenge. Sie werden ueber ihren
+    // Huellquader geschaetzt, sonst faellt eine Wand mit 0 mm2 heraus.
+    if(f.lage === 'senkrecht'){
+      const b = Math.max(G.x1 - G.x0, G.y1 - G.y0);
+      const hoehe = (f.rand[0] && f.rand[0].kanten.length) ? (function(){
+        let zlo = Infinity, zhi = -Infinity;
+        f.rand[0].kanten.forEach(k => k.p.forEach(p => { if(p[2] < zlo) zlo = p[2]; if(p[2] > zhi) zhi = p[2]; }));
+        return Math.max(0, zhi - zlo);
+      })() : 0;
+      fl = b * hoehe;
+    }
+    gesamt += fl;
+    const n = f.achse;
+    if(!n){ erreichbar += fl; return; }          // Freiform: mitzaehlen
+    if(f.lage === 'senkrecht'){ erreichbar += fl; return; }
+    if(n[2] > 0.0002) erreichbar += fl;          // zeigt nach oben
+    else unten += fl;                            // liegt auf dem Tisch
+  });
+  return {mm2:Math.round(erreichbar), gesamt:Math.round(gesamt), unten:Math.round(unten),
+          anteil:gesamt > 0 ? Math.round(erreichbar / gesamt * 100) / 100 : 0};
+}
+
+// Die sechs Lagen, bewertet. Liefert ALLE - der Vorschlag ist der
+// erste, und jede traegt ihre Zahlen mit, damit die Wahl
+// nachvollziehbar bleibt.
+function fPlanAufspannung(modell){
+  const lagen = F_STEP_ACHSEN.map(achse => {
+    const A = fStepAusrichten(modell, {achse:achse});
+    const auf = fPlanAuflage(A);
+    const ab = fPlanAbtrag(A);
+    const err = fPlanErreichbar(A);
+    const B = A.box;
+    const grund = (B.x1 - B.x0) * (B.y1 - B.y0);
+    return {
+      achse:achse, A:A,
+      auflage:Math.round(auf.groesste), auflageGesamt:Math.round(auf.gesamt),
+      // Anteil an der Grundflaeche: eine Platte, die ganz aufliegt,
+      // ist 1,0 - daran misst sich 'satt'.
+      satt:grund > 0 ? Math.round(auf.groesste / grund * 100) / 100 : 0,
+      // abtrag ist AUSKUNFT (wieviel Arbeit), kein Pluspunkt:
+      // viel Abtrag heisst oft nur, dass das Rohteil schlecht zur Lage
+      // passt. Gezaehlt wird, was FERTIG wird - siehe fertig.
+      abtrag:ab.cm3,
+      fertig:err.anteil, fertigMm2:err.mm2, ruecken:err.unten,
+      laengs:A.zaehl.laengs, waagerecht:A.zaehl.waagerecht,
+      hoehe:Math.round((B.z1 - B.z0) * 10) / 10,
+      grundflaeche:Math.round(grund)
+    };
+  });
+  // DANIELS REIHENFOLGE: erst die Auflage (doppelt), dann der Abtrag.
+  // Bohrungen und eine flache Lage entscheiden nur den Gleichstand.
+  const maxAuf = Math.max.apply(null, lagen.map(l => l.auflage)) || 1;
+  const maxLa = Math.max.apply(null, lagen.map(l => l.laengs)) || 1;
+  const minH = Math.min.apply(null, lagen.map(l => l.hoehe)) || 1;
+  lagen.forEach(l => {
+    l.punkte = Math.round((2 * (l.auflage / maxAuf) + 1.5 * l.fertig +
+                           0.3 * (l.laengs / maxLa) + 0.2 * (minH / Math.max(0.1, l.hoehe))) * 100) / 100;
+  });
+  lagen.sort((a, b) => b.punkte - a.punkte);
+  const erste = lagen[0], zweite = lagen[1] || erste;
+  // WANN DER VORSCHLAG SELBST ZWEIFELT - beides aus den Zahlen, nicht
+  // aus dem Gefuehl (an 94 echten Teilen geeicht: Median 70 %).
+  const hinweise = [];
+  if(erste.satt < 0.25)
+    hinweise.push('Das Teil liegt in keiner Lage satt auf (beste Auflage ' +
+      Math.round(erste.satt * 100) + ' % der Grundfläche, ' + erste.auflage + ' mm²) — ' +
+      'für diese Aufspannung braucht es eine Vorrichtung, Spannpratzen oder einen Sauger.');
+  if(erste !== zweite && erste.punkte - zweite.punkte < 0.15)
+    hinweise.push('Die Lagen ' + erste.achse + ' und ' + zweite.achse + ' sind fast gleichwertig — ' +
+      'dann entscheidet, was in der zweiten Aufspannung noch drankommt.');
+  if(erste.fertig < 0.6)
+    hinweise.push('In dieser Aufspannung sind nur ' + Math.round(erste.fertig * 100) +
+      ' % der Teilflächen erreichbar — es wird auf jeden Fall eine zweite gebraucht.');
+  return {
+    vorschlag:erste.achse, lagen:lagen, hinweise:hinweise,
+    grund:'Auflage ' + erste.auflage + ' mm² (' + Math.round(erste.satt * 100) + ' % der Grundfläche), ' +
+          Math.round(erste.fertig * 100) + ' % der Teilflächen in dieser Aufspannung erreichbar, ' +
+          erste.abtrag + ' cm³ abzutragen' +
+          (erste.laengs ? ', ' + erste.laengs + ' Bohrungen in Werkzeugrichtung' : '')
+  };
+}
+
 // ---- Stufe 2: waagerechte Flaechen als Z-Ebenen, Schleifen als Konturen ----
 // Jede waagerechte Ebene des Modells ist eine Hoehe, auf der gefraest wird:
 // die Oberflaeche, ein Taschenboden, eine Absatzflaeche. Ihre aeussere Schleife
@@ -7078,7 +7487,7 @@ function fSimBahnen(prog){
     const rt = (+tool.d > 0) ? +tool.d / 2 : 2.5;
     if(!(+tool.d > 0)) hinweise.push('Schritt ' + (si + 1) + ': T' + s.t + ' ohne Durchmesser in der Tabelle — mit ⌀5 simuliert.');
     let punkte = [];
-    if(!z.eigenePosition && !z.kontur){ const m = (prog.muster || [])[s.muster]; punkte = fMusterPunkte(m); if(!punkte.length){ hinweise.push('Schritt ' + (si + 1) + ': keine Position — uebersprungen.'); return; } }
+    if(!z.eigenePosition && !z.kontur){ punkte = fPunkte(s, prog); if(!punkte.length){ hinweise.push('Schritt ' + (si + 1) + ': keine Position — uebersprungen.'); return; } }
     const tool2 = Object.assign({d:2 * rt}, tool);
     let b = null;
     try{ b = fBahnSchritt(Object.assign({}, s, {ausgabe:'einzel'}), tool2, prog, punkte); }catch(e){ b = {ok:false, grund:e.message, bahn:[]}; }
@@ -7589,8 +7998,8 @@ function fProgrammSchreiben(prog, opt){
     // gibt es keinen Rueckfall — dann sagt das Programm es im Klartext,
     // statt stumm einen Werkzeugaufruf ohne Bewegung zu hinterlassen.
     const nurEinzel = !!(z && z.nurEinzel);
-    if((s.ausgabe === 'einzel' || nurEinzel) && z && (z.eigenePosition || z.kontur || m)){
-      const bh = fBahnSchritt(s, tool, prog, (z.eigenePosition || z.kontur) ? [] : fMusterPunkte(m));
+    if((s.ausgabe === 'einzel' || nurEinzel) && z && (z.eigenePosition || z.kontur || fPunkte(s, prog).length)){
+      const bh = fBahnSchritt(s, tool, prog, (z.eigenePosition || z.kontur) ? [] : fPunkte(s, prog));
       if(bh.ok) einzel = bh;
       else if(nurEinzel) warn.push('Schritt ' + (si + 1) + ': ' + bh.grund + ' — fuer ' + (z.wort || s.art) + ' gibt es KEINEN Steuerungszyklus, der Schritt bleibt ohne Bahn.');
       else warn.push('Schritt ' + (si + 1) + ': Einzelsaetze nicht moeglich — ' + bh.grund + '. Steuerungszyklus geschrieben.');
@@ -7633,6 +8042,16 @@ function fProgrammSchreiben(prog, opt){
         // Planfraesen 232: Startpunkt steckt im Zyklus, kein Bohrbild — ein
         // CYCL CALL direkt hinter der Definition (CALL-aktiv).
         satz('CYCL CALL');
+      } else if(fPosArt(s) === 'xy'){
+        // EIGENE POSITION: ein Satz mit M99 ruft den eben definierten
+        // Zyklus an genau dieser Stelle - derselbe Satz, den das
+        // Bohrbild-Unterprogramm an jedem seiner Punkte schreibt.
+        // MIT WAECHTER: eine leere Punktliste darf eine Meldung geben,
+        // nicht den ganzen Programmaufbau toeten (von der Gegenprobe
+        // gefunden - der Schreiber starb an pp.x).
+        const pp = fPunkte(s, prog)[0];
+        if(pp) satz('L X' + klNum(pp.x) + ' Y' + klNum(pp.y) + ' R0 FMAX M99');
+        else warn.push('Schritt ' + (si + 1) + ': keine Position — der Zyklus steht da, wird aber nicht gerufen.');
       } else if(m && m.ausgabe === 'zyklus' && (m.typ === 'kreis' || m.typ === 'reihe')){
         const md = fMusterZyklusDef(m, s);
         satz(md[0]); for(let i = 1; i < md.length; i++) zeilen.push(md[i]);
@@ -7718,8 +8137,16 @@ function fPruefen(prog){
       if(tool && tool.art !== 'fraeser') gelb.push(nr + 'T' + s.t + ' ist kein Fraeser (' + (F_WERKZEUGARTEN[tool.art] || tool.art) + ').');
       if(!(+s.fTief > 0)) rot.push(nr + 'Vorschub Tiefenzustellung Q11 fehlt.');
       if(+s.zust < 0) rot.push(nr + 'Zustell-Tiefe Q10 darf nicht negativ sein.');
-    } else if(!m) rot.push(nr + 'kein Positionsmuster.');
-    else if(!fMusterPunkte(m).length) rot.push(nr + 'Positionsmuster "' + (m.name || '') + '" hat keinen Punkt.');
+    } else if(fPosArt(s) === 'xy'){
+      // Eigene Position: der Punkt muss eine Zahl sein und sollte auf dem
+      // Rohteil liegen. Ausserhalb ist nicht verboten (Spannmittel,
+      // ueberstehendes Teil), aber fast immer ein Vertipper.
+      if(!isFinite(+s.posX) || !isFinite(+s.posY)) rot.push(nr + 'Position X/Y fehlt.');
+      else if(+s.posX < +k.x0 - 1e-6 || +s.posX > +k.x1 + 1e-6 ||
+              +s.posY < +k.y0 - 1e-6 || +s.posY > +k.y1 + 1e-6)
+        gelb.push(nr + 'Position X' + s.posX + ' Y' + s.posY + ' liegt ausserhalb der BLK FORM.');
+    } else if(!m) rot.push(nr + 'kein Bohrbild gewaehlt — waehle eines aus oder stelle die Position auf "eigene Position X/Y".');
+    else if(fPosArt(s) === 'muster' && !fMusterPunkte(m).length) rot.push(nr + 'Positionsmuster "' + (m.name || '') + '" hat keinen Punkt.');
     else {
       const p = fMusterPunkte(m);
       const drau = p.filter(q => q.x < +k.x0 - 1e-6 || q.x > +k.x1 + 1e-6 || q.y < +k.y0 - 1e-6 || q.y > +k.y1 + 1e-6);
@@ -7882,6 +8309,9 @@ function fPruefen(prog){
 // ---------------------------------------------------------------------
 function fDemoFlansch(){
   const p = fProgrammNeu();
+  // Eigene Tabelle: die Vorlage ist ein Beleg vom Programmierplatz und
+  // darf sich nicht aendern, wenn die Werkstatt-Tabelle waechst.
+  p.werkzeuge = fWerkzeugeDemo();
   p.kopf.name = 'DZ1';
   Object.assign(p.kopf, {x0:0, y0:0, z0:-20, x1:120, y1:100, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100});
   p.muster = [
@@ -7898,6 +8328,9 @@ function fDemoFlansch(){
 }
 function fDemoLeiste(){
   const p = fProgrammNeu();
+  // Eigene Tabelle: die Vorlage ist ein Beleg vom Programmierplatz und
+  // darf sich nicht aendern, wenn die Werkstatt-Tabelle waechst.
+  p.werkzeuge = fWerkzeugeDemo();
   p.kopf.name = 'DZ2';
   Object.assign(p.kopf, {x0:0, y0:0, z0:-45, x1:200, y1:40, z1:0, sc:2, sc2:30, oberflaeche:0, rz:80});
   p.muster = [
@@ -7913,6 +8346,9 @@ function fDemoLeiste(){
 }
 function fDemoMusterzyklen(){
   const p = fProgrammNeu();
+  // Eigene Tabelle: die Vorlage ist ein Beleg vom Programmierplatz und
+  // darf sich nicht aendern, wenn die Werkstatt-Tabelle waechst.
+  p.werkzeuge = fWerkzeugeDemo();
   p.kopf.name = 'DZ3';
   Object.assign(p.kopf, {x0:0, y0:0, z0:-15, x1:90, y1:90, z1:0, sc:2, sc2:40, oberflaeche:0, rz:60});
   p.muster = [
@@ -7939,7 +8375,7 @@ function fDemoTaschen(){
   const p = fProgrammNeu();
   p.kopf.name = 'DZ4';
   Object.assign(p.kopf, {x0:0, y0:0, z0:-25, x1:200, y1:120, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
-  p.werkzeuge = fWerkzeugeVorgabe().filter(w => w.nr !== 4 && w.nr !== 5).concat([
+  p.werkzeuge = fWerkzeugeDemo().filter(w => w.nr !== 4 && w.nr !== 5).concat([
     {nr:4, name:'Schaftfraeser 8',  art:'fraeser', d:8,  s:3500, f:500},
     {nr:5, name:'Schaftfraeser 10', art:'fraeser', d:10, s:3000, f:600}
   ]).sort((a, b) => a.nr - b.nr);
@@ -8152,20 +8588,286 @@ function fDemoGewindeFraesen(){
   p.schritte = [bo, g1, g2, g3, g4, g5];
   return p;
 }
+// DZ16 (14.09.2026): die drei BOHRFAMILIEN, die es nur als Steuerungszyklus
+// gab, als EIGENE BAHN — 205 Universal-Tiefbohren, 206 Gewindebohren mit
+// Ausgleichsfutter, 202 Ausdrehen. Je eine Position, damit das Programm
+// unter dem 99-Satz-Deckel des Demo-Wandlers bleibt (55 Saetze).
+// Werkzeuge mit Nummern, die die TOOL.T des Programmierplatzes fuehrt:
+// T40 VHM_BOHRER_D8, T4 D8, T7 D14.
+// Das Ausdrehen laeuft OHNE Freifahren: dafuer braucht es die
+// Spindel-Orientierung M19, die als Einzelsatz nicht belegt ist — mit
+// Freifahren faellt der Schritt mit Ansage auf den Zyklus zurueck.
+function fDemoBohrEinzel2(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ16';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-30, x1:90, y1:50, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [
+    {nr:40, name:'VHM-Bohrer 8', art:'bohrer', d:8, spitze:140, s:2500, f:150},
+    {nr:4,  name:'Gewindebohrer M8', art:'gewindebohrer', d:8, steigung:1.25, s:400, f:500},
+    {nr:7,  name:'Ausdrehwerkzeug 14', art:'bohrer', d:14, spitze:180, s:1200, f:100}
+  ];
+  p.muster = [
+    {name:'Tiefbohrung 8', typ:'punkte', punkte:[{x:20, y:25}], ausgabe:'punkte'},
+    {name:'Gewinde M8', typ:'punkte', punkte:[{x:45, y:25}], ausgabe:'punkte'},
+    {name:'Ausdrehung 14', typ:'punkte', punkte:[{x:70, y:25}], ausgabe:'punkte'}
+  ];
+  const a = fSchrittNeu(p, 'tiefUni', 40, 0); Object.assign(a, {tiefe:-28, zust:8, abnahme:0.5, minZust:3, q258:0.5, q259:1, q257:6, rzSpan:0.2, vUnten:0.25, q379:0, fVor:750, f:150, s:2500, ausgabe:'einzel'});
+  const b = fSchrittNeu(p, 'gewinde', 4, 1); Object.assign(b, {tiefe:-18, steigung:1.25, s:400, f:500, ausgabe:'einzel'});
+  const c = fSchrittNeu(p, 'ausdrehen', 7, 2); Object.assign(c, {tiefe:-20, vUnten:0.5, fRueck:250, freifahr:0, spWinkel:0, f:100, s:1200, ausgabe:'einzel'});
+  p.schritte = [a, b, c];
+  return p;
+}
+// DZ17 (14.09.2026): die RUNDE NUT 254 als eigene Bahn. Teilkreis ⌀50,
+// Nutbreite 10 mit einem ⌀8-Fraeser, Oeffnungswinkel 140 Grad ab 200 Grad,
+// 4 mm tief in zwei Zustellungen, seitliches Aufmass 0,2 und danach der
+// Schlichtzug. Allein im Programm (54 Saetze): zusammen mit dem Zapfen aus
+// DZ18 waeren es 119 gewesen, und der Wandler der Demo bricht bei 99 ab.
+function fDemoNutRundEinzel(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ17';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-15, x1:120, y1:90, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [{nr:4, name:'Schaftfraeser 8', art:'fraeser', d:8, s:3500, f:500}];
+  p.muster = [{name:'Mitte der Nut', typ:'punkte', punkte:[{x:60, y:45}], ausgabe:'punkte'}];
+  const d = fSchrittNeu(p, 'nutR', 4, 0); Object.assign(d, {l2:10, teilkreis:50, lage:0, xm:60, ym:45, start:200, oeffnung:140, wschritt:0, anzahl:1, tiefe:-4, zust:2, aufSeite:0.2, aufTiefe:0, zustSchl:0, eintauch:0, umfang:0, fraesart:1, f:500, fTief:150, fSchl:400, s:3500, ausgabe:'einzel'});
+  p.schritte = [d];
+  return p;
+}
+// DZ18 (14.09.2026): der RECHTECKZAPFEN 256 als eigene Bahn. Zapfen
+// 30 x 20 mit Eckenradius 5 aus einem Rohmass 44 x 34, 5 mm tief mit dem
+// ⌀10-Fraeser. Die Bahn laeuft von AUSSEN nach innen (Gegenteil der
+// Tasche), die erste Kontur liegt ausserhalb des Rohmasses — dort taucht
+// das Werkzeug in der Luft ein. 71 Saetze, deshalb allein im Programm.
+function fDemoZapfenREinzel(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ18';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-20, x1:100, y1:80, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [{nr:5, name:'Schaftfraeser 10', art:'fraeser', d:10, s:3000, f:600}];
+  p.muster = [{name:'Mitte des Zapfens', typ:'punkte', punkte:[{x:50, y:40}], ausgabe:'punkte'}];
+  const e = fSchrittNeu(p, 'zapfenR', 5, 0); Object.assign(e, {l1:30, l2:20, roh1:44, roh2:34, r:5, dreh:0, lage:0, tiefe:-5, zust:5, aufSeite:0.2, ueberl:1, fraesart:1, f:600, fTief:200, s:3000});
+  e.ausgabe = 'einzel';
+  p.schritte = [e];
+  return p;
+}
+// DZ19 (14.09.2026): das SL-VORBOHREN 21 als eigene Bahn — die Bohrleiter
+// an genau den Stellen, an denen der Raeumer spaeter eintaucht. Tasche
+// 90 x 60 mit einer Kreisinsel ⌀12: MIT der Insel sind es sechs
+// Einstichpunkte, ohne sie waere es einer, und an einem Punkt sieht man
+// der Leiter nichts an. Gerechnet wird mit dem Radius des
+// AUSRAEUM-Werkzeugs (Q13 = T5, ⌀10), gebohrt mit dem ⌀8-Bohrer.
+// 49 Saetze.
+function fDemoVorbohrenEinzel(){
+  const p = fProgrammNeu(); p.kopf.name = 'DZ19';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-20, x1:120, y1:90, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.werkzeuge = [
+    {nr:40, name:'VHM-Bohrer 8', art:'bohrer', d:8, spitze:140, s:2500, f:150},
+    {nr:5,  name:'Schaftfraeser 10', art:'fraeser', d:10, s:3000, f:600}
+  ];
+  p.konturen = [
+    {name:'Tasche', geschlossen:true, x0:15, y0:15, elemente:[{typ:'g', x:105, y:15}, {typ:'g', x:105, y:75}, {typ:'g', x:15, y:75}]},
+    {name:'Insel', geschlossen:true, x0:66, y0:45, elemente:[{typ:'k', x:60, y:45, dr:1}]}
+  ];
+  const v = fSchrittNeu(p, 'slVorbohren', 40, 0); Object.assign(v, {inseln:[1], tiefe:-8, zust:4, fTief:150, s:2500, q13:5, aufSeite:0.3, aufTiefe:0.2, ueberl:1, fraesart:1, q8:0, ausgabe:'einzel'});
+  p.schritte = [v];
+  return p;
+}
+// ---- Ein STEP-Testkoerper, den die App selbst schreibt ---------------
+// Ein Rampenblock 80 x 50 x 18: Grundflaeche auf Z -18, eine Rampe von
+// GENAU 45 Grad ueber x 0..18 und ein Plateau auf Z 0 ueber x 18..80.
+// Als echte STEP-Austauschsaetze - der Leser bekommt also dieselbe
+// Arbeit wie bei einer Datei von der Platte.
+//
+// WARUM 45 GRAD: das ist genau der Grenzwinkel des Schlichtzyklus.
+// An dieser Stelle faellt eine Rechnung ohne Toleranz um (im
+// Pruefstand steht derselbe Koerper aus demselben Grund).
+function fStepTestkoerper(){
+  let n = 0; const L = [];
+  const add = (t) => { n++; L.push('#' + n + '=' + t + ';'); return n; };
+  const pkt = (x, y, z) => add("CARTESIAN_POINT('',(" + x + ',' + y + ',' + z + '))');
+  const ric = (x, y, z) => add("DIRECTION('',(" + x + ',' + y + ',' + z + '))');
+  const lage = (x, y, z, zx, zy, zz, xx, xy, xz) =>
+    add("AXIS2_PLACEMENT_3D('',#" + pkt(x, y, z) + ',#' + ric(zx, zy, zz) + ',#' + ric(xx, xy, xz) + ')');
+  const vtx = (x, y, z) => add("VERTEX_POINT('',#" + pkt(x, y, z) + ')');
+  const kGer = (a, e) => {
+    const p = pkt(a[0], a[1], a[2]);
+    const v = add("VECTOR('',#" + ric(e[0] - a[0], e[1] - a[1], e[2] - a[2]) + ',1.0)');
+    const li = add("LINE('',#" + p + ',#' + v + ')');
+    return add("EDGE_CURVE('',#" + vtx(a[0], a[1], a[2]) + ',#' + vtx(e[0], e[1], e[2]) + ',#' + li + ',.T.)');
+  };
+  const schleife = (kanten) => add("EDGE_LOOP('',(" +
+    kanten.map(k => '#' + add("ORIENTED_EDGE('',*,*,#" + k + ',.T.)')).join(',') + '))');
+  const ebene = (x, y, z, zx, zy, zz) =>
+    add("PLANE('',#" + lage(x, y, z, zx, zy, zz, (zz > 0.5 ? 1 : 0), 0, (zz > 0.5 ? 0 : 1)) + ')');
+  const flaeche = (flId, aussen) =>
+    add("ADVANCED_FACE('',(#" + add("FACE_OUTER_BOUND('',#" + schleife(aussen) + ',.T.)') + '),#' + flId + ',.T.)');
+  const quad = (x0, y0, x1, y1, z) => [kGer([x0, y0, z], [x1, y0, z]), kGer([x1, y0, z], [x1, y1, z]),
+                                       kGer([x1, y1, z], [x0, y1, z]), kGer([x0, y1, z], [x0, y0, z])];
+  const w = Math.SQRT1_2;
+  flaeche(ebene(0, 0, -18, 0, 0, 1), quad(0, 0, 80, 50, -18));
+  flaeche(ebene(0, 0, -18, -w, 0, w),
+    [kGer([0, 0, -18], [18, 0, 0]), kGer([18, 0, 0], [18, 50, 0]),
+     kGer([18, 50, 0], [0, 50, -18]), kGer([0, 50, -18], [0, 0, -18])]);
+  flaeche(ebene(0, 0, 0, 0, 0, 1), quad(18, 0, 80, 50, 0));
+  return "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AUTOMOTIVE_DESIGN'));\nENDSEC;\nDATA;\n" +
+    '#900=(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.));\n' +
+    L.join('\n') + '\nENDSEC;\nEND-ISO-10303-21;\n';
+}
+
+// ---- Zwei WERKSTUECKE (15.09.2026) -----------------------------------
+// Keine Zyklus-Demos, sondern Teile in Daniels Bearbeitungsfolge: erst
+// die Flaeche, dann ausraeumen, dann die Loecher, zuletzt Gewinde. Sie
+// nutzen die WERKSTATT-Tabelle - wer dort ein Werkzeug aendert, sieht
+// es hier sofort. (Die 19 Funktionstests DZ1-DZ19 haengen dagegen an
+// der Demo-TOOL.T des Programmierplatzes und bleiben unberuehrt.)
+
+// DZ20 Aufspannplatte 200 x 120 x 20: planen, Tasche, Nut, vier M8.
+function fDemoPlatte(){
+  const p = fProgrammNeu();
+  p.kopf.name = 'DZ20';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-20, x1:200, y1:120, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.muster = [
+    {name:'4 x M8 in den Ecken', typ:'punkte', ausgabe:'punkte',
+     punkte:[{x:20, y:20}, {x:180, y:20}, {x:180, y:100}, {x:20, y:100}]}
+  ];
+  // 1. Planen mit dem grossen Messerkopf - vom Groben zum Feinen.
+  const a = fSchrittNeu(p, 'planfraesen', 1);
+  Object.assign(a, {q389:0, px:-45, py:8, pz:0, q386:-0.5, l1:290, l2:104,
+                    zust:0.5, aufTiefe:0, ueberl:0.8, f:950, fSchl:950, fVor:2000,
+                    sc:2, scSeite:2, sc2:50, s:800});
+  // 2. Tasche ausraeumen, Schaftfraeser 12, Helix (ANGLE 3 in der Tabelle).
+  const b = fSchrittNeu(p, 'tascheR', 13);
+  Object.assign(b, {posArt:'xy', posX:100, posY:60, l1:80, l2:50, r:8, dreh:0, lage:0,
+                    tiefe:-8, zust:4, aufSeite:0.3, aufTiefe:0.2, zustSchl:0,
+                    ueberl:1, eintauch:1, umfang:0, fraesart:1,
+                    f:570, fTief:200, fSchl:500, s:3200});
+  // 3. Nut quer, Schaftfraeser 8.
+  const c = fSchrittNeu(p, 'nut', 11);
+  // 12 mm breit mit dem 8er Fraeser: eine Nut so breit wie das Werkzeug
+  // waere ein Langloch, das die TNC nur schruppt (ihre eigene Meldung).
+  Object.assign(c, {posArt:'xy', posX:100, posY:105, l1:60, l2:12, dreh:0, lage:0,
+                    tiefe:-5, zust:2.5, aufSeite:0.2, aufTiefe:0, zustSchl:0,
+                    eintauch:0, umfang:0, fraesart:1,
+                    f:570, fTief:180, fSchl:450, s:4800});
+  // 4.-6. Die vier M8: zentrieren, bohren, Gewinde. Hier ist das
+  //       Bohrbild richtig - vier gleiche Stellen.
+  const d = fSchrittNeu(p, 'zentrieren', 20, 0);
+  Object.assign(d, {tiefe:-3, f:150, s:2500});
+  const e = fSchrittNeu(p, 'bohren', 22, 0);
+  Object.assign(e, {tiefe:-22, zust:8, f:150, s:1800});
+  const f = fSchrittNeu(p, 'gewinde', 31, 0);
+  Object.assign(f, {tiefe:-18, steigung:1.25, s:400, f:500});
+  p.schritte = [a, b, c, d, e, f];
+  return p;
+}
+
+// DZ21 Lagerbock 120 x 80 x 40: planen, Kreistasche, Passbohrung
+// reiben, Gewinde M20 fraesen, Kreiszapfen.
+function fDemoLagerbock(){
+  const p = fProgrammNeu();
+  p.kopf.name = 'DZ21';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-40, x1:120, y1:80, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  p.muster = [
+    {name:'Passbohrung 12 H7', typ:'punkte', ausgabe:'punkte', punkte:[{x:30, y:40}]}
+  ];
+  const a = fSchrittNeu(p, 'planfraesen', 2);
+  Object.assign(a, {q389:0, px:-35, py:8, pz:0, q386:-0.5, l1:190, l2:64,
+                    zust:0.5, aufTiefe:0, ueberl:0.8, f:1000, fSchl:1000, fVor:2000,
+                    sc:2, scSeite:2, sc2:50, s:1000});
+  const b = fSchrittNeu(p, 'tascheK', 12);
+  Object.assign(b, {posArt:'xy', posX:85, posY:40, dm:40,
+                    tiefe:-12, zust:4, aufSeite:0.3, aufTiefe:0.2, zustSchl:0,
+                    ueberl:1, eintauch:1, umfang:0, fraesart:1,
+                    f:570, fTief:200, fSchl:500, s:3800});
+  // Passbohrung: zentrieren, vorbohren 11.8, reiben 12 H7.
+  const c = fSchrittNeu(p, 'zentrieren', 20, 0);
+  Object.assign(c, {tiefe:-3, f:150, s:2500});
+  // SACKLOCH 25 mm: die Reibahle T30 hat 26 mm Schneidenlaenge - eine
+  // durchgehende Bohrung durch die 40 mm koennte sie nicht reiben, und
+  // die App sagt das auch (LCUTS-Warnung).
+  const d = fSchrittNeu(p, 'bohren', 25, 0);
+  Object.assign(d, {tiefe:-27, zust:10, f:150, s:1100});
+  const e = fSchrittNeu(p, 'reiben', 30, 0);
+  Object.assign(e, {tiefe:-25, f:90, s:300, vUnten:0.5});
+  // Gewinde M20 fraesen - mit dem Schaftfraeser 8, eigene Position.
+  const f = fSchrittNeu(p, 'gewFraesen', 11);
+  Object.assign(f, {posArt:'xy', posX:60, posY:15, q335:20, steigung:2.5,
+                    tiefe:-18, q355:0, fraesart:1, f:570, fVor:750, fAnfahr:200,
+                    sc:2, sc2:50, s:4800});
+  p.schritte = [a, b, c, d, e, f];
+  return p;
+}
+
+// DZ22 Rampenblock AUS DEM STEP-MODELL: schruppen Z-konstant gegen das
+// Rohteil, dann die Schraege ueber die Rautiefe schlichten. Die
+// Sollform steht NICHT im Programm (dafuer ist sie zu gross) - die
+// Vorlage rechnet sie beim Laden aus dem Modell und uebergibt sie,
+// genau wie es das STEP-Fenster tut.
+function fDemoStepRampe(){
+  const A = fStepAusrichten(fStepModell(fStepTestkoerper()), {achse:'+Z'});
+  fStepFeldSetzen(fStepSollfeld(A));
+  const p = fProgrammNeu();
+  p.kopf.name = 'DZ22';
+  Object.assign(p.kopf, {x0:0, y0:0, z0:-18, x1:80, y1:50, z1:0, sc:2, sc2:50, oberflaeche:0, rz:100, stand:'07'});
+  // Schruppen mit dem Schaftfraeser 12, schlichten mit dem Kugelfraeser 8.
+  const a = fSchrittNeu(p, 'modellSchruppen', 13);
+  Object.assign(a, {q203:0, tiefe:-18, zust:4, aufSeite:0.5, aufTiefe:0.3, ueberl:1,
+                    sc:2, sc2:50, s:3200, f:570, fTief:200});
+  // Kugelfraeser 10 (LCUTS 20): der 8er hat nur 16 mm Schneide und
+  // reicht fuer 18 mm Tiefe nicht - die App sagt das auch.
+  const b = fSchrittNeu(p, 'modellSchlichten', 18);
+  Object.assign(b, {q203:0, tiefe:-18, winkelMin:5, winkel:45, rautiefe:0.01, tolBahn:0.005,
+                    strategie:0, sc:2, sc2:50, s:3800, f:600, fTief:240});
+  p.schritte = [a, b];
+  return p;
+}
+
+// DIE VORLAGEN. Jede traegt:
+//   nr     die Programmnummer (DZn) - danach wird sortiert
+//   name   das TEIL in zwei, drei Woertern
+//   was    ein Satz, was darin steckt
+//   gruppe 'werkstueck' = ein Teil, wie es auf der Maschine liegt;
+//          'test' = Funktionstest, ein Zyklus je Schritt, fuer den
+//          Programmierplatz gebaut
+// Die Oberflaeche erzeugt daraus die Kacheln; ein HTML-Knopf je
+// Vorlage gibt es nicht mehr.
 var F_DEMOS = [
-  {id:'flansch', name:'Flanschplatte (Lochkreis + M8-Ecken)', lade:fDemoFlansch},
-  {id:'leiste',  name:'Leiste (Tieflochbohren + Reiben)',    lade:fDemoLeiste},
-  {id:'muster',  name:'Musterzyklen 220/221 (Gewinde GS)',   lade:fDemoMusterzyklen},
-  {id:'taschen', name:'Taschen, Nuten, Zapfen (251-257)',    lade:fDemoTaschen},
-  {id:'bohren2', name:'Planfraesen 232 + Bohrzyklen 202/204/205/208/209/241', lade:fDemoBohren2},
-  {id:'einzel',  name:'Einzelsaetze: Leiste als eigene Bahn ohne Zyklen (eine Bohrung je Schritt)', lade:fDemoEinzel},
-  {id:'formen',  name:'Einzelsaetze: Kreistasche, Nut, Kreiszapfen als eigene Bahn', lade:fDemoFormenEinzel},
-  {id:'plan',    name:'Einzelsaetze: Planfraesen + Rechtecktasche mit Helix', lade:fDemoPlanEinzel},
-  {id:'kontur',  name:'Konturzug: Insel als Zyklus 14/25 und als eigene Bahn', lade:fDemoKonturEinzel},
-  {id:'konturformen', name:'Konturzug: Rundung, Fase, tangentialer Bogen, Vollkreis', lade:fDemoKonturFormen},
-  {id:'bohrfraes', name:'Einzelsaetze: Bohrfraesen 208 und Einlippen-Bohren 241', lade:fDemoBohrfraesEinzel},
-  {id:'sl',      name:'SL-Zyklen 20-24: Konturtasche mit Insel, Vorbohren und Raeumen', lade:fDemoSL},
-  {id:'gewfr',   name:'Gewindefraesen 262-267 (M20 x 2,5 mit einem Fraeser ⌀8)', lade:fDemoGewindeFraesen}
+  {id:'platte', nr:'DZ20', gruppe:'werkstueck', name:'Aufspannplatte 200 x 120',
+   was:'Planfräsen mit dem Messerkopf 80, Tasche 80x50 mit Helix, Nut, vier M8', lade:fDemoPlatte},
+  {id:'lagerbock', nr:'DZ21', gruppe:'werkstueck', name:'Lagerbock 120 x 80',
+   was:'Planfräsen 63, Kreistasche 40, Passbohrung 12 H7, Gewinde M20 gefräst', lade:fDemoLagerbock},
+  {id:'steprampe', nr:'DZ22', gruppe:'werkstueck', name:'Rampenblock 80 x 50 (STEP)',
+   was:'aus dem STEP-Modell: Z-konstant schruppen, Schräge über die Rautiefe schlichten', lade:fDemoStepRampe},
+
+  {id:'flansch', nr:'DZ1', gruppe:'test', name:'Flanschplatte',
+   was:'Lochkreis 6x zentrieren und bohren, vier M8 in den Ecken', lade:fDemoFlansch},
+  {id:'leiste', nr:'DZ2', gruppe:'test', name:'Leiste',
+   was:'Reihe Tieflochbohren mit Spanbruch, vorbohren und 12 H7 reiben', lade:fDemoLeiste},
+  {id:'muster', nr:'DZ3', gruppe:'test', name:'Musterzyklen 220/221',
+   was:'Gitter als Zyklus 221, Lochkreis als 220, Gewinde GS 207', lade:fDemoMusterzyklen},
+  {id:'taschen', nr:'DZ4', gruppe:'test', name:'Taschen, Nuten, Zapfen',
+   was:'alle sechs Formzyklen 251 bis 257 nebeneinander', lade:fDemoTaschen},
+  {id:'bohren2', nr:'DZ5', gruppe:'test', name:'Planfräsen und Bohrzyklen',
+   was:'232 plus 202, 204, 205, 208, 209 und 241', lade:fDemoBohren2},
+  {id:'einzel', nr:'DZ6', gruppe:'test', name:'Leiste als eigene Bahn',
+   was:'dieselbe Leiste ohne Steuerungszyklen, eine Bohrung je Schritt', lade:fDemoEinzel},
+  {id:'formen', nr:'DZ7', gruppe:'test', name:'Formen als eigene Bahn',
+   was:'Kreistasche, Nut und Kreiszapfen als Einzelsaetze', lade:fDemoFormenEinzel},
+  {id:'plan', nr:'DZ8', gruppe:'test', name:'Planfräsen mit Helix',
+   was:'Planfräsen und Rechtecktasche, helikal eingetaucht', lade:fDemoPlanEinzel},
+  {id:'kontur', nr:'DZ9', gruppe:'test', name:'Konturzug',
+   was:'Insel einmal als Zyklus 14/25, einmal als eigene Bahn', lade:fDemoKonturEinzel},
+  {id:'konturformen', nr:'DZ10', gruppe:'test', name:'Konturformen',
+   was:'Rundung, Fase, tangentialer Bogen und Vollkreis', lade:fDemoKonturFormen},
+  {id:'bohrfraes', nr:'DZ11', gruppe:'test', name:'Bohrfräsen und Einlippen',
+   was:'208 und 241 als Einzelsaetze', lade:fDemoBohrfraesEinzel},
+  {id:'sl', nr:'DZ12', gruppe:'test', name:'SL-Zyklen 20 bis 24',
+   was:'Konturtasche mit Insel: vorbohren, räumen, schlichten', lade:fDemoSL},
+  {id:'gewfr', nr:'DZ13', gruppe:'test', name:'Gewindefräsen 262 bis 267',
+   was:'M20 x 2,5 mit einem Gewindefräser 8', lade:fDemoGewindeFraesen},
+  {id:'tiefgew', nr:'DZ16', gruppe:'test', name:'Tiefbohren, Gewinde, Ausdrehen',
+   was:'205, 206 und 202 als Einzelsaetze', lade:fDemoBohrEinzel2},
+  {id:'nutrund', nr:'DZ17', gruppe:'test', name:'Runde Nut',
+   was:'Zyklus 254 als eigene Bahn (der Eintauchpunkt lag frueher im Vollen)', lade:fDemoNutRundEinzel},
+  {id:'zapfrund', nr:'DZ18', gruppe:'test', name:'Rechteckzapfen',
+   was:'Zyklus 256 als eigene Bahn', lade:fDemoZapfenREinzel},
+  {id:'vorbohr', nr:'DZ19', gruppe:'test', name:'SL-Vorbohren',
+   was:'Zyklus 21 an einer Tasche mit Insel', lade:fDemoVorbohrenEinzel}
 ];
 
 // Merkmale der Fraesausgabe fuer die NC-Ansicht: Status je Zyklusfamilie.
@@ -8507,6 +9209,97 @@ function fArbeitsplanRender(){
 // DRAUFSICHT: Rohteil-Rechteck aus der BLK FORM, jedes Bohrbild als
 // Kreuze, jeder Bohrschritt als Kreise im Werkzeugdurchmesser; der
 // angewaehlte Schritt orange. Y zeigt nach oben wie an der Maschine.
+// ---- Die Vorlagen als Kacheln ---------------------------------------
+// Ein kleines Bild je Vorlage: Rohteil, Formen, Konturen, Bohrpunkte.
+// Gerechnet aus dem Programm - ein Fraesteil ist in der Draufsicht aus
+// Rechtecken und Kreisen gebaut, da braucht es keine gespeicherten
+// Silhouetten wie beim Drehteil.
+function fVorlagenBild(cv, prog){
+  if(!cv || !cv.getContext) return;
+  const dpr = (window.devicePixelRatio || 1);
+  const W = cv.clientWidth || 150, H = cv.clientHeight || 80;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const ctx = cv.getContext('2d'); if(!ctx || !ctx.setTransform) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const k = prog.kopf || {};
+  const bx = Math.max(1, (+k.x1 || 0) - (+k.x0 || 0)), by = Math.max(1, (+k.y1 || 0) - (+k.y0 || 0));
+  const rand = 6;
+  const sc = Math.min((W - 2 * rand) / bx, (H - 2 * rand) / by);
+  const ox = (W - bx * sc) / 2 - (+k.x0 || 0) * sc, oy = (H + by * sc) / 2 + (+k.y0 || 0) * sc;
+  const X = (x) => ox + x * sc, Y = (y) => oy - y * sc;
+  const dunkel = document.body && document.body.classList && document.body.classList.contains('dunkel');
+  // Rohteil
+  ctx.fillStyle = dunkel ? 'hsla(205,20%,32%,.6)' : 'hsl(205,32%,92%)';
+  ctx.strokeStyle = dunkel ? '#9fb3c4' : '#3d5a73'; ctx.lineWidth = 1;
+  ctx.fillRect(X(k.x0), Y(k.y1), bx * sc, by * sc);
+  ctx.strokeRect(X(k.x0), Y(k.y1), bx * sc, by * sc);
+  // Was abgetragen wird: Formen dunkler, Zapfen heller (sie bleiben stehen)
+  const weg = dunkel ? 'hsla(205,15%,18%,.75)' : 'hsl(205,18%,62%)';
+  const bleibt = dunkel ? 'hsla(205,25%,55%,.8)' : 'hsl(205,30%,78%)';
+  (prog.schritte || []).forEach(s2 => {
+    if(s2 && s2.aktiv === false) return;
+    const z = F_ZYKLEN[s2.art] || {};
+    const pkte = fPunkte(s2, prog);
+    ctx.fillStyle = /zapfen/.test(s2.art) ? bleibt : weg;
+    if(z.fraes && !z.gewf && !z.eigenePosition && !z.modell){
+      pkte.forEach(p => {
+        const x = X(p.x), y = Y(p.y);
+        if(s2.art === 'tascheK' || s2.art === 'zapfenK'){
+          const r = Math.max(2, (+s2.dm || 10) / 2 * sc);
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        } else if(s2.art === 'nutR'){
+          const r = Math.max(2, (+s2.teilkreis || 20) / 2 * sc);
+          ctx.lineWidth = Math.max(2, (+s2.l2 || 8) * sc); ctx.strokeStyle = weg;
+          ctx.beginPath(); ctx.arc(X(+s2.xm || p.x), Y(+s2.ym || p.y), r, 0, Math.PI * 1.1); ctx.stroke();
+          ctx.lineWidth = 1; ctx.strokeStyle = dunkel ? '#9fb3c4' : '#3d5a73';
+        } else {
+          const w2 = Math.max(2, (+s2.l1 || 10) * sc), h2 = Math.max(2, (+s2.l2 || 10) * sc);
+          ctx.fillRect(x - w2 / 2, y - h2 / 2, w2, h2);
+        }
+      });
+      return;
+    }
+    if(z.kontur){
+      const kt = (prog.konturen || [])[s2.kontur]; if(!kt) return;
+      const K = fKonturSegmente(kt); if(!K.seg.length) return;
+      ctx.beginPath();
+      K.seg.forEach((sg, i) => { const q = fSegPunkte(sg);
+        q.forEach((p, j) => { if(i === 0 && j === 0) ctx.moveTo(X(p.x), Y(p.y)); else ctx.lineTo(X(p.x), Y(p.y)); }); });
+      ctx.closePath(); ctx.fill();
+      return;
+    }
+    if(z.modell){ return; }   // die Sollform steckt nicht im Programm
+    // Bohren und Gewinde: ein Punkt je Position
+    ctx.fillStyle = dunkel ? '#dce6ee' : '#25405a';
+    pkte.forEach(p => { ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), Math.max(1.4, 2.2), 0, Math.PI * 2); ctx.fill(); });
+  });
+}
+
+// Die Liste der Vorlagen, nach Gruppen. Sie entsteht aus F_DEMOS -
+// eine neue Vorlage braucht seither nur DORT einen Eintrag.
+function fVorlagenListe(){
+  const ziel = document.getElementById('pmVorlagen'); if(!ziel) return;
+  const grp = [['werkstueck', 'Werkstücke — Teile, wie sie auf der Maschine liegen'],
+               ['test', 'Funktionstests — ein Zyklus je Schritt, am Programmierplatz gefahren']];
+  ziel.innerHTML = grp.map(([g, titel]) => {
+    const liste = F_DEMOS.filter(d => (d.gruppe || 'test') === g);
+    if(!liste.length) return '';
+    return '<div class="vlgrp">' + esc(titel) + '</div><div class="vlreihe">' +
+      liste.map(d => '<div class="vlk" data-demo="' + esc(d.id) + '" title="' + esc(d.was || '') + '">' +
+        '<canvas class="vlcv" id="vlcv_' + esc(d.id) + '"></canvas>' +
+        '<div class="vltxt"><div class="vlnr">' + esc(d.nr || '') + '</div>' +
+        '<div class="vlname">' + esc(d.name || d.id) + '</div>' +
+        '<div class="vlwas">' + esc(d.was || '') + '</div></div></div>').join('') + '</div>';
+  }).join('');
+  // Die Bilder erst, wenn die Kacheln ihre Groesse haben.
+  F_DEMOS.forEach(d => {
+    const cv = document.getElementById('vlcv_' + d.id); if(!cv) return;
+    let p = null; try{ p = d.lade(); }catch(e){ return; }
+    try{ fVorlagenBild(cv, p); }catch(e){}
+  });
+}
+
 function fDraufsicht(){
   const cv = document.getElementById('fdCv'); if(!cv || !cv.getContext) return;
   const rect = cv.getBoundingClientRect ? cv.getBoundingClientRect() : {width:800, height:400};
@@ -9365,18 +10158,68 @@ function fSoftkeysBauen(){
       (auf ? g.arten.map(a => '<div class="sk sk-zyk" data-art="' + a + '" title="' + esc((F_ZYKLEN[a] || {}).wort || a) + '"><span class="ic">' + fIcon(a) + '</span>' + esc((F_ZYKLEN[a] || {}).kurz || a) + '</div>').join('') : '');
   }).join('');
 }
+// ---- Das Zyklus-Blatt ------------------------------------------------
+// Am Handy war die Leiste mit aufgeklappter Gruppe 1442 px breit - fuenf
+// von achtzehn Knoepfen sichtbar. Hier stehen die Zyklen als Kacheln,
+// nach Kategorien, und brechen um statt zu wischen.
+function fZyklusWahlOeffnen(grpId){
+  const body = document.getElementById('zwBody');
+  const titel = document.getElementById('zwTitel');
+  if(!body) return;
+  const nur = F_ZYKLUS_GRUPPEN.filter(g => !grpId || g.id === grpId);
+  const zeig = nur.length ? nur : F_ZYKLUS_GRUPPEN;
+  if(titel) titel.textContent = (grpId && zeig.length === 1) ? zeig[0].name : 'Zyklus wählen';
+  // Bei EINER Kategorie steht ihr Name schon im Kopf - der Balken waere
+  // dieselbe Auskunft zweimal (Aufnahme 15.09.2026).
+  const mitBalken = zeig.length > 1;
+  body.innerHTML = zeig.map(g =>
+    (mitBalken ? '<div class="zwgrp">' + esc(g.name) + '</div>' : '') + '<div class="zwreihe">' +
+    g.arten.map(a => {
+      const z = F_ZYKLEN[a] || {};
+      return '<div class="zwk" data-art="' + a + '" title="' + esc(z.wort || a) + '">' +
+        '<span class="ic">' + fIcon(a) + '</span><span class="nm">' + esc(z.kurz || a) + '</span>' +
+        '<span class="nr">' + (z.nr ? 'iTNC ' + z.nr : 'eigene Bahn') + '</span></div>';
+    }).join('') + '</div>').join('');
+  maskZeigen('maskZyklusWahl');
+}
+
 {
   const on = (id, fn) => { const e = document.getElementById(id); if(e) e.onclick = fn; };
+  on('btnZwZu', ()=>maskZu('maskZyklusWahl'));
+  on('zwAlle', ()=>fZyklusWahlOeffnen(null));
+  {
+    const zw = document.getElementById('zwBody');
+    if(zw && zw.addEventListener) zw.addEventListener('click', (e)=>{
+      const k = e.target && e.target.closest ? e.target.closest('.zwk') : null;
+      if(!k || !k.dataset || !k.dataset.art) return;
+      maskZu('maskZyklusWahl');
+      fZyklusOeffnen(k.dataset.art);
+    });
+  }
+  {
+    const vl = document.getElementById('pmVorlagen');
+    if(vl && vl.addEventListener) vl.addEventListener('click', (e)=>{
+      const k = e.target && e.target.closest ? e.target.closest('.vlk') : null;
+      if(!k || !k.dataset || !k.dataset.demo) return;
+      const d = F_DEMOS.filter(x => x.id === k.dataset.demo)[0]; if(!d) return;
+      fProgrammSetzen(d.lade(), (d.nr ? d.nr + ' ' : '') + d.name + ' geladen: ' + (d.was || ''));
+      maskZu('maskProgramme');
+    });
+  }
   on('skKopf', fKopfOeffnen);
   on('skMuster', ()=>fMusterOeffnen(null));
   on('skKontur', ()=>fKonturOeffnen(null));
   on('hskTools', ()=>{ fWzListe(); maskZeigen('maskWerkzeuge'); });
-  on('hskProgs', ()=>{ fProgListe(); setVal('pmSaveName', fProg.kopf.name); maskZeigen('maskProgramme'); });
+  on('hskProgs', ()=>{ fProgListe(); fVorlagenListe(); setVal('pmSaveName', fProg.kopf.name); maskZeigen('maskProgramme'); });
   on('hskGcode', ()=>{ maskZeigen('maskGcode'); fNcErzeugen(); });
   const col = document.getElementById('skZyklen');
   if(col && col.addEventListener) col.addEventListener('click', (e)=>{
     const k = e.target && e.target.closest ? e.target.closest('.sk') : null; if(!k || !k.dataset) return;
     if(k.dataset.grp){
+      // AM HANDY das Blatt: die Leiste wischt sonst ueber vier
+      // Bildschirmbreiten. Am Laptop steht die Spalte senkrecht und das
+      // Akkordeon funktioniert - dort bleibt es.
+      if((window.innerWidth || 1366) < 900){ fZyklusWahlOeffnen(k.dataset.grp); return; }
       let offen = null; try{ offen = localStorage.getItem('dzf_skgruppe') || 'bohren'; }catch(e2){}
       const neu = (offen === k.dataset.grp) ? 'keine' : k.dataset.grp;
       try{ localStorage.setItem('dzf_skgruppe', neu); }catch(e2){}
@@ -9576,19 +10419,6 @@ function fProgListe(){
     rd.readAsText(f);
   });
   on('btnProgNew', ()=>{ const p = fProgrammNeu(); p.werkzeuge = JSON.parse(JSON.stringify(fProg.werkzeuge)); fProgrammSetzen(p, 'Neues leeres Programm — Werkzeugtabelle uebernommen.'); maskZu('maskProgramme'); });
-  on('btnDemoFlansch', ()=>{ fProgrammSetzen(fDemoFlansch(), 'DZ1 Flanschplatte geladen: Lochkreis 6x zentrieren + bohren 9, vier M8 in den Ecken.'); maskZu('maskProgramme'); });
-  on('btnDemoLeiste', ()=>{ fProgrammSetzen(fDemoLeiste(), 'DZ2 Leiste geladen: Reihe 5x Tieflochbohren mit Spanbruch, Mitte 11.8 vorbohren und 12 H7 reiben.'); maskZu('maskProgramme'); });
-  on('btnDemoMuster', ()=>{ fProgrammSetzen(fDemoMusterzyklen(), 'DZ3 geladen: Gitter als Zyklus 221, Lochkreis als Zyklus 220, Gewinde GS 207.'); maskZu('maskProgramme'); });
-  on('btnDemoTaschen', ()=>{ fProgrammSetzen(fDemoTaschen(), 'DZ4 geladen: Rechteck- und Kreistasche, Nut, runde Nut, Rechteck- und Kreiszapfen (Zyklen 251-257).'); maskZu('maskProgramme'); });
-  on('btnDemoBohren2', ()=>{ fProgrammSetzen(fDemoBohren2(), 'DZ5 geladen: Planfraesen 232, Bohren 200, Gewinde Spanbruch 209, Tiefbohren 205, Bohrfraesen 208, Ausdrehen 202, Rueckwaerts-Senken 204, Einlippen 241.'); maskZu('maskProgramme'); });
-  on('btnDemoFormen', ()=>{ fProgrammSetzen(fDemoFormenEinzel(), 'DZ7 geladen: Kreistasche, Nut und Kreiszapfen als eigene Bahn (Einzelsaetze mit Kreisboegen).'); maskZu('maskProgramme'); });
-  on('btnDemoPlan', ()=>{ fProgrammSetzen(fDemoPlanEinzel(), 'DZ8 geladen: Planfraesen als Maeander und Rechtecktasche mit Helix-Eintauchen als Einzelsaetze.'); maskZu('maskProgramme'); });
-  on('btnDemoKonturFormen', ()=>{ fProgrammSetzen(fDemoKonturFormen(), 'DZ10 geladen: Insel mit Rundung, Fase, tangentialem Bogen und Kreisinsel als Vollkreis — Zyklus 14/25 und eigene Bahn.'); maskZu('maskProgramme'); });
-  on('btnDemoGewFr', ()=>{ fProgrammSetzen(fDemoGewindeFraesen(), 'DZ13 geladen: die fuenf Gewindefraeszyklen 262-267 (M20 x 2,5 mit einem Fraeser ⌀8).'); maskZu('maskProgramme'); });
-  on('btnDemoBohrfraes', ()=>{ fProgrammSetzen(fDemoBohrfraesEinzel(), 'DZ11 geladen: Bohrfraesen 208 und Einlippen-Bohren 241 als Einzelsaetze — Helix in Stuecken, TOOL CALL S fuer die Drehzahlwechsel.'); maskZu('maskProgramme'); });
-  on('btnDemoSL', ()=>{ fProgrammSetzen(fDemoSL(), 'DZ12 geladen: Konturtasche mit Kreisinsel — Vorbohren 21, SL-Zyklen 20/22/23/24 und dieselbe Tasche als eigene Bahn.'); maskZu('maskProgramme'); });
-  on('btnDemoKontur', ()=>{ fProgrammSetzen(fDemoKonturEinzel(), 'DZ9 geladen: Insel mit Nut als XY-Kontur — Schritt 1 Zyklus 14/25 der Steuerung, Schritt 2 dieselbe Kontur als eigene Bahn.'); maskZu('maskProgramme'); });
-  on('btnDemoEinzel', ()=>{ fProgrammSetzen(fDemoEinzel(), 'DZ6 geladen: die Leiste als Einzelsaetze — Zentrieren, Tieflochbohren mit Spanbruch, Bohren, Reiben als eigene Bahn ohne Zyklus, eine Bohrung je Schritt.'); maskZu('maskProgramme'); });
   on('btnCloseProgs', ()=>maskZu('maskProgramme'));
 }
 
@@ -10625,7 +11455,11 @@ const STEP = {modell:null, aus:null, name:'', achse:'+Z', nullp:'ecke',
   // raster 0 = automatisch nach Teilgroesse (0,3 bis 2 mm). Von Hand feiner
   // gestellt wird es fuers Schlichten: der Bahnabstand kann nur ein Vielfaches
   // der Rasterweite sein, und die Rautiefe haengt am Bahnabstand.
-  ansicht:'draht', feld:null, bild:null, raster:0};
+  ansicht:'draht', feld:null, bild:null, raster:0,
+  // plan: das Ergebnis von fPlanAufspannung - alle sechs Lagen mit ihren
+  // Zahlen. Wird beim Laden einmal gerechnet und bleibt stehen; die
+  // Achsenknoepfe aendern danach die ANSICHT, nicht die Bewertung.
+  plan:null};
 const F_STEP_FARBE = {waagerecht:'#2f6fb2', senkrecht:'#7a8593', schraege:'#d08a2a',
   laengs:'#2f9e5a', quer:'#9b6fd0', frei:'#c0392b'};
 function fStepFarbe(f){
@@ -10703,6 +11537,52 @@ function fStepBericht(){
   M.warnungen.forEach(w => t.push('<span style="color:var(--amber,#b8860b);">' + esc(w) + '</span>'));
   el.innerHTML = t.join('<br>');
   if(inf && B) inf.textContent = esc(STEP.name) + ' — ' + fRund(B.x1 - B.x0) + ' x ' + fRund(B.y1 - B.y0) + ' x ' + fRund(B.z1 - B.z0) + ' mm';
+}
+// ---- Der Planer, Stufe 1: die Aufspannung ---------------------------
+// DANIELS FACHVORGABE (15.09.2026): "da nimmt man moeglichst die groesste
+// Flaeche nach unten zeigend zur Aufspannung, um moeglichst satt aufspannen
+// zu koennen ... und da musst du schauen, dass du in der ersten Aufspannung
+// moeglichst viel Material zerspanen kannst."
+//
+// Beim Drehen gibt es zwei Lagen, beim Fraesen sechs. Gerechnet wird in F10
+// (fPlanAufspannung, DOM-frei); hier steht nur die Anzeige. Sie zeigt ALLE
+// sechs Lagen mit ihren Zahlen - ein Vorschlag ohne die Zahlen daneben waere
+// ein Orakel, dem niemand widersprechen kann.
+function fStepAchseKnoepfe(){
+  const g = document.getElementById('stepAchseBtns');
+  if(g) [...g.querySelectorAll('button')].forEach(b => b.classList.toggle('sel', b.dataset.v === STEP.achse));
+}
+function fStepPlanRechnen(){
+  if(!STEP.modell){ STEP.plan = null; return null; }
+  try{ STEP.plan = fPlanAufspannung(STEP.modell); }
+  catch(e){ STEP.plan = null; melde('Die Aufspannung liess sich nicht rechnen: ' + e.message); }
+  return STEP.plan;
+}
+function fStepPlanMalen(){
+  const el = document.getElementById('stepPlan'); if(!el) return;
+  const R = STEP.plan;
+  if(!R){ el.innerHTML = ''; return; }
+  const zeilen = R.lagen.map(l => '<tr data-achse="' + esc(l.achse) + '"' +
+    (l.achse === STEP.achse ? ' class="sel"' : '') + '>' +
+    '<td><b>' + esc(l.achse) + '</b>' + (l.achse === R.vorschlag ? ' <span class="aufspv">Vorschlag</span>' : '') + '</td>' +
+    '<td>' + l.auflage + ' mm²</td>' +
+    '<td>' + Math.round(l.satt * 100) + ' %</td>' +
+    '<td>' + Math.round(l.fertig * 100) + ' %</td>' +
+    '<td>' + l.abtrag + ' cm³</td>' +
+    '<td>' + (l.laengs || '–') + '</td>' +
+    '<td>' + l.hoehe + ' mm</td></tr>').join('');
+  el.innerHTML =
+    '<div class="aufspkopf"><b>Aufspannung:</b> Werkzeugachse <b>' + esc(R.vorschlag) + '</b> — ' + esc(R.grund) + '</div>' +
+    R.hinweise.map(h => '<div class="aufspwarn">' + esc(h) + '</div>').join('') +
+    '<table class="aufsptab"><tr>' +
+    '<th title="Die Werkzeugachse: welche Achse des Modells nach oben zur Spindel zeigt. Die beste Lage steht oben.">Lage</th>' +
+    '<th title="Die größte ebene Fläche ganz unten — darauf steht das Teil. Nicht die Summe aller unteren Flächen: zwei Füße an den Enden tragen anders als eine durchgehende Platte.">Auflage</th>' +
+    '<th title="Anteil an der Grundfläche des Hüllquaders. 100 % heißt: das Teil liegt vollflächig auf.">satt</th>' +
+    '<th title="Anteil der Teilflächen, die in dieser Aufspannung drankommen (von oben oder von der Seite). Was nach unten zeigt, braucht die zweite Aufspannung.">erreichbar</th>' +
+    '<th title="Material über der Sollform. AUSKUNFT, wieviel Arbeit die Lage macht — kein Pluspunkt: viel Abtrag heißt oft nur, daß das Rohteil schlecht zur Lage paßt.">abzutragen</th>' +
+    '<th title="Bohrungen, die in dieser Lage in Werkzeugrichtung stehen — die gehen ohne Umspannen.">Bohrungen längs</th>' +
+    '<th title="Wie hoch das Teil dann steht. Flach ist steifer.">Höhe</th></tr>' + zeilen + '</table>' +
+    '<div class="aufsphint">Eine Zeile antippen stellt die Werkzeugachse auf diese Lage — der Vorschlag ist ein Vorschlag.</div>';
 }
 // Die Sollform von oben: fuer jeden Rasterpunkt die Hoehe, auf die gefraest
 // werden muss. Hell ist oben, dunkel ist tief; blaugrau heisst "hier steht
@@ -10831,13 +11711,21 @@ function fStepLaden(text, name){
   catch(e){ melde('FEHLER beim Lesen der STEP-Datei: ' + e.message); return null; }
   if(!M.flaechen.length){ melde('FEHLER: keine Flaechen im Modell — ist das ein Volumenmodell? (' + M.warnungen.join(' ') + ')'); }
   STEP.modell = M; STEP.name = name || 'Modell';
-  STEP.achse = fStepAchseVorschlag(M);
-  const g = document.getElementById('stepAchseBtns');
-  if(g) [...g.querySelectorAll('button')].forEach(b => b.classList.toggle('sel', b.dataset.v === STEP.achse));
+  // DIE AUFSPANNUNG ENTSCHEIDET ZUERST (Daniels Regel 15.09.2026): welche
+  // Flaeche nach unten zeigt, bevor irgendetwas anderes gerechnet wird. Der
+  // alte Achsenvorschlag zaehlt nur Bohrungen und waagerechte Flaechen; er
+  // bleibt der Rueckfall, falls die Rechnung an einem Modell scheitert.
+  // GEMESSEN an 94 echten Teilen: in 53 Faellen kommt der Planer zu einer
+  // ANDEREN Lage als die alte Zaehlung.
+  const plan = fStepPlanRechnen();
+  STEP.achse = (plan && plan.vorschlag) || fStepAchseVorschlag(M);
+  fStepAchseKnoepfe();
   STEP.zoom = 1; STEP.az = -0.7; STEP.el = 0.5;
   fStepAusrichtenJetzt();
-  melde('STEP ' + STEP.name + ': ' + M.bericht.flaechen + ' Flaechen gelesen, Werkzeugachse ' + STEP.achse
-    + ' vorgeschlagen.' + (M.warnungen.length ? ' ' + M.warnungen.join(' ') : ''));
+  melde('STEP ' + STEP.name + ': ' + M.bericht.flaechen + ' Flaechen gelesen. Aufspannung ' + STEP.achse
+    + (plan ? ' — ' + plan.grund : ' (nach Bohrungen und waagerechten Flaechen)') + '.'
+    + (plan && plan.hinweise.length ? ' ' + plan.hinweise.join(' ') : '')
+    + (M.warnungen.length ? ' ' + M.warnungen.join(' ') : ''));
   return M;
 }
 // Stufe 3 Teil B: die Sollform an das Programm geben. Sie bleibt ein Feld
@@ -10867,18 +11755,33 @@ function fStepRohUebernehmen(){
 }
 {
   const on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
-  on('hskStep', ()=>{ maskZeigen('maskStep'); setTimeout(()=>{ try{ fStepBericht(); fStepZeichnen(); }catch(e){} }, 0); });
+  on('hskStep', ()=>{ maskZeigen('maskStep'); setTimeout(()=>{ try{ fStepBericht(); fStepPlanMalen(); fStepZeichnen(); }catch(e){} }, 0); });
   on('btnStepZu', ()=>maskZu('maskStep'));
-  wireRadioGroup('stepAchseBtns', (v)=>{ STEP.achse = v; fStepAusrichtenJetzt(); });
+  wireRadioGroup('stepAchseBtns', (v)=>{ STEP.achse = v; fStepAusrichtenJetzt(); fStepPlanMalen(); });
   wireRadioGroup('stepNullBtns', (v)=>{ STEP.nullp = v; fStepAusrichtenJetzt(); });
   on('btnStepVorschlag', ()=>{
     if(!STEP.modell){ melde('Erst ein Modell laden.'); return; }
-    STEP.achse = fStepAchseVorschlag(STEP.modell);
-    const g = document.getElementById('stepAchseBtns');
-    if(g) [...g.querySelectorAll('button')].forEach(b => b.classList.toggle('sel', b.dataset.v === STEP.achse));
+    const R = fStepPlanRechnen();
+    STEP.achse = (R && R.vorschlag) || fStepAchseVorschlag(STEP.modell);
+    fStepAchseKnoepfe();
     fStepAusrichtenJetzt();
-    melde('Werkzeugachse ' + STEP.achse + ' vorgeschlagen (die meisten Bohrungen stehen dort laengs).');
+    fStepPlanMalen();
+    melde('Aufspannung ' + STEP.achse + (R ? ': ' + R.grund : '') +
+          (R && R.hinweise.length ? ' — ' + R.hinweise.join(' ') : ''));
   });
+  // Die Wahl bleibt beim Bediener: eine Zeile der Tafel antippen stellt die
+  // Werkzeugachse auf diese Lage. Delegiert, weil die Tafel neu gebaut wird.
+  {
+    const tafel = document.getElementById('stepPlan');
+    if(tafel) tafel.addEventListener('click', (ev)=>{
+      const tr = (ev.target && ev.target.closest) ? ev.target.closest('tr[data-achse]') : null;
+      if(!tr || !STEP.modell) return;
+      STEP.achse = tr.dataset.achse;
+      fStepAchseKnoepfe();
+      fStepAusrichtenJetzt();
+      fStepPlanMalen();
+    });
+  }
   on('btnStepRoh', fStepRohUebernehmen);
   on('btnStepFeld', fStepFeldUebernehmen);
   // Rasterweite der Sollform. Leer = automatisch nach Teilgroesse. Feiner
