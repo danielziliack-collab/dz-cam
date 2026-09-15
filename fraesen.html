@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="15.09.2026 21:57 (ece18e50)";</script>
+<script>window.__DZ_STAND="15.09.2026 22:13 (b964aed8)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2817,7 +2817,11 @@ Pr&uuml;fstand gegen eingefrorene Programme); gemessen, nicht versprochen.</p>
 von mehreren Schritten benutzt (Zentrieren, Bohren, Gewinde auf denselben L&ouml;chern).</li>
 <li><b>Zyklen</b> &uuml;ber die Kacheln rechts: erst die Gruppe (Bohren, Gewinde, Taschen &middot; Zapfen, Fl&auml;chen),
 dann der Zyklus &mdash; jede Kachel &ouml;ffnet genau eine Maske mit den Feldern dieses Zyklus. Die Felder hei&szlig;en neutral
-(SC, Z0, Z1, D, UXY &hellip;); im Heidenhain-Profil steht das Q-Wort des TNC-Dialogs klein dahinter.</li>
+(SC, Z0, Z1, D, UXY &hellip;); im Heidenhain-Profil steht das Q-Wort des TNC-Dialogs klein dahinter.
+<br><b>Am Handy</b> steht in der Leiste nur die <b>Gruppe</b>; ein Tipp darauf &ouml;ffnet das <b>Zyklus-Blatt</b>, und dort
+stehen die Zyklen als Kacheln untereinander. Sie zus&auml;tzlich in die Leiste zu schreiben hie&szlig;e nur, an derselben Liste
+vorbeizuwischen, aus der man gerade w&auml;hlt. <b>Am Laptop</b> ist die Leiste eine senkrechte Spalte &mdash; dort klappt die
+angetippte Gruppe ihre Zyklen gleich darunter auf.</li>
 <li><b>NC-Ausgabe</b>: Erzeugen, Pr&uuml;fen, als <code>NAME.H</code> sichern. An der Steuerung: Datei laden,
 <b>Programm-Test</b> laufen lassen, jede Meldung fotografieren.</li>
 </ol>
@@ -10556,13 +10560,21 @@ function fZyklusUebernehmen(){
 // =====================================================================
 // SOFTKEYS: Gruppen wie an der TNC, ein Knopf je Zyklus
 // =====================================================================
+// AM HANDY NUR DIE GRUPPEN. Ein Tipp oeffnet das Zyklus-Blatt, und dort
+// stehen die Zyklen als Kacheln - sie zusaetzlich in die Leiste zu
+// schreiben heisst nur, dass man an ihnen vorbeiwischen muss (Daniels
+// Foto 15.09.2026, 22:01: das Blatt offen UND dieselben Zyklen in der
+// Leiste darunter). Am Laptop steht die Spalte senkrecht, dort ist das
+// Akkordeon der Weg und bleibt.
+function fSkSchmal(){ return (window.innerWidth || 1366) < 900; }
 function fSoftkeysBauen(){
   const col = document.getElementById('skZyklen'); if(!col) return;
   // 'keine' = alle Gruppen zu (zweiter Tipp auf die offene Gruppe); ohne
   // Eintrag steht Bohren offen, die haeufigste Gruppe.
+  const schmal = fSkSchmal();
   let offen = 'bohren'; try{ offen = localStorage.getItem('dzf_skgruppe') || 'bohren'; }catch(e){}
   col.innerHTML = F_ZYKLUS_GRUPPEN.map(g => {
-    const auf = (g.id === offen);
+    const auf = (!schmal && g.id === offen);
     return '<div class="sk sk-grp' + (auf ? ' auf' : '') + '" data-grp="' + g.id + '" title="' + esc(g.name) + '"><span class="ic">' + fIcon('grp_' + g.id) + '</span>' + esc(g.name) + '</div>' +
       (auf ? g.arten.map(a => '<div class="sk sk-zyk" data-art="' + a + '" title="' + esc((F_ZYKLEN[a] || {}).wort || a) + '"><span class="ic">' + fIcon(a) + '</span>' + esc((F_ZYKLEN[a] || {}).kurz || a) + '</div>').join('') : '');
   }).join('');
@@ -10637,6 +10649,13 @@ function fZyklusWahlOeffnen(grpId){
     if(k.dataset.art) fZyklusOeffnen(k.dataset.art);
   });
   fSoftkeysBauen();
+  try{
+    let warSchmal = fSkSchmal();
+    window.addEventListener('resize', ()=>{
+      const jetzt = fSkSchmal();
+      if(jetzt !== warSchmal){ warSchmal = jetzt; fSoftkeysBauen(); }
+    });
+  }catch(e){}
 }
 
 // =====================================================================
