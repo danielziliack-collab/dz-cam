@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="15.09.2026 22:13 (b964aed8)";</script>
+<script>window.__DZ_STAND="15.09.2026 22:47 (adc99ce6)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2663,6 +2663,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <span style="font-size:11px;color:var(--text-dim);">Z-Ebene</span>
           <select id="stepEbene" style="font-size:11px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--text);max-width:210px;"></select>
           <button class="gcbtn" id="btnStepKonturen" title="Die Schleifen dieser Ebene als XY-Konturen in den Arbeitsplan legen">Konturen übernehmen</button>
+          <button class="gcbtn" id="btnStepFlaechen" title="Planen, Modell abspanen und Schr&auml;gen schlichten aus dem Modell ableiten &mdash; die Schritte stehen danach VOR den Bohrungen">Fl&auml;chen übernehmen</button>
           <button class="gcbtn" id="btnStepBohren" title="Die Bohrungen des Modells als Bohrbilder und Schritte anlegen: ein Zentrierschritt über alle Stellen, danach je Durchmesser einer — größter zuerst">Bohrungen übernehmen</button>
           <span style="display:inline-flex;gap:2px;"><button class="gcbtn primary" id="btnStepDraht" title="Drahtbild des Modells">Drahtbild</button><button class="gcbtn" id="btnStepSoll" title="Sollform von oben: die Höhe, auf die gefräst werden muss">Sollform</button></span>
         </div>
@@ -2990,6 +2991,22 @@ waagerechten Fl&auml;chen). Der <b>Nullpunkt</b> liegt wahlweise in der Ecke ode
 in der Mitte, die Oberkante des Teils immer auf Z0, so wie ein Fr&auml;steil aufgespannt wird.</dd>
 <dt>Als Rohteil &uuml;bernehmen</dt><dd>Schreibt den H&uuml;llquader des ausgerichteten Modells als <b>BLK FORM</b> in den Programmkopf. Aufma&szlig; f&uuml;r das echte
 Rohteil kommt danach von Hand dazu.</dd>
+<dt id="ba-fk05c-flaechen">Fl&auml;chen &mdash; planen, abspanen, schlichten</dt><dd>Der Knopf <b>Fl&auml;chen &uuml;bernehmen</b> leitet aus dem Modell ab, was am
+Werkst&uuml;ck fl&auml;chig zu tun ist, und legt es <b>vor den Bohrungen</b> an &mdash; in eine ungeplante Fl&auml;che zu bohren hie&szlig;e schr&auml;g anbohren, und wer
+erst bohrt und dann abspant, f&auml;hrt mit dem Fr&auml;ser durch die fertigen L&ouml;cher. Die Reihenfolge ist Daniels: vom Groben zum Feinen.
+<br><b>1. Planen</b> &mdash; nur wenn das Rohteil im Programmkopf <i>oben</i> &uuml;ber dem Modell steht. Genau das ist das <b>Aufma&szlig; im Programmkopf</b>:
+<i>Als Rohteil &uuml;bernehmen</i> liefert den H&uuml;llquader des Modells, also null Aufma&szlig; &mdash; wer von einer ges&auml;gten Platte ausgeht, tr&auml;gt Z oben
+selbst h&ouml;her ein. Ohne Aufma&szlig; sagt die App, dass es nichts zu planen gibt, statt einen leeren Schritt anzulegen.
+<br><b>2. Modell abspanen</b> &mdash; nur wenn unter der Oberfl&auml;che wirklich Fr&auml;sarbeit liegt. <b>Bohrungen z&auml;hlen nicht dazu:</b> ein Sackloch hat
+einen Boden, der in der Sollform als Fl&auml;che z&auml;hlt; ohne diese Trennung bek&auml;me jede gebohrte Platte einen Abspanschritt (gemessen an Daniels
+Teilen: 26 von 72 Vorschl&auml;gen waren <b>nur Bohrungen</b>).
+<br><b>3. Schr&auml;gen schlichten</b> &mdash; nur wenn Fl&auml;che im Band 5 bis 45 Grad liegt, und nur mit einem <b>Kugelfr&auml;ser</b> in der Tabelle.
+<br><b>Welches Werkzeug, entscheidet die Tabelle &mdash; &uuml;ber ihre Zahlen, nicht &uuml;ber die Namen:</b> ein Kugelfr&auml;ser tr&auml;gt den Eckenradius
+R2 = halber Durchmesser, ein Werkzeug mit <b>ANGLE &gt; 0</b> darf eintauchen (das Abspanen taucht senkrecht ein und braucht es), zum Planen reicht
+der gr&ouml;&szlig;te Nicht-Kugel-Fr&auml;ser. Eine eingelesene TOOL.T mit fremder Beschriftung findet damit genauso ihre Werkzeuge.
+<br><b>Was die App hier nicht tut:</b> Taschen und Konturen als eigene Zyklen ableiten (die Bahn <i>Modell abspanen</i> r&auml;umt sie mit, und was ihr
+Werkzeug nicht erreicht, steht in ihrem Restmaterialbericht); die Reihenfolge nach Werkzeugen zusammenfassen; und einen zweiten, kleineren
+Fr&auml;ser f&uuml;r das Restmaterial vorschlagen.</dd>
 <dt id="ba-fk05c-bohrungen">Bohrungen &mdash; aus dem Modell in den Arbeitsplan</dt><dd>Der Knopf <b>Bohrungen &uuml;bernehmen</b> liest die Bohrungen des Modells
 und legt sie als Bohrbilder mit ihren Schritten an: <b>ein Zentrierschritt &uuml;ber alle Stellen</b> (ein Werkzeug, ein Bohrbild &mdash; das spart Wechsel),
 danach je Durchmesser ein Schritt, <b>gr&ouml;&szlig;ter zuerst</b>. Der Bericht unter dem Bild sagt vorher, was gefunden wurde.
@@ -7057,6 +7074,148 @@ function fPlanBohrSchritte(prog, A, F){
 
 // Den Plan wirklich ins Programm schreiben. Getrennt von der Rechnung,
 // damit der Pruefstand die Rechnung ohne Nebenwirkung messen kann.
+// ---- Der Planer, Stufe 2: die Flaechen ------------------------------
+// Daniels Reihenfolge: vom Groben zum Feinen, mit wenig Werkzeugwechsel.
+// Vor jeder Bohrung steht deshalb die Flaeche - planen, abspanen,
+// schlichten. Welches Werkzeug das kann, steht in der Tabelle und wird
+// aus ihren ZAHLEN gelesen, nicht aus den Namen: ein Kugelfraeser traegt
+// den Eckenradius r2 = halber Durchmesser, ein Werkzeug mit ANGLE > 0
+// darf wendelnd oder schraeg eintauchen. Eine eingelesene TOOL.T mit
+// fremden Namen faende sonst kein einziges Werkzeug.
+function fPlanIstKugel(w){ return (+w.r2 || 0) >= (+w.d || 0) / 2 - 0.01 && (+w.d || 0) > 0; }
+function fPlanFraeser(prog, zweck){
+  const wz = ((prog && prog.werkzeuge) || []).filter(w => w.art === 'fraeser' && (+w.d || 0) > 0);
+  let f = [];
+  if(zweck === 'kugel') f = wz.filter(fPlanIstKugel);
+  // Planen: der groesste, der KEINE Kugel ist. Ein Messerkopf taucht
+  // nicht ein, muss er beim Planfraesen auch nicht - der Zyklus faehrt
+  // seitlich an.
+  else if(zweck === 'plan') f = wz.filter(w => !fPlanIstKugel(w));
+  // Abspanen: muss SENKRECHT eintauchen koennen (die Bahn taucht in der
+  // Flaeche ein, nicht von aussen). Ohne ANGLE ist das geraten.
+  else f = wz.filter(w => !fPlanIstKugel(w) && (+w.angle || 0) > 0);
+  return f.sort((a, b) => (+b.d || 0) - (+a.d || 0))[0] || null;
+}
+// Was gaebe es an diesem Modell ueberhaupt zu tun? Die Antwort steht im
+// Sollfeld: wie tief es unter die Oberkante geht und wieviel davon im
+// Winkelband liegt, das eine Zeilenbahn schlichten kann.
+function fPlanFlaechenBefund(A, F, winkelMin, winkelMax, loecher){
+  const b = {spanne:0, tiefste:0, zellen:0, imBand:0, zuSteil:0, zuFlach:0, tief:0, tiefFrei:0};
+  if(!F) return b;
+  let hMax = -1e9, hMin = 1e9;
+  for(let c = 0; c < F.h.length; c++){
+    if(!F.quelle[c]) continue;
+    b.zellen++;
+    const h = F.h[c];
+    if(h > hMax) hMax = h;
+    if(h < hMin) hMin = h;
+  }
+  if(!b.zellen) return b;
+  b.spanne = fRund(hMax - hMin); b.tiefste = fRund(hMin);
+  // WAS DAVON IST FRAESARBEIT? Zellen, die deutlich unter der Oberkante
+  // liegen und NICHT in einer erkannten Bohrung. Ohne diese Trennung
+  // schlaegt der Planer an jeder gebohrten Platte ein Abspanen vor
+  // (gemessen: 26 von 72 Vorschlaegen an Daniels Teilen).
+  const L = loecher || [];
+  for(let j = 0; j < F.ny; j++) for(let i = 0; i < F.nx; i++){
+    const c = j * F.nx + i;
+    if(!F.quelle[c] || F.h[c] > hMax - 0.5) continue;
+    b.tief++;
+    const x = F.x0 + (i + 0.5) * F.raster, y = F.y0 + (j + 0.5) * F.raster;
+    let drin = false;
+    for(let q = 0; q < L.length; q++){
+      if(Math.hypot(x - L[q].x, y - L[q].y) <= (+L[q].d || 0) / 2 + F.raster){ drin = true; break; }
+    }
+    if(!drin) b.tiefFrei++;
+  }
+  let N = null; try{ N = fNeigFeld(F); }catch(e){ N = null; }
+  if(N) for(let c = 0; c < N.length; c++){
+    if(!F.quelle[c]) continue;
+    const g = N[c];
+    if(g > winkelMax + F_WINKEL_TOL) b.zuSteil++;
+    else if(g < winkelMin - F_WINKEL_TOL) b.zuFlach++;
+    else b.imBand++;
+  }
+  return b;
+}
+// DER PLAN. Er legt nichts an - das tut fPlanFlaechenAnlegen; so laesst
+// sich die Rechnung ohne Nebenwirkung messen (Muster der Bohrungen).
+function fPlanFlaechen(prog, A, F){
+  const hinweise = [], schritte = [];
+  const k = (prog && prog.kopf) || {};
+  const B = A ? A.box : null;
+  const wMin = 5, wMax = 45;
+  // Die Bohrungen sind bekannt - was in ihnen liegt, gehoert dem
+  // Bohrplan und nicht der Fraesbahn.
+  let loecher = [];
+  try{ loecher = (fPlanBohrungen(A, F).loecher) || []; }catch(e){ loecher = []; }
+  const bef = fPlanFlaechenBefund(A, F, wMin, wMax, loecher);
+  // Die tiefste Stelle der Sollform ist eine ZELLENMITTE. Liegt sie
+  // innerhalb einer Rasterweite ueber dem Boden des Huellquaders, ist der
+  // Boden gemeint - sonst bliebe dort eine halbe Rasterweite stehen.
+  const zTief = (F && A && bef.tiefste - A.box.z0 <= F.raster + 0.001) ? A.box.z0 : bef.tiefste;
+
+  // (1) PLANEN. Das Rohteil steht oben ueber der Sollform - das ist das
+  //     Aufmass der gesaegten Platte, und es kommt zuerst herunter.
+  const oben = B ? fRund((+k.z1 || 0) - B.z1) : 0;
+  const wPlan = fPlanFraeser(prog, 'plan');
+  if(oben > 0.01 && wPlan){
+    schritte.push({art:'planfraesen', t:wPlan.nr, werte:{
+      px:fRund(+k.x0 || 0), py:fRund(+k.y0 || 0), pz:fRund(+k.z1 || 0), zEnd:fRund(B.z1),
+      l1:fRund((+k.x1 || 0) - (+k.x0 || 0)), l2:fRund((+k.y1 || 0) - (+k.y0 || 0)),
+      zust:fRund(Math.min(2, oben)), aufTiefe:0, tiefe:fRund(-oben)},
+      text:'Planen: ' + oben + ' mm Aufmass herunter, Fraeser ' + wPlan.nr + ' (⌀' + wPlan.d + ')'});
+  } else if(oben > 0.01) hinweise.push('Zum Planen fehlt ein Fraeser in der Tabelle — die ' + oben + ' mm Aufmass oben bleiben stehen.');
+  else hinweise.push('Das Rohteil hat oben kein Aufmass (Oberkante = Modell) — es gibt nichts zu planen. Als Rohteil uebernehmen liefert genau den Huellquader; wer von einer gesaegten Platte ausgeht, traegt das Aufmass im Programmkopf ein.');
+
+  // (2) MODELL ABSPANEN. Nur wenn unter der Oberkante ueberhaupt etwas
+  //     liegt: an einer reinen Platte (36 von 104 Teilen in Daniels
+  //     Bestand) waere der Schritt eine Bahn ohne Schnitt.
+  const wSchrupp = fPlanFraeser(prog, 'schrupp');
+  if(!F) hinweise.push('Ohne Sollform kann das Modell nicht abgespant werden — im STEP-Fenster Sollform ans Programm geben.');
+  else if(bef.spanne <= 0.5) hinweise.push('Unter der Oberflaeche liegt nichts (Hoehenspanne ' + bef.spanne + ' mm): eine reine Platte — abgespant wird nichts, es bleiben Bohrungen und Konturen.');
+  else if(bef.tiefFrei < bef.zellen * 0.01) hinweise.push('Unter der Oberflaeche liegen nur BOHRUNGEN (' + bef.tief + ' Rasterstellen, davon ' + bef.tiefFrei + ' ausserhalb eines Lochs) — die stehen im Bohrplan; gefraest wird dort nichts.');
+  else if(!wSchrupp) hinweise.push('Zum Abspanen fehlt ein Fraeser mit Eintauchwinkel (ANGLE) in der Tabelle — die Bahn taucht senkrecht ein und braucht ihn.');
+  else schritte.push({art:'modellSchruppen', t:wSchrupp.nr, werte:{
+      q203:fRund(B ? B.z1 : (+k.z1 || 0)), tiefe:fRund(zTief - (B ? B.z1 : 0)),
+      zust:2, aufSeite:0.5, aufTiefe:0.2, ueberl:0.8, ausgabe:'einzel'},
+      text:'Modell abspanen bis ' + fRund(zTief) + ', Fraeser ' + wSchrupp.nr + ' (⌀' + wSchrupp.d + ')'});
+
+  // (3) SCHRAEGEN SCHLICHTEN. Nur wenn im Winkelband ueberhaupt Flaeche
+  //     liegt — sonst schlichtet ein Kugelfraeser 93 Prozent Ebene.
+  const wKugel = fPlanFraeser(prog, 'kugel');
+  const anteil = bef.zellen ? Math.round(bef.imBand / bef.zellen * 100) : 0;
+  if(F && bef.imBand > 0 && wKugel){
+    schritte.push({art:'modellSchlichten', t:wKugel.nr, werte:{
+      q203:fRund(B ? B.z1 : (+k.z1 || 0)), tiefe:fRund(zTief - (B ? B.z1 : 0)),
+      winkelMin:wMin, winkel:wMax, rautiefe:0.01, tolBahn:0.005, strategie:0, ausgabe:'einzel'},
+      text:'Schraegen schlichten (' + wMin + ' bis ' + wMax + ' Grad, ' + anteil + ' % der Flaeche), Kugelfraeser ' + wKugel.nr + ' (⌀' + wKugel.d + ')'});
+  } else if(F && bef.imBand > 0) hinweise.push('Im Band ' + wMin + ' bis ' + wMax + ' Grad liegen ' + anteil + ' % der Flaeche, aber die Tabelle hat keinen Kugelfraeser — nicht geschlichtet.');
+  else if(F) hinweise.push('Keine Schraege im Band ' + wMin + ' bis ' + wMax + ' Grad (' + Math.round(bef.zuFlach / (bef.zellen || 1) * 100) + ' % flacher, ' + Math.round(bef.zuSteil / (bef.zellen || 1) * 100) + ' % steiler) — nichts zu schlichten.');
+
+  return {schritte:schritte, hinweise:hinweise, befund:bef};
+}
+// DIE FLAECHEN GEHEN VOR DIE BOHRUNGEN. In eine ungeplante Flaeche zu
+// bohren heisst schraeg anbohren; und wer erst bohrt und dann abspant,
+// faehrt mit dem Fraeser durch die fertigen Loecher.
+function fPlanFlaechenAnlegen(prog, plan, F){
+  if(!prog || !plan || !plan.schritte.length) return 0;
+  if(F && plan.schritte.some(sp => sp.art === 'modellSchruppen' || sp.art === 'modellSchlichten')) fStepFeldSetzen(F);
+  const neu = plan.schritte.map(sp => {
+    const st = fSchrittNeu(prog, sp.art, sp.t, null);
+    Object.assign(st, sp.werte);
+    return st;
+  });
+  const liste = prog.schritte || (prog.schritte = []);
+  let vor = liste.length;
+  for(let i = 0; i < liste.length; i++){
+    const z = F_ZYKLEN[liste[i].art] || {};
+    if(!z.fraes || z.gewf){ vor = i; break; }
+  }
+  liste.splice.apply(liste, [vor, 0].concat(neu));
+  return neu.length;
+}
+
 function fPlanBohrAnlegen(prog, plan){
   if(!prog || !plan || !plan.schritte.length) return 0;
   const m0 = (prog.muster || []).length;
@@ -12055,6 +12214,14 @@ function fStepBericht(){
       t.push('<b>Bohrungen:</b> ' + B.loecher.length + ' in ' + B.gruppen.length + ' Gruppe(n) — ' + esc(g) +
         (B.gruppen.length > 8 ? ' …' : '') + ' &nbsp; <i>Bohrungen übernehmen legt Bohrbilder und Schritte an.</i>');
     } else if(B) t.push('<b>Bohrungen:</b> keine in Werkzeugrichtung.');
+    // Was es an FLAECHE zu tun gibt - dieselbe Rechnung wie der Knopf,
+    // nur ohne etwas anzulegen.
+    try{
+      const R = fPlanFlaechen(fProg, A, STEP.feld || null);
+      t.push('<b>Flaechen:</b> ' + (R.schritte.length
+        ? R.schritte.map(x => esc(x.text)).join(' &middot; ') + ' &nbsp; <i>Flächen übernehmen legt sie vor den Bohrungen an.</i>'
+        : 'nichts vorzuschlagen — ' + esc(R.hinweise.join(' '))));
+    }catch(e){}
     if(B) B.hinweise.forEach(h => t.push('<span style="color:var(--text-dim);">' + esc(h) + '</span>'));
   }
   if(z) t.push('<b>Einordnung:</b> ' + z.waagerecht + ' waagerecht, ' + z.senkrecht + ' senkrecht, '
@@ -12296,6 +12463,33 @@ function fStepBohrUebernehmen(){
     + (plan.hinweise.length ? ' ' + plan.hinweise.join(' ') : ''));
   return true;
 }
+// DIE FLAECHEN: planen, abspanen, schlichten - in dieser Reihenfolge und
+// VOR den Bohrungen. Die Sollform wird dabei gebraucht und, wenn sie hier
+// schon steht, gleich ans Programm gegeben: ohne sie haetten die beiden
+// Modellzyklen nichts zu rechnen.
+function fStepFlaechenUebernehmen(){
+  const A = STEP.aus;
+  if(!A){ melde('FEHLER: kein Modell geladen.'); return false; }
+  if(!STEP.feld){ try{ STEP.feld = fStepSollfeld(A, STEP.raster || 0); STEP.bild = null; }catch(e){ STEP.feld = null; } }
+  let plan = null;
+  try{ plan = fPlanFlaechen(fProg, A, STEP.feld || null); }
+  catch(e){ melde('FEHLER beim Rechnen der Flaechen: ' + e.message); return false; }
+  if(!plan.schritte.length){
+    melde('Keine Flaechenbearbeitung angelegt. ' + (plan.hinweise.join(' ') || ''));
+    return false;
+  }
+  const k = fProg.kopf, B = A.box;
+  // Seitlich und unten muss das Rohteil zum Modell passen; OBEN darf es
+  // hoeher sein - genau das ist das Aufmass, das geplant wird.
+  const passt = ['x0', 'x1', 'y0', 'y1', 'z0'].every(q => Math.abs((+k[q] || 0) - B[q]) < 0.01)
+             && (+k.z1 || 0) >= B.z1 - 0.01;
+  const n = fPlanFlaechenAnlegen(fProg, plan, STEP.feld || null);
+  fRender();
+  melde('Flaechen: ' + n + ' Schritt(e) angelegt — ' + plan.schritte.map(s => s.text).join('; ') + '.'
+    + (passt ? '' : ' ACHTUNG: das Rohteil im Programmkopf passt nicht zum Modell — erst "Als Rohteil uebernehmen" druecken.')
+    + (plan.hinweise.length ? ' ' + plan.hinweise.join(' ') : ''));
+  return true;
+}
 function fStepRohUebernehmen(){
   const A = STEP.aus;
   if(!A){ melde('FEHLER: kein Modell geladen.'); return false; }
@@ -12338,6 +12532,7 @@ function fStepRohUebernehmen(){
   on('btnStepRoh', fStepRohUebernehmen);
   on('btnStepFeld', fStepFeldUebernehmen);
   on('btnStepBohren', fStepBohrUebernehmen);
+  on('btnStepFlaechen', fStepFlaechenUebernehmen);
   // Rasterweite der Sollform. Leer = automatisch nach Teilgroesse. Feiner
   // rechnen kostet Zeit und Speicher (die Zellzahl waechst quadratisch),
   // bringt aber beim Schlichten die Rautiefe, die man bestellt hat: der
