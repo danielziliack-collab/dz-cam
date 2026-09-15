@@ -11908,6 +11908,29 @@ function fStandMalen(){
 }
 try{ fStandMalen(); }catch(e){}
 
+// IST DIESE KOPIE NOCH DIE NEUESTE? Die veroeffentlichte App fragt beim
+// Start die Datei stand.txt ab (ohne Cache, am Service-Worker vorbei) und
+// vergleicht sie mit ihrem eigenen Stand. Weicht sie ab, laeuft hier eine
+// ALTE Kopie aus dem Offline-Speicher - und das muss man sehen: Daniel
+// hat am 15.09.2026 eine Woche lang mit dem Stand vom 12.09. gearbeitet,
+// ohne dass die App ein Wort gesagt haette.
+function fStandPruefen(){
+  if(!window.__DZ_STAND || !window.fetch) return;            // Arbeitskopie
+  try{
+    fetch('stand.txt', {cache:'no-store'}).then(r => r && r.ok ? r.text() : null).then(t => {
+      const server = String(t || '').trim();
+      if(!server || server === window.__DZ_STAND) return;
+      const el = document.getElementById('baStand');
+      if(el) el.textContent = 'Stand ' + window.__DZ_STAND + ' — auf dem Server liegt ' + server;
+      melde('ACHTUNG: Diese App laeuft aus dem Offline-Speicher und ist NICHT die neueste.'
+        + ' Hier laeuft ' + window.__DZ_STAND + ', auf dem Server liegt ' + server + '.'
+        + ' Abhilfe: App im App-Umschalter wegwischen und zweimal neu oeffnen.'
+        + ' Hilft das nicht: Einstellungen > Safari > Erweitert > Website-Daten > dz-werkstatt.github.io loeschen.');
+    }).catch(()=>{});
+  }catch(e){}
+}
+try{ setTimeout(fStandPruefen, 1200); }catch(e){}
+
 function fStepBericht(){
   const el = document.getElementById('stepBericht'), inf = document.getElementById('stepInfo');
   const M = STEP.modell, A = STEP.aus;
@@ -12336,7 +12359,7 @@ fRender();
 setVal('pmSaveName', fProg.kopf.name);
 </script>
 <script>
-window.__DZ_STAND="15.09.2026 21:22 (fa1f90b2)";
+window.__DZ_STAND="15.09.2026 21:31 (98a0cf50)";
 // PWA-Offline [pwa-bauen.js]: nur wenn ueber einen Server geladen —
 // Datei-Doppelklick und Artefakt bleiben unberuehrt.
 if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){

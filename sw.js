@@ -7,7 +7,7 @@
 // 15.09.2026: 'immer noch der Stand vom 12.09.'). Jetzt aendert jede
 // Veroeffentlichung diese Zeile, der Worker installiert neu und holt
 // alle Dateien frisch.
-const STAND='15.09.2026 21:22 (fa1f90b2)';
+const STAND='15.09.2026 21:31 (98a0cf50)';
 const CACHE='dzcam-'+STAND.replace(/[^0-9a-f]/gi,'');
 // KEIN './' in der Vorcache-Liste: nicht jeder Server liefert einen
 // Verzeichnis-Index, und EIN Fehlschlag laesst addAll die GANZE
@@ -25,6 +25,9 @@ self.addEventListener('activate', e=>{
     .then(()=>self.clients.claim()));
 });
 self.addEventListener('fetch', e=>{
+  // stand.txt geht AM CACHE VORBEI - sie ist die Datei, an der die App
+  // erkennt, ob sie selbst alt ist.
+  if(/stand\.txt/.test(e.request.url)) return;
   if(e.request.method!=='GET') return;
   e.respondWith(caches.open(CACHE).then(async c=>{
     let alt=await c.match(e.request, {ignoreSearch:true});
