@@ -2779,7 +2779,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
   </div>
 
   <div id="baPanel">
-    <div class="ba-kopf"><b>Bedienungsanleitung — DZ CAM · Fräsen</b>
+    <div class="ba-kopf"><b>Bedienungsanleitung — DZ CAM · Fräsen</b><span id="baStand" style="font-weight:400;font-size:11px;color:var(--text-dim);margin-left:10px;"></span>
       <button id="baInhaltBtn" type="button">Inhalt</button>
       <button id="baZu" type="button">✕</button></div>
     <div class="ba-inhalt" id="baScroll"><div id="baText">
@@ -11761,6 +11761,18 @@ function fStepKonturenUebernehmen(){
     + (r.hinweise.length ? ' ' + r.hinweise.join(' ') : ''));
   return r;
 }
+// DER STAND DIESER FASSUNG. In der veroeffentlichten App setzt
+// pwa-bauen.js window.__DZ_STAND (Datum, Uhrzeit, Kurzpruefsumme);
+// die Datei am Laptop und der Bauplatz haben ihn nicht - dort steht
+// ehrlich 'Arbeitskopie'. Daniels Frage vom 15.09.2026 ('bin ich noch
+// auf dem Stand vom 12.09.?') liess sich in der App nicht beantworten;
+// jetzt steht sie im Kopf der Anleitung.
+function fStandMalen(){
+  const el = document.getElementById('baStand'); if(!el) return;
+  el.textContent = window.__DZ_STAND ? ('Stand ' + window.__DZ_STAND) : 'Arbeitskopie (nicht über die Werkstatt-Adresse geladen)';
+}
+try{ fStandMalen(); }catch(e){}
+
 function fStepBericht(){
   const el = document.getElementById('stepBericht'), inf = document.getElementById('stepInfo');
   const M = STEP.modell, A = STEP.aus;
@@ -12189,6 +12201,7 @@ fRender();
 setVal('pmSaveName', fProg.kopf.name);
 </script>
 <script>
+window.__DZ_STAND="15.09.2026 21:13 (b1026eda)";
 // PWA-Offline [pwa-bauen.js]: nur wenn ueber einen Server geladen —
 // Datei-Doppelklick und Artefakt bleiben unberuehrt.
 if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){
