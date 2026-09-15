@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="15.09.2026 21:40 (113468df)";</script>
+<script>window.__DZ_STAND="15.09.2026 21:51 (3e9ff51c)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2828,6 +2828,26 @@ sie an jeder Zeile, rutscht der L&ouml;schknopf je nach L&auml;nge des Zeilentex
 mal in die zweite Zeile, und ein wandernder L&ouml;schknopf wird irgendwann falsch getroffen. Die
 Zeile <b>Programmkopf</b> beh&auml;lt ihren Stift dauerhaft &mdash; ein einzelner Knopf kann nicht
 wandern. Am Laptop steht wie bisher alles an jeder Zeile.</p>
+
+<h3 id="ba-fk02-stand">Welche Fassung Du vor Dir hast &mdash; und wie sie sich erneuert</h3>
+<p>Oben im Kopf dieser Anleitung steht <b>Stand &lt;Datum Uhrzeit&gt;</b>. Das ist die Fassung, die
+gerade l&auml;uft. Steht dort <i>Arbeitskopie</i>, ist die Datei nicht &uuml;ber die Werkstatt-Adresse
+geladen (Doppelklick am Laptop) &mdash; dann gibt es keinen Stand zu vergleichen.</p>
+<p>Die App ist eine <b>Offline-App</b>: sie legt sich eine vollst&auml;ndige Kopie ins Ger&auml;t, damit
+sie an der Maschine ohne Netz l&auml;uft. Genau diese Kopie kann veralten. Deshalb tut sie zweierlei:</p>
+<ul>
+<li><b>Beim Start holt sie sich aus dem Netz die neueste Fassung</b> und nimmt die eigene Kopie erst,
+wenn nach drei Sekunden nichts kommt. An der Maschine schl&auml;gt der Versuch sofort fehl, dort startet
+sie wie bisher aus der Kopie &mdash; offline bleibt offline.</li>
+<li><b>Sie vergleicht ihren Stand mit dem des Servers</b> (Datei <code>stand.txt</code>, am Speicher vorbei).
+Weicht er ab, steht eine rote Meldung da, die Erneuerung wird angesto&szlig;en, und sobald die neue Fassung
+bereitliegt, l&auml;dt die App sich <b>einmal</b> selbst neu. Du brauchst nichts zu tun als warten.</li>
+</ul>
+<p>Hilft das nicht (das kommt vor, wenn im Ger&auml;t noch eine sehr alte Kopie festh&auml;ngt):
+<i>Einstellungen &rsaquo; Safari &rsaquo; Erweitert &rsaquo; Website-Daten</i> &rarr; <code>dz-werkstatt.github.io</code>
+l&ouml;schen, dann die Adresse neu &ouml;ffnen. <b>Vorher die Programme sichern</b> &mdash; unter
+<i>Programme &rsaquo; Alle als Datei sichern</i>; die gespeicherten Programme liegen im selben Speicher und
+w&auml;ren sonst weg.</p>
 
 <h2 id="ba-fk03">3 &nbsp;Programmkopf</h2>
 <dl>
@@ -11917,17 +11937,27 @@ try{ fStandMalen(); }catch(e){}
 // ALTE Kopie aus dem Offline-Speicher - und das muss man sehen: Daniel
 // hat am 15.09.2026 eine Woche lang mit dem Stand vom 12.09. gearbeitet,
 // ohne dass die App ein Wort gesagt haette.
+var F_STAND_ALT = false;   // diese Kopie ist nachweislich nicht die neueste
 function fStandPruefen(){
   if(!window.__DZ_STAND || !window.fetch) return;            // Arbeitskopie
   try{
     fetch('stand.txt', {cache:'no-store'}).then(r => r && r.ok ? r.text() : null).then(t => {
       const server = String(t || '').trim();
       if(!server || server === window.__DZ_STAND) return;
+      F_STAND_ALT = true;
       const el = document.getElementById('baStand');
       if(el) el.textContent = 'Stand ' + window.__DZ_STAND + ' — auf dem Server liegt ' + server;
+      // NICHT NUR MELDEN, SONDERN ANSTOSSEN: update() prueft den
+      // Service-Worker am Cache vorbei. Danach genuegt ein Neustart der
+      // App - vorher half nur Wegwischen und Warten.
+      try{
+        if(navigator.serviceWorker && navigator.serviceWorker.getRegistration){
+          navigator.serviceWorker.getRegistration().then(r => { if(r) return r.update(); }).catch(()=>{});
+        }
+      }catch(e){}
       melde('ACHTUNG: Diese App laeuft aus dem Offline-Speicher und ist NICHT die neueste.'
         + ' Hier laeuft ' + window.__DZ_STAND + ', auf dem Server liegt ' + server + '.'
-        + ' Abhilfe: App im App-Umschalter wegwischen und zweimal neu oeffnen.'
+        + ' Die Erneuerung laeuft - die App laedt sich gleich selbst neu.'
         + ' Hilft das nicht: Einstellungen > Safari > Erweitert > Website-Daten > dz-werkstatt.github.io loeschen.');
     }).catch(()=>{});
   }catch(e){}
@@ -11935,6 +11965,21 @@ function fStandPruefen(){
 // Noch einmal beim load-Ereignis: wer die Datei anders einbindet, hat
 // den Stempel vielleicht erst spaeter gesetzt.
 try{ window.addEventListener('load', fStandMalen); }catch(e){}
+// UND WENN DER NEUE WORKER UEBERNIMMT, EINMAL NEU LADEN. Ohne das haelt
+// die Seite ihre alte Kopie bis zum naechsten Start in der Hand - Daniel
+// hat die App am 15.09.2026 viermal weggewischt und wieder geoeffnet,
+// ohne dass sich etwas aenderte. Nur EINMAL je Sitzung (Merker im
+// Sitzungsspeicher): liegt auf dem Server selbst ein alter Stand, liefe
+// es sonst im Kreis.
+function fStandNeuLaden(){
+  if(!F_STAND_ALT) return;                       // nur die alte Kopie laedt neu
+  try{ if(sessionStorage.getItem('dzf_neugeladen')) return;
+       sessionStorage.setItem('dzf_neugeladen', '1'); }catch(e){}
+  try{ location.reload(); }catch(e){}
+}
+try{
+  if(navigator.serviceWorker) navigator.serviceWorker.addEventListener('controllerchange', fStandNeuLaden);
+}catch(e){}
 try{ setTimeout(fStandPruefen, 1200); }catch(e){}
 
 function fStepBericht(){

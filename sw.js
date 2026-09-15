@@ -7,7 +7,7 @@
 // 15.09.2026: 'immer noch der Stand vom 12.09.'). Jetzt aendert jede
 // Veroeffentlichung diese Zeile, der Worker installiert neu und holt
 // alle Dateien frisch.
-const STAND='15.09.2026 21:40 (113468df)';
+const STAND='15.09.2026 21:51 (3e9ff51c)';
 const CACHE='dzcam-'+STAND.replace(/[^0-9a-f]/gi,'');
 // KEIN './' in der Vorcache-Liste: nicht jeder Server liefert einen
 // Verzeichnis-Index, und EIN Fehlschlag laesst addAll die GANZE
@@ -30,9 +30,27 @@ self.addEventListener('fetch', e=>{
   if(/stand\.txt/.test(e.request.url)) return;
   if(e.request.method!=='GET') return;
   e.respondWith(caches.open(CACHE).then(async c=>{
-    let alt=await c.match(e.request, {ignoreSearch:true});
-    if(!alt && e.request.mode==='navigate') alt=await c.match('./index.html');
-    const frisch=fetch(e.request).then(r=>{ if(r && r.ok) c.put(e.request, r.clone()); return r; }).catch(()=>null);
+    // DER NACHSCHUB MUSS ZU ENDE LAUFEN. Ohne waitUntil beendet der
+    // Browser den Worker, sobald die Antwort draussen ist - der Abruf
+    // und das Ablegen im Cache werden abgebrochen, und der Cache
+    // aktualisiert sich NIE. Genau daran hing der 12.09.-Stand.
+    const frisch=fetch(e.request).then(r=>{
+      if(r && r.ok) return c.put(e.request, r.clone()).then(()=>r).catch(()=>r);
+      return r;
+    }).catch(()=>null);
+    try{ e.waitUntil(frisch); }catch(err){}
+    // SEITENAUFRUFE: erst das Netz, mit 3 Sekunden Geduld. An der
+    // Maschine gibt es kein Netz - dort schlaegt der Abruf sofort fehl
+    // und es geht wie bisher aus dem Cache weiter.
+    if(e.request.mode==='navigate'){
+      const geduld=new Promise(r=>setTimeout(()=>r(null), 3000));
+      const netz=await Promise.race([frisch, geduld]);
+      if(netz) return netz;
+      return (await c.match(e.request, {ignoreSearch:true}))
+          || (await c.match('./index.html'))
+          || new Response('offline', {status:503});
+    }
+    const alt=await c.match(e.request, {ignoreSearch:true});
     return alt || (await frisch) || new Response('offline', {status:503});
   }));
 });
