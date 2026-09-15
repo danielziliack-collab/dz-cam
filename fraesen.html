@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="15.09.2026 22:47 (adc99ce6)";</script>
+<script>window.__DZ_STAND="15.09.2026 23:29 (3a64a5d1)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2632,11 +2632,13 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <label style="font-size:11.5px;display:flex;align-items:center;gap:4px;">Tempo <select id="simTempo" class="tool-select" style="width:auto;min-width:0;"><option value="1">1×</option><option value="5" selected>5×</option><option value="25">25×</option><option value="max">max</option></select></label>
           <span style="display:inline-flex;gap:2px;"><button class="gcbtn" id="btnSimAnsicht2D" title="Draufsicht">2D</button><button class="gcbtn primary" id="btnSimAnsicht3D" title="3D-Ansicht: ziehen = drehen, Rad = Zoom, Doppelklick = Ausgangslage">3D</button></span>
           <label style="display:inline-flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;"><input type="checkbox" id="simKanten"> Rohteilkanten</label>
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;" title="Zeigt rot, wo noch Material ueber der Sollform des Modells steht"><input type="checkbox" id="simRest" checked> Restmaterial</label>
           <input type="range" id="simPos" min="0" max="1000" value="0" style="flex:1 1 120px;min-width:80px;" title="Zeitachse">
         </div>
         <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
           <canvas id="simCv" style="width:100%;flex:1 1 auto;min-height:260px;display:block;border:1px solid var(--line);border-radius:4px;background:#e9edf1;"></canvas>
           <canvas id="simGl" style="width:100%;flex:1 1 auto;min-height:260px;display:none;border:1px solid var(--line);border-radius:4px;background:#e9edf1;touch-action:none;cursor:grab;"></canvas>
+          <div id="simRestZeile" style="flex:0 0 auto;font-size:12px;padding:4px 2px 0;"></div>
           <div class="small-hint" id="simHinweise" style="flex:0 0 auto;max-height:18vh;overflow-y:auto;"></div>
           <div class="small-hint" style="flex:0 0 auto;">3D: ziehen = drehen, Rad oder zwei Finger = Zoom, Doppelklick = Ausgangslage; das Rohteil ist undurchsichtig, seine Kanten zeichnet nur der Haken Rohteilkanten; von unten gesehen zeigt sich die Senkung des Rückwärts-Senkens. 2D-Draufsicht: unberührt blaugrau, Abtrag je tiefer je dunkler, Senkung von unten violett. Werkzeug orange mit Bohrerspitze, Vorschub grün, Eilgang rot gestrichelt, Kollision = rotes Kreuz (Eilgang durch stehendes Material). Zeit aus Vorschubweg / F, Eilgang mit 6 m/min.</div>
         </div>
@@ -3000,6 +3002,13 @@ selbst h&ouml;her ein. Ohne Aufma&szlig; sagt die App, dass es nichts zu planen 
 <br><b>2. Modell abspanen</b> &mdash; nur wenn unter der Oberfl&auml;che wirklich Fr&auml;sarbeit liegt. <b>Bohrungen z&auml;hlen nicht dazu:</b> ein Sackloch hat
 einen Boden, der in der Sollform als Fl&auml;che z&auml;hlt; ohne diese Trennung bek&auml;me jede gebohrte Platte einen Abspanschritt (gemessen an Daniels
 Teilen: 26 von 72 Vorschl&auml;gen waren <b>nur Bohrungen</b>).
+<br><b>2b. Restmaterial nachsetzen</b> &mdash; die App <i>r&auml;t nicht</i>, ob ein zweiter Durchgang n&ouml;tig ist: sie l&auml;sst die Bahn des gro&szlig;en Fr&auml;sers
+einmal rechnen und liest aus ihrem Bericht, <b>wie breit</b> die stehengebliebene Stelle ist. Passt ein kleinerer Fr&auml;ser hinein, kommt ein zweiter
+Abspan-Schritt dazu &mdash; mit dem Feld <b>&#8960; Vorwerkzeug</b>. Das ist der Durchmesser des Fr&auml;sers davor: was der erreicht hat, gilt als weggenommen,
+und der kleine f&auml;hrt <i>nur noch die Stellen ab, an die der gro&szlig;e nicht kam</i> (am Rampenblock gemessen: <b>9 statt 213 Z&uuml;ge</b>). Passt keiner mehr
+hinein, sagt die Meldung es mit Fl&auml;che, H&ouml;he und Breite &mdash; dann bleibt dort etwas stehen, und das muss man wissen.
+<br>Kommt der gr&ouml;&szlig;te Fr&auml;ser <i>nirgends</i> an das Material (zu breit f&uuml;r jede Tasche), nimmt die App von sich aus den n&auml;chstkleineren, der wirklich
+schneidet, und sagt warum. Das Aufma&szlig; z&auml;hlt dabei mit: in einen 14 mm breiten Schlitz passt bei UXY&nbsp;0,5 nur noch ein &#8960;12.
 <br><b>3. Schr&auml;gen schlichten</b> &mdash; nur wenn Fl&auml;che im Band 5 bis 45 Grad liegt, und nur mit einem <b>Kugelfr&auml;ser</b> in der Tabelle.
 <br><b>Welches Werkzeug, entscheidet die Tabelle &mdash; &uuml;ber ihre Zahlen, nicht &uuml;ber die Namen:</b> ein Kugelfr&auml;ser tr&auml;gt den Eckenradius
 R2 = halber Durchmesser, ein Werkzeug mit <b>ANGLE &gt; 0</b> darf eintauchen (das Abspanen taucht senkrecht ein und braucht es), zum Planen reicht
@@ -3076,6 +3085,9 @@ laden und <b>Sollform ans Programm</b> dr&uuml;cken, sonst meldet die Programmpr
 seine H&ouml;he ist <b>Rz = s&sup2; / (8&nbsp;r)</b> &mdash; daraus rechnet die App den Bahnabstand <b>s = &radic;(8&nbsp;r&nbsp;Rz)</b> r&uuml;ckw&auml;rts. Bei
 Kugelradius 4 und Rz 0,01&nbsp;mm sind das 0,57&nbsp;mm l&auml;ngs der Fl&auml;che.
 <ul>
+<li><b>Z ist die KUGELUNTERKANTE</b> &mdash; die Spitze, so wie die Werkzeugl&auml;nge L gemessen wird, nicht die Kugelmitte. <i>Bis zum
+15.09.2026 schrieb die App die Mitte</i>; damit stand der Fr&auml;ser einen Radius zu hoch und die Schr&auml;ge w&auml;re unber&uuml;hrt geblieben.
+Gefunden hat es die Restmaterialanzeige (Kap.&nbsp;6d), nachgerechnet am Programmierplatz-Beleg DZ15.</li>
 <li><b>Die H&ouml;he der Bahn ist die Kugel-Versatzfl&auml;che</b>: die Mitte des Fr&auml;sers l&auml;uft dort, wo die Kugel die Sollform gerade
 ber&uuml;hrt. Das ist exakt gerechnet (eine Dilatation des H&ouml;henfelds mit der Kugelkappe), nicht gen&auml;hert &mdash; deshalb kann die Bahn auch an
 einer Kante nicht ins Teil schneiden.</li>
@@ -3349,6 +3361,20 @@ die Referenz vor dem ersten Lauf.</p>
 <p id="ba-fk06d-kanten"><b>Rohteilkanten:</b> Das Rohteil ist in der 3D-Ansicht <b>undurchsichtig</b> &mdash; was hinter dem Bauteil liegt, sieht man nicht. Das ist Absicht: durchscheinende
 R&uuml;ckkanten laufen quer durch Werkzeug und Bahn und verf&auml;lschen die Konturen der Elemente, die sich davor bewegen. Wer die Umrisse des Rohteils trotzdem braucht, setzt
 den Haken <b>Rohteilkanten</b> neben den Kn&ouml;pfen 2D/3D; die Kanten werden dann gezeichnet, bleiben aber hinter dem Material verdeckt (kein Durchsehen). Der Haken wird gemerkt.</p>
+<h3 id="ba-fk06d-rest">Restmaterialanzeige</h3>
+<p>Der Haken <b>Restmaterial</b> in der Simulationsleiste vergleicht das Simulationsfeld mit der <b>Sollform des Modells</b>: wo nach allem, was
+gefahren wurde, noch Material dar&uuml;ber steht, wird die Stelle <b>rot</b>, und die Zeile unter dem Bild nennt <b>Fl&auml;che, gr&ouml;&szlig;te H&ouml;he
+und Ort</b>. Das trifft auch, was keine Bahn von sich aus meldet &mdash; einen Eckenradius, der kleiner ist als jeder Fr&auml;ser, oder eine schlicht
+vergessene Stelle.</p>
+<p><b>Die Toleranz ist keine Willk&uuml;r:</b> das Simulationsfeld stempelt mit dem Werkzeugumriss auf einem groben Raster, und an einer Schr&auml;ge
+schl&auml;gt ein halber Rasterschritt in XY als H&ouml;henfehler durch. Ohne Toleranz w&auml;re jede Schr&auml;ge rot. Gerechnet wird mit <b>einer
+Rasterweite</b>, und die Zahl steht in der Anzeige.</p>
+<p><b>Zu lesen ist die Anzeige am ENDE des Programms.</b> Vor dem Schlichten steht das Aufma&szlig; noch da &mdash; das ist kein Fehler, sondern
+Absicht; es erscheint trotzdem rot, weil gegen die <i>fertige</i> Sollform gemessen wird. Ohne geladene Sollform gibt es keine Aussage, und die
+Zeile sagt das auch.</p>
+<p><b>Der Kugelfr&auml;ser wird seit dem 15.09.2026 als Kugel gestempelt</b> (vorher galt jeder Fr&auml;ser als flache Scheibe). Erkannt wird er an
+den Zahlen der Tabelle: R2 = halber Durchmesser.</p>
+
 <h2 id="ba-fk07">7 &nbsp;NC-Ausgabe und Weg zur Maschine</h2>
 <p>Aufbau: <code>BEGIN PGM</code>, zwei <code>BLK FORM</code>-S&auml;tze, Kommentar, je Schritt <code>TOOL CALL</code>,
 <code>L Z+.. R0 FMAX M13</code>, <code>CYCL DEF</code> mit den Q-Zeilen, <code>CALL LBL n</code> (oder Musterzyklus),
@@ -3903,6 +3929,9 @@ var F_FELDER = {
   aufTiefe:   {name:'UZ Aufmaß Tiefe', einheit:'mm', ba:'ba-fk06b-aufmass'},
   zustSchl:   {name:'DS Zustellung Schlichten (0 = ein Schnitt)', einheit:'mm', ba:'ba-fk06b-aufmass'},
   ueberl:     {name:'Bahnüberlappung', einheit:'×R', ba:'ba-fk06b-bahn'},
+  // Restmaterial: was das Vorwerkzeug erreicht hat, gilt als weggenommen.
+  // 0 = kein Vorwerkzeug, also der erste Durchgang.
+  dVor:       {name:'⌀ Vorwerkzeug (Restmaterial)', einheit:'mm', ba:'ba-fk05c-flaechen'},
   eintauch:   {name:'Eintauchen', typ:'wahl', zahlWahl:true, wahl:[['0','senkrecht'],['1','Helix'],['2','pendelnd']], ba:'ba-fk06b-bahn'},
   strategie:  {name:'Strategie', typ:'wahl', zahlWahl:true, select:true, wahl:[['0','Mäander, seitliche Zustellung außen'],['1','Mäander, Zustellung am Rand'],['2','zeilenweise, Rücklauf im Eilgang']], ba:'ba-fk06b-232'},
   px:         {name:'X0 / Y0 Startpunkt', einheit:'mm', mit:'py', ba:'ba-fk06b-232'},
@@ -4017,7 +4046,7 @@ var F_MASKE = {
                feldText:{f:'F Vorschub Fräsen', l1:'LX Länge in X (± = Richtung)', l2:'LY Länge in Y (± = Richtung)', zust:'DZ max. Zustellung', ueberl:'max. Überlappung'}},
   // Modell abspanen: kein einziges Feld traegt ein Q-Wort — die Familie hat
   // keinen Steuerungszyklus. Deshalb steht die ganze Feldliste in ohneQ.
-  modellSchruppen:{felder:['#Werkzeug & Schnittwerte','t','s','f','fTief','kuehl','#Tiefe & Aufmaß','q203','tiefe','zust','aufSeite','aufTiefe','#Bahn','ueberl','#!Sicherheit','sc','sc2'],
+  modellSchruppen:{felder:['#Werkzeug & Schnittwerte','t','s','f','fTief','kuehl','#Tiefe & Aufmaß','q203','tiefe','zust','aufSeite','aufTiefe','#Bahn','ueberl','dVor','#!Sicherheit','sc','sc2'],
                feldText:{f:'F Vorschub Fräsen', fTief:'FZ Vorschub Eintauchen', zust:'D Zustellung in Z',
                  aufSeite:'UXY Aufmaß an der Wand', aufTiefe:'UZ Aufmaß nach unten', ueberl:'Bahnüberlappung (× Werkzeugradius)',
                  sc2:'SC2 Rückzug über Z0'},
@@ -4512,7 +4541,7 @@ function fSchrittNeu(prog, art, tNr, musterIdx){
       // Werkzeugradius versetzt, Oberflaeche und Tiefe aus dem Rohteil.
       // ausgabe steht fest auf einzel: einen Zyklus gibt es nicht.
       Object.assign(s, {q203:+k.z1 || 0, tiefe:-Math.max(1, fRund((+k.z1 || 0) - (+k.z0 || 0))),
-        zust:2, aufSeite:0.5, aufTiefe:0.2, ueberl:0.8, fTief:fRund(s.f * 0.3), ausgabe:'einzel'});
+        zust:2, aufSeite:0.5, aufTiefe:0.2, ueberl:0.8, dVor:0, fTief:fRund(s.f * 0.3), ausgabe:'einzel'});
     }
     if(art === 'modellSchlichten'){
       // Stufe 4: Rautiefe 0,01 mm ist ein ueblicher Schlichtwert (bei einem
@@ -7138,11 +7167,34 @@ function fPlanFlaechenBefund(A, F, winkelMin, winkelMax, loecher){
   }
   return b;
 }
+// Eine Bahn nur zum NACHSEHEN rechnen. fBahnModell liest die Sollform aus
+// der globalen Ablage; hier wird sie geliehen und danach zurueckgegeben -
+// sonst haengt sie hinterher am falschen Feld.
+var F_PLAN_PROBE = null;
+function fPlanBahnProbe(prog, tool, werte, F){
+  const schluessel = [tool.nr, tool.d, werte.tiefe, werte.q203, werte.aufSeite, werte.aufTiefe,
+                      werte.zust, werte.ueberl, werte.dVor].join('|');
+  if(F_PLAN_PROBE && F_PLAN_PROBE.feld === F && F_PLAN_PROBE.schluessel === schluessel) return F_PLAN_PROBE.wert;
+  const alt = fStepFeldHolen();
+  try{
+    if(F) fStepFeldSetzen(F);
+    const st = fSchrittNeu(prog, 'modellSchruppen', tool.nr, null);
+    Object.assign(st, werte);
+    const r = fBahnModell(st, tool, prog);
+    F_PLAN_PROBE = {feld:F, schluessel:schluessel, wert:r};
+    return r;
+  }catch(e){ return null; }
+  finally{ fStepFeldSetzen(alt); }
+}
 // DER PLAN. Er legt nichts an - das tut fPlanFlaechenAnlegen; so laesst
 // sich die Rechnung ohne Nebenwirkung messen (Muster der Bohrungen).
 function fPlanFlaechen(prog, A, F){
   const hinweise = [], schritte = [];
   const k = (prog && prog.kopf) || {};
+  // Der Weg aus einer kleinen Tabelle heraus - er steht in der App, aber
+  // niemand sucht ihn, wenn die Meldung ihn nicht nennt.
+  const kleineTabelle = ((prog && prog.werkzeuge) || []).length < fWerkzeugeVorgabe().length;
+  const holWeg = kleineTabelle ? ' Diese Vorlage bringt ihre eigene, kleine Werkzeugtabelle mit — Werkzeuge > Vorgabe holt die Werkstatt-Tabelle.' : '';
   const B = A ? A.box : null;
   const wMin = 5, wMax = 45;
   // Die Bohrungen sind bekannt - was in ihnen liegt, gehoert dem
@@ -7165,7 +7217,7 @@ function fPlanFlaechen(prog, A, F){
       l1:fRund((+k.x1 || 0) - (+k.x0 || 0)), l2:fRund((+k.y1 || 0) - (+k.y0 || 0)),
       zust:fRund(Math.min(2, oben)), aufTiefe:0, tiefe:fRund(-oben)},
       text:'Planen: ' + oben + ' mm Aufmass herunter, Fraeser ' + wPlan.nr + ' (⌀' + wPlan.d + ')'});
-  } else if(oben > 0.01) hinweise.push('Zum Planen fehlt ein Fraeser in der Tabelle — die ' + oben + ' mm Aufmass oben bleiben stehen.');
+  } else if(oben > 0.01) hinweise.push('Zum Planen fehlt ein Fraeser in der Tabelle — die ' + oben + ' mm Aufmass oben bleiben stehen.' + holWeg);
   else hinweise.push('Das Rohteil hat oben kein Aufmass (Oberkante = Modell) — es gibt nichts zu planen. Als Rohteil uebernehmen liefert genau den Huellquader; wer von einer gesaegten Platte ausgeht, traegt das Aufmass im Programmkopf ein.');
 
   // (2) MODELL ABSPANEN. Nur wenn unter der Oberkante ueberhaupt etwas
@@ -7175,11 +7227,52 @@ function fPlanFlaechen(prog, A, F){
   if(!F) hinweise.push('Ohne Sollform kann das Modell nicht abgespant werden — im STEP-Fenster Sollform ans Programm geben.');
   else if(bef.spanne <= 0.5) hinweise.push('Unter der Oberflaeche liegt nichts (Hoehenspanne ' + bef.spanne + ' mm): eine reine Platte — abgespant wird nichts, es bleiben Bohrungen und Konturen.');
   else if(bef.tiefFrei < bef.zellen * 0.01) hinweise.push('Unter der Oberflaeche liegen nur BOHRUNGEN (' + bef.tief + ' Rasterstellen, davon ' + bef.tiefFrei + ' ausserhalb eines Lochs) — die stehen im Bohrplan; gefraest wird dort nichts.');
-  else if(!wSchrupp) hinweise.push('Zum Abspanen fehlt ein Fraeser mit Eintauchwinkel (ANGLE) in der Tabelle — die Bahn taucht senkrecht ein und braucht ihn.');
-  else schritte.push({art:'modellSchruppen', t:wSchrupp.nr, werte:{
-      q203:fRund(B ? B.z1 : (+k.z1 || 0)), tiefe:fRund(zTief - (B ? B.z1 : 0)),
-      zust:2, aufSeite:0.5, aufTiefe:0.2, ueberl:0.8, ausgabe:'einzel'},
-      text:'Modell abspanen bis ' + fRund(zTief) + ', Fraeser ' + wSchrupp.nr + ' (⌀' + wSchrupp.d + ')'});
+  else if(!wSchrupp) hinweise.push('Zum Abspanen fehlt ein Fraeser mit Eintauchwinkel (ANGLE) in der Tabelle — die Bahn taucht senkrecht ein und braucht ihn.' + holWeg);
+  else {
+    const grundWerte = {q203:fRund(B ? B.z1 : (+k.z1 || 0)), tiefe:fRund(zTief - (B ? B.z1 : 0)),
+      zust:2, aufSeite:0.5, aufTiefe:0.2, ueberl:0.8, dVor:0, ausgabe:'einzel'};
+    // DER GROESSTE FRAESER, DER WIRKLICH SCHNEIDET. Der groesste der
+    // Tabelle ist es nicht immer: in eine 14 mm breite Tasche kommt ein
+    // ⌀20 nirgends hinein, und die Bahn sagt das auch. Also der Reihe
+    // nach von gross nach klein probieren, bis eine Bahn traegt.
+    const fr = ((prog && prog.werkzeuge) || []).filter(w => w.art === 'fraeser' &&
+      !fPlanIstKugel(w) && (+w.angle || 0) > 0 && (+w.d || 0) > 0)
+      .sort((a, b) => (+b.d || 0) - (+a.d || 0));
+    let wahl = null, bahn = null, ersterGrund = '';
+    for(let q = 0; q < fr.length; q++){
+      const b = fPlanBahnProbe(prog, fr[q], grundWerte, F);
+      if(b && b.ok){ wahl = fr[q]; bahn = b; break; }
+      if(!ersterGrund && b && b.grund) ersterGrund = b.grund;
+    }
+    if(!wahl){
+      hinweise.push('Kein Fraeser der Tabelle kommt an das Material: ' + (ersterGrund || 'die Bahn liefert nichts') + '.' + holWeg);
+      return {schritte:schritte, hinweise:hinweise, befund:bef};
+    }
+    if(wahl.nr !== wSchrupp.nr) hinweise.push('Der groesste Fraeser mit Eintauchwinkel (⌀' + wSchrupp.d +
+      ') kommt an diesem Teil nirgends an das Material — abgespant wird mit ⌀' + wahl.d + '.');
+    schritte.push({art:'modellSchruppen', t:wahl.nr, werte:grundWerte,
+      text:'Modell abspanen bis ' + fRund(zTief) + ', Fraeser ' + wahl.nr + ' (⌀' + wahl.d + ')'});
+    const wSchrupp2 = wahl;
+    // WAS BLEIBT STEHEN? Das sagt die Bahn selbst - ihr Bericht nennt die
+    // Breite der Stelle. Das Restwerkzeug ist der groesste Fraeser, der da
+    // noch hineinpasst.
+    if(bahn && bahn.ok && bahn.rest > 0){
+      const saum = F ? F.raster * 1.5 : 0;
+      const kand = fr.filter(w => (+w.d || 0) < (+wSchrupp2.d || 0));
+      const passt = kand.filter(w => (+w.d || 0) <= bahn.restBreit + 0.001)[0];
+      if(bahn.restBreit <= saum){
+        hinweise.push('Nach dem Abspanen bleibt nur ein Saum von ' + bahn.restBreit +
+          ' mm (Arbeitsraster ' + fRund(F ? F.raster : 0) + ' mm) — das ist Rechengenauigkeit, kein Nachsetzen noetig.');
+      } else if(passt){
+        schritte.push({art:'modellSchruppen', t:passt.nr, werte:Object.assign({}, grundWerte, {dVor:fRund(+wSchrupp2.d || 0)}),
+          text:'Restmaterial nachsetzen (' + bahn.flaeche + ' mm2, bis ' + bahn.restBreit + ' mm breit), Fraeser ' + passt.nr + ' (⌀' + passt.d + ')'});
+      } else {
+        hinweise.push('Nach dem Abspanen bleiben ' + bahn.flaeche + ' mm2 stehen, bis ' + bahn.restMax +
+          ' mm hoch und ' + bahn.restBreit + ' mm breit — der kleinste Fraeser mit Eintauchwinkel in der Tabelle ist ⌀' +
+          (kand.length ? kand[kand.length - 1].d : fRund(+wSchrupp2.d || 0)) + ' und passt dort nicht hinein.' + holWeg);
+      }
+    }
+  }
 
   // (3) SCHRAEGEN SCHLICHTEN. Nur wenn im Winkelband ueberhaupt Flaeche
   //     liegt — sonst schlichtet ein Kugelfraeser 93 Prozent Ebene.
@@ -7190,7 +7283,7 @@ function fPlanFlaechen(prog, A, F){
       q203:fRund(B ? B.z1 : (+k.z1 || 0)), tiefe:fRund(zTief - (B ? B.z1 : 0)),
       winkelMin:wMin, winkel:wMax, rautiefe:0.01, tolBahn:0.005, strategie:0, ausgabe:'einzel'},
       text:'Schraegen schlichten (' + wMin + ' bis ' + wMax + ' Grad, ' + anteil + ' % der Flaeche), Kugelfraeser ' + wKugel.nr + ' (⌀' + wKugel.d + ')'});
-  } else if(F && bef.imBand > 0) hinweise.push('Im Band ' + wMin + ' bis ' + wMax + ' Grad liegen ' + anteil + ' % der Flaeche, aber die Tabelle hat keinen Kugelfraeser — nicht geschlichtet.');
+  } else if(F && bef.imBand > 0) hinweise.push('Im Band ' + wMin + ' bis ' + wMax + ' Grad liegen ' + anteil + ' % der Flaeche, aber die Tabelle hat keinen Kugelfraeser — nicht geschlichtet.' + holWeg);
   else if(F) hinweise.push('Keine Schraege im Band ' + wMin + ' bis ' + wMax + ' Grad (' + Math.round(bef.zuFlach / (bef.zellen || 1) * 100) + ' % flacher, ' + Math.round(bef.zuSteil / (bef.zellen || 1) * 100) + ' % steiler) — nichts zu schlichten.');
 
   return {schritte:schritte, hinweise:hinweise, befund:bef};
@@ -7407,6 +7500,38 @@ function fStepSollHoehe(F, x, y){
 }
 
 // ---------------------------------------------------------------------
+// RESTMATERIAL IN DER SIMULATION
+// ---------------------------------------------------------------------
+// Das Simulationsfeld gegen die Sollform: wo steht noch Material?
+// feld = Feld der Simulation (h, nx, ny, raster, x0, y0, oben, unten),
+// F = Sollform des Modells. Ohne eines von beiden gibt es keine Aussage -
+// und dann wird auch keine gemacht.
+function fSimRest(feld, F, tol){
+  if(!feld || !F) return null;
+  const t = (tol > 0) ? tol : Math.max(0.05, feld.raster);
+  const n = feld.nx * feld.ny, maske = new Uint8Array(n);
+  let zellen = 0, maxH = 0, mx = 0, my = 0;
+  for(let j = 0; j < feld.ny; j++) for(let i = 0; i < feld.nx; i++){
+    const c = j * feld.nx + i;
+    const x = feld.x0 + (i + 0.5) * feld.raster, y = feld.y0 + (j + 0.5) * feld.raster;
+    const soll = fStepSollHoehe(F, x, y);
+    const ueber = feld.h[c] - soll;
+    if(!(ueber > t)) continue;
+    maske[c] = 1; zellen++;
+    if(ueber > maxH){ maxH = ueber; mx = x; my = y; }
+  }
+  return {maske:maske, zellen:zellen, flaeche:fRund(zellen * feld.raster * feld.raster),
+          maxH:fRund(maxH), x:fRund(mx), y:fRund(my), tol:fRund(t), gen:feld.gen};
+}
+// Der Satz dazu - eine Stelle, damit Kopfzeile und Anleitung dasselbe sagen.
+function fSimRestText(R){
+  if(!R) return 'Restmaterial: keine Sollform geladen — im STEP-Fenster ein Modell laden und "Sollform ans Programm" druecken.';
+  if(!R.zellen) return 'Kein Restmaterial: ueberall ist die Sollform erreicht (Toleranz ' + R.tol + ' mm).';
+  return 'RESTMATERIAL: ' + R.flaeche + ' mm2, bis ' + R.maxH + ' mm hoch, am meisten bei X' + R.x + ' Y' + R.y +
+         ' (Toleranz ' + R.tol + ' mm — eine Rasterweite der Simulation).';
+}
+
+// ---------------------------------------------------------------------
 // STUFE 3 TEIL B: DAS MODELL GEGEN DAS ROHTEIL ABSPANEN (Z-konstant)
 // ---------------------------------------------------------------------
 // Die Sollform liegt NEBEN dem Programm, nicht darin: sie gehoert zum
@@ -7556,6 +7681,13 @@ function fBahnModell(s, tool, prog){
   const r = G.raster, nx = G.nx, ny = G.ny, n = nx * ny;
   if(G.grob) warn.push('Rohteil und Sollform ergeben zu viele Rasterstellen — das Arbeitsraster wurde auf ' + fRund(r) + ' mm vergroebert.');
   const ueberl = (+s.ueberl > 0) ? Math.min(+s.ueberl, 1.414) : 0.8;
+  // RESTMATERIAL: der Durchmesser des Vorwerkzeugs. Was dieses erreicht
+  // hat, gilt als weggenommen - der kleinere Fraeser faehrt nur noch dort,
+  // wo der groessere nicht hinkam. Das Vorwerkzeug gilt dabei um einen
+  // Hauch kleiner (Ueberlappung), damit an der Nahtstelle kein Grat
+  // stehen bleibt.
+  const rVor = (+s.dVor > 0) ? +s.dVor / 2 : 0;
+  if(rVor > 0 && rVor <= rt) warn.push('Das Vorwerkzeug ⌀' + fRund(2 * rVor) + ' ist nicht groesser als ⌀' + fRund(2 * rt) + ' — dann gibt es kein Restmaterial zu holen.');
   const schritt = Math.max(1, Math.round(Math.min(2 * rt, ueberl * rt) / r));
   // Der Abstand aus der Verwandlung geht von Zellenmitte zu Zellenmitte. Die
   // wirkliche Kante des verbotenen Bereichs kann bis zu einer halben
@@ -7564,6 +7696,12 @@ function fBahnModell(s, tool, prog){
   // halbe Diagonale kommt deshalb als Zugabe dazu.
   const grenz = (rt + uXY) / r + Math.SQRT1_2, g2 = grenz * grenz;
   const verboten = new Uint8Array(n), d2 = new Float64Array(n);
+  // Dasselbe Mass fuer das Vorwerkzeug, und die Reichweite seiner
+  // Schneide in Rasterweiten (um die Ueberlappung verkuerzt).
+  const grenzV = rVor > 0 ? (rVor + uXY) / r + Math.SQRT1_2 : 0, gV2 = grenzV * grenzV;
+  const ueLap = rVor > 0 ? Math.min(0.5, rt * 0.2) : 0;
+  const reichV = rVor > 0 ? Math.max(0, rVor - ueLap) / r : 0, reichV2 = reichV * reichV;
+  const vorZ = rVor > 0 ? new Uint8Array(n) : null, d2V = rVor > 0 ? new Float64Array(n) : null;
   // Steht ueberhaupt etwas ueber der Sollform? Wer "Als Rohteil uebernehmen"
   // drueckt, bekommt den Huellquader des Modells — bei einer flachen Platte
   // liegt die Deckflaeche dann genau auf der Rohteiloberkante. Dann fehlt das
@@ -7662,9 +7800,17 @@ function fBahnModell(s, tool, prog){
     // Werkzeugradius zur Seite und damit ueber die naechste Zeile hinweg —
     // sie faende dort nichts mehr zu tun und fiele aus, obwohl zwischen den
     // Zeilen Material stehen bleibt (gemessen: jede zweite Zeile fiel aus).
-    standVor.set(G.stand);
     for(let q = 0; q < n; q++) verboten[q] = (G.soll[q] + uZ > z + 1e-9) ? 1 : 0;
     fEdt(verboten, nx, ny, d2);
+    // WAS DAS VORWERKZEUG SCHON GENOMMEN HAT, steht nicht mehr da. Erst
+    // in den Stand stempeln, dann den Stand der Ebene merken - sonst
+    // faehrt der kleine Fraeser die ganze Flaeche noch einmal ab.
+    if(rVor > 0){
+      for(let q = 0; q < n; q++) vorZ[q] = (d2[q] > gV2 + 1e-9) ? 1 : 0;
+      fEdt(vorZ, nx, ny, d2V);
+      for(let q = 0; q < n; q++) if(d2V[q] <= reichV2 + 1e-9 && G.stand[q] > z) G.stand[q] = z;
+    }
+    standVor.set(G.stand);
     for(let q = 0; q < n; q++) erlaubt[q] = (d2[q] > g2 + 1e-9) ? 1 : 0;
     let inEbene = durchgang(0, z, zr, (q) => erlaubt[q] && standVor[q] > z + 1e-6);
     // QUERDURCHGANG. Zwischen zwei Zeilen bleibt an einer senkrechten Wand
@@ -7961,7 +8107,9 @@ function fBahnSchlichten(s, tool, prog){
       const c = zelle(a, b);
       if(gut[c] && isFinite(BF[c])){
         if(!P){ P = []; stuecke.push(P); }
-        P.push([fRund(wx(a, b)), fRund(wy(a, b)), fRund(BF[c])]);
+        // Z IST DIE KUGELUNTERKANTE (die Spitze), wie die Werkzeuglaenge L
+        // gemessen wird. BF ist die Bahn der MITTE - ein Kugelradius tiefer.
+        P.push([fRund(wx(a, b)), fRund(wy(a, b)), fRund(BF[c] - rk)]);
       } else P = null;
     }
     if(!stuecke.length) continue;
@@ -7979,7 +8127,7 @@ function fBahnSchlichten(s, tool, prog){
       // gelassen hat (UXY/UZ) — das steht UEBER der Sollform.
       if(!letzt){ eil({x:A0[0], y:A0[1], z:sicher}); }
       else if(Math.hypot(A0[0] - letzt[0], A0[1] - letzt[1]) <= 3 * istMm + 1e-9){
-        eil({z:fRund(Math.min(sicher, Math.max(fBallMax(BF, F, letzt[0], letzt[1], A0[0], A0[1]), letzt[2], A0[2]) + sc))});
+        eil({z:fRund(Math.min(sicher, Math.max(fBallMax(BF, F, letzt[0], letzt[1], A0[0], A0[1]) - rk, letzt[2], A0[2]) + sc))});
         eil({x:A0[0], y:A0[1]});
       } else { spruenge++; eil({z:sicher}); eil({x:A0[0], y:A0[1]}); }
       eil({z:fRund(A0[2] + sc)});
@@ -8001,6 +8149,7 @@ function fBahnSchlichten(s, tool, prog){
     + ' Grad und bleiben hier UNBEARBEITET — sie gehoeren der Z-konstanten Bahn (noch nicht gebaut).');
   if(nFlach) warn.push(nFlach + ' Rasterstelle(n) sind flacher als ' + fRund(grenzU)
     + ' Grad und bleiben hier UNBEARBEITET — waagerechte Flaechen gehoeren dem Schaft- oder Messerkopf, nicht der Kugel.');
+  warn.push('Z ist die KUGELUNTERKANTE (die Spitze), so wie die Werkzeuglaenge L gemessen wird — nicht die Kugelmitte.');
   warn.push('Geprueft wird nur die KUGEL, nicht der Schaft und nicht der Halter: an einer hohen steilen Wand kann der Schaft anstehen, ohne dass die App es sagt. Vor dem ersten Lauf Programm-Test und Einzelsatz.');
   return {ok:true, bahn:B, warn:warn, zuege:zuege, punkte:punkte, roh:roh,
     schritt:fRund(istMm), soll:fRund(schrittMm), rz:fRund(istRz), spruenge:spruenge,
@@ -8044,6 +8193,11 @@ var F_SIM_EILGANG = 6000;   // mm/min fuer FMAX in der Zeitachse (kein NC-Wort, 
 // Spitzenwinkels). 0 = flach (Fraeser, Reibahle, Bohrstange).
 function fSimKegel(tool){
   const art = tool && tool.art;
+  // KUGELFRAESER: der Kopf ist eine Halbkugel, keine flache Scheibe und
+  // kein Kegel. -1 ist die Marke dafuer - ein Kegel hat immer einen
+  // positiven Kotangens. Erkannt wird sie an den ZAHLEN der Tabelle:
+  // Eckenradius R2 = halber Durchmesser.
+  if(art === 'fraeser' && (+tool.d || 0) > 0 && (+tool.r2 || 0) >= (+tool.d || 0) / 2 - 0.01) return -1;
   if(!(art === 'bohrer' || art === 'zentrierer' || art === 'gewindebohrer')) return 0;
   let sw = +tool.spitze; if(!(sw > 0) || sw >= 180) sw = (art === 'zentrierer') ? 90 : 118;
   return 1 / Math.tan(sw / 2 * Math.PI / 180);
@@ -8306,7 +8460,10 @@ function fSimStempel(F, x, y, z, r, nurPruefen, kegel){
     for(let i = i0; i <= i1; i++){
       const cx = F.x0 + (i + 0.5) * F.raster, d2 = (cx - x) * (cx - x) + (cy - y) * (cy - y);
       if(d2 > r2) continue;
-      const zc = kg ? z + Math.sqrt(d2) * kg : z, idx = j * F.nx + i;
+      // kg < 0 = KUGEL mit Radius r (Spitze auf z), kg > 0 = Kegel,
+      // 0 = flache Stirn.
+      const zc = (kg < 0) ? z + r - Math.sqrt(Math.max(0, r2 - d2)) : (kg ? z + Math.sqrt(d2) * kg : z);
+      const idx = j * F.nx + i;
       // Pruefung: eine Zelle unter der Unterkante ist kein Material mehr (Durchgangsbohrung mit Kegelspitze)
       if(F.h[idx] > zc + 1e-6 && (!nurPruefen || F.h[idx] > F.unten + 1e-6)){ traf = true; if(nurPruefen) return true; F.h[idx] = zc; }
     }
@@ -11712,7 +11869,10 @@ function fHilfebild(fokus){
 // Matrizen) rechnet F10 DOM-frei; hier stehen nur die GL-Aufrufe. Ohne
 // WebGL (domstub, alte Geraete) bleibt die 2D-Ansicht mit Hinweis.
 // =====================================================================
-const SIM = {liste:null, feld:null, gesamt:0, t:0, idx:0, u:0, koll:[], laeuft:false, tempo:5, spur:[], letzte:null, hinweise:[], bahnen:[], raf:0, uhr:0, bild:null, ansicht:'3d'};
+const SIM = {liste:null, feld:null, gesamt:0, t:0, idx:0, u:0, koll:[], laeuft:false, tempo:5, spur:[], letzte:null, hinweise:[], bahnen:[], raf:0, uhr:0, bild:null, ansicht:'3d',
+  // Restmaterial: der Befund und sein Schalter. restQuelle merkt sich die
+  // Sollform, gegen die gerechnet wurde - wechselt das Modell, wird neu gerechnet.
+  rest:null, restQuelle:null, restAn:true};
 try{ SIM.ansicht = (localStorage.getItem('dzf_simansicht') === '2d') ? '2d' : '3d'; }catch(e){}
 function fSimAufbauen(){
   const B = fSimBahnen(fProg), Z = fSimZeitachse(B.bahnen, fProg);
@@ -11745,6 +11905,17 @@ function fSimPosition(){
   const e = L[SIM.idx]; const p = fSimPunkt(e, SIM.u); p.e = e; return p;
 }
 // Verteiler: 3D, wenn gewaehlt und WebGL da; sonst die Draufsicht.
+// RESTMATERIAL: das Simulationsfeld gegen die Sollform des Modells.
+// Gerechnet wird nur, wenn sich am Feld etwas geaendert hat - der Vergleich
+// laeuft ueber alle Zellen und gehoert nicht in jedes Bild.
+function fSimRestHolen(){
+  const F = SIM.feld, S = fStepFeldHolen();
+  if(!F || !S){ SIM.rest = null; return null; }
+  if(SIM.rest && SIM.rest.gen === F.gen && SIM.restQuelle === S) return SIM.rest;
+  SIM.rest = fSimRest(F, S, 0);
+  SIM.restQuelle = S;
+  return SIM.rest;
+}
 function fSimZeichnen(){
   const cv2 = document.getElementById('simCv'), cv3 = document.getElementById('simGl');
   const drei = (SIM.ansicht === '3d') && cv3 && fSim3dInit(cv3);
@@ -11768,7 +11939,9 @@ function fSimZeichnen2D(){
   const X = (x) => ox + (x - F.x0) * sc, Y = (y) => oy - (y - F.y0) * sc;
   // Feld als Bild: Hoehe -> Grauwert (Oberkante hell, Grund dunkel), unberuehrt
   // blaugrau, Senkung von unten (nur hu angehoben) violett
-  if(!SIM.bild || SIM.bild.gen !== F.gen || SIM.bild.nx !== F.nx){
+  const RM = SIM.restAn ? fSimRestHolen() : null;
+  const restKey = RM ? ('r' + RM.zellen) : 'r-';
+  if(!SIM.bild || SIM.bild.gen !== F.gen || SIM.bild.nx !== F.nx || SIM.bild.rest !== restKey){
     const off = document.createElement('canvas'); off.width = F.nx; off.height = F.ny;
     const oc = off.getContext('2d');
     const img = (oc && oc.createImageData) ? oc.createImageData(F.nx, F.ny) : null;   // domstub liefert kein ImageData
@@ -11778,11 +11951,14 @@ function fSimZeichnen2D(){
         const idx = j * F.nx + i, h = F.h[idx], o = ((F.ny - 1 - j) * F.nx + i) * 4;   // Y nach oben
         if(h >= F.oben - 1e-6){ if(F.hu && F.hu[idx] > F.unten + 1e-6){ d[o] = 172; d[o + 1] = 160; d[o + 2] = 204; } else { d[o] = 176; d[o + 1] = 186; d[o + 2] = 196; } }
         else { const q = Math.max(0, Math.min(1, (F.oben - h) / tief)); const g = Math.round(150 - 110 * q); d[o] = g + 20; d[o + 1] = g + 30; d[o + 2] = g + 45; }
+        // Restmaterial rot ueber die Hoehenfarbe gelegt - die Form bleibt
+        // erkennbar, die Stelle springt ins Auge.
+        if(RM && RM.maske[idx]){ d[o] = Math.round(d[o] * 0.35 + 205 * 0.65); d[o + 1] = Math.round(d[o + 1] * 0.35 + 60 * 0.65); d[o + 2] = Math.round(d[o + 2] * 0.35 + 45 * 0.65); }
         d[o + 3] = 255;
       }
       oc.putImageData(img, 0, 0);
     }
-    SIM.bild = {cv:off, gen:F.gen, nx:F.nx};
+    SIM.bild = {cv:off, gen:F.gen, nx:F.nx, rest:restKey};
   }
   try{ ctx.imageSmoothingEnabled = false; ctx.drawImage(SIM.bild.cv, X(F.x0), Y(F.y0 + bh), bw * sc, bh * sc); }catch(e){}
   ctx.strokeStyle = dunkel ? '#9fb3c4' : '#3d5a73'; ctx.lineWidth = 1; ctx.strokeRect(X(F.x0), Y(F.y0 + bh), bw * sc, bh * sc);
@@ -11982,6 +12158,20 @@ function fSimInfo(){
   const e = p && p.e;
   el.textContent = (e ? 'Schritt ' + (e.schritt + 1) + ' · ' + (e.m.a === 'eil' ? 'Eilgang' : (e.m.a === 'verweil' ? 'Verweilen' : 'Vorschub F' + (e.m.f || ''))) + ' · X' + fRund(p.x) + ' Y' + fRund(p.y) + ' Z' + fRund(p.z) : '—') +
     ' · ' + mmss(SIM.t) + ' / ' + mmss(SIM.gesamt) + ' min' + (SIM.koll.length ? ' · KOLLISION ' + SIM.koll.length + 'x (Eilgang im Material)' : '') + ' · Raster ' + SIM.feld.raster + ' mm';
+  // RESTMATERIAL in eigener Zeile unter dem Bild: wo steht noch Material
+  // ueber der Sollform? Das trifft auch, was keine Bahn meldet - einen
+  // Eckenradius, der kleiner ist als jeder Fraeser, oder eine vergessene
+  // Stelle.
+  const rz = document.getElementById('simRestZeile');
+  if(rz){
+    if(!SIM.restAn){ rz.textContent = ''; }
+    else {
+      const R = fSimRestHolen();
+      rz.textContent = fSimRestText(R);
+      rz.style.color = (R && R.zellen) ? '#c53a2d' : 'var(--text-dim)';
+      rz.style.fontWeight = (R && R.zellen) ? '600' : '400';
+    }
+  }
   const sl = document.getElementById('simPos'); if(sl && SIM.gesamt > 0) sl.value = Math.round(SIM.t / SIM.gesamt * 1000);
 }
 function fSimTakt(){
@@ -12026,6 +12216,9 @@ function fSimOeffnen(){
   try{ SIM3D.kanten = localStorage.getItem('dzf_simkanten') === 'an'; }catch(e){}
   const kb = document.getElementById('simKanten');
   if(kb){ kb.checked = SIM3D.kanten; if(kb.addEventListener) kb.addEventListener('change', ()=>{ SIM3D.kanten = !!kb.checked; try{ localStorage.setItem('dzf_simkanten', SIM3D.kanten ? 'an' : 'aus'); }catch(e){} fSimZeichnen(); }); }
+  try{ SIM.restAn = (localStorage.getItem('dzf_simrest') || 'an') === 'an'; }catch(e){}
+  const rb = document.getElementById('simRest');
+  if(rb){ rb.checked = SIM.restAn; if(rb.addEventListener) rb.addEventListener('change', ()=>{ SIM.restAn = !!rb.checked; try{ localStorage.setItem('dzf_simrest', SIM.restAn ? 'an' : 'aus'); }catch(e){} SIM.bild = null; fSimZeichnen(); fSimInfo(); }); }
   const tempo = document.getElementById('simTempo'); if(tempo && tempo.addEventListener) tempo.addEventListener('change', ()=>{ const v = tempo.value; SIM.tempo = (v === 'max') ? 'max' : (+v || 1); });
   const sl = document.getElementById('simPos');
   if(sl && sl.addEventListener) sl.addEventListener('input', ()=>{ fSimPause(); const tZiel = (+sl.value / 1000) * SIM.gesamt; if(!SIM.liste) fSimAufbauen(); if(tZiel < SIM.t) fSimAufbauen(); fSimBis(tZiel); fSimZeichnen(); fSimInfo(); });
