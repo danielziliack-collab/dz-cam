@@ -2662,6 +2662,7 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <span style="font-size:11px;color:var(--text-dim);">Z-Ebene</span>
           <select id="stepEbene" style="font-size:11px;padding:5px 6px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--text);max-width:210px;"></select>
           <button class="gcbtn" id="btnStepKonturen" title="Die Schleifen dieser Ebene als XY-Konturen in den Arbeitsplan legen">Konturen übernehmen</button>
+          <button class="gcbtn" id="btnStepBohren" title="Die Bohrungen des Modells als Bohrbilder und Schritte anlegen: ein Zentrierschritt über alle Stellen, danach je Durchmesser einer — größter zuerst">Bohrungen übernehmen</button>
           <span style="display:inline-flex;gap:2px;"><button class="gcbtn primary" id="btnStepDraht" title="Drahtbild des Modells">Drahtbild</button><button class="gcbtn" id="btnStepSoll" title="Sollform von oben: die Höhe, auf die gefräst werden muss">Sollform</button></span>
         </div>
         <div class="mask-body" style="display:flex;flex-direction:column;gap:6px;min-height:0;">
@@ -2962,6 +2963,23 @@ waagerechten Fl&auml;chen). Der <b>Nullpunkt</b> liegt wahlweise in der Ecke ode
 in der Mitte, die Oberkante des Teils immer auf Z0, so wie ein Fr&auml;steil aufgespannt wird.</dd>
 <dt>Als Rohteil &uuml;bernehmen</dt><dd>Schreibt den H&uuml;llquader des ausgerichteten Modells als <b>BLK FORM</b> in den Programmkopf. Aufma&szlig; f&uuml;r das echte
 Rohteil kommt danach von Hand dazu.</dd>
+<dt id="ba-fk05c-bohrungen">Bohrungen &mdash; aus dem Modell in den Arbeitsplan</dt><dd>Der Knopf <b>Bohrungen &uuml;bernehmen</b> liest die Bohrungen des Modells
+und legt sie als Bohrbilder mit ihren Schritten an: <b>ein Zentrierschritt &uuml;ber alle Stellen</b> (ein Werkzeug, ein Bohrbild &mdash; das spart Wechsel),
+danach je Durchmesser ein Schritt, <b>gr&ouml;&szlig;ter zuerst</b>. Der Bericht unter dem Bild sagt vorher, was gefunden wurde.
+<br><b>Nicht jeder Zylinder ist eine Bohrung.</b> Der senkrechte Eckenradius einer Tasche ist im Modell dieselbe Fl&auml;chenart; unterschieden wird am
+&uuml;berstrichenen <i>Winkel</i> (ein voller Kreis ist eine Bohrung, ein Viertelkreis eine Verrundung). Eine Bohrung steht im Modell oft als zwei
+Halbzylinder &mdash; die App f&uuml;gt sie zusammen. Ob <b>Loch oder Zapfen</b>, entscheidet die H&ouml;he in der Mitte: liegt das Material unten, ist es ein
+Loch; liegt es oben, ist es ein Zapfen und geh&ouml;rt zum Fr&auml;sen. An 96 echten Modellen gemessen bleiben so 10&nbsp;% unklar &mdash; die werden
+gez&auml;hlt und genannt, nicht geraten.
+<br><b>Das Werkzeug kommt aus der Tabelle.</b> Ein Bohrer bohrt seinen Durchmesser: gibt es ihn, wird gebohrt. Gibt es ihn nicht, f&auml;hrt ein
+Fr&auml;ser die Bohrung wendelnd aus (Zyklus 208) &mdash; daf&uuml;r braucht er einen <b>Eintauchwinkel</b> in der Tabelle und mindestens ein Drittel des
+Bohrungsdurchmessers. Ist die &Ouml;ffnung gr&ouml;&szlig;er, ist sie keine Bohrung mehr, sondern eine <b>runde Tasche</b>; das sagt die Meldung, und der
+Schritt wird nicht angelegt.
+<br><b>Die Tiefe ist eine Entscheidung, kein Modellma&szlig;:</b> durch eine Platte bohrt die App um die Spitzenl&auml;nge (0,3&nbsp;&times;&nbsp;&empty; beim
+118-Grad-Bohrer, sonst nach dem Spitzenwinkel der Tabelle) plus 1&nbsp;mm tiefer, sonst bliebe der Kegel als Kragen stehen. Bei einem Sackloch gilt das
+Modellma&szlig;. <b>Senkungen und Gewinde legt die App nicht an</b> &mdash; welches Gewinde in eine &empty;8,5-Bohrung soll, steht in keinem Modell.
+<br>Die Punkte liegen im Koordinatensystem des <i>ausgerichteten</i> Modells: erst <b>Als Rohteil &uuml;bernehmen</b>, dann passen Bohrbild und BLK FORM
+zusammen. Tun sie das nicht, sagt es die Meldung.</dd>
 <dt id="ba-fk05c-ebenen">Z-Ebenen und Konturen</dt><dd>Jede <b>waagerechte</b> Fl&auml;che des Modells liegt auf einer H&ouml;he, auf der gefr&auml;st wird:
 die Oberfl&auml;che, ein Taschenboden, eine Absatzfl&auml;che. Die App sammelt sie zu <b>Z-Ebenen</b> (Toleranz 0,01&nbsp;mm) und listet sie von oben nach
 unten. Die gew&auml;hlte Ebene steht im Drahtbild kr&auml;ftig orange. <b>Konturen &uuml;bernehmen</b> legt ihre Schleifen als XY-Konturen in den Arbeitsplan:
@@ -6654,6 +6672,239 @@ function fPlanAufspannung(modell){
           erste.abtrag + ' cm³ abzutragen' +
           (erste.laengs ? ', ' + erste.laengs + ' Bohrungen in Werkzeugrichtung' : '')
   };
+}
+
+// ---- Der Planer, Stufe 2: was am Teil zu tun ist --------------------
+// Zuerst die BOHRUNGEN. Sie sind in Daniels Teilen der groesste Posten
+// (eine Grundplatte traegt 212 Stueck) und das Einzige, was sich aus dem
+// Modell eindeutig ablesen laesst: Durchmesser, Lage, Tiefe stehen da.
+//
+// NICHT JEDER ZYLINDER IST EINE BOHRUNG. Der senkrechte Eckenradius einer
+// Tasche ist im STEP dieselbe Flaechenart. GEMESSEN an 96 echten Teilen:
+// von 676 Zylinderflaechen laengs der Werkzeugachse bleiben 449 Achslagen,
+// davon 281 volle Kreise und 168 Teilzylinder - unter den Teilzylindern
+// allein 41-mal ⌀1, also Verrundungen. Das Unterscheidungsmerkmal ist der
+// UEBERSTRICHENE WINKEL, nicht der Durchmesser.
+//
+// UND EINE BOHRUNG STEHT SELTEN IN EINER EINZIGEN FLAECHE: 201 der 449
+// Achslagen sind aus zwei oder mehr Halbzylindern zusammengesetzt. Deshalb
+// werden Flaechen mit gleicher Achse, gleichem Radius und ueberlappender
+// z-Spanne zusammengefasst, BEVOR der Winkel gezaehlt wird.
+
+// Der ueberstrichene Winkel einer Zylinderflaeche in Grad. Gezaehlt wird
+// ueber die groesste LUECKE zwischen den Randpunkten - ein voller Kreis hat
+// keine, ein Viertelkreis 270 Grad.
+function fPlanZylWinkel(f){
+  const cx = f.ort ? f.ort[0] : 0, cy = f.ort ? f.ort[1] : 0, w = [];
+  f.rand.forEach(lo => lo.kanten.forEach(k => k.p.forEach(p => {
+    const dx = p[0] - cx, dy = p[1] - cy;
+    // Nur Punkte, die wirklich auf dem Mantel liegen: die Randkurve einer
+    // Zylinderflaeche kann auch ueber eine Gerade laufen.
+    if(Math.abs(Math.hypot(dx, dy) - f.r) > Math.max(0.02, f.r * 0.02)) return;
+    w.push(Math.atan2(dy, dx));
+  })));
+  if(w.length < 2) return 0;
+  w.sort((a, b) => a - b);
+  let luecke = 0;
+  for(let i = 1; i < w.length; i++) luecke = Math.max(luecke, w[i] - w[i - 1]);
+  luecke = Math.max(luecke, w[0] + 2 * Math.PI - w[w.length - 1]);
+  return fRund((2 * Math.PI - luecke) * 180 / Math.PI);
+}
+
+// z-Spanne der Randpunkte einer Flaeche.
+function fPlanZSpanne(f){
+  let zlo = Infinity, zhi = -Infinity;
+  f.rand.forEach(lo => lo.kanten.forEach(k => k.p.forEach(p => {
+    if(p[2] < zlo) zlo = p[2]; if(p[2] > zhi) zhi = p[2];
+  })));
+  return {zlo:zlo, zhi:zhi};
+}
+
+// Alle Zylinder laengs der Werkzeugachse zu ACHSLAGEN zusammenfassen.
+function fPlanZylLagen(A, art){
+  const lagen = [];
+  A.flaechen.forEach(f => {
+    if(f.art !== (art || 'zylinder') || f.lage !== 'laengs') return;
+    const S = fPlanZSpanne(f);
+    if(!isFinite(S.zlo)) return;
+    const cx = f.ort ? f.ort[0] : 0, cy = f.ort ? f.ort[1] : 0;
+    let g = null;
+    for(let i = 0; i < lagen.length; i++){
+      const o = lagen[i];
+      if(Math.abs(o.x - cx) < 0.01 && Math.abs(o.y - cy) < 0.01 && Math.abs(o.r - f.r) < 0.005
+         && S.zlo < o.zhi + 0.01 && S.zhi > o.zlo - 0.01){ g = o; break; }
+    }
+    if(!g) lagen.push({x:fRund(cx), y:fRund(cy), r:f.r, zlo:S.zlo, zhi:S.zhi, winkel:fPlanZylWinkel(f), n:1});
+    else { g.zlo = Math.min(g.zlo, S.zlo); g.zhi = Math.max(g.zhi, S.zhi);
+           g.winkel = fRund(g.winkel + fPlanZylWinkel(f)); g.n++; }
+  });
+  return lagen;
+}
+
+// DIE BOHRUNGEN. Liefert auch, was KEINE ist - Zapfen, Verrundungen und
+// die unklaren Faelle werden gezaehlt und benannt statt stumm verworfen.
+//
+// LOCH ODER ZAPFEN? Die erste Messung verglich die Hoehe in der Mitte mit
+// der Umgebung. Das liess 75 von 281 unklar, und zwar zu Recht: in einem
+// Lochbild liegt neben einem Loch das naechste, beide gleich tief. Richtig
+// ist der Vergleich mit der EIGENEN z-Spanne des Zylinders: bei einem LOCH
+// steht das Material in der Mitte UNTEN (am Grund oder ganz durch), bei
+// einem ZAPFEN OBEN (seine Deckflaeche). Damit blieben von 281 nur noch 29
+// unklar (10 %).
+function fPlanBohrungen(A, F){
+  const feld = F || fStepSollfeld(A);
+  const lagen = fPlanZylLagen(A);
+  const kegel = fPlanZylLagen(A, 'kegel');
+  const loecher = [], hinweise = [];
+  let zapfen = 0, unklar = 0, teil = 0;
+  lagen.forEach(g => {
+    if(g.winkel < 350){ teil++; return; }              // Verrundung, keine Bohrung
+    let hm = null;
+    try{ hm = fStepSollHoehe(feld, g.x, g.y); }catch(e){}
+    if(hm == null){ unklar++; return; }
+    if(hm >= g.zhi - 0.05){ zapfen++; return; }
+    if(hm > g.zlo + 0.05){ unklar++; return; }
+    // Kegel auf derselben Achse: unten die Bohrerspitze eines vorhandenen
+    // Sacklochs, oben eine Senkung oder Fase. Beides gehoert zur Bohrung
+    // und nicht als eigene Stelle in die Liste.
+    const spitze = kegel.some(k => Math.abs(k.x - g.x) < 0.01 && Math.abs(k.y - g.y) < 0.01 && k.zhi <= g.zlo + 0.02);
+    const sk = kegel.filter(k => Math.abs(k.x - g.x) < 0.01 && Math.abs(k.y - g.y) < 0.01 && k.zlo >= g.zhi - 0.02)[0];
+    loecher.push({x:g.x, y:g.y, d:fRund(2 * g.r), zOben:fRund(g.zhi), zUnten:fRund(g.zlo),
+      tiefe:fRund(g.zhi - g.zlo), durch:(g.zlo <= A.box.z0 + 0.02),
+      spitze:spitze, senkung:sk ? {d:fRund(2 * sk.r), tiefe:fRund(sk.zhi - sk.zlo)} : null,
+      flaechen:g.n});
+  });
+  // Gleiche Bohrungen zu einem BOHRBILD zusammenfassen: gleicher
+  // Durchmesser, gleiche Hoehe, gleiche Tiefe. Genau dafuer ist ein
+  // Bohrbild da - ein Werkzeug, ein Zyklus, viele Stellen.
+  const gruppen = [];
+  loecher.forEach(L => {
+    let g = gruppen.filter(q => Math.abs(q.d - L.d) < 0.011 && Math.abs(q.zOben - L.zOben) < 0.05
+      && Math.abs(q.tiefe - L.tiefe) < 0.05 && q.durch === L.durch)[0];
+    if(!g){ g = {d:L.d, zOben:L.zOben, zUnten:L.zUnten, tiefe:L.tiefe, durch:L.durch,
+                 senkung:L.senkung, punkte:[]}; gruppen.push(g); }
+    g.punkte.push({x:L.x, y:L.y});
+  });
+  // Vom Groben zum Feinen (Daniels Reihenfolge): der groesste Durchmesser
+  // zuerst, bei gleichem Durchmesser die tiefere Bohrung.
+  gruppen.sort((a, b) => (b.d - a.d) || (b.tiefe - a.tiefe));
+  // Innerhalb einer Gruppe zeilenweise im Maeander - der kurze Weg.
+  gruppen.forEach(g => g.punkte.sort((p, q) => (p.y - q.y) || (p.x - q.x)));
+  if(teil) hinweise.push(teil + ' Zylinderflaeche(n) ueberstreichen keinen vollen Kreis — das sind Eckenradien von Taschen, keine Bohrungen.');
+  if(zapfen) hinweise.push(zapfen + ' runde(r) Zapfen (Material INNEN) — die gehoeren zum Fraesen, nicht zum Bohren.');
+  if(unklar) hinweise.push(unklar + ' runde Stelle(n) liessen sich nicht als Loch oder Zapfen einordnen — bitte am Modell ansehen.');
+  return {loecher:loecher, gruppen:gruppen, zapfen:zapfen, unklar:unklar, teilzylinder:teil,
+          hinweise:hinweise, feld:feld};
+}
+
+// DAS WERKZEUG ZUR BOHRUNG. Ein Bohrer bohrt seinen Durchmesser und
+// keinen anderen - deshalb zaehlt nur der passende. Fehlt er, ist das
+// kein Grund zu raten: entweder faehrt ein Fraeser die Bohrung wendelnd
+// aus (Zyklus 208, dafuer muss er hineinpassen), oder die App sagt, was
+// fehlt.
+function fPlanBohrWerkzeug(prog, d){
+  const wz = (prog && prog.werkzeuge) || [];
+  const bohrer = wz.filter(w => w.art === 'bohrer' && Math.abs((+w.d || 0) - d) < 0.021)
+                   .sort((a, b) => (b.lcuts || 0) - (a.lcuts || 0))[0];
+  if(bohrer) return {art:'bohren', t:bohrer.nr, wz:bohrer};
+  // Wendelnd ausfraesen (Zyklus 208): das geht nur mit einem Fraeser, der
+  // RAMPEN kann - ANGLE in der Tabelle. Ohne den Filter nahm die erste
+  // Fassung bei einer ⌀130-Oeffnung den Planfraeser 52 (WSP, ANGLE 0), und
+  // ein Messerkopf taucht nicht wendelnd ein.
+  // Und er muss mindestens ein DRITTEL des Durchmessers haben: darunter
+  // faehrt er ewig im Kreis, und die Stelle ist ohnehin keine Bohrung mehr,
+  // sondern eine runde Tasche.
+  const fr = wz.filter(w => w.art === 'fraeser' && (+w.angle || 0) > 0
+                            && (+w.d || 0) <= d - 0.4 && (+w.d || 0) >= d / 3)
+                .sort((a, b) => (+b.d || 0) - (+a.d || 0))[0];
+  if(fr) return {art:'bohrfraesen', t:fr.nr, wz:fr};
+  // Warum es nicht geht, ist fuer die Meldung wichtiger als das blosse Nein.
+  const rampe = wz.filter(w => w.art === 'fraeser' && (+w.angle || 0) > 0)
+                  .sort((a, b) => (+b.d || 0) - (+a.d || 0))[0];
+  return {art:null, t:0, wz:null,
+          grund:(rampe && d > (+rampe.d || 0) * 3) ? 'tasche' : 'kein werkzeug'};
+}
+
+// AUS DEN BOHRUNGEN WERDEN SCHRITTE. Daniels Reihenfolge: vom Groben zum
+// Feinen und mit WENIG WERKZEUGWECHSEL - deshalb steht das Zentrieren als
+// EIN Schritt ueber ALLE Stellen am Anfang (ein Werkzeug, ein Bohrbild)
+// und danach je Durchmesser ein Schritt, groesster zuerst.
+//
+// Der DURCHBRUCH ist eine Entscheidung und keine Geometrie: durch eine
+// Platte bohrt man um die Spitzenlaenge (0,3 x ⌀ bei 118 Grad) plus 1 mm
+// tiefer, sonst bleibt der Kegel als Kragen stehen. Das steht in der
+// Meldung, damit niemand die Tiefe fuer ein Modellmass haelt.
+function fPlanBohrSchritte(prog, A, F){
+  const B = fPlanBohrungen(A, F);
+  const hinweise = B.hinweise.slice(), schritte = [], muster = [];
+  if(!B.gruppen.length){
+    hinweise.unshift('Keine Bohrung in Werkzeugrichtung gefunden.');
+    return {schritte:schritte, muster:muster, hinweise:hinweise, bohrungen:B};
+  }
+  const wz = (prog && prog.werkzeuge) || [];
+  const zentrierer = wz.filter(w => w.art === 'zentrierer').sort((a, b) => (+b.d || 0) - (+a.d || 0))[0];
+  // ZENTRIERT WIRD NUR, WAS AUCH GEBOHRT WIRD. Sonst bekommt ein Teil
+  // einen Koerner an vier Stellen, fuer die es gar kein Werkzeug gibt.
+  const machbar = B.gruppen.map(g => ({g:g, W:fPlanBohrWerkzeug(prog, g.d)})).filter(q => q.W.art);
+  const alle = [];
+  machbar.forEach(q => q.g.punkte.forEach(p => alle.push(p)));
+  alle.sort((p, q) => (p.y - q.y) || (p.x - q.x));
+
+  if(zentrierer && alle.length){
+    muster.push({name:'Alle Bohrungen', typ:'punkte', punkte:alle.slice()});
+    // Auf DURCHMESSER zentrieren gibt zugleich die Anfasung der Bohrung -
+    // aber nur, wenn der Zentrierer gross genug ist. Sonst auf Tiefe.
+    const dMin = Math.min.apply(null, machbar.map(q => q.g.d));
+    const aufD = (+zentrierer.d || 0) >= dMin * 1.1;
+    schritte.push({art:'zentrieren', t:zentrierer.nr, muster:0,
+      werte:aufD ? {zAuswahl:1, zDurchm:fRund(dMin), tiefe:-2, q203:fRund(B.gruppen[0].zOben)}
+                 : {zAuswahl:0, tiefe:-1.5, q203:fRund(B.gruppen[0].zOben)},
+      text:'Zentrieren, ' + alle.length + ' Stellen' + (aufD ? ', auf ⌀' + fRund(dMin) : ', 1,5 mm tief')});
+    if(!aufD) hinweise.push('Zentriert wird 1,5 mm tief: der Zentrierbohrer ⌀' + fRund(zentrierer.d) +
+      ' ist zu klein, um auf den Bohrungsdurchmesser anzusenken.');
+  } else if(alle.length) hinweise.push('Kein Zentrierbohrer in der Werkzeugtabelle — es wird ohne Zentrieren gebohrt.');
+
+  B.gruppen.forEach(g => {
+    const W = fPlanBohrWerkzeug(prog, g.d);
+    if(!W.art){
+      hinweise.push(W.grund === 'tasche'
+        ? ('⌀' + g.d + ' (' + g.punkte.length + 'x): zu gross zum Bohren und zum Wendeln — das ist eine runde TASCHE und gehoert zu den Fraesbahnen, nicht in den Bohrplan.')
+        : ('⌀' + g.d + ' (' + g.punkte.length + 'x): kein Bohrer dieses Durchmessers und kein Fraeser mit Eintauchwinkel, der hineinpasst — dieser Schritt fehlt.'));
+      return;
+    }
+    const mi = muster.length;
+    muster.push({name:'⌀' + g.d + (g.durch ? ' durch' : ' ' + fRund(g.tiefe) + ' tief'), typ:'punkte', punkte:g.punkte.slice()});
+    // Spitzenlaenge 0,3 x ⌀ gilt fuer den 118-Grad-Standardbohrer; steht in
+    // der Tabelle ein anderer Spitzenwinkel, wird mit dem gerechnet.
+    const sw = (W.wz && +W.wz.spitze) ? +W.wz.spitze : 118;
+    const spitzL = (W.art === 'bohren') ? fRund(g.d / 2 / Math.tan(sw / 2 * Math.PI / 180)) : 0;
+    const tiefe = g.durch ? fRund(-(g.tiefe + spitzL + 1)) : fRund(-g.tiefe);
+    if(W.wz && +W.wz.lcuts && Math.abs(tiefe) > +W.wz.lcuts)
+      hinweise.push('⌀' + g.d + ': ' + Math.abs(tiefe) + ' mm sind tiefer als die Schneidenlaenge ' + W.wz.lcuts + ' mm des Werkzeugs.');
+    schritte.push({art:W.art, t:W.t, muster:mi,
+      werte:(W.art === 'bohren')
+        ? {tiefe:tiefe, zust:0, q203:fRund(g.zOben)}
+        : {tiefe:tiefe, q335:g.d, q342:0, q334:fRund(Math.min(2, g.d / 6)), q203:fRund(g.zOben)},
+      text:(W.art === 'bohren' ? 'Bohren ⌀' : 'Bohrfraesen ⌀') + g.d + ', ' + g.punkte.length + ' Stellen, ' +
+           (g.durch ? 'durch (' + Math.abs(tiefe) + ' mm mit Spitze und Ueberlauf)' : fRund(g.tiefe) + ' mm tief')});
+    if(W.art === 'bohrfraesen') hinweise.push('⌀' + g.d + ': kein Bohrer dieses Durchmessers — die Bohrung wird mit dem Fraeser ⌀' + fRund(W.wz.d) + ' wendelnd ausgefraest (Zyklus 208).');
+    if(g.senkung) hinweise.push('⌀' + g.d + ': am oberen Ende sitzt eine Senkung ⌀' + g.senkung.d + ' — die App legt sie NICHT an, dafuer fehlt ihr das Werkzeugmass.');
+  });
+  return {schritte:schritte, muster:muster, hinweise:hinweise, bohrungen:B};
+}
+
+// Den Plan wirklich ins Programm schreiben. Getrennt von der Rechnung,
+// damit der Pruefstand die Rechnung ohne Nebenwirkung messen kann.
+function fPlanBohrAnlegen(prog, plan){
+  if(!prog || !plan || !plan.schritte.length) return 0;
+  const m0 = (prog.muster || []).length;
+  prog.muster = (prog.muster || []).concat(plan.muster.map(m => ({name:m.name, typ:'punkte', punkte:m.punkte.slice()})));
+  plan.schritte.forEach(sp => {
+    const s = fSchrittNeu(prog, sp.art, sp.t, m0 + sp.muster);
+    Object.assign(s, sp.werte);
+    prog.schritte.push(s);
+  });
+  return plan.schritte.length;
 }
 
 // ---- Stufe 2: waagerechte Flaechen als Z-Ebenen, Schleifen als Konturen ----
@@ -11531,6 +11782,20 @@ function fStepBericht(){
       + Math.round(F.exakt / ges * 100) + ' % der Flaeche exakt aus Ebenen, '
       + Math.round(F.geschaetzt / ges * 100) + ' % geschaetzt (gekruemmt — dort bleibt beim Schruppen etwas mehr stehen), '
       + Math.round(F.leer / ges * 100) + ' % ohne Flaeche.'); }
+  // DIE BOHRUNGEN: was der Planer im Modell findet. Gerechnet wird nur,
+  // wenn ein ausgerichtetes Modell da ist; die Sollform kommt aus dem
+  // Zwischenspeicher, wenn sie schon steht.
+  if(A){
+    let B = null;
+    try{ B = fPlanBohrungen(A, STEP.feld || null); }catch(e){ B = null; }
+    if(B && B.loecher.length){
+      const g = B.gruppen.slice(0, 8).map(q => '⌀' + q.d + ' × ' + q.punkte.length +
+        (q.durch ? ' durch' : ' ' + fRund(q.tiefe) + ' tief')).join(', ');
+      t.push('<b>Bohrungen:</b> ' + B.loecher.length + ' in ' + B.gruppen.length + ' Gruppe(n) — ' + esc(g) +
+        (B.gruppen.length > 8 ? ' …' : '') + ' &nbsp; <i>Bohrungen übernehmen legt Bohrbilder und Schritte an.</i>');
+    } else if(B) t.push('<b>Bohrungen:</b> keine in Werkzeugrichtung.');
+    if(B) B.hinweise.forEach(h => t.push('<span style="color:var(--text-dim);">' + esc(h) + '</span>'));
+  }
   if(z) t.push('<b>Einordnung:</b> ' + z.waagerecht + ' waagerecht, ' + z.senkrecht + ' senkrecht, '
     + z.schraege + ' Schraege' + (A.neigungen.length ? ' (' + A.neigungen.join(', ') + ' Grad)' : '')
     + ', ' + z.laengs + ' Bohrung/Zylinder laengs, ' + z.quer + ' quer, ' + z.frei + ' Freiform.');
@@ -11743,6 +12008,33 @@ function fStepFeldUebernehmen(){
     + ' mm. Der Zyklus "Modell abspanen" rechnet jetzt damit — sie wird NICHT mit dem Programm gespeichert.');
   return true;
 }
+// DIE BOHRUNGEN INS PROGRAMM. Der Planer rechnet (fPlanBohrSchritte, F10,
+// DOM-frei), hier wird angelegt und gemeldet - samt allem, was NICHT
+// angelegt wurde: eine verschwiegene Luecke ist an der Maschine teurer
+// als eine genannte.
+function fStepBohrUebernehmen(){
+  const A = STEP.aus;
+  if(!A){ melde('FEHLER: kein Modell geladen.'); return false; }
+  if(!STEP.feld){ try{ STEP.feld = fStepSollfeld(A, STEP.raster || 0); STEP.bild = null; }catch(e){ STEP.feld = null; } }
+  let plan = null;
+  try{ plan = fPlanBohrSchritte(fProg, A, STEP.feld || null); }
+  catch(e){ melde('FEHLER beim Rechnen der Bohrungen: ' + e.message); return false; }
+  if(!plan.schritte.length){
+    melde('Keine Bohrung angelegt. ' + (plan.hinweise.join(' ') || ''));
+    return false;
+  }
+  // Die Punkte stehen im Koordinatensystem des ausgerichteten Modells.
+  // Passt das Rohteil des Programms nicht dazu, liegen die Bohrungen
+  // neben dem Werkstueck - das muss man sehen, bevor die Maschine laeuft.
+  const k = fProg.kopf, B = A.box;
+  const passt = ['x0', 'x1', 'y0', 'y1', 'z0', 'z1'].every(q => Math.abs((+k[q] || 0) - B[q]) < 0.01);
+  const n = fPlanBohrAnlegen(fProg, plan);
+  fRender();
+  melde('Bohrplan: ' + n + ' Schritt(e) angelegt — ' + plan.schritte.map(s => s.text).join('; ') + '.'
+    + (passt ? '' : ' ACHTUNG: das Rohteil im Programmkopf passt nicht zum Modell — erst "Als Rohteil uebernehmen" druecken, sonst liegen die Bohrungen neben dem Werkstueck.')
+    + (plan.hinweise.length ? ' ' + plan.hinweise.join(' ') : ''));
+  return true;
+}
 function fStepRohUebernehmen(){
   const A = STEP.aus;
   if(!A){ melde('FEHLER: kein Modell geladen.'); return false; }
@@ -11784,6 +12076,7 @@ function fStepRohUebernehmen(){
   }
   on('btnStepRoh', fStepRohUebernehmen);
   on('btnStepFeld', fStepFeldUebernehmen);
+  on('btnStepBohren', fStepBohrUebernehmen);
   // Rasterweite der Sollform. Leer = automatisch nach Teilgroesse. Feiner
   // rechnen kostet Zeit und Speicher (die Zellzahl waechst quadratisch),
   // bringt aber beim Schlichten die Rautiefe, die man bestellt hat: der
