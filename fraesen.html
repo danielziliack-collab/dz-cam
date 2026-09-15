@@ -2977,9 +2977,20 @@ Bohrungsdurchmessers. Ist die &Ouml;ffnung gr&ouml;&szlig;er, ist sie keine Bohr
 Schritt wird nicht angelegt.
 <br><b>Die Tiefe ist eine Entscheidung, kein Modellma&szlig;:</b> durch eine Platte bohrt die App um die Spitzenl&auml;nge (0,3&nbsp;&times;&nbsp;&empty; beim
 118-Grad-Bohrer, sonst nach dem Spitzenwinkel der Tabelle) plus 1&nbsp;mm tiefer, sonst bliebe der Kegel als Kragen stehen. Bei einem Sackloch gilt das
-Modellma&szlig;. <b>Senkungen und Gewinde legt die App nicht an</b> &mdash; welches Gewinde in eine &empty;8,5-Bohrung soll, steht in keinem Modell.
+Modellma&szlig;; beim wendelnden Ausfr&auml;sen entf&auml;llt die Spitzenzugabe.
 <br>Die Punkte liegen im Koordinatensystem des <i>ausgerichteten</i> Modells: erst <b>Als Rohteil &uuml;bernehmen</b>, dann passen Bohrbild und BLK FORM
 zusammen. Tun sie das nicht, sagt es die Meldung.</dd>
+<dt id="ba-fk05c-gewinde">Gewinde: Kernloch, Senkung, Gewinde</dt><dd>Findet die App ein Loch, dessen Durchmesser <b>genau</b> ein Kernlochma&szlig; ist
+(&empty;4,2 = M5 &hellip; &empty;17,5 = M20 nach DIN&nbsp;13), und steht der passende <b>Gewindebohrer in der Werkzeugtabelle</b>, dann legt sie die ganze Kette an:
+Kernloch bohren &rarr; <b>ansenken</b> &rarr; Gewinde schneiden. Gesenkt wird nach Daniels Regel auf <b>Nenndurchmesser + 0,6</b> &mdash; bei M12 also &empty;12,6.
+Die <b>Zustelltiefe</b> rechnet die App aus dem Spitzenwinkel des Senkwerkzeugs (T-ANGLE der Tabelle): beim 90-Grad-Anbohrer ist das der halbe Durchmesser,
+6,3&nbsp;mm; bei 120&nbsp;Grad nur 3,64&nbsp;mm. Genommen wird das kleinste 90-Grad-Werkzeug, das gro&szlig; genug ist &mdash; ein &empty;10-Anbohrer senkt keine
+&empty;10,6 an, daf&uuml;r steht der Kegelsenker in der Tabelle. Die <b>Gewindetiefe</b> ist nicht die Bohrtiefe: durch die Platte geht sie ganz durch (plus
+1&nbsp;mm), im Sackloch bleiben zwei Steigungen f&uuml;r Anschnitt und Sp&auml;ne.
+<br><b>Dass es ein Gewinde ist, steht im Modell nicht.</b> Die App schlie&szlig;t es aus dem Durchmesser &mdash; nur exakt: &empty;8,5 ist ein M10-Kernloch,
+&empty;8,4 ist ein Loch. Sie sagt es in der Meldung; wer ein blankes Loch wollte, l&ouml;scht die zwei Schritte. Fehlt der Gewindebohrer, bleibt es ein Loch,
+und auch das steht in der Meldung. Geschnitten wird mit <b>Zyklus 206</b> (Ausgleichsfutter, F = Steigung &times; S) &mdash; der Synchronlauf 207 braucht die
+geregelte Spindel und wird nicht geraten.</dd>
 <dt id="ba-fk05c-ebenen">Z-Ebenen und Konturen</dt><dd>Jede <b>waagerechte</b> Fl&auml;che des Modells liegt auf einer H&ouml;he, auf der gefr&auml;st wird:
 die Oberfl&auml;che, ein Taschenboden, eine Absatzfl&auml;che. Die App sammelt sie zu <b>Z-Ebenen</b> (Toleranz 0,01&nbsp;mm) und listet sie von oben nach
 unten. Die gew&auml;hlte Ebene steht im Drahtbild kr&auml;ftig orange. <b>Konturen &uuml;bernehmen</b> legt ihre Schleifen als XY-Konturen in den Arbeitsplan:
@@ -4149,6 +4160,43 @@ function fWerkzeugeDemo(){
 // gerechnet: vc 200 m/min fuer die WSP-Koepfe, 120 fuer VHM in Stahl,
 // fz 0,2 bzw. 0,03 bis 0,09 mm je Schneide nach Durchmesser. Wer seine
 // Werte kennt, traegt sie ein.
+// ---------------------------------------------------------------------
+// REGELGEWINDE M5 bis M20 (DIN 13). Kernloch, Steigung - und die
+// SENKUNG nach DANIELS REGEL (15.09.2026): 0,6 mm groesser als der
+// Nenndurchmesser. Bei M12 sind das ⌀12,6. Die Senkung fuehrt den
+// Gewindebohrer und bricht die Kante; ohne sie steht der erste Gang
+// ueber der Flaeche.
+var F_REGELGEWINDE = [
+  {nenn:5,  steigung:0.8,  kern:4.2},
+  {nenn:6,  steigung:1,    kern:5},
+  {nenn:8,  steigung:1.25, kern:6.8},
+  {nenn:10, steigung:1.5,  kern:8.5},
+  {nenn:12, steigung:1.75, kern:10.2},
+  {nenn:14, steigung:2,    kern:12},
+  {nenn:16, steigung:2,    kern:14},
+  {nenn:18, steigung:2.5,  kern:15.5},
+  {nenn:20, steigung:2.5,  kern:17.5}
+];
+// Der Senkdurchmesser eines Gewindes: Nenn + 0,6.
+function fGewindeSenkD(nenn){ return fRund((+nenn || 0) + 0.6); }
+// Welches Regelgewinde gehoert zu diesem Kernloch? Nur der exakte
+// Durchmesser zaehlt - ein ⌀8,4 ist kein M10-Kernloch, sondern ein Loch.
+function fGewindeZuKern(d, tol){
+  const t = (tol == null) ? 0.05 : tol;
+  return F_REGELGEWINDE.filter(g => Math.abs(g.kern - d) <= t)[0] || null;
+}
+// DIE ZUSTELLTIEFE DES SENKWERKZEUGS, aus dem Durchmesser gerechnet:
+// die Spitze ist ein Kegel, also tiefe = (⌀/2) / tan(Spitzenwinkel/2).
+// Beim 90-Grad-Anbohrer ist das genau der halbe Durchmesser (⌀12,6 ->
+// 6,3 mm), bei 120 Grad nur noch 3,64 mm. Deshalb steht der Winkel in
+// der Werkzeugtabelle (T-ANGLE) und wird nicht angenommen.
+function fSenkTiefe(dSenk, spitze){
+  const w = (+spitze > 0 ? +spitze : 90) / 2 * Math.PI / 180;
+  const t = Math.tan(w);
+  if(!(t > 0)) return 0;
+  return fRund((+dSenk || 0) / 2 / t);
+}
+
 function fWerkzeugeVorgabe(){
   return [
     // --- Planen und ecken: Messerkoepfe mit Wendeschneidplatten -------
@@ -4170,18 +4218,33 @@ function fWerkzeugeVorgabe(){
     {nr:17, name:'Kugelfraeser 8',    art:'fraeser', d:8,  r2:4, lcuts:16, angle:3, s:4800, f:600},
     {nr:18, name:'Kugelfraeser 10',   art:'fraeser', d:10, r2:5, lcuts:20, angle:3, s:3800, f:600},
     // --- Bohren: zentrieren, dann die Loecher -------------------------
+    // Der NC-Anbohrer zentriert UND senkt: mit 90 Grad Spitze reicht er
+    // fuer jede Senkung bis ⌀10 (Daniels Regel Nenn + 0,6 heisst: bis M8).
     {nr:20, name:'NC-Anbohrer 90°',   art:'zentrierer', d:10,  lcuts:10, spitze:90,  s:2500, f:150},
-    {nr:21, name:'Bohrer 5',          art:'bohrer', d:5,    lcuts:52, spitze:118, s:2200, f:120},
+    // Die KERNLOCHBOHRER fuer M5 bis M20 (Daniels Ansage 15.09.2026: die
+    // braucht man immer wieder). Reihenfolge der Plaetze: was vorher da
+    // war, ist geblieben - die Testprogramme rufen ihre Nummern.
+    {nr:21, name:'Bohrer 5 (M6)',     art:'bohrer', d:5,    lcuts:52, spitze:118, s:2200, f:120},
     {nr:22, name:'Bohrer 6.8 (M8)',   art:'bohrer', d:6.8,  lcuts:69, spitze:118, s:1800, f:150},
     {nr:23, name:'Bohrer 8.5 (M10)',  art:'bohrer', d:8.5,  lcuts:75, spitze:118, s:1500, f:150},
-    {nr:24, name:'Bohrer 9',          art:'bohrer', d:9,    lcuts:81, spitze:118, s:1400, f:150},
+    {nr:24, name:'Bohrer 10.2 (M12)', art:'bohrer', d:10.2, lcuts:87, spitze:118, s:1250, f:150},
     {nr:25, name:'Bohrer 11.8',       art:'bohrer', d:11.8, lcuts:94, spitze:118, s:1100, f:150},
-    // --- Reiben und Gewinde -------------------------------------------
+    {nr:26, name:'Bohrer 4.2 (M5)',   art:'bohrer', d:4.2,  lcuts:44, spitze:118, s:2600, f:110},
+    {nr:27, name:'Bohrer 12 (M14)',   art:'bohrer', d:12,   lcuts:96, spitze:118, s:1050, f:160},
+    {nr:28, name:'Bohrer 14 (M16)',   art:'bohrer', d:14,   lcuts:108, spitze:118, s:900, f:170},
+    {nr:29, name:'Bohrer 15.5 (M18)', art:'bohrer', d:15.5, lcuts:120, spitze:118, s:820, f:175},
+    // --- Senken, reiben und Gewinde -----------------------------------
     {nr:30, name:'Reibahle 12 H7',    art:'reibahle', d:12, lcuts:26, s:300, f:90},
     {nr:31, name:'Gewindebohrer M8',  art:'gewindebohrer', d:8,  lcuts:20, steigung:1.25, s:400, f:500},
     {nr:32, name:'Gewindebohrer M10', art:'gewindebohrer', d:10, lcuts:22, steigung:1.5,  s:350, f:525},
+    {nr:33, name:'Gewindebohrer M12', art:'gewindebohrer', d:12, lcuts:26, steigung:1.75, s:300, f:525},
+    // Der ⌀17,5 fuer M20 und der grosse Senker passten nicht mehr in den
+    // Bohrblock - sie stehen bei den grossen Werkzeugen. Der Kegelsenker
+    // 90° ⌀20,5 deckt die Senkungen ab M10 (⌀10,6) bis M20 (⌀20,6) ab.
+    {nr:35, name:'Bohrer 17.5 (M20)', art:'bohrer', d:17.5, lcuts:130, spitze:118, s:730, f:180},
+    {nr:36, name:'Kegelsenker 90° 20.5', art:'zentrierer', d:20.5, lcuts:12, spitze:90, s:900, f:120},
     // --- Zuletzt: Kanten brechen ---------------------------------------
-    {nr:40, name:'Fasenfraeser 90° 12', art:'fraeser', d:12, lcuts:6, angle:0, s:3000, f:400}
+    {nr:40, name:'Fasenfraeser 90° 12', art:'fraeser', d:12, lcuts:6, angle:0, spitze:90, s:3000, f:400}
   ];
 }
 var F_WERKZEUGARTEN = {zentrierer:'NC-Anbohrer / Zentrierer', bohrer:'Bohrer', gewindebohrer:'Gewindebohrer', reibahle:'Reibahle', fraeser:'Fraeser'};
@@ -6825,6 +6888,19 @@ function fPlanBohrWerkzeug(prog, d){
           grund:(rampe && d > (+rampe.d || 0) * 3) ? 'tasche' : 'kein werkzeug'};
 }
 
+// DAS SENKWERKZEUG zu einem Senkdurchmesser: ein Kegel mit passendem
+// Spitzenwinkel, der GROSS GENUG ist - ein ⌀10-Anbohrer senkt keine
+// ⌀10,6 an. Genommen wird der kleinste, der reicht (weniger Luftweg),
+// und ein Zentrierer vor einem Fasenfraeser.
+function fPlanSenkWerkzeug(prog, dSenk, winkel){
+  const w0 = (winkel || 90);
+  const wz = (prog && prog.werkzeuge) || [];
+  const passt = wz.filter(w => Math.abs((+w.spitze || 0) - w0) < 1 && (+w.d || 0) >= dSenk - 0.001
+                               && (w.art === 'zentrierer' || w.art === 'fraeser'));
+  passt.sort((a, b) => (a.art === b.art ? ((+a.d || 0) - (+b.d || 0)) : (a.art === 'zentrierer' ? -1 : 1)));
+  return passt[0] || null;
+}
+
 // AUS DEN BOHRUNGEN WERDEN SCHRITTE. Daniels Reihenfolge: vom Groben zum
 // Feinen und mit WENIG WERKZEUGWECHSEL - deshalb steht das Zentrieren als
 // EIN Schritt ueber ALLE Stellen am Anfang (ein Werkzeug, ein Bohrbild)
@@ -6842,7 +6918,12 @@ function fPlanBohrSchritte(prog, A, F){
     return {schritte:schritte, muster:muster, hinweise:hinweise, bohrungen:B};
   }
   const wz = (prog && prog.werkzeuge) || [];
-  const zentrierer = wz.filter(w => w.art === 'zentrierer').sort((a, b) => (+b.d || 0) - (+a.d || 0))[0];
+  // Zum ZENTRIEREN der kleinste Kegel, der reicht - der grosse Senker
+  // gehoert zu den Senkungen, nicht an den Anfang (er wurde vorher
+  // gewaehlt, weil die Liste nach dem groessten Durchmesser sortiert war).
+  const dMin0 = B.gruppen.length ? Math.min.apply(null, B.gruppen.map(g => g.d)) : 0;
+  const zentrierer = fPlanSenkWerkzeug(prog, dMin0, 90)
+    || wz.filter(w => w.art === 'zentrierer').sort((a, b) => (+a.d || 0) - (+b.d || 0))[0];
   // ZENTRIERT WIRD NUR, WAS AUCH GEBOHRT WIRD. Sonst bekommt ein Teil
   // einen Koerner an vier Stellen, fuer die es gar kein Werkzeug gibt.
   const machbar = B.gruppen.map(g => ({g:g, W:fPlanBohrWerkzeug(prog, g.d)})).filter(q => q.W.art);
@@ -6888,8 +6969,62 @@ function fPlanBohrSchritte(prog, A, F){
       text:(W.art === 'bohren' ? 'Bohren ⌀' : 'Bohrfraesen ⌀') + g.d + ', ' + g.punkte.length + ' Stellen, ' +
            (g.durch ? 'durch (' + Math.abs(tiefe) + ' mm mit Spitze und Ueberlauf)' : fRund(g.tiefe) + ' mm tief')});
     if(W.art === 'bohrfraesen') hinweise.push('⌀' + g.d + ': kein Bohrer dieses Durchmessers — die Bohrung wird mit dem Fraeser ⌀' + fRund(W.wz.d) + ' wendelnd ausgefraest (Zyklus 208).');
-    if(g.senkung) hinweise.push('⌀' + g.d + ': am oberen Ende sitzt eine Senkung ⌀' + g.senkung.d + ' — die App legt sie NICHT an, dafuer fehlt ihr das Werkzeugmass.');
+    if(g.senkung) hinweise.push('⌀' + g.d + ': am oberen Ende sitzt eine Senkung ⌀' + g.senkung.d + ' aus dem Modell — die App legt sie NICHT an, dafuer fehlt ihr das Werkzeugmass.');
   });
+
+  // --- Senken und Gewinde (Daniels Regel: Senkung = Nenn + 0,6) -------
+  // Erst ALLE Senkungen, dann alle Gewinde: das ist die Reihenfolge an
+  // der Maschine (die Senkung fuehrt den Gewindebohrer und bricht die
+  // Kante) und zugleich die mit den wenigsten Wechseln.
+  const gew = [];
+  B.gruppen.forEach(g => {
+    const G = fGewindeZuKern(g.d);
+    if(!G) return;                                   // kein Kernlochmass
+    if(!fPlanBohrWerkzeug(prog, g.d).art) return;    // wird gar nicht gebohrt
+    const tap = wz.filter(w => w.art === 'gewindebohrer' && Math.abs((+w.d || 0) - G.nenn) < 0.051)
+                  .sort((a, b) => (b.lcuts || 0) - (a.lcuts || 0))[0];
+    if(!tap){
+      hinweise.push('⌀' + g.d + ' ist das Kernloch fuer M' + G.nenn +
+        ' — es steht aber kein Gewindebohrer M' + G.nenn + ' in der Tabelle, also bleibt es ein Loch.');
+      return;
+    }
+    gew.push({g:g, G:G, tap:tap});
+  });
+
+  gew.forEach(q => {
+    const dS = fGewindeSenkD(q.G.nenn);
+    const senker = fPlanSenkWerkzeug(prog, dS, 90);
+    if(!senker){
+      hinweise.push('M' + q.G.nenn + ': die Senkung ⌀' + dS + ' braucht ein 90-Grad-Werkzeug ab ⌀' + dS +
+        ' — in der Tabelle steht keines, das reicht. Das Gewinde wird OHNE Senkung geschnitten.');
+      return;
+    }
+    const tiefe = fSenkTiefe(dS, senker.spitze);
+    const mi = muster.length;
+    muster.push({name:'M' + q.G.nenn + ' senken', typ:'punkte', punkte:q.g.punkte.slice()});
+    schritte.push({art:'zentrieren', t:senker.nr, muster:mi,
+      werte:{zAuswahl:1, zDurchm:dS, tiefe:fRund(-tiefe), q203:fRund(q.g.zOben)},
+      text:'Senken M' + q.G.nenn + ' auf ⌀' + dS + ' (' + tiefe + ' mm tief), ' + q.g.punkte.length + ' Stellen'});
+  });
+
+  gew.forEach(q => {
+    const mi = muster.length;
+    muster.push({name:'M' + q.G.nenn, typ:'punkte', punkte:q.g.punkte.slice()});
+    // DIE GEWINDETIEFE ist nicht die Bohrtiefe: im Sackloch bleiben
+    // zwei Steigungen fuer Anschnitt und Spaene, durch die Platte geht
+    // es ganz durch.
+    const tief = q.g.durch ? fRund(-(q.g.tiefe + 1))
+                           : fRund(-Math.max(q.G.steigung, q.g.tiefe - 2 * q.G.steigung));
+    const dz = +q.tap.s || 300;
+    schritte.push({art:'gewinde', t:q.tap.nr, muster:mi,
+      werte:{tiefe:tief, steigung:q.G.steigung, s:dz, f:fRund(q.G.steigung * dz), q203:fRund(q.g.zOben)},
+      text:'Gewinde M' + q.G.nenn + ' x ' + q.G.steigung + ', ' + q.g.punkte.length + ' Stellen, ' +
+           Math.abs(tief) + ' mm tief'});
+    hinweise.push('⌀' + q.g.d + ' ist das Kernloch fuer M' + q.G.nenn +
+      ' — Senkung ⌀' + fGewindeSenkD(q.G.nenn) + ' und Gewinde sind ANGELEGT, aus dem Durchmesser geschlossen.' +
+      ' Im Modell steht kein Gewinde; wer ein blankes Loch wollte, loescht die zwei Schritte.');
+  });
+
   return {schritte:schritte, muster:muster, hinweise:hinweise, bohrungen:B};
 }
 
@@ -12201,7 +12336,7 @@ fRender();
 setVal('pmSaveName', fProg.kopf.name);
 </script>
 <script>
-window.__DZ_STAND="15.09.2026 21:13 (b1026eda)";
+window.__DZ_STAND="15.09.2026 21:22 (fa1f90b2)";
 // PWA-Offline [pwa-bauen.js]: nur wenn ueber einen Server geladen —
 // Datei-Doppelklick und Artefakt bleiben unberuehrt.
 if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){
