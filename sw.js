@@ -7,7 +7,7 @@
 // 15.09.2026: 'immer noch der Stand vom 12.09.'). Jetzt aendert jede
 // Veroeffentlichung diese Zeile, der Worker installiert neu und holt
 // alle Dateien frisch.
-const STAND='15.09.2026 21:56 (ece18e50)';
+const STAND='15.09.2026 21:57 (ece18e50)';
 const CACHE='dzcam-'+STAND.replace(/[^0-9a-f]/gi,'');
 // KEIN './' in der Vorcache-Liste: nicht jeder Server liefert einen
 // Verzeichnis-Index, und EIN Fehlschlag laesst addAll die GANZE
@@ -45,7 +45,7 @@ self.addEventListener('fetch', e=>{
     if(e.request.mode==='navigate'){
       const geduld=new Promise(r=>setTimeout(()=>r(null), 3000));
       const netz=await Promise.race([frisch, geduld]);
-      if(netz) return netz;
+      if(netz && netz.ok) return netz;   // eine Fehlerseite verdraengt die Kopie nicht
       return (await c.match(e.request, {ignoreSearch:true}))
           || (await c.match('./index.html'))
           || new Response('offline', {status:503});
