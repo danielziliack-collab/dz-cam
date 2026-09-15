@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>html,body{touch-action:pan-y;}</style>
 <title>DZ CAM</title>
-<script>window.__DZ_STAND="15.09.2026 23:29 (3a64a5d1)";</script>
+<script>window.__DZ_STAND="16.09.2026 00:20 (ca266b95)";</script>
 <link rel="manifest" href="manifest-fraesen.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2544,6 +2544,16 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <div class="mrow"><label data-ba="ba-fk03-blk">MIN Z (Unterkante)</label><input type="number" step="any" id="fkZ0" value="-20"><span class="unit">mm</span></div>
           <div class="mrow"><label data-ba="ba-fk03-blk">MAX-Punkt X / Y</label><input type="number" step="any" id="fkX1" value="100" style="width:51px;"><input type="number" step="any" id="fkY1" value="80" style="width:51px;"><span class="unit unit2"><i>X</i><i>Y</i></span></div>
           <div class="mrow"><label data-ba="ba-fk03-blk">MAX Z (Oberfläche)</label><input type="number" step="any" id="fkZ1" value="0"><span class="unit">mm</span></div>
+          <!-- SPANNMITTEL (16.09.2026, Daniels Frage): die Backen stehen an
+               den Rohteilkanten; alles unter der Backenoberkante ist Backe. -->
+          <div class="msec">Spannmittel — Schraubstock</div>
+          <div class="mrow"><label data-ba="ba-fk03-spann">Spannmittel</label><div class="radiobtns fwrap" id="fkSpannBtns"><button data-v="aus" class="sel">keines (wird nicht geprüft)</button><button data-v="schraubstock">Schraubstock</button></div></div>
+          <div class="mrow" id="fkSpR1"><label data-ba="ba-fk03-spann">Backen spannen in</label><div class="radiobtns fwrap" id="fkSpannRichtBtns"><button data-v="y" class="sel">Y (Backen vorn und hinten)</button><button data-v="x">X (Backen links und rechts)</button></div></div>
+          <div class="mrow" id="fkSpR2"><label data-ba="ba-fk03-spann">Backenoberkante Z (abs)</label><input type="number" step="any" id="fkSpannZ" value="0"><span class="unit">mm</span></div>
+          <div class="mrow" id="fkSpR3"><label data-ba="ba-fk03-spann">Backe: Überstand / Länge</label><input type="number" step="any" id="fkSpannBreite" value="40" style="width:51px;"><input type="number" step="any" id="fkSpannLaenge" value="150" style="width:51px;"><span class="unit unit2"><i>über</i><i>lang</i></span></div>
+          <div class="mrow" id="fkSpR4"><label data-ba="ba-fk03-spann">Luft / Mindest-Einspanntiefe</label><input type="number" step="any" id="fkSpannLuft" value="1" style="width:51px;"><input type="number" step="any" id="fkSpannMin" value="8" style="width:51px;"><span class="unit unit2"><i>Luft</i><i>min</i></span></div>
+          <div class="mrow" id="fkSpR5"><button class="gcbtn" id="btnFkSpannVor" style="width:100%;padding:8px;" title="Die Backenoberkante aus der tiefsten Bearbeitung rechnen">Aufspanntiefe vorschlagen</button></div>
+          <div class="mrow small-hint" id="fkSpannInfo" style="display:none;">—</div>
           <div class="msec">Sicherheit (Vorbelegung für jeden Schritt)</div>
           <div class="mrow"><label data-ba="ba-fk03-sc">SC Sicherheitsabstand</label><input type="number" step="any" id="fkSc" value="2"><span class="unit">mm</span></div>
           <div class="mrow"><label data-ba="ba-fk03-sc">SC2 Rückzug zwischen Positionen</label><input type="number" step="any" id="fkSc2" value="50"><span class="unit">mm</span></div>
@@ -2719,6 +2729,9 @@ body.dunkel .zw-mbox .zw-m{border-bottom-color:hsl(var(--ton),14%,26%);}
           <div class="mrow"><label data-ba="ba-fk04-masse">DL / DR Delta</label><input type="number" step="any" id="fwDL" value="0" style="width:51px;"><input type="number" step="any" id="fwDR" value="0" style="width:51px;"><span class="unit unit2"><i>DL</i><i>DR</i></span></div>
           <div class="mrow"><label data-ba="ba-fk04-schneide">LCUTS Schneidenlänge</label><input type="number" step="any" id="fwLcuts" value="0"><span class="unit">mm</span></div>
           <div class="mrow"><label data-ba="ba-fk04-schneide">ANGLE Eintauchwinkel</label><input type="number" step="any" id="fwAngle" value="0"><span class="unit">°</span></div>
+          <!-- Fuer die Spannmittelpruefung (16.09.2026): ohne diese zwei Zahlen
+               prueft die App nur Schneide und Schaft und sagt das auch. -->
+          <div class="mrow"><label data-ba="ba-fk04-halter">Auskraglänge / Halter-⌀</label><input type="number" step="any" id="fwAuskrag" value="0" style="width:51px;"><input type="number" step="any" id="fwHalterD" value="0" style="width:51px;"><span class="unit unit2"><i>L</i><i>⌀</i></span></div>
           <div class="mrow"><label data-ba="ba-fk04-schneide">T-ANGLE Spitzenwinkel</label><input type="number" step="any" id="fwSpitze" value="118"><span class="unit">°</span></div>
           <div class="mrow"><label data-ba="ba-fk04-schneide">PITCH Steigung</label><input type="number" step="any" id="fwSteig" value="0"><span class="unit">mm</span></div>
           <div class="mrow"><label data-ba="ba-fk04">DOC Kommentar</label><input type="text" id="fwDoc" value="" style="width:150px;"></div>
@@ -2876,6 +2889,25 @@ zwischen den L&ouml;chern) und Koordinate der Werkst&uuml;ck-Oberfl&auml;che. Da
 neuen Bohrschritt; im Schritt selbst bleiben sie &auml;nderbar.</dd>
 <dt id="ba-fk03-rz">Sichere H&ouml;he</dt><dd>Absolute Z-H&ouml;he f&uuml;r <code>L Z+.. R0 FMAX</code> nach jedem Werkzeugaufruf und vor jedem
 Werkzeugwechsel. Muss &uuml;ber der Rohteil-Oberkante liegen &mdash; sonst sperrt die Pr&uuml;fung.</dd>
+<dt id="ba-fk03-spann">Spannmittel &mdash; Schraubstock</dt><dd><b>Vorgabe ist &bdquo;keines&ldquo;</b>, dann pr&uuml;ft und meldet die App dazu
+nichts. Mit <b>Schraubstock</b> stehen zwei Backen an den Rohteilkanten: Du sagst, in welcher Richtung sie spannen
+(Y = vorn und hinten, X = links und rechts), wo ihre <b>Oberkante</b> liegt (absolut in Z), wie weit eine Backe
+&uuml;ber die Teilkante hinausragt und wie lang sie ist. Alles unterhalb der Backenoberkante innerhalb dieser Rechtecke
+gilt als Backe. Die Draufsicht zeichnet sie schraffiert mit.
+<br><br><b>Aufspanntiefe vorschlagen</b> beantwortet Daniels Frage mit einer Zahl: die App rechnet alle Bahnen des
+Programms, nimmt die <b>tiefste Stelle</b>, setzt die Backenoberkante um die eingetragene <b>Luft</b> darunter und sagt,
+wieviel vom Rohteil dann noch im Griff steckt. Bleibt das unter der <b>Mindest-Einspanntiefe</b> (Daumenwert, &auml;nderbar),
+sagt sie das ausdr&uuml;cklich &mdash; dann h&auml;lt der Schraubstock das Teil nicht, und es braucht ein h&ouml;heres Rohteil,
+Spannpratzen, eine Vorrichtung, oder die tiefe Stelle geh&ouml;rt in die zweite Aufspannung. Steht das Teil viel weiter
+&uuml;ber den Backen als darin, warnt sie vor dem Federn.
+<br><br>Die <b>Ampel</b> pr&uuml;ft danach jede Bahn gegen die Backen &mdash; nicht nur die Schneide, sondern auch Schaft und
+Halter, soweit die Werkzeugtabelle Auskragl&auml;nge und Halter-&empty; f&uuml;hrt (Kap.&nbsp;4). Ein Treffer der SCHNEIDE ist rot:
+die Bahn f&auml;hrt in die Backe. Schaft und Halter sind gelb &mdash; die l&ouml;st ein anderes Werkzeug oder mehr Auskragl&auml;nge,
+ohne dass sich die Bahn &auml;ndert; die n&ouml;tige L&auml;nge steht als Zahl in der Meldung.
+<br><br><b>Grenzen, ehrlich:</b> die Backen sind Quader und der Halter ein Zylinder &mdash; eine gestufte Backe, eine
+Spannpratze oder die echte Halterkontur bildet die App nicht ab. Gepr&uuml;ft werden die <b>Bahnpunkte</b> im Abstand von
+2&nbsp;mm, nicht der Span. Das Spannmittel steht in <b>keinem NC-Satz</b> &mdash; es &auml;ndert am Programm nichts und dient
+allein der Pr&uuml;fung.</dd>
 </dl>
 
 <h2 id="ba-fk04">4 &nbsp;Werkzeuge &mdash; Tabelle im Stil der TOOL.T</h2>
@@ -2895,6 +2927,13 @@ r&auml;t die App aus dem Namen (BOHRER, GEWINDE, REIB, ZENTR &hellip;, sonst Fr&
 &empty; (Nutbreite, Taschenma&szlig;e), die TNC mit R.</dd>
 <dt id="ba-fk04-schneide">Schneide</dt><dd>LCUTS Schneidenl&auml;nge (0 = keine Pr&uuml;fung, so auch an der TNC), ANGLE Eintauchwinkel f&uuml;r
 Helix und Pendeln (0 = nur senkrecht), T-ANGLE Spitzenwinkel des Bohrers, PITCH Gewindesteigung.</dd>
+<dt id="ba-fk04-halter">Auskragl&auml;nge / Halter-&empty;</dt><dd><b>Zwei App-Zusatzspalten, die es in der TOOL.T nicht gibt</b> &mdash;
+sie werden nur f&uuml;r die Spannmittelpr&uuml;fung gebraucht (Kap.&nbsp;3) und stehen in keinem NC-Satz. Die
+<b>Auskragl&auml;nge</b> misst von der Werkzeugspitze bis zur Stirn des Halters (bei der Spannzange: bis zur Mutter), der
+<b>Halter-&empty;</b> ist sein gr&ouml;&szlig;ter Durchmesser in diesem Bereich. Beides am eingespannten Werkzeug messen &mdash;
+geraten n&uuml;tzt es nichts. <b>0 = keine Angabe:</b> dann pr&uuml;ft die App nur Schneide und Schaft und schreibt in die
+Meldung, was sie NICHT gepr&uuml;ft hat. Eine Auskragl&auml;nge unter der Schneidenl&auml;nge weist sie zur&uuml;ck &mdash; dann
+steckte die Schneide im Halter.</dd>
 <dt id="ba-fk04-import">TOOL.T einlesen / sichern</dt><dd><b>Einlesen:</b> die TOOL.T der Maschine als ASCII-Datei (aus TNCremo, oder am
 Programmierplatz &uuml;ber <code>tnc-wandeln.ps1 -Rueck</code>; die bin&auml;re Datei des TNC-Laufwerks kann die App nicht lesen). Die App
 nimmt die Spaltenstarts aus der Kopfzeile, &uuml;berspringt T0 und leere Pl&auml;tze und ERSETZT ihre Tabelle; S/F bekommen
@@ -3363,9 +3402,18 @@ R&uuml;ckkanten laufen quer durch Werkzeug und Bahn und verf&auml;lschen die Kon
 den Haken <b>Rohteilkanten</b> neben den Kn&ouml;pfen 2D/3D; die Kanten werden dann gezeichnet, bleiben aber hinter dem Material verdeckt (kein Durchsehen). Der Haken wird gemerkt.</p>
 <h3 id="ba-fk06d-rest">Restmaterialanzeige</h3>
 <p>Der Haken <b>Restmaterial</b> in der Simulationsleiste vergleicht das Simulationsfeld mit der <b>Sollform des Modells</b>: wo nach allem, was
-gefahren wurde, noch Material dar&uuml;ber steht, wird die Stelle <b>rot</b>, und die Zeile unter dem Bild nennt <b>Fl&auml;che, gr&ouml;&szlig;te H&ouml;he
-und Ort</b>. Das trifft auch, was keine Bahn von sich aus meldet &mdash; einen Eckenradius, der kleiner ist als jeder Fr&auml;ser, oder eine schlicht
-vergessene Stelle.</p>
+gefahren wurde, noch Material dar&uuml;ber steht, wird die Stelle <b>rot</b> &mdash; in der Draufsicht und seit dem 16.09.2026 auch im <b>3D-Bild</b>
+&mdash;, und die Zeile unter dem Bild nennt <b>Fl&auml;che, gr&ouml;&szlig;te H&ouml;he und Ort</b>. Das trifft auch, was keine Bahn von sich aus meldet
+&mdash; einen Eckenradius, der kleiner ist als jeder Fr&auml;ser, oder eine schlicht vergessene Stelle.</p>
+<p><b>Und womit es weggeht.</b> Die Zeile sagt dazu, welches <b>Werkzeug aus Deiner Tabelle</b> dort noch hink&auml;me: gerechnet wird, wo die
+Werkzeugmitte auf der jeweiligen Sollh&ouml;he &uuml;berhaupt stehen darf (weiter als ihr Radius von allem, was stehen bleiben muss) und ob die
+Reststelle von dort aus in Reichweite liegt &mdash; dieselbe Rechnung wie beim Schruppen. Gesucht ist der <b>gr&ouml;&szlig;te</b> Fr&auml;ser, der
+<b>alles</b> erreicht: einer, der 98&nbsp;% wegnimmt und die Ecke stehen l&auml;sst, ist keine Antwort. Kommt keiner hin, steht da, wieviel der beste
+schafft &mdash; dann ist die Stelle enger als jedes Werkzeug der Tabelle. Und k&auml;me ein Werkzeug hin, das <b>so gro&szlig; ist wie eines der schon
+benutzten</b>, dann liegt es gar nicht an der Gr&ouml;&szlig;e: dort fehlt eine <b>BAHN</b>, und genau das sagt die Meldung.</p>
+<p><b>Grenzen:</b> gerechnet werden die vier h&auml;ufigsten Sollh&ouml;hen der Reststellen (der Rest wird gez&auml;hlt, nicht geraten), auf dem
+Raster der Simulation und mit einer halben Rasterweite Zugabe &mdash; die Aussage ist eine <b>Werkzeugempfehlung</b>, keine fertige Bahn. W&auml;hrend
+die Uhr l&auml;uft wird sie nicht neu gerechnet; sie steht, sobald die Simulation h&auml;lt.</p>
 <p><b>Die Toleranz ist keine Willk&uuml;r:</b> das Simulationsfeld stempelt mit dem Werkzeugumriss auf einem groben Raster, und an einer Schr&auml;ge
 schl&auml;gt ein halber Rasterschritt in XY als H&ouml;henfehler durch. Ohne Toleranz w&auml;re jede Schr&auml;ge rot. Gerechnet wird mit <b>einer
 Rasterweite</b>, und die Zahl steht in der Anzeige.</p>
@@ -4478,6 +4526,15 @@ function fProgrammNeu(){
       sc2:50,        // Q204 2. Sicherheits-Abstand (Rueckzug zwischen den Loechern)
       oberflaeche:0, // Q203 Koordinate der Werkstueck-Oberflaeche
       rz:100,        // sichere Hoehe (absolut) fuer Werkzeugwechsel und Programmende
+      // SPANNMITTEL (16.09.2026). Vorgabe AUS - ein Programm ohne Angabe
+      // verhaelt sich wie bisher; die NC-Ausgabe kennt das Spannmittel nicht.
+      spann:'aus',       // 'aus' | 'schraubstock'
+      spannRichtung:'y', // in welcher Richtung die Backen spannen
+      spannZ:0,          // Backenoberkante, absolut
+      spannBreite:40,    // wie weit eine Backe ueber die Teilkante hinausragt
+      spannLaenge:150,   // Backenbreite laengs, mittig zum Rohteil
+      spannLuft:1,       // Sicherheitsabstand zu den Backen
+      spannMin:8,        // geforderte Einspanntiefe (Daumenwert, aenderbar)
       stand:'07'     // Software-Stand der Zielsteuerung (F_STAENDE): 253 schreibt
                      // die Drehlage je Stand als Q374 oder Q224, 256/257 gibt es
                      // erst ab -06.
@@ -7531,6 +7588,110 @@ function fSimRestText(R){
          ' (Toleranz ' + R.tol + ' mm — eine Rasterweite der Simulation).';
 }
 
+// WELCHES WERKZEUG HOLT DAS RESTMATERIAL? (Daniels Ansage: "Wichtig ist,
+// dass das Restmaterial mit einem kleineren Werkzeug auch abgespant wird.")
+//
+// Die Frage ist eine ERREICHBARKEITSFRAGE, und sie laesst sich mit
+// derselben Abstandsverwandlung beantworten wie die Schruppbahn: auf der
+// Hoehe z darf die Werkzeugmitte nur stehen, wo sie weiter als ihr Radius
+// von allem entfernt ist, was dort stehen bleiben muss (Sollform ueber z).
+// Eine Zelle ist erreichbar, wenn eine solche Mittelstellung hoechstens
+// einen Radius entfernt liegt - zwei Abstandsverwandlungen je Radius.
+//
+// Gerechnet wird EBENENWEISE: jede Reststelle bringt ihre eigene Sollhoehe
+// mit, und auf verschiedenen Hoehen sieht die Wand verschieden aus. Die
+// Hoehen werden auf Eimer gerundet; die vier dicksten werden gerechnet, der
+// Rest wird GENANNT statt geraten.
+function fSimRestWerkzeug(feld, F, RM, werkzeuge, benutzt){
+  if(!RM || !RM.zellen || !feld || !F) return null;
+  const r = feld.raster;
+  // (1) Die Radien der Tabelle, gross zuerst. Ein Bohrer raeumt keine
+  //     Flaeche - gefragt sind Fraeser.
+  const radien = [];
+  (werkzeuge || []).forEach(w => {
+    if((w.art || 'fraeser') !== 'fraeser' || !(+w.d > 0)) return;
+    const rad = +w.d / 2;
+    if(!radien.some(q => Math.abs(q.r - rad) < 1e-9)) radien.push({r:rad, nr:w.nr, name:w.name || ('T' + w.nr), d:+w.d});
+  });
+  radien.sort((a, b) => b.r - a.r);
+  if(!radien.length) return {ok:false, grund:'In der Werkzeugtabelle steht kein Fraeser.'};
+  // (2) Das Arbeitsgitter mit Rand: die Werkzeugmitte darf ueber die
+  //     Rohteilkante hinausfahren (wie beim Schruppen, fModellGitter).
+  const pad = Math.ceil(radien[0].r / r) + 2;
+  const nx = feld.nx + 2 * pad, ny = feld.ny + 2 * pad, n = nx * ny;
+  const gx0 = feld.x0 - pad * r, gy0 = feld.y0 - pad * r;
+  // (3) Die Reststellen nach Sollhoehe in Eimer sortieren - auf
+  //     verschiedenen Hoehen sieht die Wand verschieden aus. Gerechnet
+  //     werden die vier dicksten Eimer, der Rest wird GENANNT.
+  const eimer = {};
+  for(let j = 0; j < feld.ny; j++) for(let i = 0; i < feld.nx; i++){
+    const c = j * feld.nx + i; if(!RM.maske[c]) continue;
+    const z = fStepSollHoehe(F, feld.x0 + (i + 0.5) * r, feld.y0 + (j + 0.5) * r);
+    const k = Math.round(z / Math.max(0.2, r));
+    (eimer[k] = eimer[k] || {z:z, zellen:[]}).zellen.push((j + pad) * nx + (i + pad));
+  }
+  const alle = Object.keys(eimer).map(k => eimer[k]).sort((a, b) => b.zellen.length - a.zellen.length);
+  const genommen = alle.slice(0, 4);
+  const offen = alle.slice(4).reduce((s2, e) => s2 + e.zellen.length, 0);
+  const geprueft = genommen.reduce((s2, e) => s2 + e.zellen.length, 0);
+  if(!geprueft) return {ok:false, grund:'Keine Reststelle mit einer Sollhoehe.'};
+  // (4) Die WAENDE je Ebene - einmal, sie haengen nicht am Radius.
+  const sollG = new Float32Array(n);
+  for(let j = 0; j < ny; j++) for(let i = 0; i < nx; i++) sollG[j * nx + i] = fStepSollHoehe(F, gx0 + (i + 0.5) * r, gy0 + (j + 0.5) * r);
+  const verboten = new Uint8Array(n), erlaubt = new Uint8Array(n), dE = new Float64Array(n);
+  const dWs = genommen.map(e => {
+    for(let c = 0; c < n; c++) verboten[c] = (sollG[c] > e.z + 1e-6) ? 1 : 0;
+    return fEdt(verboten, nx, ny, new Float64Array(n));
+  });
+  // (5) Die Radien von gross nach klein. Beim ersten, das ALLES erreicht,
+  //     ist Schluss - es ist per Bauart das groesste.
+  const liste = [];
+  for(let qi = 0; qi < radien.length; qi++){
+    const q = radien[qi];
+    // Eine halbe Rasterweite Zugabe in beiden Richtungen: gerechnet wird auf
+    // Zellenmitten, und ohne sie faellt die Ecke durch, in die das Werkzeug
+    // GENAU hineinpasst (gemessen: ⌀6 in einer r3-Ecke kam auf 88 % statt 100).
+    const rc = q.r / r, wand = Math.max(0, rc - 0.5), reich = rc + 0.5;
+    const wand2 = wand * wand, reich2 = reich * reich;
+    let k = 0;
+    for(let ei = 0; ei < genommen.length; ei++){
+      const dW = dWs[ei], zellen = genommen[ei].zellen;
+      // fEdt misst den Abstand ZU den markierten Zellen - markiert werden
+      // die ERLAUBTEN Mittelstellungen.
+      for(let c = 0; c < n; c++) erlaubt[c] = (dW[c] >= wand2 - 1e-9) ? 1 : 0;
+      fEdt(erlaubt, nx, ny, dE);
+      for(let z2 = 0; z2 < zellen.length; z2++) if(dE[zellen[z2]] <= reich2 + 1e-9) k++;
+    }
+    const quote = k / geprueft;
+    liste.push({nr:q.nr, name:q.name, d:q.d, quote:quote, anteil:Math.round(100 * quote)});
+    if(quote >= 0.999) break;                       // groesser geht nicht
+  }
+  const bestes = liste.filter(x => x.quote >= 0.999)[0] || null;
+  let meiste = null;
+  liste.forEach(x => { if(!meiste || x.anteil > meiste.anteil) meiste = x; });
+  // Liegt es ueberhaupt an der Werkzeuggroesse? Kommt eines hin, das so
+  // gross ist wie das kleinste schon benutzte, dann fehlt dort eine BAHN.
+  let dMin = 0;
+  (benutzt || []).forEach(d2 => { if(+d2 > 0) dMin = dMin ? Math.min(dMin, +d2) : +d2; });
+  return {ok:true, liste:liste, bestes:bestes, meiste:meiste, dMin:dMin,
+          bahnluecke:!!(bestes && dMin && bestes.d >= dMin - 1e-9),
+          kleinster:radien[radien.length - 1], geprueft:geprueft, offen:offen, ebenen:genommen.length};
+}
+// Der Satz dazu.
+function fSimRestWzText(W){
+  if(!W) return '';
+  if(!W.ok) return ' ' + W.grund;
+  // Liegt es gar nicht an der Groesse, ist DAS die wichtigere Aussage:
+  // dann steht das Material nicht, weil kein Werkzeug hinkommt, sondern
+  // weil keine Bahn hinfaehrt.
+  if(W.bahnluecke) return ' Das liegt NICHT an der Werkzeuggroesse: auch T' + W.bestes.nr + ' ⌀' + W.bestes.d +
+    ' kaeme dort hin, und gearbeitet wird schon mit ⌀' + W.dMin + ' — dort fehlt eine BAHN.';
+  if(W.bestes) return ' Der groesste Fraeser, der dort noch hinkommt: T' + W.bestes.nr + ' ⌀' + W.bestes.d + ' (' + W.bestes.name + ').';
+  if(W.meiste && W.meiste.anteil > 0) return ' Kein Fraeser der Tabelle holt ALLES — am meisten T' + W.meiste.nr + ' ⌀' + W.meiste.d +
+    ' mit ' + W.meiste.anteil + ' %; was dann noch steht, ist enger als jeder Fraeser der Tabelle.';
+  return ' KEIN Fraeser der Tabelle kommt dort hin (kleinster: ⌀' + W.kleinster.d + ').';
+}
+
 // ---------------------------------------------------------------------
 // STUFE 3 TEIL B: DAS MODELL GEGEN DAS ROHTEIL ABSPANEN (Z-konstant)
 // ---------------------------------------------------------------------
@@ -8431,7 +8592,7 @@ function fSimZeitachse(bahnen, prog){
     else if(m.a === 'kreis'){ const sg = {x0:x, y0:y, x1:m.x, y1:m.y, cx:m.cx, cy:m.cy, dr:m.dr}; const r = Math.hypot(x - m.cx, y - m.cy); weg = Math.abs(fBogenWinkel(sg)) * r; if(m.z != null) weg = Math.hypot(weg, m.z - z); dauer = weg / Math.max(1, +m.f || 1) * 60; }
     else if(m.a === 'helix'){ const r = Math.hypot(x - m.cx, y - m.cy); weg = Math.hypot(2 * Math.PI * r * (+m.turns || 0), +m.dz || 0); z1 = (m.z != null) ? m.z : z + (+m.dz || 0); dauer = weg / Math.max(1, +m.f || 1) * 60; }
     else if(m.a === 'verweil'){ dauer = +m.t || 0; }
-    liste.push({schritt:bh.schritt, rt:bh.rt, kegel:bh.kegel || 0, spitze:bh.spitze || 0, wzArt:bh.wzArt, m:m, p0:p0, p1:{x:x1, y:y1, z:z1}, weg:weg, t0:t, t1:t + dauer});
+    liste.push({schritt:bh.schritt, t:bh.t, rt:bh.rt, kegel:bh.kegel || 0, spitze:bh.spitze || 0, wzArt:bh.wzArt, m:m, p0:p0, p1:{x:x1, y:y1, z:z1}, weg:weg, t0:t, t1:t + dauer});
     x = x1; y = y1; z = z1; t += dauer;
   }));
   return {liste:liste, gesamt:t};
@@ -8568,6 +8729,13 @@ function fSim3dSteigung(F, h, out){
     out[o + 1] = (h[iR] - h[iL]) / (r * ((iR - iL) || 1));
     out[o + 2] = (h[jU] - h[jD]) / (r * ((jU - jD) / nx || 1));
   }
+  return out;
+}
+// Restmaterial als Attribut je Gitterpunkt (0 oder 1) fuer die 3D-Ansicht.
+// Ohne Befund liefert sie lauter Nullen - dann faerbt der Shader nichts.
+function fSim3dRest(F, maske){
+  const n = F.nx * F.ny, out = new Float32Array(n);
+  if(maske) for(let i = 0; i < n; i++) out[i] = maske[i] ? 1 : 0;
   return out;
 }
 // Rand: je Randzelle ein Wandstueck von der Unterseite hu bis zur Oberseite h,
@@ -8811,6 +8979,238 @@ function fProgrammSchreiben(prog, opt){
 // ---------------------------------------------------------------------
 // PRUEFUNG vor der Ausgabe. rot = kein Programm, gelb = ansehen.
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// SPANNMITTEL: DER SCHRAUBSTOCK (16.09.2026, Daniels Frage)
+//
+// Seine Worte: "wenn ich die erste Seite abspanen, dann muss ich ja
+// wissen, wie tief spanne ich das Bauteil vielleicht auch ein, um nicht
+// mit den Schraubstockbacken zu kollidieren, wenn ich fraese".
+//
+// Das ist EINE Frage mit zwei Antworten, und beide sind rechenbar:
+//   1. Wie tief DARF ich spannen? Die Backenoberkante muss unter der
+//      tiefsten Bearbeitung liegen - sonst faehrt der Fraeser hinein.
+//   2. Kommt das Werkzeug ueberhaupt hin? Dafuer zaehlt nicht die
+//      Schneide allein, sondern Schaft und Halter darueber.
+//
+// Die Backen sind bewusst QUADER, keine Konturkoerper. hyperMILL fuehrt
+// den Halter als gedrehte 2D-Kontur mit elf Strecken; fuer die Werkstatt
+// reicht der Zylinder, und was er nicht kann, steht in der Meldung.
+// ---------------------------------------------------------------------
+const F_SPANN_LUFT = 1;   // Vorgabe Sicherheitsabstand zu den Backen, mm
+
+// Die zwei Backenkoerper. Null, wenn kein Spannmittel gefuehrt wird -
+// dann prueft und meldet auch nichts, statt etwas zu erfinden.
+function fSpannBacken(prog){
+  const k = (prog && prog.kopf) || {};
+  if(String(k.spann || 'aus') !== 'schraubstock') return null;
+  const x0 = Math.min(+k.x0, +k.x1), x1 = Math.max(+k.x0, +k.x1);
+  const y0 = Math.min(+k.y0, +k.y1), y1 = Math.max(+k.y0, +k.y1);
+  // Die Backen liegen AN den Rohteilkanten an - dort spannen sie.
+  const zO = isFinite(+k.spannZ) ? +k.spannZ : fRund((+k.z0 || 0) + 10);
+  const b = (+k.spannBreite > 0) ? +k.spannBreite : 40;
+  const L = (+k.spannLaenge > 0) ? +k.spannLaenge : 150;
+  if(String(k.spannRichtung || 'y') === 'x'){
+    const cy = (y0 + y1) / 2, ya = fRund(cy - L / 2), yb = fRund(cy + L / 2);
+    return {zOben:zO, richtung:'x', backen:[
+      {x0:fRund(x0 - b), x1:x0, y0:ya, y1:yb, name:'Backe X-'},
+      {x0:x1, x1:fRund(x1 + b), y0:ya, y1:yb, name:'Backe X+'}]};
+  }
+  const cx = (x0 + x1) / 2, xa = fRund(cx - L / 2), xb = fRund(cx + L / 2);
+  return {zOben:zO, richtung:'y', backen:[
+    {x0:xa, x1:xb, y0:fRund(y0 - b), y1:y0, name:'Backe Y-'},
+    {x0:xa, x1:xb, y0:y1, y1:fRund(y1 + b), name:'Backe Y+'}]};
+}
+
+// Die Koerper eines Werkzeugs, von der SPITZE aus nach oben gemessen.
+// Was die Tabelle nicht fuehrt, wird NICHT geraten: der letzte bekannte
+// Koerper laeuft dann nach oben weiter und 'fehlt' sagt, was gefehlt hat.
+// (Ein Zylinder statt der echten Halterkontur liegt auf der sicheren
+// Seite, solange der Halter-⌀ der GROESSTE Durchmesser ist.)
+function fWerkzeugKoerper(tool){
+  const t = tool || {}, d = (+t.d > 0) ? +t.d : 5;
+  const lc = +t.lcuts, au = +t.auskrag, hd = +t.halterD, fehlt = [];
+  const K = [];
+  if(!(lc > 0)){
+    fehlt.push('Schneidenlaenge LCUTS');
+    return {teile:[{name:'Schneide', r:d / 2, von:0, bis:Infinity}], fehlt:fehlt};
+  }
+  K.push({name:'Schneide', r:d / 2, von:0, bis:lc});
+  const rs = (+t.schaftD > 0) ? +t.schaftD / 2 : d / 2;
+  if(!(au > lc)){
+    // Eine Auskraglaenge UNTER der Schneidenlaenge gibt es am Werkzeug
+    // nicht - dann steckte die Schneide im Halter. Das ist ein falscher
+    // Wert, keine fehlende Angabe, und wird auch so benannt.
+    fehlt.push(au > 0 ? ('Auskraglaenge ' + au + ' mm liegt unter der Schneidenlaenge ' + lc + ' mm') : 'Auskraglaenge');
+    K.push({name:'Schaft', r:rs, von:lc, bis:Infinity});
+    return {teile:K, fehlt:fehlt};
+  }
+  K.push({name:'Schaft', r:rs, von:lc, bis:au});
+  if(!(hd > 0)){ fehlt.push('Halter-⌀'); return {teile:K, fehlt:fehlt}; }
+  K.push({name:'Halter', r:hd / 2, von:au, bis:Infinity});
+  return {teile:K, fehlt:fehlt};
+}
+
+// Abstand eines Punktes zum Rechteck (0, wenn er darin liegt).
+function fRechteckAbstand(x, y, b){
+  const dx = Math.max(b.x0 - x, 0, x - b.x1), dy = Math.max(b.y0 - y, 0, y - b.y1);
+  return Math.hypot(dx, dy);
+}
+
+// Steht an (x,y) mit der Spitze auf z etwas in einer Backe? Liefert den
+// schlimmsten Treffer: welcher Koerper, welche Backe, wie tief drin.
+function fSpannPunkt(x, y, z, teile, B, luft){
+  let schlimm = null, auskrag = 0, nahMin = Infinity;
+  const arten = {};
+  for(let i = 0; i < teile.length; i++){
+    const p = teile[i];
+    // Seitlich: kommt dieser Koerper ueberhaupt an eine Backe heran?
+    let nah = false;
+    for(let j = 0; j < B.backen.length; j++){
+      const bk = B.backen[j], ab = fRechteckAbstand(x, y, bk), frei = ab - p.r;
+      if(frei >= luft) continue;
+      nah = true;
+      // Der Koerper beginnt bei z+von. Liegt sein UNTERES Ende ueber der
+      // Backenoberkante, steht er frei - dann zaehlt nur die Naehe.
+      if(z + p.von > B.zOben + luft) continue;
+      const tief = fRund(Math.max(luft - frei, 0));
+      arten[p.name] = (arten[p.name] || 0) + 1;
+      if(!schlimm || tief > schlimm.tief) schlimm = {teil:p.name, backe:bk.name, tief:tief, frei:fRund(frei), x:fRund(x), y:fRund(y), z:fRund(z), von:p.von};
+    }
+    // DIE ZAHL, NACH DER DANIEL GEFRAGT HAT: steht der Halter seitlich
+    // ueber einer Backe, muss sein unteres Ende darueber liegen - also
+    // Auskraglaenge mindestens Backenoberkante + Luft ueber der Spitze.
+    // Das gilt auch dann, wenn ein anderer Koerper tiefer drinsteckt.
+    if(nah && p.name === 'Halter') auskrag = Math.max(auskrag, fRund(B.zOben + luft - z));
+    // WIE HOCH DARF DIE BACKE STEHEN? Nur was seitlich ueber ihr haengt,
+    // begrenzt sie - und zwar mit seiner Unterkante.
+    if(nah) nahMin = Math.min(nahMin, z + p.von);
+  }
+  if(nahMin < Infinity && !schlimm && !auskrag) return {nahMin:nahMin};
+  return schlimm ? Object.assign(schlimm, {arten:arten, auskrag:auskrag, nahMin:nahMin}) : (auskrag > 0 ? {nurAuskrag:auskrag, nahMin:nahMin} : null);
+}
+
+// Die Pruefung ueber eine fertige Zeitachse (fSimZeitachse). Getrennt von
+// fSpannPruefen, damit die Simulation ihre Liste nicht zweimal baut.
+function fSpannTreffer(liste, B, prog, max){
+  const k = (prog && prog.kopf) || {};
+  const luft = (+k.spannLuft >= 0) ? +k.spannLuft : F_SPANN_LUFT;
+  const grenze = (max > 0) ? max : 12;
+  const treffer = [], fehltAlle = {}, cache = {}, artenAlle = {}, auskragJe = {};
+  let zTiefstes = Infinity, noetigeAuskrag = 0, punkte = 0, bewegungen = 0, zNah = Infinity;
+  const holen = (tNr) => {
+    if(cache[tNr]) return cache[tNr];
+    const t = ((prog && prog.werkzeuge) || []).find(w => w.nr === tNr) || {};
+    const kr = fWerkzeugKoerper(t);
+    kr.fehlt.forEach(f => { (fehltAlle[f] = fehltAlle[f] || {})['T' + tNr] = 1; });
+    return (cache[tNr] = kr);
+  };
+  (liste || []).forEach(e => {
+    const m = e.m; if(!m || m.a === 'verweil') return;
+    zTiefstes = Math.min(zTiefstes, e.p0.z, e.p1.z);
+    if(!B) return;
+    const kr = holen(e.t);
+    // Abtastung: 2 mm laengs der Bewegung. Eine Backe ist 40 x 150 mm -
+    // darunter kann kein Treffer zwischen zwei Proben durchrutschen.
+    const n = Math.max(1, Math.ceil((+e.weg || 0) / 2));
+    let schlimm = null; const artenHier = {};
+    for(let i = 0; i <= n; i++){
+      const p = fSimPunkt(e, i / n);
+      punkte++;
+      const tr = fSpannPunkt(p.x, p.y, p.z, kr.teile, B, luft);
+      if(!tr) continue;
+      if(tr.nahMin < zNah) zNah = tr.nahMin;
+      const au = tr.auskrag || tr.nurAuskrag || 0;
+      if(au > 0){ noetigeAuskrag = Math.max(noetigeAuskrag, au); auskragJe[e.t] = Math.max(auskragJe[e.t] || 0, au); }
+      if(!tr.teil) continue;
+      Object.keys(tr.arten).forEach(a => { artenHier[a] = 1; });
+      if(!schlimm || tr.tief > schlimm.tief) schlimm = tr;
+    }
+    // Ein Eintrag je Bewegung - die Liste soll lesbar bleiben; gezaehlt
+    // wird je BEWEGUNG, nicht je Bahnprobe (sonst stuenden dort die
+    // Abtastpunkte und niemand kann die Zahl einordnen).
+    if(schlimm){
+      bewegungen++;
+      Object.keys(artenHier).forEach(a => { artenAlle[a] = (artenAlle[a] || 0) + 1; });
+      if(treffer.length < grenze) treffer.push(Object.assign({schritt:e.schritt, t:e.t, eil:(m.a === 'eil')}, schlimm));
+    }
+  });
+  // Zu kurz ist ein Halter nur gegen seinen EIGENEN Tabellenwert. Wo die
+  // Tabelle nichts fuehrt, ist die Zahl trotzdem die Antwort auf Daniels
+  // Frage - dann steht sie als Forderung da, nicht als Vorwurf.
+  const kurz = Object.keys(auskragJe).map(tn => {
+    const t = ((prog && prog.werkzeuge) || []).find(w => String(w.nr) === String(tn)) || {};
+    const ist = +t.auskrag || 0, soll = auskragJe[tn];
+    if(ist > 0 && ist >= soll) return null;
+    return {t:+tn, soll:soll, ist:ist};
+  }).filter(Boolean);
+  return {treffer:treffer, backen:B, zTiefstes:(zTiefstes === Infinity) ? null : fRund(zTiefstes),
+          zNah:(zNah === Infinity) ? null : fRund(zNah),
+          noetigeAuskrag:noetigeAuskrag, auskragKurz:kurz, punkte:punkte, bewegungen:bewegungen, arten:artenAlle, luft:luft,
+          fehlt:Object.keys(fehltAlle).map(f => f + ' (' + Object.keys(fehltAlle[f]).join(' ') + ')')};
+}
+
+// Bequemer Einstieg: baut Bahnen und Zeitachse selbst.
+function fSpannPruefen(prog, max){
+  const bh = fSimBahnen(prog);
+  const za = fSimZeitachse(bh.bahnen, prog);
+  return fSpannTreffer(za.liste, fSpannBacken(prog), prog, max);
+}
+
+// DIE AUFSPANNTIEFE. Die Backenoberkante muss unter die tiefste
+// Bearbeitung; was darunter vom Rohteil uebrigbleibt, ist der Griff.
+function fSpannVorschlag(prog, befund){
+  const k = (prog && prog.kopf) || {}, hinweise = [];
+  const zU = +k.z0 || 0, zO = +k.z1 || 0;
+  const luft = (+k.spannLuft >= 0) ? +k.spannLuft : F_SPANN_LUFT;
+  const mind = (+k.spannMin > 0) ? +k.spannMin : 8;
+  // Der Befund darf mitgebracht werden - die Bahnen zweimal zu rechnen
+  // kostet am Modell-Abspanen eine halbe Sekunde je Ampel-Aufruf.
+  const R = befund || fSpannPruefen(prog, 1);
+  const tief = R.zTiefstes;
+  if(tief === null) return {ok:false, grund:'Kein aktiver Arbeitsschritt mit einer Bahn - ohne Bearbeitung gibt es keine Tiefe, gegen die sich spannen laesst.', hinweise:hinweise};
+  // Die Backenhoehe begrenzt NUR, was seitlich ueber einer Backe haengt.
+  // Kommt keine Bahn dort hin, darf so hoch gespannt werden, wie das Teil
+  // ist - eine tiefe Tasche in der Mitte geht die Backen nichts an.
+  // Seitlich ueber einer Backe liegt schon der Eilgang auf sicherer Hoehe
+  // (der Nullpunkt sitzt an der Rohteilecke, dort beginnen die Backen) -
+  // das begrenzt nichts. Eng wird es erst, wenn dabei unter die
+  // Rohteiloberkante gefahren wird.
+  const nah = (R.zNah !== null && R.zNah !== undefined) ? (R.zNah - luft) : zO;
+  const eng = nah < zO - 1e-9;
+  const backeZ = fRund(Math.min(nah, zO));
+  const einspann = fRund(backeZ - zU);
+  const frei = fRund(zO - backeZ);
+  if(!eng) hinweise.push('Keine Bahn kommt den Backen seitlich nahe - die Bearbeitung begrenzt die Spannhoehe nicht. Die Backenoberkante richtet sich dann allein nach dem Teil (tiefste Bearbeitung Z' + tief + ').');
+  if(einspann < mind) hinweise.push('Ueber den Backen wird bis Z' + fRund(R.zNah) + ' gearbeitet - mit ' + luft + ' mm Luft duerfen sie nur bis Z' + backeZ + ' stehen, das sind ' + einspann + ' mm Einspanntiefe bei geforderten ' + mind + ' mm. So laesst sich das Teil im Schraubstock nicht halten: hoeheres Rohteil, Spannpratzen, eine Vorrichtung - oder die tiefe Stelle in die zweite Aufspannung.');
+  if(einspann <= 0) hinweise.push('Die Bearbeitung ueber den Backen reicht unter die Rohteil-Unterkante - im Schraubstock geht das gar nicht.');
+  if(frei > 3 * Math.max(1, einspann) && einspann > 0) hinweise.push('Das Teil steht ' + frei + ' mm ueber den Backen und steckt nur ' + einspann + ' mm darin - es wird beim Fraesen federn. Kurz spannen oder abstuetzen.');
+  return {ok:true, tiefste:tief, zNah:R.zNah, eng:eng, luft:luft, backeZ:backeZ, einspann:einspann, frei:frei, mind:mind, reicht:(einspann >= mind), hinweise:hinweise};
+}
+
+// Der Befund in Worten - eine Quelle fuer Panel, Ampel und Pruefstand.
+function fSpannText(R){
+  if(!R || !R.backen) return 'Kein Spannmittel im Programmkopf - es wird nichts gegen Backen geprueft.';
+  if(!R.treffer.length){
+    let t = 'Keine Beruehrung mit den Backen (' + R.punkte + ' Bahnpunkte, ' + R.luft + ' mm Luft).';
+    t += fSpannAuskragText(R);
+    if(R.fehlt.length) t += ' NICHT geprueft: ' + R.fehlt.join(', ') + ' — in der Werkzeugtabelle nachtragen.';
+    return t;
+  }
+  const e = R.treffer[0];
+  const arten = Object.keys(R.arten).map(a => a + ' ' + R.arten[a] + 'x').join(', ');
+  let t = R.bewegungen + ' Bewegung' + (R.bewegungen === 1 ? '' : 'en') + ' in die Backen (' + arten + '). Am tiefsten: ' +
+    e.teil + ' von T' + e.t + ' bei X' + e.x + ' Y' + e.y + ' Z' + e.z + ', ' + e.tief + ' mm in der ' + e.backe + ' (Schritt ' + (e.schritt + 1) + ').';
+  t += fSpannAuskragText(R);
+  if(R.fehlt.length) t += ' NICHT geprueft: ' + R.fehlt.join(', ') + '.';
+  return t;
+}
+
+// Was der Halter braeuchte - nur fuer die Werkzeuge, die darunter liegen.
+function fSpannAuskragText(R){
+  if(!R || !R.auskragKurz || !R.auskragKurz.length) return '';
+  return ' Auskraglaenge: ' + R.auskragKurz.map(a => 'T' + a.t + ' mindestens ' + a.soll + ' mm' + (a.ist > 0 ? (' (Tabelle: ' + a.ist + ')') : ' (Tabelle fuehrt keine)')).join(', ') + '.';
+}
+
 function fPruefen(prog){
   const rot = [], gelb = [];
   const k = prog.kopf || {};
@@ -9029,6 +9429,24 @@ function fPruefen(prog){
       if(+s.umfang === 2) gelb.push(nr + 'Nur Schlichten (Q215=2): die TNC faehrt im Eilgang auf die erste Zustelltiefe — die Form muss vorgeschruppt sein' + (!(+s.aufSeite > 0) && !(+s.aufTiefe > 0) ? '; beide Aufmasse stehen auf 0, dann schlichtet sie nichts' : '') + '.');
     }
   });
+  // SPANNMITTEL (16.09.2026): nur wenn eines gefuehrt wird. Ein Treffer
+  // mit der SCHNEIDE ist rot - die Bahn faehrt in die Backe; Schaft und
+  // Halter sind gelb, weil ein anderes Werkzeug oder mehr Auskraglaenge
+  // sie loest, ohne die Bahn zu aendern.
+  const spB = fSpannBacken(prog);
+  if(spB && schritte.length){
+    let R = null; try{ R = fSpannPruefen(prog, 12); }catch(e){ gelb.push('Spannmittel: die Pruefung ist gescheitert (' + e.message + ').'); }
+    if(R && R.auskragKurz.length && !R.treffer.length) gelb.push('Spannmittel:' + fSpannAuskragText(R));
+    if(R && R.treffer.length){
+      const schneide = R.treffer.some(t => t.teil === 'Schneide');
+      (schneide ? rot : gelb).push('Spannmittel: ' + fSpannText(R));
+    }
+    // Die Backenhoehe selbst prueft die Kollisionsrechnung oben - eine
+    // zweite Zeile dazu waere dieselbe Aussage in groeberer Form. Hier
+    // steht nur noch, was sie NICHT sagen kann: ob der Griff reicht.
+    const V = R ? fSpannVorschlag(prog, R) : {ok:false};
+    if(V.ok && !V.reicht) gelb.push('Spannmittel: ' + V.hinweise.filter(h => /Einspanntiefe/.test(h))[0]);
+  }
   return {rot:rot, gelb:gelb};
 }
 
@@ -10042,6 +10460,10 @@ function fDraufsicht(){
   let x0 = Math.min(k.x0, k.x1), x1 = Math.max(k.x0, k.x1), y0 = Math.min(k.y0, k.y1), y1 = Math.max(k.y0, k.y1);
   fProg.muster.forEach(m => fMusterPunkte(m).forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }));
   (fProg.konturen || []).forEach(kt => fKonturSegmente(kt).seg.forEach(sg => fSegPunkte(sg).forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); })));
+  // Die Backen gehoeren mit ins Bild - sonst liegen sie ausserhalb und man
+  // sieht nicht, wie weit sie ueber das Teil ragen.
+  const spVor = fSpannBacken(fProg);
+  if(spVor) spVor.backen.forEach(b => { x0 = Math.min(x0, b.x0); x1 = Math.max(x1, b.x1); y0 = Math.min(y0, b.y0); y1 = Math.max(y1, b.y1); });
   const bw = Math.max(1, x1 - x0), bh = Math.max(1, y1 - y0);
   const rand = 26;
   const sc = Math.min((W - 2 * rand) / bw, (H - 2 * rand) / bh);
@@ -10053,6 +10475,27 @@ function fDraufsicht(){
   ctx.strokeStyle = dunkel ? '#9fb3c4' : '#3d5a73'; ctx.lineWidth = 1.5;
   ctx.fillRect(X(k.x0), Y(k.y1), (k.x1 - k.x0) * sc, (k.y1 - k.y0) * sc);
   ctx.strokeRect(X(k.x0), Y(k.y1), (k.x1 - k.x0) * sc, (k.y1 - k.y0) * sc);
+  // SPANNBACKEN (16.09.2026): sie liegen an den Rohteilkanten an und sind
+  // schraffiert - so sieht man auf einen Blick, wo das Werkzeug nicht hin
+  // darf, und wieviel Ueberstand die Backen haben.
+  const spB = fSpannBacken(fProg);
+  if(spB){
+    ctx.save();
+    ctx.fillStyle = dunkel ? 'rgba(200,120,60,.20)' : 'rgba(150,110,80,.16)';
+    ctx.strokeStyle = dunkel ? '#c08a5a' : '#8a6a4a'; ctx.lineWidth = 1.2;
+    spB.backen.forEach(b => {
+      const px = X(b.x0), py = Y(b.y1), pw = (b.x1 - b.x0) * sc, ph = (b.y1 - b.y0) * sc;
+      ctx.fillRect(px, py, pw, ph); ctx.strokeRect(px, py, pw, ph);
+      ctx.save(); ctx.beginPath(); ctx.rect(px, py, pw, ph); ctx.clip();
+      ctx.lineWidth = 0.6; ctx.beginPath();
+      for(let q = -ph; q < pw + ph; q += 7){ ctx.moveTo(px + q, py + ph); ctx.lineTo(px + q + ph, py); }
+      ctx.stroke(); ctx.restore();
+    });
+    ctx.fillStyle = dunkel ? '#c08a5a' : '#8a6a4a'; ctx.font = '10px Arial';
+    const b0 = spB.backen[0];
+    ctx.fillText('Backen OK Z' + spB.zOben, X((b0.x0 + b0.x1) / 2) - 24, Y((b0.y0 + b0.y1) / 2) + 3);
+    ctx.restore();
+  }
   // Nullpunkt und Achsen
   ctx.strokeStyle = dunkel ? '#7fc0ff' : '#1858a0'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(X(0) - 12, Y(0)); ctx.lineTo(X(0) + 26, Y(0)); ctx.moveTo(X(0), Y(0) + 12); ctx.lineTo(X(0), Y(0) - 26); ctx.stroke();
@@ -10465,7 +10908,22 @@ function fKopfOeffnen(){
   setVal('fkName', k.name); setVal('fkProfil', k.profil || 'HEIDENHAIN_ITNC530'); setVal('fkStand', k.stand || '07');
   setVal('fkX0', k.x0); setVal('fkY0', k.y0); setVal('fkZ0', k.z0); setVal('fkX1', k.x1); setVal('fkY1', k.y1); setVal('fkZ1', k.z1);
   setVal('fkSc', k.sc); setVal('fkSc2', k.sc2); setVal('fkOber', k.oberflaeche); setVal('fkRz', k.rz);
+  setRadio('fkSpannBtns', k.spann || 'aus'); setRadio('fkSpannRichtBtns', k.spannRichtung || 'y');
+  setVal('fkSpannZ', (k.spannZ === 0 || k.spannZ) ? k.spannZ : fRund((+k.z0 || 0) + 10));
+  setVal('fkSpannBreite', k.spannBreite || 40); setVal('fkSpannLaenge', k.spannLaenge || 150);
+  setVal('fkSpannLuft', (k.spannLuft === 0 || k.spannLuft) ? k.spannLuft : 1); setVal('fkSpannMin', k.spannMin || 8);
+  const si = document.getElementById('fkSpannInfo'); if(si){ si.style.display = 'none'; si.textContent = '—'; }
+  fKopfSpannSync();
   maskZeigen('maskKopf');
+}
+// Die Spannmittelzeilen gibt es nur, wenn eines gefuehrt wird - eine
+// Ueberschrift ueber lauter wirkungslosen Feldern ist eine Falle
+// (dieselbe Regel wie leereBereicheAusblenden im Drehteil).
+function fKopfSpannSync(){
+  const an = (selBtnVal('fkSpannBtns') || 'aus') === 'schraubstock';
+  ['fkSpR1', 'fkSpR2', 'fkSpR3', 'fkSpR4', 'fkSpR5'].forEach(id => {
+    const e = document.getElementById(id); if(e) e.style.display = an ? '' : 'none';
+  });
 }
 {
   const ok = document.getElementById('btnFkOk'); if(ok) ok.onclick = ()=>{
@@ -10473,6 +10931,9 @@ function fKopfOeffnen(){
     k.name = getStr('fkName').trim() || 'DZ1'; k.profil = getStr('fkProfil') || 'HEIDENHAIN_ITNC530'; k.stand = getStr('fkStand') || '07';
     k.x0 = getNum('fkX0'); k.y0 = getNum('fkY0'); k.z0 = getNum('fkZ0', -20); k.x1 = getNum('fkX1', 100); k.y1 = getNum('fkY1', 80); k.z1 = getNum('fkZ1');
     k.sc = getNum('fkSc', 2); k.sc2 = getNum('fkSc2', 50); k.oberflaeche = getNum('fkOber'); k.rz = getNum('fkRz', 100);
+    k.spann = selBtnVal('fkSpannBtns') || 'aus'; k.spannRichtung = selBtnVal('fkSpannRichtBtns') || 'y';
+    k.spannZ = getNum('fkSpannZ'); k.spannBreite = getNum('fkSpannBreite', 40); k.spannLaenge = getNum('fkSpannLaenge', 150);
+    k.spannLuft = getNum('fkSpannLuft', 1); k.spannMin = getNum('fkSpannMin', 8);
     const bereinigt = fName(fProg);
     if(bereinigt !== k.name.toUpperCase()) melde('Programmname wird als ' + bereinigt + ' geschrieben (nur A-Z 0-9 _ -, max. 16 Zeichen).');
     k.name = bereinigt;
@@ -10480,6 +10941,28 @@ function fKopfOeffnen(){
     maskZu('maskKopf'); fRender();
   };
   const ab = document.getElementById('btnFkCancel'); if(ab) ab.onclick = ()=>maskZu('maskKopf');
+  wireRadioGroup('fkSpannBtns', fKopfSpannSync); wireRadioGroup('fkSpannRichtBtns', fKopfSpannSync);
+  // AUFSPANNTIEFE VORSCHLAGEN: die Backenoberkante folgt aus der tiefsten
+  // Bearbeitung, die Einspanntiefe aus der Rohteilhoehe darunter. Der
+  // Knopf SETZT den Wert - der Vorschlag steht danach im Feld und laesst
+  // sich ueberschreiben.
+  const vor = document.getElementById('btnFkSpannVor'); if(vor) vor.onclick = ()=>{
+    const si = document.getElementById('fkSpannInfo');
+    const p = Object.assign({}, fProg, {kopf:Object.assign({}, fProg.kopf, {
+      spann:'schraubstock', spannZ:getNum('fkSpannZ'), spannBreite:getNum('fkSpannBreite', 40),
+      spannLaenge:getNum('fkSpannLaenge', 150), spannLuft:getNum('fkSpannLuft', 1),
+      spannMin:getNum('fkSpannMin', 8), spannRichtung:selBtnVal('fkSpannRichtBtns') || 'y',
+      x0:getNum('fkX0'), y0:getNum('fkY0'), z0:getNum('fkZ0', -20),
+      x1:getNum('fkX1', 100), y1:getNum('fkY1', 80), z1:getNum('fkZ1')})});
+    let V = null; try{ V = fSpannVorschlag(p); }catch(e){ V = {ok:false, grund:e.message}; }
+    if(si) si.style.display = 'block';
+    if(!V.ok){ if(si) si.textContent = V.grund; return; }
+    setVal('fkSpannZ', V.backeZ);
+    if(si) si.textContent = 'Tiefste Bearbeitung Z' + V.tiefste + ' — mit ' + V.luft + ' mm Luft duerfen die Backen bis Z' + V.backeZ + ' stehen. '
+      + 'Einspanntiefe ' + V.einspann + ' mm, ueber den Backen stehen ' + V.frei + ' mm.'
+      + (V.hinweise.length ? ' ' + V.hinweise.join(' ') : '');
+    if(si) si.style.color = V.reicht ? 'var(--text-dim)' : '#c53a2d';
+  };
 }
 
 // =====================================================================
@@ -10995,6 +11478,7 @@ function fWzForm(w){
   setVal('fwNr', w.nr); setVal('fwName', w.name || ''); setVal('fwArt', w.art || 'bohrer'); setVal('fwD', w.d || 0);
   setVal('fwL', w.l || 0); setVal('fwR2', w.r2 || 0); setVal('fwDL', w.dl || 0); setVal('fwDR', w.dr || 0);
   setVal('fwLcuts', w.lcuts || 0); setVal('fwAngle', w.angle || 0);
+  setVal('fwAuskrag', w.auskrag || 0); setVal('fwHalterD', w.halterD || 0);
   setVal('fwSpitze', w.spitze || 118); setVal('fwSteig', w.steigung || 0); setVal('fwDoc', w.doc || ''); setVal('fwS', w.s || 1000); setVal('fwF', w.f || 100);
 }
 // TOOL.T einlesen (ASCII-Export der Maschine) — ersetzt die Tabelle der App.
@@ -11023,6 +11507,7 @@ function fWzImport(text, dateiname){
     const alt = fWerkzeug(nr) || {};
     const w = {nr:nr, name:getStr('fwName').trim() || ('Werkzeug ' + nr), art:getStr('fwArt') || 'bohrer', d:getNum('fwD'),
       l:getNum('fwL'), r2:getNum('fwR2'), dl:getNum('fwDL'), dr:getNum('fwDR'), lcuts:getNum('fwLcuts'), angle:getNum('fwAngle'),
+      auskrag:getNum('fwAuskrag'), halterD:getNum('fwHalterD'),
       spitze:getNum('fwSpitze', 118), doc:getStr('fwDoc').trim(), s:getNum('fwS', 1000), f:getNum('fwF', 100)};
     // Der TYP-Text einer importierten Tabelle bleibt, solange die Art dieselbe ist.
     if(alt.typ && alt.art === w.art) w.typ = alt.typ;
@@ -11872,7 +12357,7 @@ function fHilfebild(fokus){
 const SIM = {liste:null, feld:null, gesamt:0, t:0, idx:0, u:0, koll:[], laeuft:false, tempo:5, spur:[], letzte:null, hinweise:[], bahnen:[], raf:0, uhr:0, bild:null, ansicht:'3d',
   // Restmaterial: der Befund und sein Schalter. restQuelle merkt sich die
   // Sollform, gegen die gerechnet wurde - wechselt das Modell, wird neu gerechnet.
-  rest:null, restQuelle:null, restAn:true};
+  rest:null, restQuelle:null, restAn:true, restWz:null, restWzKey:''};
 try{ SIM.ansicht = (localStorage.getItem('dzf_simansicht') === '2d') ? '2d' : '3d'; }catch(e){}
 function fSimAufbauen(){
   const B = fSimBahnen(fProg), Z = fSimZeitachse(B.bahnen, fProg);
@@ -11908,6 +12393,23 @@ function fSimPosition(){
 // RESTMATERIAL: das Simulationsfeld gegen die Sollform des Modells.
 // Gerechnet wird nur, wenn sich am Feld etwas geaendert hat - der Vergleich
 // laeuft ueber alle Zellen und gehoert nicht in jedes Bild.
+// Welches Werkzeug das Restmaterial noch holt - einmal je Befund.
+function fSimRestWzHolen(R){
+  if(!R || !R.zellen) return null;
+  const S = fStepFeldHolen(); if(!S || !SIM.feld) return null;
+  // Waehrend die Uhr laeuft wird nicht neu gerechnet - die Rechnung geht
+  // ueber mehrere Abstandsverwandlungen und wuerde das Bild anhalten.
+  if(SIM.laeuft) return SIM.restWz;
+  const key = R.gen + '/' + R.zellen + '/' + (fProg.werkzeuge || []).length;
+  if(SIM.restWzKey === key) return SIM.restWz;
+  // Die schon benutzten Durchmesser: daran haengt die Frage, ob es
+  // ueberhaupt an der Werkzeuggroesse liegt.
+  const benutzt = (fProg.schritte || []).filter(x => x && x.aktiv !== false)
+    .map(x => { const w = (fProg.werkzeuge || []).find(y => y.nr === x.t); return w ? +w.d : 0; });
+  let W = null; try{ W = fSimRestWerkzeug(SIM.feld, S, R, fProg.werkzeuge, benutzt); }catch(e){ W = {ok:false, grund:'Werkzeugfrage gescheitert: ' + e.message}; }
+  SIM.restWz = W; SIM.restWzKey = key;
+  return W;
+}
 function fSimRestHolen(){
   const F = SIM.feld, S = fStepFeldHolen();
   if(!F || !S){ SIM.rest = null; return null; }
@@ -11991,7 +12493,7 @@ function fSimZeichnen2D(){
 // Wunsch da ("ich moechte eigentlich nicht durchschauen koennen durch das
 // Bauteil, das verfaelscht mir die Konturen von den Elementen")  Vorgabe aus,
 // Haken simKanten, Slot dzf_simkanten, und auch eingeschaltet mit Tiefentest.
-const SIM3D = {gl:null, cv:null, ok:false, versucht:false, pT:null, pS:null, az:-0.62, el:0.55, dist:0.8, drag:null, kanten:false, feldKey:'', gen:-1, netzN:0, idxTyp:0, randN:0, spurN:-1, spurV:0, spurE:0, wz:null, wzKey:'', wzN:0, b:{}};
+const SIM3D = {gl:null, cv:null, ok:false, versucht:false, pT:null, pS:null, az:-0.62, el:0.55, dist:0.8, drag:null, kanten:false, feldKey:'', gen:-1, netzN:0, idxTyp:0, randN:0, spurN:-1, spurV:0, spurE:0, wz:null, wzKey:'', wzN:0, restKey:'', b:{}};
 function fSim3dShader(gl, typ, src){ const sh = gl.createShader(typ); gl.shaderSource(sh, src); gl.compileShader(sh); if(!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error('Shader: ' + gl.getShaderInfoLog(sh)); return sh; }
 function fSim3dProgramm(gl, vs, fs, attr){
   const p = gl.createProgram(); gl.attachShader(p, fSim3dShader(gl, gl.VERTEX_SHADER, vs)); gl.attachShader(p, fSim3dShader(gl, gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
@@ -12011,21 +12513,24 @@ function fSim3dInit(cv){
     if(!gl.getParameter(gl.VERSION).match(/WebGL 2/)) gl.getExtension('OES_element_index_uint');
     const licht = 'uniform vec3 u_licht;';
     SIM3D.pT = fSim3dProgramm(gl,
-      'attribute vec2 a_xy; attribute vec3 a_zn; uniform mat4 u_mvp; uniform float u_nz; varying vec3 v_n; varying float v_z;' +
-      'void main(){ v_z = a_zn.x; v_n = vec3(-a_zn.y * u_nz, -a_zn.z * u_nz, u_nz); gl_Position = u_mvp * vec4(a_xy, a_zn.x, 1.0); }',
+      'attribute vec2 a_xy; attribute vec3 a_zn; attribute float a_rest; uniform mat4 u_mvp; uniform float u_nz; varying vec3 v_n; varying float v_z; varying float v_r;' +
+      'void main(){ v_z = a_zn.x; v_r = a_rest; v_n = vec3(-a_zn.y * u_nz, -a_zn.z * u_nz, u_nz); gl_Position = u_mvp * vec4(a_xy, a_zn.x, 1.0); }',
       // u_nz steht in beiden Shadern: gleiche Praezision noetig (Vertex-Standard highp),
       // sonst bricht das Linken mit "Precisions of uniform differ" (WARP-Befund)
-      'precision mediump float; varying vec3 v_n; varying float v_z; ' + licht + ' uniform float u_oben; uniform float u_unten; uniform highp float u_nz;' +
+      'precision mediump float; varying vec3 v_n; varying float v_z; varying float v_r; ' + licht + ' uniform float u_oben; uniform float u_unten; uniform highp float u_nz;' +
       'void main(){ float l = 0.40 + 0.60 * abs(dot(normalize(v_n), u_licht)); vec3 c; float tief = max(0.01, u_oben - u_unten);' +
       ' if(u_nz > 0.0){ if(v_z >= u_oben - 0.0002) c = vec3(0.69, 0.73, 0.77); else { float q = clamp((u_oben - v_z) / tief, 0.0, 1.0); c = mix(vec3(0.82, 0.84, 0.86), vec3(0.40, 0.44, 0.50), q); } }' +
       ' else { if(v_z <= u_unten + 0.0002) c = vec3(0.50, 0.53, 0.57); else c = vec3(0.68, 0.62, 0.80); }' +
-      ' gl_FragColor = vec4(c * l, 1.0); }', ['a_xy', 'a_zn']);
+      // RESTMATERIAL: dieselbe Farbe wie im 2D-Bild, ueber die Hoehenfarbe
+      // gelegt statt sie zu ersetzen - die Form bleibt erkennbar.
+      ' if(u_nz > 0.0 && v_r > 0.5) c = mix(c, vec3(0.80, 0.23, 0.18), 0.72);' +
+      ' gl_FragColor = vec4(c * l, 1.0); }', ['a_xy', 'a_zn', 'a_rest']);
     SIM3D.pS = fSim3dProgramm(gl,
       'attribute vec3 a_pos; attribute vec3 a_nrm; uniform mat4 u_mvp; uniform vec3 u_off; varying vec3 v_n;' +
       'void main(){ v_n = a_nrm; gl_Position = u_mvp * vec4(a_pos + u_off, 1.0); }',
       'precision mediump float; varying vec3 v_n; ' + licht + ' uniform vec4 u_col; uniform float u_lit;' +
       'void main(){ float l = mix(1.0, 0.45 + 0.55 * max(0.0, dot(normalize(v_n), u_licht)), u_lit); gl_FragColor = vec4(u_col.rgb * l, u_col.a); }', ['a_pos', 'a_nrm']);
-    const b = SIM3D.b; ['xy', 'zn', 'znU', 'idx', 'rand', 'wz', 'spurV', 'spurE', 'lin', 'koll'].forEach(n => { b[n] = gl.createBuffer(); });
+    const b = SIM3D.b; ['xy', 'zn', 'znU', 'rest', 'idx', 'rand', 'wz', 'spurV', 'spurE', 'lin', 'koll'].forEach(n => { b[n] = gl.createBuffer(); });
     gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
     SIM3D.gl = gl; SIM3D.ok = true; SIM3D.feldKey = ''; SIM3D.gen = -1; SIM3D.spurN = -1; SIM3D.wzKey = '';
     fSim3dBedienung(cv);
@@ -12090,12 +12595,22 @@ function fSim3dZeichnen(){
     const rand = fSim3dRand(F); gl.bindBuffer(gl.ARRAY_BUFFER, b.rand); gl.bufferData(gl.ARRAY_BUFFER, rand, gl.DYNAMIC_DRAW); SIM3D.randN = rand.length / 6;
     SIM3D.gen = F.gen;
   }
+  // RESTMATERIAL je Gitterpunkt. Eigener Schluessel, weil der Schalter den
+  // Befund an- und abschaltet, ohne dass sich am Feld etwas aendert.
+  const RM3 = SIM.restAn ? fSimRestHolen() : null;
+  const restKey3 = (RM3 ? ('r' + RM3.zellen + '/' + RM3.gen) : 'aus') + '/' + F.nx + 'x' + F.ny;
+  if(SIM3D.restKey !== restKey3){
+    gl.bindBuffer(gl.ARRAY_BUFFER, b.rest);
+    gl.bufferData(gl.ARRAY_BUFFER, fSim3dRest(F, RM3 ? RM3.maske : null), gl.DYNAMIC_DRAW);
+    SIM3D.restKey = restKey3;
+  }
   // Kamera
   const K = fSim3dKamera(F, SIM3D.az, SIM3D.el, SIM3D.dist, W / H);
   const licht = [0.35, -0.45, 0.82]; { const l = Math.hypot(licht[0], licht[1], licht[2]); licht[0] /= l; licht[1] /= l; licht[2] /= l; }
   // Feld: Oberseite, Unterseite
   gl.useProgram(T.p); gl.uniformMatrix4fv(T.u.u_mvp, false, K.mvp); gl.uniform3fv(T.u.u_licht, licht); gl.uniform1f(T.u.u_oben, F.oben); gl.uniform1f(T.u.u_unten, F.unten);
   gl.bindBuffer(gl.ARRAY_BUFFER, b.xy); gl.enableVertexAttribArray(T.a.a_xy); gl.vertexAttribPointer(T.a.a_xy, 2, gl.FLOAT, false, 0, 0);
+  if(T.a.a_rest >= 0){ gl.bindBuffer(gl.ARRAY_BUFFER, b.rest); gl.enableVertexAttribArray(T.a.a_rest); gl.vertexAttribPointer(T.a.a_rest, 1, gl.FLOAT, false, 0, 0); }
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b.idx);
   gl.disable(gl.CULL_FACE);
   // Flaechen einen Tiefenschritt nach hinten: eine eingeschaltete Kantenlinie
@@ -12106,6 +12621,7 @@ function fSim3dZeichnen(){
     gl.uniform1f(T.u.u_nz, q[1]); gl.drawElements(gl.TRIANGLES, SIM3D.netzN, SIM3D.idxTyp, 0);
   });
   gl.disableVertexAttribArray(T.a.a_xy); gl.disableVertexAttribArray(T.a.a_zn);
+  if(T.a.a_rest >= 0) gl.disableVertexAttribArray(T.a.a_rest);
   // Koerper und Linien
   gl.useProgram(S.p); gl.uniformMatrix4fv(S.u.u_mvp, false, K.mvp); gl.uniform3fv(S.u.u_licht, licht); gl.uniform3f(S.u.u_off, 0, 0, 0);
   const koerper = (buf, n, col, lit, off) => {
@@ -12167,7 +12683,7 @@ function fSimInfo(){
     if(!SIM.restAn){ rz.textContent = ''; }
     else {
       const R = fSimRestHolen();
-      rz.textContent = fSimRestText(R);
+      rz.textContent = fSimRestText(R) + fSimRestWzText(fSimRestWzHolen(R));
       rz.style.color = (R && R.zellen) ? '#c53a2d' : 'var(--text-dim)';
       rz.style.fontWeight = (R && R.zellen) ? '600' : '400';
     }
@@ -12218,7 +12734,7 @@ function fSimOeffnen(){
   if(kb){ kb.checked = SIM3D.kanten; if(kb.addEventListener) kb.addEventListener('change', ()=>{ SIM3D.kanten = !!kb.checked; try{ localStorage.setItem('dzf_simkanten', SIM3D.kanten ? 'an' : 'aus'); }catch(e){} fSimZeichnen(); }); }
   try{ SIM.restAn = (localStorage.getItem('dzf_simrest') || 'an') === 'an'; }catch(e){}
   const rb = document.getElementById('simRest');
-  if(rb){ rb.checked = SIM.restAn; if(rb.addEventListener) rb.addEventListener('change', ()=>{ SIM.restAn = !!rb.checked; try{ localStorage.setItem('dzf_simrest', SIM.restAn ? 'an' : 'aus'); }catch(e){} SIM.bild = null; fSimZeichnen(); fSimInfo(); }); }
+  if(rb){ rb.checked = SIM.restAn; if(rb.addEventListener) rb.addEventListener('change', ()=>{ SIM.restAn = !!rb.checked; try{ localStorage.setItem('dzf_simrest', SIM.restAn ? 'an' : 'aus'); }catch(e){} SIM.bild = null; SIM3D.restKey = ''; fSimZeichnen(); fSimInfo(); }); }
   const tempo = document.getElementById('simTempo'); if(tempo && tempo.addEventListener) tempo.addEventListener('change', ()=>{ const v = tempo.value; SIM.tempo = (v === 'max') ? 'max' : (+v || 1); });
   const sl = document.getElementById('simPos');
   if(sl && sl.addEventListener) sl.addEventListener('input', ()=>{ fSimPause(); const tZiel = (+sl.value / 1000) * SIM.gesamt; if(!SIM.liste) fSimAufbauen(); if(tZiel < SIM.t) fSimAufbauen(); fSimBis(tZiel); fSimZeichnen(); fSimInfo(); });
